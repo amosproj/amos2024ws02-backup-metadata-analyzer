@@ -39,3 +39,4 @@ bin/
 
 .nx/cache
 .nx/workspace-data
+.angular
