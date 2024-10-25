@@ -1,2 +1,2 @@
-# Fabulous Project (AMOS SS 20xx)
+# Backup Metadata Analyzer (AMOS WS 2024/25)
 Something something something
