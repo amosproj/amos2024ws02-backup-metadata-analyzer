@@ -1,0 +1,26 @@
+{
+  "name": "metadata-analyzer-backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/backend/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "metadata-analyzer-backend:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "metadata-analyzer-backend:build:development"
+        },
+        "production": {
+          "buildTarget": "metadata-analyzer-backend:build:production"
+        }
+      }
+    }
+  }
+}

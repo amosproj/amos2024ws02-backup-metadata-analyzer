@@ -34,3 +34,8 @@ bin/
 
 # MacOS
 .DS_Store
+
+
+
+.nx/cache
+.nx/workspace-data
