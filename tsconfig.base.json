@@ -1,6 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "noPropertyAccessFromIndexSignature": false,
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,

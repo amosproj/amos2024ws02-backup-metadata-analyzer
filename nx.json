@@ -1,54 +1,69 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "defaultBase": "main",
-  "plugins": [
-    {
-      "plugin": "@nx/webpack/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "serveTargetName": "serve",
-        "previewTargetName": "preview"
-      }
-    },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
-    {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      },
-      "exclude": ["apps/backend-e2e/**/*"]
-    },
-    {
-      "plugin": "@nx/cypress/plugin",
-      "options": {
-        "targetName": "e2e",
-        "openTargetName": "open-cypress",
-        "componentTestingTargetName": "component-test",
-        "ciTargetName": "e2e-ci"
-      }
-    }
-  ],
-  "targetDefaults": {
-    "@angular-devkit/build-angular:application": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["default", "^default"]
-    },
-    "e2e-ci--**/*": {
-      "dependsOn": ["^build"]
-    }
-  },
-  "generators": {
-    "@nx/angular:application": {
-      "e2eTestRunner": "cypress",
-      "linter": "eslint",
-      "style": "scss",
-      "unitTestRunner": "jest"
-    }
-  }
+	"$schema": "./node_modules/nx/schemas/nx-schema.json",
+	"defaultBase": "main",
+	"plugins": [
+		{
+			"plugin": "@nx/webpack/plugin",
+			"options": {
+				"buildTargetName": "build",
+				"serveTargetName": "serve",
+				"previewTargetName": "preview"
+			}
+		},
+		{
+			"plugin": "@nx/eslint/plugin",
+			"options": {
+				"targetName": "lint"
+			}
+		},
+		{
+			"plugin": "@nx/jest/plugin",
+			"options": {
+				"targetName": "test"
+			},
+			"exclude": ["apps/backend-e2e/**/*"]
+		},
+		{
+			"plugin": "@nx/cypress/plugin",
+			"options": {
+				"targetName": "e2e",
+				"openTargetName": "open-cypress",
+				"componentTestingTargetName": "component-test",
+				"ciTargetName": "e2e-ci"
+			}
+		}
+	],
+	"targetDefaults": {
+		"@angular-devkit/build-angular:application": {
+			"cache": true,
+			"dependsOn": ["^build"],
+			"inputs": ["default", "^default"]
+		},
+		"@nx/vite:test": {
+			"cache": true,
+			"inputs": ["default", "^default"]
+		},
+		"@nx/vite:build": {
+			"cache": true,
+			"dependsOn": ["^build"],
+			"inputs": ["default", "^default"]
+		},
+
+		"e2e-ci--**/*": {
+			"dependsOn": ["^build"]
+		}
+	},
+	"generators": {
+		"@nx/angular:application": {
+			"e2eTestRunner": "cypress",
+			"linter": "eslint",
+			"style": "scss",
+			"unitTestRunner": "jest",
+			"@nx/esbuild:esbuild": {
+				"cache": true,
+				"dependsOn": ["^build"],
+				"inputs": ["default", "^default"]
+			}
+		}
+	}
 }

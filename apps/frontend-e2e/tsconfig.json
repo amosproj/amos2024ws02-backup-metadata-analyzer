@@ -20,5 +20,5 @@
     "**/*.cy.ts",
     "**/*.cy.js",
     "**/*.d.ts"
-  ]
+, "eslint.config.cjs"  ]
 }
