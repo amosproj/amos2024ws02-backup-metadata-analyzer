@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "nx build metadata-analyzer-backend && node dist/apps/backend/main.js"
+    "be": "nx serve metadata-analyzer-backend",
+    "fe": "nx serve metadata-analyzer-frontend",
+    "both": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend"
   },
   "author": "",
   "license": "ISC",
