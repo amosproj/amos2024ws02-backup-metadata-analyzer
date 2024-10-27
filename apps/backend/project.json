@@ -21,7 +21,9 @@
       }
     },
     "preview": {
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "executor": "@nx/vite:preview-server",
       "defaultConfiguration": "development",
       "options": {
@@ -40,15 +42,19 @@
     },
     "build": {
       "executor": "@nx/esbuild:esbuild",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "main": "apps/backend/src/main.ts",
         "outputPath": "dist/apps/backend",
-        "outputFileName": "main.js",
         "tsConfig": "apps/backend/tsconfig.app.json",
         "assets": [],
-        "platform": "node"
+        "platform": "node",
+        "additionalEntryPoints": [
+          "{projectRoot}/src/migrations.main.ts"
+        ]
       },
       "configurations": {
         "development": {
@@ -56,6 +62,23 @@
         },
         "production": {
           "minify": true
+        }
+      }
+    },
+    "migrations": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
+      "configurations": {
+        "run": {
+          "command": "npx typeorm-ts-node-esm -d dist/apps/backend/migrations.main.js migration:run"
+        },
+        "generate": {
+          "command": "npx typeorm-ts-node-esm -d dist/apps/backend/migrations.main.js migration:generate apps/backend/src/app/migrations/{args.name}"
+        },
+        "revert": {
+          "command": "npx typeorm-ts-node-esm -d dist/apps/backend/migrations.main.js migration:revert"
         }
       }
     }
