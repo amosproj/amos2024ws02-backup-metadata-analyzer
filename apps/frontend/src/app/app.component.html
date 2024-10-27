@@ -1,1 +1,16 @@
-<app-nx-welcome></app-nx-welcome> <router-outlet></router-outlet>
+<clr-main-container>
+  <div class="main-container">
+    <app-header></app-header>
+
+    <div class="content-container">
+      <app-sidenav></app-sidenav>
+
+      <main class="content-area" style="display: block; justify-content: center; text-align: center;">
+        <h1 >Welcome to Metadata analyzer! 👋</h1>
+        <button class="btn btn-block btn-warning" (click)="helloWorld()"> Verbindung hier testen -- Klicken!</button>
+        <span class="label label-orange">{{ textarea }}</span>
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+</clr-main-container>
