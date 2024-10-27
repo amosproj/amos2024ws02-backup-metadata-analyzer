@@ -19,7 +19,6 @@ async function bootstrap() {
       origin: 'http://localhost:4200', // Erlaubte URL des Angular-Frontends
     })
   );
-
   const options = new DocumentBuilder()
     .setTitle('Your API Title')
     .setDescription('Your API description')
@@ -32,6 +31,7 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   const port = process.env.PORT || 3000;
+  console.log('test');
   await app.listen(port);
 }
 

@@ -8,10 +8,8 @@
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
-      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "metadata-analyzer-backend:build",
-        "runBuildTargetDependencies": false
+        "buildTarget": "metadata-analyzer-backend:build"
       },
       "configurations": {
         "development": {
@@ -19,6 +17,68 @@
         },
         "production": {
           "buildTarget": "metadata-analyzer-backend:build:production"
+        }
+      }
+    },
+    "preview": {
+      "dependsOn": [
+        "build"
+      ],
+      "executor": "@nx/vite:preview-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "metadata-analyzer-backend:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "metadata-analyzer-backend:build:development",
+          "hmr": true
+        },
+        "production": {
+          "buildTarget": "metadata-analyzer-backend:build:production",
+          "hmr": true
+        }
+      }
+    },
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "apps/backend/src/main.ts",
+        "outputPath": "dist/apps/backend",
+        "tsConfig": "apps/backend/tsconfig.app.json",
+        "assets": [],
+        "platform": "node",
+        "additionalEntryPoints": [
+          "{projectRoot}/src/migrations.main.ts"
+        ]
+      },
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      }
+    },
+    "migrations": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
+      "configurations": {
+        "run": {
+          "command": "npx typeorm-ts-node-esm -d dist/apps/backend/migrations.main.js migration:run"
+        },
+        "generate": {
+          "command": "npx typeorm-ts-node-esm -d dist/apps/backend/migrations.main.js migration:generate apps/backend/src/app/migrations/{args.name}"
+        },
+        "revert": {
+          "command": "npx typeorm-ts-node-esm -d dist/apps/backend/migrations.main.js migration:revert"
         }
       }
     }

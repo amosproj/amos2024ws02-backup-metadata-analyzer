@@ -1,22 +1,21 @@
-import {Module} from "@nestjs/common";
+import {Module} from '@nestjs/common';
+import {ConfigModule} from '@nestjs/config';
 
-import {AppController} from "./app.controller";
-import {AppService} from "./app.service";
-import {TypeOrmModule} from "@nestjs/typeorm";
+import {AppController} from './app.controller';
+import {AppService} from './app.service';
+import {TypeOrmModule} from '@nestjs/typeorm';
+import {DbConfigService} from "./db-config.service";
 
 @Module({
     imports: [
-        TypeOrmModule,
-/*         TypeOrmModule.forRoot({
-        type: 'postgres',
-        host: 'localhost',
-        port: 5433,
-        username: 'postgres',
-        password: 'postgres',
-        database: 'postgres',
-        entities: [],
-        synchronize: true,
-    }) */],
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
+        TypeOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            useClass: DbConfigService,
+        }),
+    ],
     controllers: [AppController],
     providers: [AppService],
 })
