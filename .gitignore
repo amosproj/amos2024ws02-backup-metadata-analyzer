@@ -35,7 +35,8 @@ bin/
 # MacOS
 .DS_Store
 
-
+# Local envs
+!/apps/backend/.env
 
 .nx/cache
 .nx/workspace-data
