@@ -1,0 +1,45 @@
+services:
+  # Angular Frontend App
+
+  frontend:
+    extends:
+      file: docker-compose.base.yml
+
+      service: nx-app-base
+
+    #command: npm run frontend:dev:docker
+    command: ['npm', 'run', 'fe']
+
+    ports:
+      - 4200:4200
+
+  # Nest Backend App
+
+  backend:
+    extends:
+      file: docker-compose.base.yml
+
+      service: nx-app-base
+
+    #command: npm run backend:dev:docker
+    command: ['npm', 'run', 'be']
+
+    ports:
+      - 3000:3000 # API Entry port
+
+      # - 4311:4311 # Server Debugging port
+
+  # Database
+  database:
+    image: postgres
+    container_name: database
+    restart: always
+    ports:
+      - 5433:5433
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+volumes:
+  mono-node-modules: null
