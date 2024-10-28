@@ -1,0 +1,36 @@
+<div class="clr-container">
+  <h1>Find Data TEST👋</h1>
+  <form (ngSubmit)="onSubmit()" clrForm>
+    <clr-input-container>
+      <label for="textInput">ID eingeben:</label>
+      <input
+        clrInput
+        type="text"
+        id="idInput"
+        [(ngModel)]="idInput"
+        name="idInput"
+        required
+        placeholder="Geben Sie eine ID ein"
+      />
+    </clr-input-container>
+
+    <button class="btn btn-outline" type="submit" [disabled]="!idInput">
+      Upload
+    </button>
+  </form>
+
+  <h5>ID:</h5>
+  <span class="label label-info">{{ id }}</span>
+  <form clrForm>
+    <clr-textarea-container>
+      <label>Data description</label>
+      <textarea
+        clrTextarea
+        [(ngModel)]="data"
+        name="description"
+        required
+        disabled
+      ></textarea>
+    </clr-textarea-container>
+  </form>
+</div>

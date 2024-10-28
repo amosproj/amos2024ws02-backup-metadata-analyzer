@@ -9,15 +9,9 @@ import { map } from 'rxjs';
 })
 export class AppComponent {
   title = 'metadata-analyzer-frontend';
-  textarea: string = '---';
+ 
 
-  constructor(private readonly helloWorldService: HelloWorldService) {}
+  constructor() {}
 
-  helloWorld() {
-    console.log('Hello WOrld!');
-    this.helloWorldService.getHelloWorld().subscribe({
-      next: (response) => (this.textarea = response),
-      error: (error) => console.error('Error fetching hello world:', error),
-    });
-  }
+
 }
