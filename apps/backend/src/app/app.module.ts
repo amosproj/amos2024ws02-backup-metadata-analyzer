@@ -5,6 +5,7 @@ import {AppController} from './app.controller';
 import {AppService} from './app.service';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {DbConfigService} from "./db-config.service";
+import {DemoModule} from "./demo/demo.module";
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import {DbConfigService} from "./db-config.service";
             imports: [ConfigModule],
             useClass: DbConfigService,
         }),
+        DemoModule
     ],
     controllers: [AppController],
     providers: [AppService],
