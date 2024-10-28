@@ -16,7 +16,12 @@
       "inputs": ["default", "^default"]
     },
     "e2e-ci--**/*": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build","^pre-build"]
+    },
+    "build": {
+      "options": {
+        "esbuildConfig": "{projectRoot}/esbuild.config.cjs"
+      }
     }
   }
 }
