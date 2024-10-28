@@ -14,7 +14,7 @@ export class DemoController {
     }
 
     @Get(":entryId")
-    async getAnswerById(
+    async getEntryById(
         @Param('entryId') entryId: string,
     ): Promise<DemoDto> {
         const entryDto = await this.demoService.findOneById(entryId);
