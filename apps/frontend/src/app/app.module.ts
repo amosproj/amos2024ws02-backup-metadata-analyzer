@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
+import { ClarityIcons, homeIcon, searchIcon, uploadCloudIcon } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { HeaderComponent } from './ui/header/header.component';
 import { SidenavComponent } from './ui/sidenav/sidenav.component';
@@ -34,4 +35,8 @@ import { FindTestDataComponent } from './test-upload/component/find-test-data/fi
   providers: [],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    ClarityIcons.addIcons(uploadCloudIcon, homeIcon, searchIcon);
+  }
+}
