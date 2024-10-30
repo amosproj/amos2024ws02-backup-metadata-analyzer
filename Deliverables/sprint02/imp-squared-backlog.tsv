@@ -1,14 +1,4 @@
-Title	URL	Assignees	Status	Estimated size	Real size
-Initialize Frontend module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/8	chrisklg	Awaiting Review	2	
-Create Architecture Diagram	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/10	ddeli	Awaiting Review	1	
-Initialize Backend Module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/11	engelharddirk, flo0852	Awaiting Review	2	
-Architecture evaluation and decision	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/4	ddeli, engelharddirk, flo0852, heskil	In Progress	3	
-Dev Environment Setup	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/3	chrisklg, ddeli, engelharddirk, flo0852, heskil, Omega65536	In Progress	3	
-Concept of build process defined	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/6	engelharddirk	In Progress	2	
-Model analysis research	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/5	heskil, Omega65536	In Progress	3	
-Implement build process	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/7		Product Backlog		
-Requirements Analysis for the Analysis module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/18		Product Backlog		
-Frontend Landing page	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/9		Product Backlog		
-Import Backup Data	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/16		Product Backlog		
-Backend endpoint: Basic analysis of the data	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/17		Product Backlog		
-First Test with Analysis module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/19		Product Backlog		
+Title	URL	Assignees	Status
+Important documents, which are not commited in Github, should be saved in the Google Drive folder	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/13		In Progress
+SM should be asked if questions are not beeing answered	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/15		In Progress
+Recipient of message should be tagged	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/14		In Progress
