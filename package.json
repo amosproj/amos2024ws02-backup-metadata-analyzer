@@ -21,7 +21,6 @@
     "@eslint/js": "^9.8.0",
     "@nestjs/schematics": "^10.0.1",
     "@nestjs/testing": "^10.0.2",
-    "@nrwl/nest": "^19.8.4",
     "@nx/angular": "^20.0.5",
     "@nx/cypress": "^20.0.5",
     "@nx/esbuild": "^20.0.5",
