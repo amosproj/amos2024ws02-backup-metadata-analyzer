@@ -10,14 +10,14 @@ import { HelloWorldService } from '../../../statistics/service/hello-world.servi
 })
 export class TestUploadComponent {
   textInput: string = '';
+  uploadID: string = '';
 
   constructor(
     private http: HttpClient,
-    private readonly testUploadService: TestUploadServiceService,
-    private readonly helloWorldService: HelloWorldService
+    private readonly testUploadService: TestUploadServiceService
   ) {}
 
-/*   helloWorld() {
+  /*   helloWorld() {
     console.log('Hello WOrld!');
     this.helloWorldService.getHelloWorld().subscribe({
       next: (response) => (this.textarea = response),
@@ -26,6 +26,8 @@ export class TestUploadComponent {
   } */
 
   onSubmit(): void {
-    this.testUploadService.upload(this.textInput);
+    this.testUploadService.upload(this.textInput).subscribe(
+      (response) =>( this.uploadID = response)
+    );
   }
 }

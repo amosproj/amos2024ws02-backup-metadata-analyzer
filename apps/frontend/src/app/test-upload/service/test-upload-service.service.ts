@@ -11,15 +11,17 @@ interface Data {
   providedIn: 'root',
 })
 export class TestUploadServiceService {
+  public uploadNewID: string = '';
   constructor(private readonly http: HttpClient) {}
 
-  upload(input: string) {
+  upload(input: string): Observable<string> {
     const payload = { text: input };
 
-    this.http.post('http://localhost:3000/api/demo', payload).subscribe({
-      next: (response) => console.log('Erfolgreich hochgeladen', response),
-      error: (error) => console.error('Fehler beim Hochladen', error),
-    });
+    return this.http.post<Data>('http://localhost:3000/api/demo', payload).pipe(
+      map((response) => {
+        return response.id;
+      })
+    );
   }
 
   // bc0126ea-525f-4525-abd9-609e41ae16ec
