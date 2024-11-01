@@ -32,25 +32,6 @@
   flex-grow: 1;
 }
 
-.sidebar {
-  width: 250px;
-  background-color: #343a40;
-  color: white;
-  padding-top: 20px;
-}
-
-.sidebar clr-vertical-nav-group {
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  color: #bfc7ce;
-}
-
-.sidebar clr-vertical-nav-group:hover {
-  background-color: #495057;
-  cursor: pointer;
-}
-
 .content-area {
   padding: 20px;
   flex-grow: 1;
