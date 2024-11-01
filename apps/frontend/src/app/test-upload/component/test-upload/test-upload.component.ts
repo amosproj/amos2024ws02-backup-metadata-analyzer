@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { TestUploadServiceService } from '../../service/test-upload-service.service';
-import { HelloWorldService } from '../../../statistics/service/hello-world.service';
 
 @Component({
   selector: 'app-test-upload',
