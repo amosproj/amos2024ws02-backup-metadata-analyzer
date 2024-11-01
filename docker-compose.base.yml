@@ -8,7 +8,6 @@ services:
       dockerfile: Dockerfile
 
     #environment:
-    #  - DEV_PLATFORM=DOCKER
 
     volumes:
       - ./:/app

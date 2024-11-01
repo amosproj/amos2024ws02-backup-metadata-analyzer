@@ -6,8 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "be": "nx serve metadata-analyzer-backend",
-    "fe": "nx serve metadata-analyzer-frontend --host 0.0.0.0",
-    "both": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend"
+    "fe": "nx serve metadata-analyzer-frontend",
+    "fe-docker": "nx serve metadata-analyzer-frontend --host 0.0.0.0",
+    "both": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend",
+    "docker-build": "docker-compose --env-file .env.docker up --build"
   },
   "author": "",
   "license": "ISC",
