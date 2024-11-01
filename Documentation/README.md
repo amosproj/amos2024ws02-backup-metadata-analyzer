@@ -12,10 +12,15 @@ running the code locally:
 - `npm run fe`: run frontend individually
 - `npm run both`: run backend and frontend
 
+Running Docker locally after basic setup
+
+- Install Docker on your machine: https://www.docker.com/
+- `docker-compose --env-file .env.docker up --build`
+
 generating database migrations:
 
 - the entity files need to be annotated with `@Entity(<table-name>)`
 - append the entity file to the `entities` array in `db-config.service.ts`
 - run the following command to generate a migration file:
-    - `nx run metadata-analyzer-backend:migrations:generate --name <migration-name>`
+  - `nx run metadata-analyzer-backend:migrations:generate --name <migration-name>`
 - append the generated file to the `migrations` array in `db-config.service.ts`
