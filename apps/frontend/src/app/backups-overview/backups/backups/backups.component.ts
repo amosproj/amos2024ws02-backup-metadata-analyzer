@@ -12,8 +12,9 @@ import { BackupService } from '../../service/backup-service.service';
 
 interface BackupData {
   id: string;
-  size: number;
+  sizeMB: number;
   creationDate: Date;
+  bio: string;
 }
 @Component({
   selector: 'app-backups',
