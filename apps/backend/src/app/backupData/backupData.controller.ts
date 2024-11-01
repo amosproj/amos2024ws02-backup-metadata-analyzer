@@ -27,6 +27,13 @@ export class BackupDataController {
         return entity;
     }
 
+    @Get()
+    @ApiOperation({summary: 'Returns all backupData Objects.'})
+    @ApiOkResponse({type: [BackupDataDto]})
+    async getAll(): Promise<BackupDataDto[]> {
+        return this.backupDataService.findAll();
+    }
+    
     @Post()
     @ApiOperation({summary: 'Creates a new backupData Object.'})
     @ApiCreatedResponse({

@@ -21,6 +21,13 @@ export class BackupDataService {
     }
 
     /**
+     * Find all backups.
+     */
+    async findAll(): Promise<BackupDataEntity[]> {
+        return this.backupDataRepository.find();
+    }
+
+    /**
      * Create a new backup data entity.
      * @param createBackupDataDto
      */
