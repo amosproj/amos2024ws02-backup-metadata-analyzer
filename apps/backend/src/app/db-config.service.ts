@@ -4,6 +4,8 @@ import {TypeOrmModuleOptions, TypeOrmOptionsFactory} from '@nestjs/typeorm';
 import {DataSourceOptions} from 'typeorm';
 import {DemoEntity} from "./demo/entity/demo.entity";
 import {Init1730126846408} from "./migrations/1730126846408-Init";
+import {BackupDataEntity} from "./backupData/entity/backupData.entity";
+import {AddBackupDataTable1730491370687} from "./migrations/1730491370687-AddBackupDataTable";
 
 /**
  * Used by NestJS to reach database.
@@ -23,9 +25,9 @@ export class DbConfigService implements TypeOrmOptionsFactory {
             username: this.configService.getOrThrow<string>('DATABASE_USER'),
             password: this.configService.getOrThrow<string>('DATABASE_PASSWORD'),
             database: this.configService.getOrThrow<string>('DATABASE_DATABASE'),
-            entities: [DemoEntity],
+            entities: [DemoEntity, BackupDataEntity],
             migrationsRun: true,
-            migrations: [Init1730126846408],
+            migrations: [Init1730126846408, AddBackupDataTable1730491370687],
         };
     }
 }
