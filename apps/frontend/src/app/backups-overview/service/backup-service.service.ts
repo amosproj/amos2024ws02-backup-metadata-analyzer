@@ -1,21 +1,37 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-
-interface BackupData {
-  id: string;
-  sizeMB: number;
-  creationDate: Date;
-  bio: string;
-}
+import { BASE_URL } from '../../shared/types/configuration';
+import { Backup } from '../../shared/types/backup';
+import { APIResponse } from '../../shared/types/api-response';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BackupService {
-  constructor(private http: HttpClient) {}
+  constructor(
+    @Inject(BASE_URL) private readonly baseUrl: string,
+    private readonly http: HttpClient
+  ) {}
 
-  getAllBackups(): Observable<BackupData[]> {
-    return this.http.get<BackupData[]>('../../../../public/Backup.json');
+  getAllBackups(): Observable<Backup[]> {
+    const mapToBackup = (data: Backup): Backup => {
+      return {
+        id: data.id,
+        sizeMB: data.sizeMB,
+        creationDate: data.creationDate,
+        bio: data.bio,
+      };
+    };
+
+    let params = new HttpParams();
+
+    return this.http
+      .get<APIResponse>(`${this.baseUrl}/backupData`, { params })
+      .pipe(
+        map((response) => {
+          return response.data.map(mapToBackup);
+        })
+      );
   }
 }
