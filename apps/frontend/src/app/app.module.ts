@@ -19,11 +19,9 @@ import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
 import { FindTestDataComponent } from './test-upload/component/find-test-data/find-test-data.component';
 import { BackupsComponent } from './backups-overview/backups/backups/backups.component';
+import { BASE_URL } from './shared/types/configuration';
 
-// amCharts imports
-// import * as am5 from '@amcharts/amcharts5';
-// import * as am5chart from '@amcharts/amcharts5/xy';
-// import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
+
 
 @NgModule({
   declarations: [
@@ -41,7 +39,9 @@ import { BackupsComponent } from './backups-overview/backups/backups/backups.com
     HttpClientModule,
     RouterModule.forRoot(appRoutes),
   ],
-  providers: [],
+  providers: [
+    { provide: BASE_URL, useValue: 'http://localhost:3000/api'}
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {
