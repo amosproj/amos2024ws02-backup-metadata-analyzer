@@ -44,7 +44,7 @@ export class BackupDataService extends PaginationService {
         return this.backupDataRepository.save(backupDataEntity);
     }
 
-    private createWhereClause(backupDataFilterDto: BackupDataFilterDto) {
+    createWhereClause(backupDataFilterDto: BackupDataFilterDto) {
         let where: any = {};
 
         //ID search
