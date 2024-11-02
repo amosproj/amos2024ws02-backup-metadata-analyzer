@@ -7,6 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="../../public/favicon.ico" />
   </head>
+
+  <template id="error_template">
+    <div style="display: flex; flex-direction: column; height: 100vh">
+      <div style="margin-top: auto; margin-bottom: auto">
+        <h1>Unable to start application :/</h1>
+        <p>
+          Something went wrong during startup. Contact the system administrator
+          for details.
+        </p>
+      </div>
+    </div>
+  </template>
+
   <body cds-theme="light">
     <app-root></app-root>
   </body>

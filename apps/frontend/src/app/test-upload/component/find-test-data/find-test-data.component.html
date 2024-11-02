@@ -18,19 +18,16 @@
       Upload
     </button>
   </form>
-
-  <h5>ID:</h5>
-  <span class="label label-info">{{ id }}</span>
-  <form clrForm>
-    <clr-textarea-container>
-      <label>Data description</label>
-      <textarea
-        clrTextarea
-        [(ngModel)]="data"
-        name="description"
-        required
-        disabled
-      ></textarea>
-    </clr-textarea-container>
-  </form>
+  <ng-container *ngIf="backup$ | async as backup">
+    <div class="card">
+      <div class="card-header">{{ backup.id }}</div>
+      <div class="card-block">
+        <div class="card-text">
+          <p>{{ backup.sizeMB }}</p>
+          <p>{{ backup.creationDate }}</p>
+          <p>{{ backup.bio }}</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
 </div>
