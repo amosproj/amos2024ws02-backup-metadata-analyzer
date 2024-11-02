@@ -5,6 +5,7 @@ import {BackupDataDto} from "./dto/backupData.dto";
 import {CreateBackupDataDto} from "./dto/createBackupData.dto";
 import {PaginationDto} from "../utils/pagination/PaginationDto";
 import {PaginationOptionsDto} from "../utils/pagination/PaginationOptionsDto";
+import {BackupDataFilterDto} from "./dto/backupDataFilter.dto";
 
 @Controller('backupData')
 export class BackupDataController {
@@ -32,8 +33,8 @@ export class BackupDataController {
     @Get()
     @ApiOperation({summary: 'Returns all backupData Objects.'})
     @ApiOkResponse()
-    async findAll(@Query() paginationOptionsDto: PaginationOptionsDto): Promise<PaginationDto<BackupDataDto>> {
-        return this.backupDataService.findAll(paginationOptionsDto);
+    async findAll(@Query() paginationOptionsDto: PaginationOptionsDto, @Query() backupDataFilterDto: BackupDataFilterDto): Promise<PaginationDto<BackupDataDto>> {
+        return this.backupDataService.findAll(paginationOptionsDto, backupDataFilterDto);
     }
 
     @Post()
