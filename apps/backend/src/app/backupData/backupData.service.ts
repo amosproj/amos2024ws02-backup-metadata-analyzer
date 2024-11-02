@@ -3,13 +3,18 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {BackupDataEntity} from "./entity/backupData.entity";
 import {CreateBackupDataDto} from "./dto/createBackupData.dto";
+import {PaginationOptionsDto} from "../utils/pagination/PaginationOptionsDto";
+import {PaginationDto} from "../utils/pagination/PaginationDto";
+import {PaginationService} from "../utils/pagination/paginationService";
+import {BackupDataDto} from "./dto/backupData.dto";
 
 @Injectable()
-export class BackupDataService {
+export class BackupDataService extends PaginationService {
     constructor(
         @InjectRepository(BackupDataEntity)
         private backupDataRepository: Repository<BackupDataEntity>,
     ) {
+        super();
     }
 
     /**
@@ -21,10 +26,10 @@ export class BackupDataService {
     }
 
     /**
-     * Find all backups.
+     * Find all backups with pagination.
      */
-    async findAll(): Promise<BackupDataEntity[]> {
-        return this.backupDataRepository.find();
+    async findAll(paginationOptionsDto: PaginationOptionsDto): Promise<PaginationDto<BackupDataDto>> {
+        return await this.paginate(this.backupDataRepository, paginationOptionsDto, {}) as PaginationDto<BackupDataDto>;
     }
 
     /**

@@ -28,6 +28,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
             entities: [DemoEntity, BackupDataEntity],
             migrationsRun: true,
             migrations: [Init1730126846408, AddBackupDataTable1730491370687],
+            logging: true,
         };
     }
 }

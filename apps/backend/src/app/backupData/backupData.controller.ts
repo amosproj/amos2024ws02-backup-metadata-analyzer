@@ -1,8 +1,10 @@
-import {Body, Controller, Get, Logger, NotFoundException, Param, Post,} from '@nestjs/common';
+import {Body, Controller, Get, Logger, NotFoundException, Param, Post, Query,} from '@nestjs/common';
 import {ApiCreatedResponse, ApiOkResponse, ApiOperation,} from '@nestjs/swagger';
 import {BackupDataService} from "./backupData.service";
 import {BackupDataDto} from "./dto/backupData.dto";
 import {CreateBackupDataDto} from "./dto/createBackupData.dto";
+import {PaginationDto} from "../utils/pagination/PaginationDto";
+import {PaginationOptionsDto} from "../utils/pagination/PaginationOptionsDto";
 
 @Controller('backupData')
 export class BackupDataController {
@@ -29,11 +31,11 @@ export class BackupDataController {
 
     @Get()
     @ApiOperation({summary: 'Returns all backupData Objects.'})
-    @ApiOkResponse({type: [BackupDataDto]})
-    async getAll(): Promise<BackupDataDto[]> {
-        return this.backupDataService.findAll();
+    @ApiOkResponse()
+    async findAll(@Query() paginationOptionsDto: PaginationOptionsDto): Promise<PaginationDto<BackupDataDto>> {
+        return this.backupDataService.findAll(paginationOptionsDto);
     }
-    
+
     @Post()
     @ApiOperation({summary: 'Creates a new backupData Object.'})
     @ApiCreatedResponse({
