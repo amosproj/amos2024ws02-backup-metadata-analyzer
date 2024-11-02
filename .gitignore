@@ -18,6 +18,7 @@ pids
 # Python
 *.pyc
 __pycache__/
+venv/
 
 # vscode
 .vscode/

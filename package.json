@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "be": "nx serve metadata-analyzer-backend",
     "fe": "nx serve metadata-analyzer-frontend",
-    "py": "./apps/analyzer/.venv/bin/python3 /home/dirk/Documents/repos/amos2024ws02-backup-metadata-analyzer/apps/analyzer/metadata_analyzer/main.py",
+    "py": "./apps/analyzer/venv/bin/python3 ./apps/analyzer/metadata_analyzer/main.py",
     "both": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend"
   },
   "author": "",
