@@ -47,7 +47,7 @@ export class BackupsComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    //this.createChart();
+    this.createChart();
   }
 
   refresh(option?: ClrDatagridStateInterface<Backup>): void {
@@ -75,97 +75,123 @@ export class BackupsComponent implements AfterViewInit {
     this.filterOptions$.next(params);
   }
 
-  // createChart() {
-  //   this.backups$
-  //     .pipe(
-  //       map((data) =>
-  //         data
-  //           .map((item) => ({
-  //             date: new Date(item.creationDate),
-  //             sizeMB: item.sizeMB,
-  //             timestamp: new Date(item.creationDate).getTime(), // Zusätzliche Property für die Sortierung
-  //           }))
-  //           .sort((a, b) => a.timestamp - b.timestamp)
-  //       )
-  //     )
-  //     .subscribe((chartData) => {
-  //       // Chart-Root erstellen
-  //       let root = am5.Root.new('backupSizeChart');
+  createChart() {
+    this.backups$
+      .pipe(
+        map((data) =>
+          data
+            .map((item) => ({
+              date: new Date(item.creationDate),
+              sizeMB: item.sizeMB,
+              timestamp: new Date(item.creationDate).getTime(), // Zusätzliche Property für die Sortierung
+            }))
+            .sort((a, b) => a.timestamp - b.timestamp)
+        )
+      )
+      .subscribe();
 
-  //       // Theme hinzufügen
-  //       root.setThemes([am5themes_Animated.new(root)]);
+    // Chart-Root erstellen
+    let root = am5.Root.new('backupSizeChart');
 
-  //       // Chart erstellen
-  //       let chart = root.container.children.push(
-  //         am5xy.XYChart.new(root, {
-  //           layout: root.verticalLayout,
-  //         })
-  //       );
+    // Theme hinzufügen
+    root.setThemes([am5themes_Animated.new(root)]);
 
-  //       chart.children.unshift(
-  //         am5.Label.new(root, {
-  //           text: 'Datengröße der vergangenen Backups',
-  //           fontSize: 24,
-  //           fontWeight: 'bold',
-  //           textAlign: 'center',
-  //           x: am5.p50,
-  //           centerX: am5.p50,
-  //         })
-  //       );
+    // Chart erstellen
+    let chart = root.container.children.push(
+      am5xy.XYChart.new(root, {
+        layout: root.verticalLayout,
+      })
+    );
 
-  //       // X-Achse
-  //       let xAxis = chart.xAxes.push(
-  //         am5xy.CategoryAxis.new(root, {
-  //           maxDeviation: 0.3,
-  //           categoryField: 'date',
-  //           renderer: am5xy.AxisRendererX.new(root, {
-  //             minGridDistance: 30,
-  //           }),
-  //         })
-  //       );
+    chart.children.unshift(
+      am5.Label.new(root, {
+        text: 'Datengröße der vergangenen Backups',
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        x: am5.p50,
+        centerX: am5.p50,
+      })
+    );
 
-  //       xAxis.get('renderer').labels.template.setAll({
-  //         rotation: -45,
-  //         centerY: am5.p50,
-  //         centerX: am5.p100,
-  //       });
+    // X-Achse
+    let xAxis = chart.xAxes.push(
+      am5xy.CategoryAxis.new(root, {
+        maxDeviation: 0.3,
+        categoryField: 'date',
+        renderer: am5xy.AxisRendererX.new(root, {
+          minGridDistance: 30,
+        }),
+      })
+    );
 
-  //       xAxis.data.setAll(chartData);
+    xAxis.get('renderer').labels.template.setAll({
+      rotation: -45,
+      centerY: am5.p50,
+      centerX: am5.p100,
+    });
 
-  //       // Y-Achse
-  //       let yAxis = chart.yAxes.push(
-  //         am5xy.ValueAxis.new(root, {
-  //           renderer: am5xy.AxisRendererY.new(root, {}),
-  //         })
-  //       );
+    //xAxis.data.setAll(chartData);
+    this.backups$
+    .pipe(
+      map((data) =>
+        data
+          .map((item) => ({
+            date: new Date(item.creationDate),
+            sizeMB: item.sizeMB,
+            timestamp: new Date(item.creationDate).getTime(), // Zusätzliche Property für die Sortierung
+          }))
+          .sort((a, b) => a.timestamp - b.timestamp)
+      )
+    )
+    .subscribe((chartData) => xAxis.data.setAll(chartData));
 
-  //       // Scrollbar hinzufügen
-  //       chart.set(
-  //         'scrollbarX',
-  //         am5.Scrollbar.new(root, {
-  //           orientation: 'horizontal',
-  //         })
-  //       );
+    // Y-Achse
+    let yAxis = chart.yAxes.push(
+      am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {}),
+      })
+    );
 
-  //       // Balkenserie hinzufügen
-  //       let series = chart.series.push(
-  //         am5xy.ColumnSeries.new(root, {
-  //           name: 'Size',
-  //           xAxis: xAxis,
-  //           yAxis: yAxis,
-  //           valueYField: 'sizeMB',
-  //           categoryXField: 'date',
-  //           tooltip: am5.Tooltip.new(root, {
-  //             labelText: '{valueY} MB',
-  //           }),
-  //         })
-  //       );
+    // Scrollbar hinzufügen
+    chart.set(
+      'scrollbarX',
+      am5.Scrollbar.new(root, {
+        orientation: 'horizontal',
+      })
+    );
 
-  //       series.data.setAll(chartData);
+    // Balkenserie hinzufügen
+    let series = chart.series.push(
+      am5xy.ColumnSeries.new(root, {
+        name: 'Size',
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: 'sizeMB',
+        categoryXField: 'date',
+        tooltip: am5.Tooltip.new(root, {
+          labelText: '{valueY} MB',
+        }),
+      })
+    );
 
-  //       // Animation für Balken
-  //       series.appear(1000);
-  //       chart.appear(1000, 100);
-  //     });
-  // }
+    //series.data.setAll(chartData);
+    this.backups$
+      .pipe(
+        map((data) =>
+          data
+            .map((item) => ({
+              date: new Date(item.creationDate),
+              sizeMB: item.sizeMB,
+              timestamp: new Date(item.creationDate).getTime(), // Zusätzliche Property für die Sortierung
+            }))
+            .sort((a, b) => a.timestamp - b.timestamp)
+        )
+      )
+      .subscribe((chartData) => series.data.setAll(chartData));
+
+    // Animation für Balken
+    series.appear(1000);
+    chart.appear(1000, 100);
+  }
 }
