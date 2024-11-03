@@ -5,11 +5,12 @@
     <clr-datagrid
       *ngIf="backups$ | async as backups"
       [clrDgItemsTrackBy]="trackBackupById"
+      (clrDgRefresh)="refresh($event)"
     >
       <clr-dg-column [clrDgField]="'id'">Backup ID</clr-dg-column>
       <clr-dg-column [clrDgField]="'sizeMB'">Size</clr-dg-column>
       <clr-dg-column [clrDgField]="'creationDate'">Creation date</clr-dg-column>
-      <clr-dg-column [clrDgField]="'description'">Description</clr-dg-column>
+      <clr-dg-column [clrDgField]="'bio'">Description</clr-dg-column>
 
       <clr-dg-placeholder>We couldn't find any backups!</clr-dg-placeholder>
       <clr-dg-row *clrDgItems="let backup of backups" [clrDgItem]="backup">
