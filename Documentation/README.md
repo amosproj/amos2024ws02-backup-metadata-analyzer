@@ -16,8 +16,8 @@ cd ./apps/analyzer/metadata_analyzer ; poetry install
 
 - `npm run be`: run backend individually
 - `npm run fe`: run frontend individually
-- `npm run both`: run backend and frontend
 - `npm run py` : run python app
+- `npm run all`: run backend, frontend and python module
 
 ### Generating database migrations:
 
