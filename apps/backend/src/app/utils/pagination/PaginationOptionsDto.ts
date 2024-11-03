@@ -1,6 +1,4 @@
-import {OrderBy} from "./OrderBy";
-import {IsEnum, IsOptional} from "class-validator";
-import {SortOrder} from "./SortOrder";
+import {IsOptional} from "class-validator";
 import {ApiProperty} from "@nestjs/swagger";
 
 export class PaginationOptionsDto {
@@ -17,22 +15,4 @@ export class PaginationOptionsDto {
     })
     @IsOptional()
     limit?: number;
-
-    @ApiProperty({
-        description: 'Order by',
-        enum: OrderBy,
-        required: false,
-    })
-    @IsOptional()
-    @IsEnum(OrderBy)
-    orderBy?: OrderBy;
-
-    @ApiProperty({
-        description: 'Sort order',
-        enum: SortOrder,
-        required: false,
-    })
-    @IsOptional()
-    @IsEnum(SortOrder)
-    sortOrder?: SortOrder;
 }

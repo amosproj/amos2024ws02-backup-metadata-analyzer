@@ -8,6 +8,7 @@ import {PaginationDto} from "../utils/pagination/PaginationDto";
 import {PaginationService} from "../utils/pagination/paginationService";
 import {BackupDataDto} from "./dto/backupData.dto";
 import {BackupDataFilterDto} from "./dto/backupDataFilter.dto";
+import {BackupDataOrderOptionsDto} from "./dto/backupDataOrderOptions.dto";
 
 @Injectable()
 export class BackupDataService extends PaginationService {
@@ -29,8 +30,8 @@ export class BackupDataService extends PaginationService {
     /**
      * Find all backups with pagination.
      */
-    async findAll(paginationOptionsDto: PaginationOptionsDto, backupDataFilterDto: BackupDataFilterDto): Promise<PaginationDto<BackupDataDto>> {
-        return await this.paginate(this.backupDataRepository, paginationOptionsDto, this.createWhereClause(backupDataFilterDto)) as PaginationDto<BackupDataDto>;
+    async findAll(paginationOptionsDto: PaginationOptionsDto, backupDataOrderOptionsDto: BackupDataOrderOptionsDto, backupDataFilterDto: BackupDataFilterDto): Promise<PaginationDto<BackupDataDto>> {
+        return await this.paginate<BackupDataEntity>(this.backupDataRepository, this.createOrderClause(backupDataOrderOptionsDto), this.createWhereClause(backupDataFilterDto), paginationOptionsDto);
     }
 
     /**
@@ -44,6 +45,10 @@ export class BackupDataService extends PaginationService {
         return this.backupDataRepository.save(backupDataEntity);
     }
 
+    /**
+     * Create where clause.
+     * @param backupDataFilterDto
+     */
     createWhereClause(backupDataFilterDto: BackupDataFilterDto) {
         let where: any = {};
 
@@ -93,5 +98,15 @@ export class BackupDataService extends PaginationService {
             where.bio = ILike(`%${backupDataFilterDto.bio}%`);
         }
         return where;
+    }
+
+    /**
+     * Create order clause.
+     * @param backupDataOrderOptionsDto
+     */
+    createOrderClause(backupDataOrderOptionsDto: BackupDataOrderOptionsDto) {
+        return {
+            [backupDataOrderOptionsDto.orderBy ?? 'creationDate']: backupDataOrderOptionsDto.sortOrder ?? 'DESC',
+        }
     }
 }

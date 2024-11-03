@@ -1,5 +1,5 @@
 import {PaginationOptionsDto} from "./PaginationOptionsDto";
-import {FindManyOptions, FindOptionsWhere, Repository} from "typeorm";
+import {FindManyOptions, FindOptionsOrder, FindOptionsWhere, Repository} from "typeorm";
 import {PaginationDto} from "./PaginationDto";
 
 export class PaginationService {
@@ -7,19 +7,19 @@ export class PaginationService {
     /**
      * Paginate.
      * @param repository
-     * @param paginationOptionsDto
+     * @param order
      * @param where
+     * @param paginationOptionsDto
      */
     protected async paginate<T>(
         repository: Repository<any>,
-        paginationOptionsDto: PaginationOptionsDto,
+        order: FindOptionsOrder<T>,
         where: FindOptionsWhere<T>,
+        paginationOptionsDto: PaginationOptionsDto
     ): Promise<PaginationDto<T>> {
         let options: FindManyOptions = {
-            order: {
-                [paginationOptionsDto.orderBy ?? 'creationDate']: paginationOptionsDto.sortOrder ?? 'DESC',
-            },
-            where: where,
+            order,
+            where,
         }
 
         if (paginationOptionsDto.offset) {
