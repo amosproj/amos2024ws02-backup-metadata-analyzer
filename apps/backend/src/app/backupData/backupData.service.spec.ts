@@ -6,6 +6,8 @@ import {BackupDataEntity} from './entity/backupData.entity';
 import {BackupDataFilterDto} from "./dto/backupDataFilter.dto";
 import {BadRequestException} from "@nestjs/common";
 import {CreateBackupDataDto} from "./dto/createBackupData.dto";
+import {BackupDataOrderByOptions} from "./dto/backupDataOrderOptions.dto";
+import {SortOrder} from "../utils/pagination/SortOrder";
 
 const mockBackupDataEntity: BackupDataEntity = {
     id: '123e4567-e89b-12d3-a456-426614174062',
@@ -44,7 +46,7 @@ describe('BackupDataService', () => {
     });
     describe('findAll', () => {
         it('should return paginated backup data with default sort by createdDate DESC', async () => {
-            const result = await service.findAll({offset: 0, limit: 5}, {});
+            const result = await service.findAll({offset: 0, limit: 5}, {}, {});
             expect(result).toEqual({
                 data: [mockBackupDataEntity],
                 paginationData: {
@@ -112,6 +114,36 @@ describe('BackupDataService', () => {
         it('should throw an error for invalid toDate', () => {
             const filterDto: BackupDataFilterDto = {toDate: 'invalid-date'};
             expect(() => service.createWhereClause(filterDto)).toThrow(BadRequestException);
+        });
+    });
+
+    describe('createOrderClause', () => {
+        it('should create an order clause for creationDate in DESC order by default', () => {
+            const orderClause = service.createOrderClause({});
+            expect(orderClause).toEqual({creationDate: 'DESC'});
+        });
+
+        it('should create an order clause for sizeMB in ASC order', () => {
+            const orderClause = service.createOrderClause({
+                orderBy: BackupDataOrderByOptions.SIZE,
+                sortOrder: SortOrder.ASC
+            });
+            expect(orderClause).toEqual({sizeMB: 'ASC'});
+        });
+
+        it('should create an order clause for bio in DESC order', () => {
+            const orderClause = service.createOrderClause({
+                orderBy: BackupDataOrderByOptions.BIO,
+                sortOrder: SortOrder.DESC
+            });
+            expect(orderClause).toEqual({bio: 'DESC'});
+        });
+
+        it('should create an order clause for id in ASC order', () => {
+            const orderClause = service.createOrderClause({
+                orderBy: BackupDataOrderByOptions.ID,
+                sortOrder: SortOrder.ASC});
+            expect(orderClause).toEqual({id: 'ASC'});
         });
     });
 
