@@ -1,4 +1,6 @@
 from flask import Flask,request
+import dotenv
+    
 
 app = Flask(__name__)
 
@@ -11,13 +13,15 @@ def hello_world():
 def echo():
     if request.method == 'POST': 
         data = request.get_json()
-        strData = data["input"]
+        obj = data["body"]
+        strData = obj["text"]
         newData = ""
 
         for i in range (len(strData)-1,-1,-1):
             newData = newData + strData[i]
-
-        return newData
+       
+        newBody = "{ \"output\": \"" + newData + "\" }"
+        return newBody
 
 if __name__ == '__main__':
     app.run()

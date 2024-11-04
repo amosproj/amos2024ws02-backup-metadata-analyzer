@@ -1,12 +1,9 @@
 # metadata-analyzer
 
-Project description here.
+Rename .env.example to .env, adjust necessary values
 
-Linux/Mac: python3 -m venv .venv
-Windows: py -m venv .venv
-
-Linux/Max: source .venv/bin/activate
-Windows: .\.venv\Scripts\activate
-(to deactivate: deactivate)
-
-npm run py
+if flask imports are not recognized, potential vscode problem:
+strg + shift + p
+-> Select Interpreter
+-> Enter Interpreter Path
+(select python that lies in .venv directory)
