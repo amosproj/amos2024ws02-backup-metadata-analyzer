@@ -1,0 +1,15 @@
+services:
+  nx-app-base:
+    restart: always
+
+    build:
+      context: .
+
+      dockerfile: Dockerfile
+
+    #environment:
+
+    volumes:
+      - ./:/app
+
+      - mono-node-modules:/app/node_modules
