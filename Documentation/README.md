@@ -10,7 +10,8 @@ cd ./apps/analyzer/metadata_analyzer ; poetry install
 ```
 
 - `npm ci`: dependency install
-- copy `.env.example` file and rename to `.env` (adjust database properties according to database setup if necessary)
+- copy `.env.example` file in backend and rename to `.env` (adjust database properties according to database setup if necessary)
+- copy `.env.example` file in analyzer and rename to `.env` (adjust port properties according to backend setup if necessary)
 
 ### Running the code locally:
 
