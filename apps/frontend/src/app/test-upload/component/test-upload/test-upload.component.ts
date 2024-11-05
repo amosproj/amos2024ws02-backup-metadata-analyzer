@@ -11,9 +11,7 @@ export class TestUploadComponent {
   textInput: string = '';
   uploadID: string = '';
 
-  constructor(
-    private readonly testUploadService: TestUploadServiceService
-  ) {}
+  constructor(private readonly testUploadService: TestUploadServiceService) {}
 
   onSubmit(): void {}
 }

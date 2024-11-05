@@ -14,7 +14,7 @@ export class BackupService {
     private readonly http: HttpClient
   ) {}
 
-  getAllBackups(options?: any): Observable<Backup[]> {
+  getAllBackups(options?: HttpParams): Observable<Backup[]> {
     const mapToBackup = (data: Backup): Backup => {
       return {
         id: data.id,

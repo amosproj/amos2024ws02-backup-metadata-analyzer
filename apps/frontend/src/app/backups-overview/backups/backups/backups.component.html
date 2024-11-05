@@ -1,7 +1,6 @@
 <h1 class="header">Backups Overview</h1>
 <div class="clr-row">
   <div class="clr-col-lg-12 clr-col-lg-12">
-    <!-- [(clrDgSelected)]="selectedBackups" -->
     <clr-datagrid
       *ngIf="backups$ | async as backups"
       [clrDgItemsTrackBy]="trackBackupById"
@@ -39,7 +38,5 @@
   <div class="clr-col-sm-12 clr-col-md-6">
     <div id="backupSizeChart" style="width: 100%; height: 300px"></div>
   </div>
-  <div class="clr-col-sm-12 clr-col-md-6">
-    ...weitere grafik ...
-  </div>
+  <div class="clr-col-sm-12 clr-col-md-6">...weitere grafik ...</div>
 </div>

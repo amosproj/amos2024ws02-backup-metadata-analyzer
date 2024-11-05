@@ -14,6 +14,7 @@ import {
 import { BackupService } from '../../service/backup-service.service';
 import { Backup } from '../../../shared/types/backup';
 import { ClrDatagridStateInterface } from '@clr/angular';
+import { HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-backups',
@@ -51,24 +52,25 @@ export class BackupsComponent implements AfterViewInit {
   }
 
   refresh(option?: ClrDatagridStateInterface<Backup>): void {
-    let params: any = {};
+    let params: HttpParams = new HttpParams();
 
-    // Paginierung
     if (option) {
       if (option.page) {
-        params.offset = option.page.current;
-        params.limit = option.page.size;
+        if (option.page.current && option.page.size)
+          params = params.append(
+            'offset',
+            (option.page.current - 1) * option.page.size
+          );
+        if (option.page.size) params = params.append('limit', option.page.size);
       }
 
-      // Sortierung
       if (option.sort) {
-        params.orderBy = option.sort.by as string;
-        params.sortOrder = option.sort.reverse ? 'DESC' : 'ASC';
+        params = params.set('orderBy', option.sort.by as string);
+        params = params.set('sortOrder', option.sort.reverse ? 'DESC' : 'ASC');
       }
-      // Filter
       if (option.filters) {
         option.filters.forEach((filter) => {
-          params[filter.property] = filter.value;
+          params = params.append(filter.property, filter.value);
         });
       }
     }
@@ -76,20 +78,14 @@ export class BackupsComponent implements AfterViewInit {
   }
 
   createChart() {
-    this.backups$
-      .pipe(
-        map((data) =>
-          data
-            .map((item) => ({
-              date: new Date(item.creationDate),
-              sizeMB: item.sizeMB,
-              timestamp: new Date(item.creationDate).getTime(), // Zusätzliche Property für die Sortierung
-            }))
-            .sort((a, b) => a.timestamp - b.timestamp)
-        )
+    let chartData$ = this.backups$.pipe(
+      map((data) =>
+        data.map((item) => ({
+          date: new Date(item.creationDate),
+          sizeMB: item.sizeMB,
+        }))
       )
-      .subscribe();
-
+    );
     // Chart-Root erstellen
     let root = am5.Root.new('backupSizeChart');
 
@@ -105,7 +101,7 @@ export class BackupsComponent implements AfterViewInit {
 
     chart.children.unshift(
       am5.Label.new(root, {
-        text: 'Datengröße der vergangenen Backups',
+        text: 'Size of last backups',
         fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',
@@ -132,19 +128,8 @@ export class BackupsComponent implements AfterViewInit {
     });
 
     //xAxis.data.setAll(chartData);
-    this.backups$
-    .pipe(
-      map((data) =>
-        data
-          .map((item) => ({
-            date: new Date(item.creationDate),
-            sizeMB: item.sizeMB,
-            timestamp: new Date(item.creationDate).getTime(), // Zusätzliche Property für die Sortierung
-          }))
-          .sort((a, b) => a.timestamp - b.timestamp)
-      )
-    )
-    .subscribe((chartData) => xAxis.data.setAll(chartData));
+
+    chartData$.subscribe((chartData) => xAxis.data.setAll(chartData));
 
     // Y-Achse
     let yAxis = chart.yAxes.push(
@@ -176,19 +161,7 @@ export class BackupsComponent implements AfterViewInit {
     );
 
     //series.data.setAll(chartData);
-    this.backups$
-      .pipe(
-        map((data) =>
-          data
-            .map((item) => ({
-              date: new Date(item.creationDate),
-              sizeMB: item.sizeMB,
-              timestamp: new Date(item.creationDate).getTime(), // Zusätzliche Property für die Sortierung
-            }))
-            .sort((a, b) => a.timestamp - b.timestamp)
-        )
-      )
-      .subscribe((chartData) => series.data.setAll(chartData));
+    chartData$.subscribe((chartData) => series.data.setAll(chartData));
 
     // Animation für Balken
     series.appear(1000);
