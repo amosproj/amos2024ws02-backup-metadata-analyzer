@@ -1,13 +1,64 @@
 <clr-main-container>
-  <div class="main-container">
-    <app-header></app-header>
+  <clr-header class="header">
+    <img src="../../../../public/team_logo.png" alt="Team Logo" width="50" />
+    <span class="title">Metadata Analyzer</span>
+    <div class="header-actions"></div>
+  </clr-header>
 
-    <div class="content-container">
-      <app-sidenav></app-sidenav>
+  <div class="content-container">
+    <clr-vertical-nav class="clr-vertical-nav has-nav-groups clr-nav-level-1">
+      <div class="nav-content">
+        <clr-vertical-nav-group class="nav-group">
+          <clr-vertical-nav-item routerLink="/" routerLinkActive="active">
+            <cds-icon shape="home"></cds-icon>
+            <span class="nav-text">Dashboard</span>
+          </clr-vertical-nav-item>
 
-      <main class="content-area">
-        <router-outlet></router-outlet>
-      </main>
-    </div>
+          <clr-vertical-nav-group-children>
+            <a
+              clrVerticalNavLink
+              clrAriaCurrentLink
+              routerLink="/"
+              routerLinkActive="active"
+              class="nav-link"
+              ><span class="nav-text">Overview</span></a
+            >
+          </clr-vertical-nav-group-children>
+
+          <clr-vertical-nav-group-children>
+            <a
+              clrVerticalNavLink
+              clrAriaCurrentLink
+              class="nav-link"
+              routerLink="/"
+              routerLinkActive="active"
+            >
+              <span class="nav-text">Last Import</span>
+            </a>
+          </clr-vertical-nav-group-children>
+        </clr-vertical-nav-group>
+
+        <clr-vertical-nav-group class="nav-group">
+          <clr-vertical-nav-item routerLink="/upload" routerLinkActive="active">
+            <cds-icon shape="upload-cloud"></cds-icon>
+            <span class="nav-text">Upload</span>
+          </clr-vertical-nav-item>
+        </clr-vertical-nav-group>
+
+        <clr-vertical-nav-group class="nav-group">
+          <clr-vertical-nav-item
+            routerLink="/findData"
+            routerLinkActive="active"
+          >
+            <cds-icon shape="search"></cds-icon>
+            <span class="nav-text">Find Data</span>
+          </clr-vertical-nav-item>
+        </clr-vertical-nav-group>
+      </div>
+    </clr-vertical-nav>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 </clr-main-container>

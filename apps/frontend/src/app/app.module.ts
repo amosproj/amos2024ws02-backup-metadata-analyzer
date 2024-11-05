@@ -8,20 +8,27 @@ import { FormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
-import { ClarityIcons, homeIcon, searchIcon, uploadCloudIcon } from '@cds/core/icon';
+import {
+  ClarityIcons,
+  homeIcon,
+  searchIcon,
+  tableIcon,
+  uploadCloudIcon,
+} from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
-import { HeaderComponent } from './ui/header/header.component';
-import { SidenavComponent } from './ui/sidenav/sidenav.component';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
 import { FindTestDataComponent } from './test-upload/component/find-test-data/find-test-data.component';
+import { BackupsComponent } from './backups-overview/backups/backups/backups.component';
+import { BASE_URL } from './shared/types/configuration';
+
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    HeaderComponent,
-    SidenavComponent,
     TestUploadComponent,
     FindTestDataComponent,
+    BackupsComponent,
   ],
   imports: [
     BrowserModule,
@@ -32,11 +39,13 @@ import { FindTestDataComponent } from './test-upload/component/find-test-data/fi
     HttpClientModule,
     RouterModule.forRoot(appRoutes),
   ],
-  providers: [],
+  providers: [
+    { provide: BASE_URL, useValue: 'http://localhost:3000/api'}
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {
   constructor() {
-    ClarityIcons.addIcons(uploadCloudIcon, homeIcon, searchIcon);
+    ClarityIcons.addIcons(uploadCloudIcon, homeIcon, searchIcon, tableIcon);
   }
 }

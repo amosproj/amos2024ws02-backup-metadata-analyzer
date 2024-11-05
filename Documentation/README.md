@@ -5,6 +5,7 @@ basic setup:
 
 - `npm ci`: dependency install
 - copy `.env.example` file and rename to `.env` (adjust database properties according to database setup if necessary)
+- To insert dummy data into table backupData you can use the SQL script `dummyData.sql` in `apps/backend/src/app/utils`
 
 running the code locally:
 

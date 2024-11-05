@@ -7,16 +7,18 @@ import {NestFactory} from '@nestjs/core';
 
 import {AppModule} from './app/app.module';
 import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
+import {ValidationPipe} from "@nestjs/common";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     const globalPrefix = 'api';
     app.setGlobalPrefix(globalPrefix);
+    app.useGlobalPipes(new ValidationPipe());
 
     app.enableCors({
         origin: 'http://localhost:4200', // Allowed URL of the Angular frontend
     });
-    
+
     const options = new DocumentBuilder()
         .setTitle('Your API Title')
         .setDescription('Your API description')
