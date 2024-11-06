@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { TestUploadServiceService } from '../../service/test-upload-service.service';
-import { Observable } from 'rxjs';
-import { Backup } from '../../../shared/types/backup';
+import {
+  Data,
+  TestUploadServiceService,
+} from '../../service/test-upload-service.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-find-test-data',
@@ -9,15 +11,15 @@ import { Backup } from '../../../shared/types/backup';
   styleUrl: './find-test-data.component.css',
 })
 export class FindTestDataComponent {
-  backup$: Observable<Backup> | undefined;
+  data: Data | undefined;
 
   idInput: string = '';
 
-  constructor(
-    private readonly testUploadService: TestUploadServiceService
-  ) {}
+  constructor(private readonly testUploadService: TestUploadServiceService) {}
 
-  onSubmit(): void {
-    this.backup$ = this.testUploadService.getData(this.idInput);
+  async onSubmit(): Promise<void> {
+    this.data = await firstValueFrom(
+      this.testUploadService.getData(this.idInput)
+    );
   }
 }
