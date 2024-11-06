@@ -13,5 +13,9 @@ export class TestUploadComponent {
 
   constructor(private readonly testUploadService: TestUploadServiceService) {}
 
-  onSubmit(): void {}
+  onSubmit(): void {
+    this.testUploadService
+      .upload(this.textInput)
+      .subscribe((response) => (this.uploadID = response));
+  }
 }

@@ -2,19 +2,33 @@ import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { BASE_URL } from '../../shared/types/configuration';
-import { Backup } from '../../shared/types/backup';
+
+export interface Data {
+  text: string;
+  id: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class TestUploadServiceService {
-  public uploadNewID: string = '';
+
   constructor(
     @Inject(BASE_URL) private readonly baseUrl: string,
     private readonly http: HttpClient
   ) {}
 
-  getData(id: string): Observable<Backup> {
-    return this.http.get<Backup>(`${this.baseUrl}/backupData/${id}`);
+  upload(input: string): Observable<string> {
+    const payload = { text: input };
+
+    return this.http.post<Data>(`${this.baseUrl}/demo`, payload).pipe(
+      map((response) => {
+        return response.id;
+      })
+    );
+  }
+
+  getData(id: string): Observable<Data> {
+    return this.http.get<Data>(`${this.baseUrl}/demo/${id}`);
   }
 }
