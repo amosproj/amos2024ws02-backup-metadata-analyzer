@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "be": "nx serve metadata-analyzer-backend",
     "fe": "nx serve metadata-analyzer-frontend",
-    "both": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend"
+    "py": "nx serve metadata-analyzer",
+    "all": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend,metadata-analyzer"
   },
   "author": "",
   "license": "ISC",
