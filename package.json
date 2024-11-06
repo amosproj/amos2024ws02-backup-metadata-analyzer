@@ -7,8 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "be": "nx serve metadata-analyzer-backend",
     "fe": "nx serve metadata-analyzer-frontend",
-    "py": "nx serve metadata-analyzer",
-    "all": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend,metadata-analyzer"
+    "both": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend"
   },
   "author": "",
   "license": "ISC",
@@ -64,6 +63,7 @@
   },
   "nx": {},
   "dependencies": {
+    "@amcharts/amcharts5": "^5.10.7",
     "@angular/animations": "~18.2.0",
     "@angular/common": "~18.2.0",
     "@angular/compiler": "~18.2.0",
