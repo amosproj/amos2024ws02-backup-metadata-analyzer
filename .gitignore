@@ -18,6 +18,7 @@ pids
 # Python
 *.pyc
 __pycache__/
+.venv/
 
 # vscode
 .vscode/
@@ -43,3 +44,5 @@ apps/*/.env
 .nx/workspace-data
 **/vite.config.{js,ts,mjs,mts,cjs,cts}.timestamp*
 .angular
+
+.cache/*

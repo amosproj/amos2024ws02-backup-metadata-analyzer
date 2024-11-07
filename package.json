@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "be": "nx serve metadata-analyzer-backend",
     "fe": "nx serve metadata-analyzer-frontend",
-    "both": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend"
+    "py": "nx serve metadata-analyzer",
+    "all": "nx run-many --target serve --projects metadata-analyzer-backend,metadata-analyzer-frontend,metadata-analyzer"
   },
   "author": "",
   "license": "ISC",
@@ -31,6 +32,7 @@
     "@nx/nest": "^20.0.5",
     "@nx/node": "20.0.5",
     "@nx/web": "20.0.5",
+    "@nxlv/python": "^19.2.1",
     "@schematics/angular": "~18.2.0",
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
@@ -74,6 +76,7 @@
     "@cds/core": "^6.13.0",
     "@clr/angular": "^17.3.1",
     "@clr/ui": "^17.3.1",
+    "@nestjs/axios": "^3.1.1",
     "@nestjs/common": "^10.0.2",
     "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^10.0.2",
