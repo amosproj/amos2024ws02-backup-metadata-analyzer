@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
+import { BASE_URL } from '../../shared/types/configuration';
 
-interface Data {
+export interface Data {
   text: string;
   id: string;
 }
@@ -11,25 +12,23 @@ interface Data {
   providedIn: 'root',
 })
 export class TestUploadServiceService {
-  public uploadNewID: string = '';
-  constructor(private readonly http: HttpClient) {}
+
+  constructor(
+    @Inject(BASE_URL) private readonly baseUrl: string,
+    private readonly http: HttpClient
+  ) {}
 
   upload(input: string): Observable<string> {
     const payload = { text: input };
 
-    return this.http.post<Data>('http://localhost:3000/api/demo', payload).pipe(
+    return this.http.post<Data>(`${this.baseUrl}/demo`, payload).pipe(
       map((response) => {
         return response.id;
       })
     );
   }
 
-  // bc0126ea-525f-4525-abd9-609e41ae16ec
   getData(id: string): Observable<Data> {
-    return this.http.get<Data>(`http://localhost:3000/api/demo/${id}`).pipe(
-      map((response) => {
-        return response;
-      })
-    );
+    return this.http.get<Data>(`${this.baseUrl}/demo/${id}`);
   }
 }

@@ -38,6 +38,7 @@ bin/
 
 # Local env files
 apps/*/.env
+.env.docker
 
 .nx/cache
 .nx/workspace-data

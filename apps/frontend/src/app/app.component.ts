@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { HelloWorldService } from './statistics/service/hello-world.service';
 import { map } from 'rxjs';
 
 @Component({
