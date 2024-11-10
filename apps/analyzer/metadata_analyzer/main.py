@@ -1,5 +1,6 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from database import Database
 import os
 
 app = Flask(__name__)
@@ -24,8 +25,15 @@ def echo():
         newBody = '{ "output": "' + newData + '" }'
         return newBody
 
+@app.route("/analyze", methods=["GET"])
+def analyze():
+    data = list(database.get_data())
+
+    return jsonify(count=len(data))
 
 if __name__ == "__main__":
+    database = Database()
+
     new_port = os.getenv("FLASK_RUN_PORT")
     int_port = int(new_port or 5000)
     print("int_port: " + str(int_port))
