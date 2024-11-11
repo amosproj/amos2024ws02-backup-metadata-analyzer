@@ -14,7 +14,7 @@
     "serve": {
       "executor": "@nxlv/python:run-commands",
       "options": {
-        "command": "./.venv/bin/python3.11 ./metadata_analyzer/main.py",
+        "command": "./.venv/bin/python3.11 ./main.py",
         "cwd": "apps/analyzer"
       }
     },

@@ -6,7 +6,6 @@ import os
 
 app = Flask(__name__)
 
-
 @app.route("/")
 def hello_world():
     return "Hello, world!"
@@ -33,7 +32,9 @@ def analyze():
 
     return jsonify(result)
 
-if __name__ == "__main__":
+def main():
+    global database
+    global simple_analyzer
     database = Database()
     simple_analyzer = SimpleAnalyzer()
 
