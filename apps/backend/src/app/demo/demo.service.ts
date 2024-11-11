@@ -31,11 +31,4 @@ export class DemoService {
     return this.demoRepository.save(entry);
   }
 
-  /**
-   * Echo the given text.
-   * @param text
-   */
-  async echo(text: string): Promise<string> {
-    return await firstValueFrom(this.analyzerService.echo(text));
-  }
 }

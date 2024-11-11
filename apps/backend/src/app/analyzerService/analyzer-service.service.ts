@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { map, Observable } from 'rxjs';
+import { firstValueFrom, map, Observable } from 'rxjs';
 
 /**
  * Service to connect to the Analyzer service.
@@ -23,12 +23,39 @@ export class AnalyzerServiceService {
    * @param text The text to echo.
    * @returns The echoed text.
    */
-  echo(text: string): Observable<string> {
+  sendEcho(text: string): Observable<string> {
     this.logger.debug(`Sending echo request to Analyzer service`);
     return this.httpService
       .post<string>(`${this.analyzerServiceUrl}/echo`, {
         body: { text },
       })
       .pipe(map((response) => response.data));
+  }
+
+  /**
+   * Echo the given text.
+   * @param text
+   */
+  async echo(text: string): Promise<string> {
+    return await firstValueFrom(this.sendEcho(text));
+  }
+
+  /**
+   * Gets the first entry of a dummy dataset in the database using the Analyzer service. (Used for Demo purposes)
+   *
+   * @returns The first entry.
+   */
+  getAnalyzerDemo(): Observable<string> {
+    this.logger.debug(`Sending demo analyzer request to Analyzer service`);
+    return this.httpService
+      .get(`${this.analyzerServiceUrl}/analyze`)
+      .pipe(map((response) => response.data));
+  }
+
+  /**
+   * Return the "analyzed" data.
+   */
+  async analyzerDemo(): Promise<string> {
+    return await firstValueFrom(this.getAnalyzerDemo());
   }
 }
