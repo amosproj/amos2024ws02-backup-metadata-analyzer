@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from database import Database
-from simple_analyzer import SimpleAnalyzer
+from metadata_analyzer.database import Database, get_data
+from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 import os
 
 app = Flask(__name__)
@@ -28,7 +28,7 @@ def echo():
 
 @app.route("/analyze", methods=["GET"])
 def analyze():
-    data = list(database.get_data())
+    data = list(get_data(database))
     result = simple_analyzer.analyze(data)
 
     return jsonify(result)
