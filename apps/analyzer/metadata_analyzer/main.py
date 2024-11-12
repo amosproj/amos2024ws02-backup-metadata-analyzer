@@ -1,9 +1,10 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from metadata_analyzer.database import Database, get_data
+from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 import os
 
 app = Flask(__name__)
-
 
 @app.route("/")
 def hello_world():
@@ -24,8 +25,19 @@ def echo():
         newBody = '{ "output": "' + newData + '" }'
         return newBody
 
+@app.route("/analyze", methods=["GET"])
+def analyze():
+    data = list(get_data(database))
+    result = simple_analyzer.analyze(data)
 
-if __name__ == "__main__":
+    return jsonify(result)
+
+def main():
+    global database
+    global simple_analyzer
+    database = Database()
+    simple_analyzer = SimpleAnalyzer()
+
     new_port = os.getenv("FLASK_RUN_PORT")
     int_port = int(new_port or 5000)
     print("int_port: " + str(int_port))

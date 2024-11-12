@@ -35,10 +35,4 @@ export class DemoController {
     return await this.demoService.createEntry(createEntryDto.text);
   }
 
-  @Get('echo/:text')
-  @ApiOperation({ summary: 'Echo the given text.' })
-  @ApiOkResponse({ type: String })
-  async echo(@Param('text') text: string): Promise<string> {
-    return await this.demoService.echo(text);
-  }
 }
