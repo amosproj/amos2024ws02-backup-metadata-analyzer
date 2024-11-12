@@ -18,4 +18,3 @@ def get_data(self):
     return result
 
 
-#Database().get_data()
