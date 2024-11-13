@@ -83,6 +83,7 @@
     "@nestjs/platform-express": "^10.0.2",
     "@nestjs/swagger": "^7.4.2",
     "@nestjs/typeorm": "^10.0.2",
+    "@nrwl/jest": "^19.8.4",
     "axios": "^1.6.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
