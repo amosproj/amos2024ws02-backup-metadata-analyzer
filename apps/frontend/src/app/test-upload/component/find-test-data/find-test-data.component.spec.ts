@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FindTestDataComponent } from './find-test-data.component';
+import { BASE_URL } from '../../../shared/types/configuration';
+import { HttpClient } from '@angular/common/http';
 
 describe('FindTestDataComponent', () => {
   let component: FindTestDataComponent;
@@ -9,6 +11,18 @@ describe('FindTestDataComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [FindTestDataComponent],
+      providers: [
+        { provide: BASE_URL, useValue: 'test' },
+        {
+          provide: HttpClient,
+          useValue: {
+            get: jest.fn(),
+            post: jest.fn(),
+            put: jest.fn(),
+            delete: jest.fn(),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FindTestDataComponent);
@@ -19,7 +33,7 @@ describe('FindTestDataComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  
+
   it('should have the correct selector', () => {
     const element = fixture.debugElement.nativeElement;
     expect(element.tagName.toLowerCase()).toBe('app-find-test-data');

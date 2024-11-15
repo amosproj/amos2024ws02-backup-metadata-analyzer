@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { TestUploadService } from './test-upload-service.service';
 import { HttpClient } from '@angular/common/http';
+import { BASE_URL } from '../../shared/types/configuration';
 
 describe('TestUploadService', () => {
   let service: TestUploadService;
@@ -11,6 +12,7 @@ describe('TestUploadService', () => {
     TestBed.configureTestingModule({
       providers: [
         TestUploadService,
+        { provide: BASE_URL, useValue: 'test' },
         {
           provide: HttpClient,
           useValue: {

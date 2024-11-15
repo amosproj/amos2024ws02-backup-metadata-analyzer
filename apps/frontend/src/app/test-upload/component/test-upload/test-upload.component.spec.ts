@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {  HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { TestUploadComponent } from './test-upload.component';
 import { HttpClient } from '@angular/common/http';
 import { TestUploadService } from '../../service/test-upload-service.service';
+import { BASE_URL } from '../../../shared/types/configuration';
 
 describe('TestUploadComponent', () => {
   let component: TestUploadComponent;
@@ -13,8 +14,8 @@ describe('TestUploadComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TestUploadComponent],
-      imports: [HttpClientTestingModule],
-      providers: [TestUploadService],
+      imports: [HttpClientTestingModule], //TODO: deprecated
+      providers: [TestUploadService, { provide: BASE_URL, useValue: 'test' }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestUploadComponent);

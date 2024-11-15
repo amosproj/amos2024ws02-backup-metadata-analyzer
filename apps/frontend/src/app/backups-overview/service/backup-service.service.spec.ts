@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { BackupService } from './backup-service.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { BASE_URL } from '../../shared/types/configuration';
 
 describe('BackupService', () => {
   let service: BackupService;
@@ -10,6 +11,7 @@ describe('BackupService', () => {
     TestBed.configureTestingModule({
       providers: [
         BackupService,
+        { provide: BASE_URL, useValue: 'test' },
         {
           provide: HttpClient,
           useValue: {
