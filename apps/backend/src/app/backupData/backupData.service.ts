@@ -93,10 +93,6 @@ export class BackupDataService extends PaginationService {
             where.sizeMB = LessThanOrEqual(backupDataFilterDto.toSizeMB);
         }
 
-        // Bio search
-        if (backupDataFilterDto.bio) {
-            where.bio = ILike(`%${backupDataFilterDto.bio}%`);
-        }
         return where;
     }
 
