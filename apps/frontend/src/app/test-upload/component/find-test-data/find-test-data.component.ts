@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {
   Data,
-  TestUploadServiceService,
+  TestUploadService,
 } from '../../service/test-upload-service.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -15,7 +15,7 @@ export class FindTestDataComponent {
 
   idInput: string = '';
 
-  constructor(private readonly testUploadService: TestUploadServiceService) {}
+  constructor(private readonly testUploadService: TestUploadService) {}
 
   async onSubmit(): Promise<void> {
     this.data = await firstValueFrom(

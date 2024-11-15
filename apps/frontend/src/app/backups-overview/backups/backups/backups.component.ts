@@ -23,6 +23,8 @@ import { HttpParams } from '@angular/common/http';
 })
 export class BackupsComponent implements AfterViewInit {
   selectedBackups: Backup[] = [];
+  root: am5.Root;
+  chart: any;
 
   subscriptions: Subscription = new Subscription();
   readonly backupSubject$ = new BehaviorSubject<Backup[]>([]);
@@ -30,6 +32,8 @@ export class BackupsComponent implements AfterViewInit {
   private filterOptions$ = new BehaviorSubject<any>({});
 
   constructor(private readonly backupService: BackupService) {
+    this.root = am5.Root.new('backupSizeChart');
+    this.chart = am5xy.XYChart;
     this.filterOptions$
       .pipe(
         switchMap((filterOptions) =>
@@ -160,8 +164,7 @@ export class BackupsComponent implements AfterViewInit {
       })
     );
 
-    //series.data.setAll(chartData);
-    chartData$.subscribe((chartData) => series.data.setAll(chartData));
+    //series.data.setAll(chartData);    chartData$.subscribe((chartData) => series.data.setAll(chartData));
 
     // Animation für Balken
     series.appear(1000);

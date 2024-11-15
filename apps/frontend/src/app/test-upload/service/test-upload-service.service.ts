@@ -11,7 +11,7 @@ export interface Data {
 @Injectable({
   providedIn: 'root',
 })
-export class TestUploadServiceService {
+export class TestUploadService {
 
   constructor(
     @Inject(BASE_URL) private readonly baseUrl: string,

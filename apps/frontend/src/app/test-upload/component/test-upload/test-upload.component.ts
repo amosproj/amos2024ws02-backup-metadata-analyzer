@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { TestUploadServiceService } from '../../service/test-upload-service.service';
+import { TestUploadService } from '../../service/test-upload-service.service';
 
 @Component({
   selector: 'app-test-upload',
@@ -11,7 +11,7 @@ export class TestUploadComponent {
   textInput: string = '';
   uploadID: string = '';
 
-  constructor(private readonly testUploadService: TestUploadServiceService) {}
+  constructor(private readonly testUploadService: TestUploadService) {}
 
   onSubmit(): void {
     this.testUploadService
