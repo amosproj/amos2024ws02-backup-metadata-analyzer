@@ -65,4 +65,13 @@ export class BackupDataController {
   ): Promise<BackupDataDto> {
     return this.backupDataService.create(createBackupDataDto);
   }
+
+  @Post('batched')
+  @ApiOperation({ summary: 'Creates new backupData Objects batched.' })
+  @ApiCreatedResponse({})
+  async createBatched(
+    @Body() createBackupDataDtos: CreateBackupDataDto[]
+  ): Promise<void> {
+    return this.backupDataService.createBatched(createBackupDataDtos);
+  }
 }
