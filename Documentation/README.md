@@ -13,7 +13,6 @@ cd ./apps/analyzer/metadata_analyzer ; poetry install
 
 - copy `.env.example` file in backend and rename to `.env` (adjust database properties according to database setup if necessary)
 - copy `.env.example` file in analyzer and rename to `.env` (adjust port properties according to backend setup if necessary)
-- To insert dummy data into table backupData you can use the SQL script `dummyData.sql` in `apps/backend/src/app/utils`
 
 ### Running the code locally:
 
