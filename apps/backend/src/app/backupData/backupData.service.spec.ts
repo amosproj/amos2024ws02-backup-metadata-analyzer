@@ -151,6 +151,18 @@ describe('BackupDataService', () => {
     });
   });
 
+  describe('createBatched', () => {
+    it('should create new backup data entities batched', async () => {
+      const createBackupDataDtos: CreateBackupDataDto[] = [
+        { id: '1', sizeMB: 100, creationDate: new Date() },
+        { id: '2', sizeMB: 200, creationDate: new Date() },
+      ];
+
+      await service.createBatched(createBackupDataDtos);
+
+      expect(repository.save).toHaveBeenCalledWith(createBackupDataDtos);
+    });
+  });
   describe('findOneById', () => {
     it('should return a backup data entity by id', async () => {
       const result = await service.findOneById(mockBackupDataEntity.id);
