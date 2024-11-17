@@ -22,7 +22,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
           },
         },
         defaults: {
-          from: `"No Reply" <${config.get('MAIL_FROM')}>`,
+          from: `"Metadata Mavericks Alerting Service" <${config.get('MAIL_FROM')}>`,
         },
         template: {
           dir: join('apps/backend/src/app/utils/mail/templates'),
