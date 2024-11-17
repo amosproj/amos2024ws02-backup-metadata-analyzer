@@ -46,3 +46,8 @@ apps/*/.env
 .angular
 
 .cache/*
+
+# Test results
+apps/analyzer/.coverage
+reports/*
+coverage/*
