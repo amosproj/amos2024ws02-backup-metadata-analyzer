@@ -2,7 +2,6 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
-import * as fs from 'fs';
 
 @Injectable()
 export class MailService {
@@ -19,13 +18,8 @@ export class MailService {
     const context = {
       alert: 'Size has been increased by 35% in the last 24 hours',
     };
-    const logoPath = path.resolve('apps/backend/src/assets/team_logo.png');
-    this.logger.log(`Logo path: ${logoPath}`);
 
-    if (!fs.existsSync(logoPath)) {
-      this.logger.error(`Logo not found at path: ${logoPath}`);
-      throw new Error('Logo not found');
-    }
+    const logoPath = path.resolve('apps/backend/src/assets/team_logo.png');
 
     const attachments = [
       {
