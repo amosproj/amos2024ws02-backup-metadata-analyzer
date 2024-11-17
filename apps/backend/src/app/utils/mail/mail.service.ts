@@ -12,11 +12,12 @@ export class MailService {
     private configService: ConfigService
   ) {}
 
-  async sendAlertMail() {
+  async sendAlertMail(reason: string, description: string) {
     const to =
       this.configService.getOrThrow<string>('MAILING_LIST').split(',') || [];
     const context = {
-      alert: 'Size has been increased by 35% in the last 24 hours',
+      reason,
+      description,
     };
 
     const logoPath = path.resolve('apps/backend/src/assets/team_logo.png');
