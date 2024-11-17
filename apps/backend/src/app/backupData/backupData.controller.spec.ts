@@ -65,7 +65,7 @@ describe('BackupDataController (e2e)', () => {
       .expect(201);
 
     expect(response.body).toEqual({
-      id: '1',
+      id: createBackupDataDto.id,
       sizeMB: createBackupDataDto.sizeMB,
       creationDate: createBackupDataDto.creationDate.toISOString(),
       bio: createBackupDataDto.bio,
