@@ -21,5 +21,6 @@ export default {
 	moduleNameMapper: {
 		'@clr/angular': '<rootDir>/../../node_modules/@clr/angular',
 		'@amcharts/amcharts5': '<rootDir>/../../node_modules/@amcharts/amcharts5'
-	  }
+	  },
+	moduleDirectories: ['node_modules', 'src']
 };

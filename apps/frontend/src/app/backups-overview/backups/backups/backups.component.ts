@@ -23,7 +23,6 @@ import { HttpParams } from '@angular/common/http';
 })
 export class BackupsComponent implements AfterViewInit {
   selectedBackups: Backup[] = [];
-  root: am5.Root;
   chart: any;
 
   subscriptions: Subscription = new Subscription();
@@ -32,7 +31,6 @@ export class BackupsComponent implements AfterViewInit {
   private filterOptions$ = new BehaviorSubject<any>({});
 
   constructor(private readonly backupService: BackupService) {
-    this.root = am5.Root.new('backupSizeChart');
     this.chart = am5xy.XYChart;
     this.filterOptions$
       .pipe(
