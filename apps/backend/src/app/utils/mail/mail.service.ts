@@ -10,7 +10,7 @@ export class MailService {
   ) {}
 
   async sendAlertMail() {
-    const to = this.configService.get<string>('MAILING_LIST').split(',') || [];
+    const to = this.configService.getOrThrow<string>('MAILING_LIST').split(',') || [];
     const context = {
       alert: 'Size has been increased by 35% in the last 24 hours',
     };
@@ -23,10 +23,11 @@ export class MailService {
     template: string,
     context: Record<string, string>
   ) {
+
     await this.mailerService.sendMail({
       to,
       subject,
-      template: `./templates/${template}`, // `.hbs` extension is appended automatically
+      template: `./${template}`, // `.hbs` extension is appended automatically
       context,
     });
   }
