@@ -35,4 +35,9 @@ export class DemoController {
     return await this.demoService.createEntry(createEntryDto.text);
   }
 
+  @Post('send-alert')
+  @ApiOperation({ summary: 'Send a demo alert mail.' })
+  async sendDemoAlertMail(): Promise<void> {
+    await this.demoService.sendDemoAlertMail();
+  }
 }

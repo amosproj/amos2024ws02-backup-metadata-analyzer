@@ -3,14 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DemoEntity } from './entity/demo.entity';
 import { Repository } from 'typeorm';
 import { AnalyzerServiceService } from '../analyzerService/analyzer-service.service';
-import { firstValueFrom } from 'rxjs';
+import { MailService } from '../utils/mail/mail.service';
 
 @Injectable()
 export class DemoService {
   constructor(
     @InjectRepository(DemoEntity)
     private demoRepository: Repository<DemoEntity>,
-    private analyzerService: AnalyzerServiceService
+    private analyzerService: AnalyzerServiceService,
+    private mailService: MailService
   ) {}
 
   /**
@@ -31,4 +32,10 @@ export class DemoService {
     return this.demoRepository.save(entry);
   }
 
+  /**
+   * Send a demo alert mail.
+   */
+  async sendDemoAlertMail() {
+    await this.mailService.sendAlertMail();
+  }
 }
