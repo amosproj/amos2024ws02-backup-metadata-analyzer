@@ -1,18 +1,33 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailService {
-  constructor(private mailerService: MailerService) {}
+  constructor(
+    private mailerService: MailerService,
+    private configService: ConfigService
+  ) {}
 
   async sendAlertMail() {
+    const to = this.configService.get<string>('MAILING_LIST').split(',') || [];
+    const context = {
+      alert: 'Size has been increased by 35% in the last 24 hours',
+    };
+    await this.sendMail(to, 'Alert has been triggered', 'alertMail', context);
+  }
+
+  async sendMail(
+    to: string[],
+    subject: string,
+    template: string,
+    context: Record<string, string>
+  ) {
     await this.mailerService.sendMail({
-      to: 'test@test.com',
-      subject: 'An alert has been triggered',
-      template: './templates/alertMail', // `.hbs` extension is appended automatically
-      context: {
-        //Variables to be used in the template
-      },
+      to,
+      subject,
+      template: `./templates/${template}`, // `.hbs` extension is appended automatically
+      context,
     });
   }
 }
