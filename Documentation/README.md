@@ -36,6 +36,7 @@ cd ./apps/analyzer/metadata_analyzer ; poetry install
 
 Fill the `.env` file with the mailing information
 Hint: For gmail you have to generate an app password, which you have to use as password in the `.env` file
+For changes in templates being used, you have to restart the backend
 
 ## Installing new dependencies
 
