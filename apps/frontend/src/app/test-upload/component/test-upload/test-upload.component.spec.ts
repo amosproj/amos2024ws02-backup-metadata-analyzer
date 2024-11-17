@@ -5,6 +5,7 @@ import { TestUploadComponent } from './test-upload.component';
 import { HttpClient } from '@angular/common/http';
 import { TestUploadService } from '../../service/test-upload-service.service';
 import { BASE_URL } from '../../../shared/types/configuration';
+import { ClarityModule } from '@clr/angular';
 
 describe('TestUploadComponent', () => {
   let component: TestUploadComponent;
@@ -14,7 +15,7 @@ describe('TestUploadComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TestUploadComponent],
-      imports: [HttpClientTestingModule], //TODO: deprecated
+      imports: [HttpClientTestingModule, ClarityModule], //TODO: deprecated
       providers: [TestUploadService, { provide: BASE_URL, useValue: 'test' }],
     }).compileComponents();
 

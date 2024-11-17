@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FindTestDataComponent } from './find-test-data.component';
 import { BASE_URL } from '../../../shared/types/configuration';
 import { HttpClient } from '@angular/common/http';
+import { ClarityModule } from '@clr/angular';
 
 describe('FindTestDataComponent', () => {
   let component: FindTestDataComponent;
@@ -23,6 +24,7 @@ describe('FindTestDataComponent', () => {
           },
         },
       ],
+      imports: [ClarityModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FindTestDataComponent);
