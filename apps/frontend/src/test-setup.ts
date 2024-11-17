@@ -6,3 +6,15 @@ globalThis.ngJest = {
   },
 };
 import 'jest-preset-angular/setup-jest';
+
+// Füge globale Mocks hinzu, falls nötig
+jest.mock('@clr/angular', () => ({
+  ClarityModule: class { },
+  // Weitere Clarity-Komponenten die du mockst
+}));
+
+// Optional: Mock für amCharts
+jest.mock('@amcharts/amcharts5', () => ({
+  // Deine amCharts Mocks
+}));
+

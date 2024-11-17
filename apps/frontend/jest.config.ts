@@ -18,4 +18,8 @@ export default {
 		"jest-preset-angular/build/serializers/ng-snapshot",
 		"jest-preset-angular/build/serializers/html-comment",
 	],
+	moduleNameMapper: {
+		'@clr/angular': '<rootDir>/../../node_modules/@clr/angular',
+		'@amcharts/amcharts5': '<rootDir>/../../node_modules/@amcharts/amcharts5'
+	  }
 };
