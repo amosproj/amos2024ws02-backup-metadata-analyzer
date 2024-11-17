@@ -20,7 +20,6 @@ export class BackupService {
         id: data.id,
         sizeMB: data.sizeMB,
         creationDate: data.creationDate,
-        bio: data.bio,
       };
     };
     return this.http

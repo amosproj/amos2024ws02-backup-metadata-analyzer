@@ -86,6 +86,7 @@ export class BackupsComponent implements AfterViewInit {
         }))
       )
     );
+
     // Chart-Root erstellen
     let root = am5.Root.new('backupSizeChart');
 
