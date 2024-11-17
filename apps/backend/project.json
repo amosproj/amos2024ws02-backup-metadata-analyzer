@@ -50,7 +50,9 @@
         "main": "apps/backend/src/main.ts",
         "outputPath": "dist/apps/backend",
         "tsConfig": "apps/backend/tsconfig.app.json",
-        "assets": [],
+        "assets": [
+          "**/*.hbs"
+        ],
         "platform": "node",
         "additionalEntryPoints": [
           "{projectRoot}/src/migrations.main.ts"
