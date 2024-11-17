@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from metadata_analyzer.database import Database, get_data
+from metadata_analyzer.database import Database, get_data, get_results
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
+import requests
 import os
+
+BACKEND_URL = "http://localhost:3000/api/"
 
 app = Flask(__name__)
 
@@ -31,6 +34,46 @@ def analyze():
     result = simple_analyzer.analyze(data)
 
     return jsonify(result)
+
+@app.route("/updateBackendDatabase", methods=["POST"])
+def update_data():
+    # Convert a result from the database into the format used by the backend
+    def convert_result(result):
+        return {
+            "id": result.uuid,
+            "sizeMB": result.data_size // 1_000_000,
+            "creationDate": result.start_time.isoformat()
+        }
+
+    results = list(get_results(database))
+
+    # Batch the api calls to the backend for improved efficiency
+    url = BACKEND_URL + "backupData/batched"
+    batch = []
+    count = 0
+    for result in results:
+        # Only send 'full' backups
+        if result.fdi_type != "F":
+            continue
+
+        # Only send backups where the relevant data is not null
+        if result.data_size is None or result.start_time is None:
+            continue
+
+        batch.append(convert_result(result))
+        count += 1
+
+        # Send a full batch
+        if len(batch) == 100:
+            r = requests.post(url, json=batch)
+            batch = []
+    
+    # Send the remaining results
+    if len(batch) > 0:
+        r = requests.post(url, json=batch)
+
+    return jsonify(count=count)
+
 
 def main():
     global database
