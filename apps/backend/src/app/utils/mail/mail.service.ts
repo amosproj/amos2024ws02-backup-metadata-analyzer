@@ -13,7 +13,7 @@ export class MailService {
   ) {}
 
   async sendAlertMail(reason: string, description: string) {
-    const to =
+    const receivers =
       this.configService.getOrThrow<string>('MAILING_LIST').split(',') || [];
     const context = {
       reason,
@@ -31,7 +31,7 @@ export class MailService {
       },
     ];
     await this.sendMail(
-      to,
+      receivers,
       'Alert has been triggered',
       'alertMail',
       context,
@@ -40,17 +40,17 @@ export class MailService {
   }
 
   async sendMail(
-    to: string[],
+    receivers: string[],
     subject: string,
     template: string,
     context: Record<string, string>,
     attachments?: any[]
   ) {
     this.logger.log(
-      `Sending mail to: ${to.join(',')} with subject "${subject}"`
+      `Sending mail to: ${receivers.join(',')} with subject "${subject}"`
     );
     await this.mailerService.sendMail({
-      to,
+      to: receivers,
       subject,
       template: `./${template}`, // `.hbs` extension is appended automatically
       context,

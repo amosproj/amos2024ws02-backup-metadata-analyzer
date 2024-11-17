@@ -5,7 +5,6 @@ import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter.js';
 
-
 @Global()
 @Module({
   imports: [
@@ -13,16 +12,18 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
         transport: {
-          host: config.get('MAIL_HOST'),
-          port: config.get('MAIL_PORT'),
+          host: config.getOrThrow('MAIL_HOST'),
+          port: config.getOrThrow('MAIL_PORT'),
           secure: true,
           auth: {
-            user: config.get('MAIL_USER'),
-            pass: config.get('MAIL_PASSWORD'),
+            user: config.getOrThrow('MAIL_USER'),
+            pass: config.getOrThrow('MAIL_PASSWORD'),
           },
         },
         defaults: {
-          from: `"Metadata Mavericks Alerting Service" <${config.get('MAIL_FROM')}>`,
+          from: `"Metadata Mavericks Alerting Service" <${config.getOrThrow(
+            'MAIL_FROM'
+          )}>`,
         },
         template: {
           dir: join('apps/backend/src/app/utils/mail/templates'),
