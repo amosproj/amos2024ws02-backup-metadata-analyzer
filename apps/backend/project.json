@@ -83,6 +83,13 @@
           "command": "npx typeorm-ts-node-esm -d dist/apps/backend/migrations.main.js migration:revert"
         }
       }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "options": {
+        "jestConfig": "apps/backend/jest.config.ts",
+        "passWithNoTests": false
+      }
     }
   }
 }
