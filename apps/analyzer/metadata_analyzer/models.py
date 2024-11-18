@@ -1,5 +1,4 @@
-from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import mapped_column, Mapped, declarative_base
 from datetime import datetime
 
 Base = declarative_base()

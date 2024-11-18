@@ -7,9 +7,8 @@ import os
 
 class Database:
     def __init__(self):
-
         db_user = os.getenv("DATABASE_USER") or "postgres"
-        db_port = os.getenv("DATABASE_PORT") or "localhost"
+        db_port = os.getenv("DATABASE_PORT") or "5432"
         db_password = os.getenv("DATABASE_PASSWORD") or "postgres"
         db_host = os.getenv("DATABASE_HOST") or "localhost"
         db_name = os.getenv("DATABASE_DATABASE") or "postgres"

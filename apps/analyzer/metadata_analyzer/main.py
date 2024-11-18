@@ -53,7 +53,6 @@ def convert_result(result):
 
 @app.route("/updateBackendDatabase", methods=["POST"])
 def update_data():
-
     results = list(get_results(database))
 
     # Batch the api calls to the backend for improved efficiency
@@ -87,7 +86,6 @@ def update_data():
 def main():
     global database
     global simple_analyzer
-    global backend_url
     database = Database()
     simple_analyzer = SimpleAnalyzer()
 
