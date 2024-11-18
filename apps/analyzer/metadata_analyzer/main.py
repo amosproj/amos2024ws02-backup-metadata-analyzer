@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from metadata_analyzer.database import Database, get_results
+from metadata_analyzer.database import Database, get_data, get_results
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 import requests
 import os
@@ -34,11 +34,21 @@ def analyze():
     converted_data = []
 
     for elem in data:
-        converted_data.append(convert_result(elem))
+        if elem.data_size != None:
+            converted_data.append(convert_result(elem))
 
     result = simple_analyzer.analyze(converted_data)
 
     return jsonify(result)
+
+
+# Convert a result from the database into the format used by the backend
+def convert_result(result):
+    return {
+        "id": result.uuid,
+        "sizeMB": result.data_size // 1_000_000,
+        "creationDate": result.start_time.isoformat(),
+    }
 
 
 @app.route("/updateBackendDatabase", methods=["POST"])
@@ -74,18 +84,10 @@ def update_data():
     return jsonify(count=count)
 
 
-# Convert a result from the database into the format used by the backend
-def convert_result(result):
-    return {
-        "id": result.uuid,
-        "sizeMB": result.data_size,
-        "creationDate": result.start_time.isoformat(),
-    }
-
-
 def main():
     global database
     global simple_analyzer
+    global backend_url
     database = Database()
     simple_analyzer = SimpleAnalyzer()
 

@@ -8,10 +8,8 @@ class SimpleAnalyzer:
         dates = []
         sizes = []
         for elem in data:
-            size = elem.get("sizeMB")
-            if size != None:
-                dates.append(elem.get("creationDate"))
-                sizes.append(size)
+            dates.append(elem.get("creationDate"))
+            sizes.append(elem.get("sizeMB"))
         return {
             "count": count,
             "firstBackup": min(dates),
