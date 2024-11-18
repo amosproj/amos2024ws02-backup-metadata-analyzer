@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from metadata_analyzer.database import Database, get_data, get_results
+from metadata_analyzer.database import Database, get_results
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 import requests
 import os
@@ -30,21 +30,19 @@ def echo():
 
 @app.route("/analyze", methods=["GET"])
 def analyze():
-    data = list(get_data(database))
-    result = simple_analyzer.analyze(data)
+    data = list(get_results(database))
+    converted_data = []
+
+    for elem in data:
+        converted_data.append(convert_result(elem))
+
+    result = simple_analyzer.analyze(converted_data)
 
     return jsonify(result)
 
 
 @app.route("/updateBackendDatabase", methods=["POST"])
 def update_data():
-    # Convert a result from the database into the format used by the backend
-    def convert_result(result):
-        return {
-            "id": result.uuid,
-            "sizeMB": result.data_size // 1_000_000,
-            "creationDate": result.start_time.isoformat(),
-        }
 
     results = list(get_results(database))
 
@@ -76,6 +74,15 @@ def update_data():
     return jsonify(count=count)
 
 
+# Convert a result from the database into the format used by the backend
+def convert_result(result):
+    return {
+        "id": result.uuid,
+        "sizeMB": result.data_size,
+        "creationDate": result.start_time.isoformat(),
+    }
+
+
 def main():
     global database
     global simple_analyzer
@@ -86,6 +93,4 @@ def main():
     int_port = int(new_port or 5000)
     global backend_url
     backend_url = os.getenv("BACKEND_URL")
-    print("int_port: " + str(int_port))
-    print("backup url from env is " + backend_url)
     app.run(host="localhost", port=int_port, debug=False)
