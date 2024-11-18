@@ -4,6 +4,7 @@ from datetime import datetime
 
 Base = declarative_base()
 
+
 class BackupData(Base):
     __tablename__ = "BackupData"
 
@@ -17,6 +18,7 @@ class BackupData(Base):
 
     def __str__(self):
         return repr(self)
+
 
 class Result(Base):
     __tablename__ = "results"
@@ -42,6 +44,3 @@ class Result(Base):
 
     def __str__(self):
         return repr(self)
-
-
-

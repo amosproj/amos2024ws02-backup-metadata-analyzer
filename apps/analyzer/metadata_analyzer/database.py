@@ -7,8 +7,25 @@ import os
 
 class Database:
     def __init__(self):
-        self.engine = create_engine("postgresql+pg8000://postgres:postgres@localhost:5432/postgres")
-        
+
+        db_user = os.getenv("DATABASE_USER") or "postgres"
+        db_port = os.getenv("DATABASE_PORT") or "localhost"
+        db_password = os.getenv("DATABASE_PASSWORD") or "postgres"
+        db_host = os.getenv("DATABASE_HOST") or "localhost"
+        db_name = os.getenv("DATABASE_DATABASE") or "postgres"
+        self.engine = create_engine(
+            "postgresql+pg8000://"
+            + db_user
+            + ":"
+            + db_password
+            + "@"
+            + db_host
+            + ":"
+            + db_port
+            + "/"
+            + db_name
+        )
+
 
 def get_data(self):
     session = Session(self.engine)
@@ -16,6 +33,7 @@ def get_data(self):
 
     result = session.scalars(stmt)
     return result
+
 
 def get_results(self):
     session = Session(self.engine)

@@ -5,9 +5,8 @@ from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 import requests
 import os
 
-BACKEND_URL = "http://localhost:3000/api/"
-
 app = Flask(__name__)
+
 
 @app.route("/")
 def hello_world():
@@ -28,27 +27,37 @@ def echo():
         newBody = '{ "output": "' + newData + '" }'
         return newBody
 
+
 @app.route("/analyze", methods=["GET"])
 def analyze():
-    data = list(get_data(database))
-    result = simple_analyzer.analyze(data)
+    data = list(get_results(database))
+    converted_data = []
+
+    for elem in data:
+        if elem.data_size != None:
+            converted_data.append(convert_result(elem))
+
+    result = simple_analyzer.analyze(converted_data)
 
     return jsonify(result)
 
+
+# Convert a result from the database into the format used by the backend
+def convert_result(result):
+    return {
+        "id": result.uuid,
+        "sizeMB": result.data_size // 1_000_000,
+        "creationDate": result.start_time.isoformat(),
+    }
+
+
 @app.route("/updateBackendDatabase", methods=["POST"])
 def update_data():
-    # Convert a result from the database into the format used by the backend
-    def convert_result(result):
-        return {
-            "id": result.uuid,
-            "sizeMB": result.data_size // 1_000_000,
-            "creationDate": result.start_time.isoformat()
-        }
 
     results = list(get_results(database))
 
     # Batch the api calls to the backend for improved efficiency
-    url = BACKEND_URL + "backupData/batched"
+    url = backend_url + "backupData/batched"
     batch = []
     count = 0
     for result in results:
@@ -67,7 +76,7 @@ def update_data():
         if len(batch) == 100:
             r = requests.post(url, json=batch)
             batch = []
-    
+
     # Send the remaining results
     if len(batch) > 0:
         r = requests.post(url, json=batch)
@@ -78,10 +87,12 @@ def update_data():
 def main():
     global database
     global simple_analyzer
+    global backend_url
     database = Database()
     simple_analyzer = SimpleAnalyzer()
 
     new_port = os.getenv("FLASK_RUN_PORT")
     int_port = int(new_port or 5000)
-    print("int_port: " + str(int_port))
+    global backend_url
+    backend_url = os.getenv("BACKEND_URL")
     app.run(host="localhost", port=int_port, debug=False)
