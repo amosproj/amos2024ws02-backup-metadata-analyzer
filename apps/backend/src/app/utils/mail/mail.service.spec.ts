@@ -41,14 +41,17 @@ describe('MailService', () => {
   });
 
   it('should send alert mail', async () => {
-    await service.sendAlertMail();
+    const reason = 'Test Reason';
+    const description = 'Test Description';
+    await service.sendAlertMail(reason, description);
 
     expect(mailerService.sendMail).toHaveBeenCalledWith({
       to: ['test@example.com'],
       subject: 'Alert has been triggered',
       template: './alertMail',
       context: {
-        alert: 'Size has been increased by 35% in the last 24 hours',
+        reason,
+        description,
       },
       attachments: [
         {
