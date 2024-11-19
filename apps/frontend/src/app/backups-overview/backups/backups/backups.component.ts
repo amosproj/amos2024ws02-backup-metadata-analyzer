@@ -23,8 +23,11 @@ export class BackupsComponent implements AfterViewInit, OnDestroy {
   selectedTimeRange: 'week' | 'month' | 'year' = 'month';
 
   readonly backupSubject$ = new BehaviorSubject<Backup[]>([]);
+  readonly chartBackuppSubject$ = new BehaviorSubject<Backup[]>([]);
   readonly backups$: Observable<Backup[]>;
+  readonly chartBackups$: Observable<Backup[]>;
   private filterOptions$ = new BehaviorSubject<any>({});
+  private chartFilterOptions$ = new BehaviorSubject<any>({});
 
   constructor(private readonly backupService: BackupService) {
     this.filterOptions$
@@ -37,7 +40,18 @@ export class BackupsComponent implements AfterViewInit, OnDestroy {
         this.backupSubject$.next(data);
       });
 
+    this.chartFilterOptions$
+      .pipe(
+        switchMap((filterOptions) =>
+          this.backupService.getAllBackups(filterOptions)
+        )
+      )
+      .subscribe((data) => {
+        this.chartBackuppSubject$.next(data);
+      });
+
     this.backups$ = this.backupSubject$.asObservable();
+    this.chartBackups$ = this.chartBackuppSubject$.asObservable();
     this.setTimeRange('month');
   }
 
@@ -75,11 +89,11 @@ export class BackupsComponent implements AfterViewInit, OnDestroy {
       .set('toDate', toDate.toISOString())
       .set('orderBy', 'creationDate');
 
-    this.filterOptions$.next(params);
+    this.chartFilterOptions$.next(params);
   }
 
   private createBackupTimelineChart() {
-    let chartData$ = this.backups$.pipe(
+    let chartData$ = this.chartBackups$.pipe(
       map((data) => {
         const sortedData = data.sort(
           (a, b) =>
@@ -258,7 +272,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy {
         return { timeUnit: 'day', count: 1 };
     }
   }
-// Datum auf das gewünschte Zeitintervall runden
+  // Datum auf das gewünschte Zeitintervall runden
   private roundDateToInterval(
     date: Date,
     interval: { unit: string; value: number }
