@@ -109,7 +109,7 @@ def analyze():
     """
     return jsonify(Analyzer.analyze())
 
-@app.route("/updateBackendDatabase", methods=["POST"])
+@app.route("/updateBasicBackupData", methods=["POST"])
 def update_data():
     """Updates the backend database with values taken from the analyzer database.
     ---
