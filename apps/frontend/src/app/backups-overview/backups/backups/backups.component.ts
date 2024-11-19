@@ -10,6 +10,7 @@ import { BackupService } from '../../service/backup-service.service';
 import { Backup } from '../../../shared/types/backup';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { HttpParams } from '@angular/common/http';
+import { ITimeInterval } from '@amcharts/amcharts5/.internal/core/util/Time';
 
 @Component({
   selector: 'app-backups',
@@ -19,7 +20,7 @@ import { HttpParams } from '@angular/common/http';
 export class BackupsComponent implements AfterViewInit, OnDestroy {
   protected root!: am5.Root;
   selectedBackups: Backup[] = [];
-  selectedTimeRange: 'week' | 'month' | 'year' = 'month'; // Default: last month
+  selectedTimeRange: 'week' | 'month' | 'year' = 'month';
 
   readonly backupSubject$ = new BehaviorSubject<Backup[]>([]);
   readonly backups$: Observable<Backup[]>;
@@ -37,13 +38,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy {
       });
 
     this.backups$ = this.backupSubject$.asObservable();
-
-    // Initial load with default time range
     this.setTimeRange('month');
   }
 
   ngAfterViewInit(): void {
-    // Kleine Verzögerung für die Chart-Initialisierung
     setTimeout(() => {
       this.createBackupTimelineChart();
     }, 100);
@@ -72,35 +70,37 @@ export class BackupsComponent implements AfterViewInit, OnDestroy {
         fromDate.setFullYear(fromDate.getFullYear() - 1);
         break;
     }
-    // Format dates as ISO strings or whatever format your backend expects
     const params = new HttpParams()
       .set('fromDate', fromDate.toISOString())
-      .set('toDate', toDate.toISOString());
-    console.log(fromDate, toDate);
+      .set('toDate', toDate.toISOString())
+      .set('orderBy', 'creationDate');
 
     this.filterOptions$.next(params);
   }
 
-  getTimeRange(): string {
-    return this.selectedTimeRange
-  }
-
   private createBackupTimelineChart() {
     let chartData$ = this.backups$.pipe(
-      map((data) =>
-        data.map((item) => ({
+      map((data) => {
+        const sortedData = data.sort(
+          (a, b) =>
+            new Date(a.creationDate).getTime() -
+            new Date(b.creationDate).getTime()
+        );
+        const aggregatedData = this.aggregateDataByTimeRange(sortedData);
+
+        return aggregatedData.map((item) => ({
           id: item.id,
           sizeMB: item.sizeMB,
-          creationDate: new Date(item.creationDate).getTime(), // Convert to timestamp
-        }))
-      )
+          creationDate: new Date(item.creationDate).getTime(),
+          count: item.count || 1,
+        }));
+      })
     );
-
     // Chart-Root erstellen
     this.root = am5.Root.new('backupTimelineChart');
 
-    // Theme hinzufügen
     this.root.setThemes([am5themes_Animated.new(this.root)]);
+    this.root.fps = 30;
 
     // Chart erstellen
     let chart = this.root.container.children.push(
@@ -115,48 +115,40 @@ export class BackupsComponent implements AfterViewInit, OnDestroy {
       })
     );
 
-    chart.children.unshift(
-      am5.Label.new(this.root, {
-        text: 'Backup Timeline',
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        x: am5.p50,
-        centerX: am5.p50,
-      })
-    );
+    const tooltip = am5.Tooltip.new(this.root, {
+      labelText: 'Size: {valueY} MB\nDate: {valueX}\nBackups: {count}',
+      getFillFromSprite: true,
+      getStrokeFromSprite: true,
+      autoTextColor: true,
+    });
 
     // X-Achse
     let xAxis = chart.xAxes.push(
       am5xy.DateAxis.new(this.root, {
-        baseInterval: { timeUnit: 'day', count: 1 },
+        baseInterval: this.getBaseInterval(),
         renderer: am5xy.AxisRendererX.new(this.root, {
-          minGridDistance: 50,
+          minGridDistance: 80,
           cellStartLocation: 0.1,
           cellEndLocation: 0.9,
         }),
         tooltip: am5.Tooltip.new(this.root, {}),
-        dateFormats: {
-          day: 'MMM dd',
-          month: 'MMM yyyy',
-        },
-        periodChangeDateFormats: {
-          day: 'MMM dd',
-          month: 'MMM yyyy',
-        },
+        groupData: true,
+        groupCount: 500, // Maximale Anzahl der angezeigten Datenpunkte
+        extraMax: 0.1,
       })
     );
 
     // Y-Achse
     let yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(this.root, {
-        renderer: am5xy.AxisRendererY.new(this.root, {}),
-        tooltip: am5.Tooltip.new(this.root, {}),
+        renderer: am5xy.AxisRendererY.new(this.root, {
+          minGridDistance: 50,
+        }),
         numberFormat: '#.# MB',
       })
     );
 
-    // LineSeries hinzufügen
+    // Serie
     let series = chart.series.push(
       am5xy.LineSeries.new(this.root, {
         name: 'Backup Size',
@@ -164,81 +156,128 @@ export class BackupsComponent implements AfterViewInit, OnDestroy {
         yAxis: yAxis,
         valueYField: 'sizeMB',
         valueXField: 'creationDate',
-        tooltip: am5.Tooltip.new(this.root, {
-          labelText: 'Size: {valueY} MB\nDate: {valueX}',
-        }),
+        tooltip,
       })
     );
 
-    // Add bullet points - Fixed type definition
-    series.bullets.push((root: am5.Root) => {
+    // Bullets
+    series.bullets.push((root) => {
+      const circle = am5.Circle.new(root, {
+        radius: 4,
+        fill: series.get('fill'),
+        stroke: root.interfaceColors.get('background'),
+        strokeWidth: 2,
+        opacity: 0.7,
+      });
       return am5.Bullet.new(root, {
-        sprite: am5.Circle.new(root, {
-          radius: 5,
-          fill: series.get('fill'),
-          stroke: root.interfaceColors.get('background'),
-          strokeWidth: 2,
-        }),
+        sprite: circle,
       });
     });
 
-    // Add cursor
+    // Cursor
     chart.set(
       'cursor',
       am5xy.XYCursor.new(this.root, {
-        behavior: 'zoomX',
+        behavior: 'zoomXY',
+        snapToSeries: [series],
       })
     );
 
-    // Nach der Cursor-Definition
+    // Scrollbar
     let scrollbarX = chart.set(
       'scrollbarX',
       am5.Scrollbar.new(this.root, {
         orientation: 'horizontal',
+        minHeight: 10,
       })
     );
 
-    let rangeDate = xAxis.makeDataItem({});
-    let rangeTime = Date.now();
-    rangeDate.set('value', rangeTime);
-    rangeDate.set('endValue', rangeTime - 1000 * 60 * 60 * 24 * 30); // 30 Tage
-
-    xAxis.createAxisRange(rangeDate);
-
+    // Daten laden und zoomen
     chartData$.subscribe({
       next: (data) => {
         if (data && data.length > 0) {
           series.data.setAll(data);
-
-          // Set zoom to match selected time range
-          const endDate = new Date();
-          const startDate = new Date();
-
-          switch (this.selectedTimeRange) {
-            case 'week':
-              startDate.setDate(startDate.getDate() - 7);
-              break;
-            case 'month':
-              startDate.setMonth(startDate.getMonth() - 1);
-              break;
-            case 'year':
-              startDate.setFullYear(startDate.getFullYear() - 1);
-              break;
-          }
-
-          xAxis.zoomToDates(startDate, endDate);
-        } else {
-          console.warn('No data available for chart');
         }
       },
-      error: (error) => {
-        console.error('Error loading chart data:', error);
-      },
+      error: (error) => console.error('Error loading chart data:', error),
     });
 
-    // Make stuff animate on load
+    // Animation
     series.appear(1000);
     chart.appear(1000, 100);
+  }
+
+  // Datenaggregation
+  private aggregateDataByTimeRange(data: Backup[]): any[] {
+    const interval = this.getAggregationInterval();
+    const aggregated = new Map();
+
+    data.forEach((backup) => {
+      const date = new Date(backup.creationDate);
+      const timeKey = this.roundDateToInterval(date, interval);
+
+      if (!aggregated.has(timeKey)) {
+        aggregated.set(timeKey, {
+          creationDate: timeKey,
+          sizeMB: backup.sizeMB,
+          count: 1,
+          id: backup.id,
+        });
+      } else {
+        const existing = aggregated.get(timeKey);
+        existing.sizeMB = Math.max(existing.sizeMB, backup.sizeMB);
+        existing.count += 1;
+      }
+    });
+    return Array.from(aggregated.values());
+  }
+
+  //  Zeitintervall-Bestimmung
+  private getAggregationInterval(): { unit: string; value: number } {
+    switch (this.selectedTimeRange) {
+      case 'week':
+        return { unit: 'hour', value: 4 }; // 4-Stunden-Intervalle
+      case 'month':
+        return { unit: 'day', value: 1 }; // Tagesintervalle
+      case 'year':
+        return { unit: 'week', value: 1 }; // Wochenintervalle
+      default:
+        return { unit: 'day', value: 1 };
+    }
+  }
+
+  private getBaseInterval(): ITimeInterval {
+    switch (this.selectedTimeRange) {
+      case 'week':
+        return { timeUnit: 'hour', count: 4 };
+      case 'month':
+        return { timeUnit: 'day', count: 1 };
+      case 'year':
+        return { timeUnit: 'week', count: 1 };
+      default:
+        return { timeUnit: 'day', count: 1 };
+    }
+  }
+// Datum auf das gewünschte Zeitintervall runden
+  private roundDateToInterval(
+    date: Date,
+    interval: { unit: string; value: number }
+  ): number {
+    const d = new Date(date);
+    switch (interval.unit) {
+      case 'hour':
+        d.setMinutes(0, 0, 0);
+        d.setHours(Math.floor(d.getHours() / interval.value) * interval.value);
+        break;
+      case 'day':
+        d.setHours(0, 0, 0, 0);
+        break;
+      case 'week':
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() - d.getDay());
+        break;
+    }
+    return d.getTime();
   }
 
   refresh(option?: ClrDatagridStateInterface<Backup>): void {
