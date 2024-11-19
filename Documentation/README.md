@@ -29,7 +29,11 @@ cd ./apps/analyzer/metadata_analyzer ; poetry install
   - `nx run metadata-analyzer-backend:migrations:generate --name <migration-name>`
 - append the generated file to the `migrations` array in `db-config.service.ts`
 
+### Running tests
 
+- backend: `nx run metadata-analyzer-backend:test`
+- frontend: `nx run metadata-analyzer-frontend:test`
+- python: `nx run metadata-analyzer:test`
 
 ## Installing new dependencies
 
