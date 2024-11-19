@@ -2,19 +2,67 @@ from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 from metadata_analyzer.database import Database, get_data, get_results
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
+from flasgger import Swagger
 import requests
 import os
 
 app = Flask(__name__)
+swagger = Swagger(app)
 
 
 @app.route("/")
 def hello_world():
+    """Most basic example endpoint that returns a hello world message.
+    ---
+    definitions:
+        Output:
+            type: string
+            example: 'Hello, world!'
+    responses:
+        200:
+            description: The hello world message
+            schema:
+                $ref: '#/definitions/Output'
+    """
     return "Hello, world!"
 
 
 @app.route("/echo", methods=["POST"])
 def echo():
+    """Example endpoint that echoes an inverted version of the string that was passed to it.
+    ---
+    parameters:
+      - name: Input
+        in: body
+        type: object
+        required: true
+        properties:
+            body:
+                type: object
+                items: '#/definitions/TextBody'
+                properties:
+                    text:
+                        type: string
+                        example: 'inverted'
+    definitions:
+        TextBody:
+            type: object
+            properties:
+                text:
+                    type: string
+                    example: 'detrevni'
+        BodyBody:
+            type: object
+            properties:
+                body:
+                    type: object
+                    items: '#/definitions/TextBody'
+    responses:
+        200:
+            description: The inverted string
+            schema:
+                $ref: '#/definitions/TextBody'
+    """
     if request.method == "POST":
         data = request.get_json()
         obj = data["body"]
@@ -30,6 +78,33 @@ def echo():
 
 @app.route("/analyze", methods=["GET"])
 def analyze():
+    """Example endpoint that simulates a basic data analysis on real database data.
+    ---
+    definitions:
+      BackupStats:
+        type: object
+        properties:
+          count:
+            type: int
+            example: 126068
+          firstBackup:
+            type: string
+            example: '2017-11-23T08:10:03'
+          lastBackup:
+            type: string
+            example: '2024-10-12T18:20:22'
+          maxSize:
+            type: string
+            example: 2288438
+          minSize:
+            type: int
+            example: 0
+    responses:
+      200:
+        description: Some basic properties of the backups currently in the database
+        schema:
+          $ref: '#/definitions/BackupStats'
+    """
     data = list(get_results(database))
     converted_data = []
 
@@ -53,6 +128,35 @@ def convert_result(result):
 
 @app.route("/updateBackendDatabase", methods=["POST"])
 def update_data():
+    """Updates the backend database with values taken from the analyzer database.
+    ---
+    parameters:
+      - name: Input
+        in: body
+        type: object
+        required: true
+        properties:
+            content:
+                type: object
+                items: '#/definitions/BackendRequest'
+    definitions:
+        BackendRequest:
+            type: object
+            properties:
+                content:
+                    type: object
+        BackendResponse:
+            type: object
+            properties:
+                count:
+                    type: int
+                    example: 54767
+    responses:
+        200:
+            description: The number of entries that were updated
+            schema:
+                $ref: '#/definitions/BackendResponse'
+    """
     results = list(get_results(database))
 
     # Batch the api calls to the backend for improved efficiency
