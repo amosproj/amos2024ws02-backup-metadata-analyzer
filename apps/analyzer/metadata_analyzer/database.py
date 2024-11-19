@@ -26,17 +26,17 @@ class Database:
         )
 
 
-def get_data(self):
-    session = Session(self.engine)
-    stmt = select(BackupData)
+    def get_data(self):
+        session = Session(self.engine)
+        stmt = select(BackupData)
 
-    result = session.scalars(stmt)
-    return result
+        result = session.scalars(stmt)
+        return result
 
 
-def get_results(self):
-    session = Session(self.engine)
-    stmt = select(Result)
+    def get_results(self):
+        session = Session(self.engine)
+        stmt = select(Result)
 
-    result = session.scalars(stmt)
-    return result
+        result = session.scalars(stmt)
+        return result
