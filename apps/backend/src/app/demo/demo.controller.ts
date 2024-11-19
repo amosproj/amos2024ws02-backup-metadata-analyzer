@@ -34,5 +34,4 @@ export class DemoController {
   async createEntry(@Body() createEntryDto: CreateEntryDto): Promise<DemoDto> {
     return await this.demoService.createEntry(createEntryDto.text);
   }
-
 }

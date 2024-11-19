@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      background-color: #0d233a;
+      color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .header img {
+      max-width: 100px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .content {
+      padding: 20px;
+      line-height: 1.6;
+      color: #333333;
+    }
+
+    .content p {
+      margin: 0 0 10px;
+    }
+
+    .content strong {
+      color: #0d233a;
+    }
+
+    .footer {
+      background-color: #0d233a;
+      color: #ffffff;
+      text-align: center;
+      padding: 10px 0;
+      border-radius: 0 0 8px 8px;
+      font-size: 12px;
+    }
+
+    .footer p {
+      margin: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    table, th, td {
+      border: 1px solid #dddddd;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img src="cid:logo" alt="Company Logo" />
+    <h1>Alert Notification: {{reason}}</h1>
+  </div>
+  <div class="content">
+    <p>Dear customer,</p>
+    <p>The following alert has been triggered:</p>
+    <table>
+      <tr>
+        <th>Reason</th>
+        <td>{{reason}}</td>
+      </tr>
+      <tr>
+        <th>Description</th>
+        <td>{{description}}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="footer">
+    <p>&copy; 2024 Metadata Mavericks. All rights reserved.</p>
+  </div>
+</div>
+</body>
+</html>
