@@ -50,7 +50,9 @@
         "main": "apps/backend/src/main.ts",
         "outputPath": "dist/apps/backend",
         "tsConfig": "apps/backend/tsconfig.app.json",
-        "assets": [],
+        "assets": [
+          "**/*.hbs"
+        ],
         "platform": "node",
         "additionalEntryPoints": [
           "{projectRoot}/src/migrations.main.ts"
@@ -80,6 +82,13 @@
         "revert": {
           "command": "npx typeorm-ts-node-esm -d dist/apps/backend/migrations.main.js migration:revert"
         }
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "options": {
+        "jestConfig": "apps/backend/jest.config.ts",
+        "passWithNoTests": false
       }
     }
   }

@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DemoEntity } from './entity/demo.entity';
 import { Repository } from 'typeorm';
 import { AnalyzerServiceService } from '../analyzerService/analyzer-service.service';
-import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class DemoService {
@@ -30,5 +29,4 @@ export class DemoService {
     entry.text = text;
     return this.demoRepository.save(entry);
   }
-
 }
