@@ -44,9 +44,10 @@ export class AlertEntity {
   @Column({ nullable: false })
   referenceValue!: number;
 
-  @ManyToOne(() => BackupDataEntity, (backup) => backup.id, {
+  @ManyToOne(() => BackupDataEntity, {
     nullable: false,
+    eager: false,
   })
   @JoinColumn({ name: 'backupId' })
-  backup!: string;
+  backup!: BackupDataEntity;
 }

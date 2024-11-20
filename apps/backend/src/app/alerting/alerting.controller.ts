@@ -27,7 +27,7 @@ export class AlertingController {
     required: false,
   })
   async getAllAlerts(
-    @Query('backupId', ParseUUIDPipe) backupId?: string
+    @Query('backupId') backupId?: string
   ): Promise<AlertEntity[]> {
     return this.alertingService.findAllAlerts(backupId);
   }
