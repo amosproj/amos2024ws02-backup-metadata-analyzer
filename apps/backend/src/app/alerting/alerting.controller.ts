@@ -1,7 +1,7 @@
 import { Body, Controller, Logger, Post } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
-import { AlertingInformationDto } from './dto/alertingInformationDto';
+import { AlertingInformationDto } from './dto/alertingInformation.dto';
 
 @Controller('alerting')
 export class AlertingController {
