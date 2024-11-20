@@ -24,12 +24,4 @@ export class BackupDataDto {
     })
     @IsString()
     creationDate!: Date;
-
-    @ApiProperty({
-        description: 'Bio',
-        nullable: false,
-        required: true,
-    })
-    @IsString()
-    bio!: string;
 }
