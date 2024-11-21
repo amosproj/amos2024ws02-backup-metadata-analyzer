@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { BASE_URL } from '../../shared/types/configuration';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Alert } from '../../shared/types/alert';
 
 @Injectable({
@@ -15,5 +15,6 @@ export class AlertServiceService {
 
   getAllAlerts(): Observable<Alert[]> {
     return this.http.get<Alert[]>(`${this.baseUrl}/alerting`);
+    //return of([]);
   }
 }

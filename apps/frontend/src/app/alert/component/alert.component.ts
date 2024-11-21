@@ -2,16 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
 import { Alert } from '../../shared/types/alert';
 import { AlertType } from '../../../../../backend/src/app/alerting/dto/alertType';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-alert',
   templateUrl: './alert.component.html',
   styleUrl: './alert.component.css',
+  providers: [DatePipe],
 })
 export class AlertComponent implements OnInit {
   alerts: Alert[] = [];
 
-  constructor(private readonly alertService: AlertServiceService) {}
+  constructor(
+    private readonly alertService: AlertServiceService,
+    private datePipe: DatePipe
+  ) {}
 
   ngOnInit(): void {
     this.loadAlerts();
@@ -59,17 +64,17 @@ export class AlertComponent implements OnInit {
     switch (alert.type) {
       case AlertType.SIZE_DECREASED:
         percentage = Math.floor((1 - alert.value / alert.referenceValue) * 100);
-        description = `Size of backup (${
-          alert.backup.id
-        }, ${alert.backup.creationDate.toLocaleString()}) decreased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
+        description = `Size of backup decreased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
         break;
       case AlertType.SIZE_INCREASED:
         percentage = Math.floor((alert.value / alert.referenceValue - 1) * 100);
-        description = `Size of backup (${
-          alert.backup.id
-        }, ${alert.backup.creationDate.toLocaleString()}) increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
+        description = `Size of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
         break;
     }
     return description;
+  }
+
+  formatDate(date: Date): string {
+    return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
   }
 }

@@ -1,9 +1,21 @@
 .alert-green {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: #b2d4b2;
 }
 
 .alert-yellow {
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: #fbe870;
+}
+
+.alert {
+    display: flex;
+    align-items: center;
+    border: none;
+    background-color: #f8f1c4;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.alert cds-icon {
+    margin-right: 5px;
 }
