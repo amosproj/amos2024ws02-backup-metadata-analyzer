@@ -1,11 +1,7 @@
-<div class="clr-container">
-  <h1>Alerts</h1>
-  <div class="clr-row">
-    <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
-      <div class="card" [ngClass]="getStatusClass()">
-        <div class="card-header">
-          <span>Status: {{ status }}</span>
-          <span class="alert-counts">
+<div class="card" [ngClass]="getStatusClass()">
+  <div class="card-header">
+    <span>Status: {{ status }}</span>
+    <span class="alert-counts">
             <span *ngIf="criticalAlertsCount > 0" class="alert-count">
               <cds-icon shape="error-standard" class="is-solid"></cds-icon>
               {{ criticalAlertsCount }}
@@ -15,39 +11,36 @@
               {{ nonCriticalAlertsCount }}
             </span>
           </span>
-        </div>
-        <div class="card-block">
-          <div class="card-text">
-            <div *ngFor="let alert of alerts">
-              <clr-tooltip>
-                <div clrTooltipTrigger [ngClass]="getAlertClass(alert)" class="alert">
-                  <cds-icon *ngIf="!criticalAlertTypes.includes(alert.type)" shape="warning-standard"
-                            class="is-solid"></cds-icon>
-                  <cds-icon *ngIf="criticalAlertTypes.includes(alert.type)" shape="error-standard"
-                            class="is-solid"></cds-icon>
-                  <span>{{ getAlertReason(alert) }}</span>
-                </div>
-                <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
-                  <b>Backup ID:</b>
-                  {{ alert.backup.id }}
-                  <br />
-                  <b>Creation Date:</b>
-                  {{ formatDate(alert.backup.creationDate) }}
-                  <br />
-                  <br />
-                  {{ getAlertDetails(alert) }}
-                </clr-tooltip-content>
-              </clr-tooltip>
-            </div>
-            <div *ngIf="alerts.length === 0">
-              No Alerts.
-            </div>
+  </div>
+  <div class="card-block">
+    <div class="card-text">
+      <div *ngFor="let alert of alerts">
+        <clr-tooltip>
+          <div clrTooltipTrigger [ngClass]="getAlertClass(alert)" class="alert">
+            <cds-icon *ngIf="!criticalAlertTypes.includes(alert.type)" shape="warning-standard"
+                      class="is-solid"></cds-icon>
+            <cds-icon *ngIf="criticalAlertTypes.includes(alert.type)" shape="error-standard"
+                      class="is-solid"></cds-icon>
+            <span>{{ getAlertReason(alert) }}</span>
           </div>
-        </div>
-        <div class="card-footer">
-          {{ alerts.length }} Alerts have been triggered
-        </div>
+          <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
+            <b>Backup ID:</b>
+            {{ alert.backup.id }}
+            <br />
+            <b>Creation Date:</b>
+            {{ formatDate(alert.backup.creationDate) }}
+            <br />
+            <br />
+            {{ getAlertDetails(alert) }}
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </div>
+      <div *ngIf="alerts.length === 0">
+        No Alerts.
       </div>
     </div>
+  </div>
+  <div class="card-footer">
+    {{ alerts.length }} Alerts have been triggered
   </div>
 </div>

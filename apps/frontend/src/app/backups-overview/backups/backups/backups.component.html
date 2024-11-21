@@ -1,6 +1,29 @@
 <h1 class="header">Backups Overview</h1>
+<div class="alert-info-section">
+  <app-alert class="alert-panel"></app-alert>
+  <div class="card" class="info">
+    <div class="card-block">
+      <div class="card-text">
+        <p>On this page, you can:</p>
+        <ul>
+          <li><strong>See Alerts</strong>: View the current status and details of any alerts that have been triggered.
+            Alerts are categorized by their severity.
+          </li>
+          <li><strong>See All Backups with Basic Data</strong>: Browse through a list of all backups, including
+            essential information such as Backup ID, size and creation date.
+          </li>
+          <li><strong>See How the Size of the Backup Evolved Over Time</strong>: Visualize the changes in backup sizes
+            over time through a dedicated chart, helping you understand the growth and trends in your backup data.
+          </li>
+        </ul>
+        <p>More insights will follow.</p>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="clr-row">
   <div class="clr-col-lg-12 clr-col-lg-12">
+    <h2>All Backups:</h2>
     <clr-datagrid
       *ngIf="backups$ | async as backups"
       [clrDgItemsTrackBy]="trackBackupById"
@@ -27,7 +50,8 @@
       <clr-dg-footer>
         <clr-dg-pagination #pagination [clrDgPageSize]="10">
           <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]"
-            >Backups per page</clr-dg-page-size
+          >Backups per page
+          </clr-dg-page-size
           >
           {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
           {{ pagination.totalItems }} backups

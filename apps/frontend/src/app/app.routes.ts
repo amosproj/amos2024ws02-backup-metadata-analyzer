@@ -7,6 +7,5 @@ import { AlertComponent } from './alert/component/alert.component';
 export const appRoutes: Route[] = [
   { path: 'upload', component: TestUploadComponent },
   { path: 'findData', component: FindTestDataComponent },
-  { path: 'alerts', component: AlertComponent },
   { path: '', component: BackupsComponent },
 ];
