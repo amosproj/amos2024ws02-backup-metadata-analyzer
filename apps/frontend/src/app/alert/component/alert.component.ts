@@ -12,8 +12,10 @@ import { AlertType } from '../../shared/enums/alertType';
 })
 export class AlertComponent implements OnInit {
   alerts: Alert[] = [];
+  criticalAlertsCount: number = 0;
+  nonCriticalAlertsCount: number = 0;
 
-  criticalAlerts: AlertType[] = [AlertType.SIZE_INCREASED];
+  criticalAlertTypes: AlertType[] = [];
 
   status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
@@ -28,7 +30,15 @@ export class AlertComponent implements OnInit {
 
   loadAlerts(): void {
     this.alertService.getAllAlerts().subscribe((data: Alert[]) => {
-      this.alerts = data;
+      const criticalAlerts = data.filter((alert) =>
+        this.criticalAlertTypes.includes(alert.type)
+      );
+      const nonCriticalAlerts = data.filter(
+        (alert) => !this.criticalAlertTypes.includes(alert.type)
+      );
+      this.criticalAlertsCount = criticalAlerts.length;
+      this.nonCriticalAlertsCount = nonCriticalAlerts.length;
+      this.alerts = [...criticalAlerts, ...nonCriticalAlerts];
       this.status = this.getStatus();
     });
   }
@@ -43,21 +53,21 @@ export class AlertComponent implements OnInit {
     return 'status-green';
   }
 
-  getAlertClass(): string {
-    switch (this.status) {
-      case 'Critical':
-        return 'alert-red';
-      case 'Warning':
-        return 'alert-yellow';
+  getAlertClass(alert: Alert): string {
+    if (this.criticalAlertTypes.includes(alert.type)) {
+      return 'alert-red';
+    } else {
+      return 'alert-yellow';
     }
-    return '';
   }
 
   getStatus() {
     if (this.alerts.length === 0) {
       return 'OK';
     }
-    if (this.alerts.some((alert) => this.criticalAlerts.includes(alert.type))) {
+    if (
+      this.alerts.some((alert) => this.criticalAlertTypes.includes(alert.type))
+    ) {
       return 'Critical';
     }
     return 'Warning';

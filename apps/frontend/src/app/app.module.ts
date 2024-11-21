@@ -9,12 +9,12 @@ import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
 import {
-  ClarityIcons,
+  ClarityIcons, errorStandardIcon,
   homeIcon,
   searchIcon,
   tableIcon,
   uploadCloudIcon,
-  warningStandardIcon,
+  warningStandardIcon
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -51,7 +51,9 @@ export class AppModule {
       homeIcon,
       searchIcon,
       tableIcon,
-      warningStandardIcon
+      warningStandardIcon,
+      errorStandardIcon,
+
     );
   }
 }

@@ -3,13 +3,28 @@
   <div class="clr-row">
     <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
       <div class="card" [ngClass]="getStatusClass()">
-        <div class="card-header">Status: {{ status }}</div>
+        <div class="card-header">
+          <span>Status: {{ status }}</span>
+          <span class="alert-counts">
+            <span *ngIf="criticalAlertsCount > 0" class="alert-count">
+              <cds-icon shape="error-standard" class="is-solid"></cds-icon>
+              {{ criticalAlertsCount }}
+            </span>
+            <span *ngIf="nonCriticalAlertsCount > 0" class="alert-count">
+              <cds-icon shape="warning-standard" class="is-solid"></cds-icon>
+              {{ nonCriticalAlertsCount }}
+            </span>
+          </span>
+        </div>
         <div class="card-block">
           <div class="card-text">
             <div *ngFor="let alert of alerts">
               <clr-tooltip>
-                <div clrTooltipTrigger [ngClass]="getAlertClass()" class="alert">
-                  <cds-icon shape="warning-standard" class="is-solid"></cds-icon>
+                <div clrTooltipTrigger [ngClass]="getAlertClass(alert)" class="alert">
+                  <cds-icon *ngIf="!criticalAlertTypes.includes(alert.type)" shape="warning-standard"
+                            class="is-solid"></cds-icon>
+                  <cds-icon *ngIf="criticalAlertTypes.includes(alert.type)" shape="error-standard"
+                            class="is-solid"></cds-icon>
                   <span>{{ getAlertReason(alert) }}</span>
                 </div>
                 <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
