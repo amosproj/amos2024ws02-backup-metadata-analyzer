@@ -20,8 +20,7 @@ import { TestUploadComponent } from './test-upload/component/test-upload/test-up
 import { FindTestDataComponent } from './test-upload/component/find-test-data/find-test-data.component';
 import { BackupsComponent } from './backups-overview/backups/backups/backups.component';
 import { BASE_URL } from './shared/types/configuration';
-
-
+import { AlertComponent } from './alert/component/alert.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +28,7 @@ import { BASE_URL } from './shared/types/configuration';
     TestUploadComponent,
     FindTestDataComponent,
     BackupsComponent,
+    AlertComponent,
   ],
   imports: [
     BrowserModule,
@@ -39,9 +39,7 @@ import { BASE_URL } from './shared/types/configuration';
     HttpClientModule,
     RouterModule.forRoot(appRoutes),
   ],
-  providers: [
-    { provide: BASE_URL, useValue: 'http://localhost:3000/api'}
-  ],
+  providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }],
   bootstrap: [AppComponent],
 })
 export class AppModule {
