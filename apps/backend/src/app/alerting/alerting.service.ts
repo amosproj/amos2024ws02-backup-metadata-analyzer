@@ -1,17 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AlertEntity } from './entity/alert.entity';
 import { Repository } from 'typeorm';
 import { CreateAlertDto } from './dto/createAlert.dto';
-import { BackupDataEntity } from '../backupData/entity/backupData.entity';
+import { BackupDataService } from '../backupData/backupData.service';
 
 @Injectable()
 export class AlertingService {
   constructor(
     @InjectRepository(AlertEntity)
     private alertRepository: Repository<AlertEntity>,
-    private mailService: MailService
+    private mailService: MailService,
+    private backupDataService: BackupDataService
   ) {}
 
   async createAlert(createAlertDto: CreateAlertDto) {
@@ -20,9 +21,18 @@ export class AlertingService {
     alert.type = createAlertDto.type;
     alert.value = createAlertDto.value;
     alert.referenceValue = createAlertDto.referenceValue;
-    alert.backup = createAlertDto.backupId as unknown as BackupDataEntity;
+    const backupDataEntity = await this.backupDataService.findOneById(
+      createAlertDto.backupId
+    );
+    if (!backupDataEntity) {
+      throw new NotFoundException(
+        `Backup with id ${createAlertDto.backupId} not found`
+      );
+    }
+    alert.backup = backupDataEntity;
 
-    await this.alertRepository.save(alert);
+    const entity = await this.alertRepository.save(alert);
+    await this.triggerAlertMail(entity);
   }
 
   async findAllAlerts(backupId?: string): Promise<AlertEntity[]> {
@@ -34,7 +44,7 @@ export class AlertingService {
     return await this.alertRepository.find();
   }
 
-  async triggerAlertMail(reason: string, description: string) {
-    await this.mailService.sendAlertMail(reason, description);
+  async triggerAlertMail(alert: AlertEntity) {
+    await this.mailService.sendAlertMail(alert);
   }
 }

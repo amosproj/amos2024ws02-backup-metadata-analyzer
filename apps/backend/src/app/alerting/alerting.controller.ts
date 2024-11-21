@@ -1,15 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  ParseUUIDPipe,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
-import { AlertingInformationDto } from './dto/alertingInformation.dto';
 import { AlertEntity } from './entity/alert.entity';
 import { CreateAlertDto } from './dto/createAlert.dto';
 
@@ -36,16 +27,5 @@ export class AlertingController {
   @ApiOperation({ summary: 'Create a new alert.' })
   async createAlert(@Body() createAlertDto: CreateAlertDto): Promise<void> {
     await this.alertingService.createAlert(createAlertDto);
-  }
-
-  @Post('mail')
-  @ApiOperation({ summary: 'Send an alert mail with the given informations.' })
-  async sendAlertMail(
-    @Body() alertingInformationDto: AlertingInformationDto
-  ): Promise<void> {
-    await this.alertingService.triggerAlertMail(
-      alertingInformationDto.reason,
-      alertingInformationDto.description
-    );
   }
 }
