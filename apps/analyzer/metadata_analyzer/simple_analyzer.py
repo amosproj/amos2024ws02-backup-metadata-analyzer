@@ -4,8 +4,12 @@ class SimpleAnalyzer:
 
     def analyze(self, data):
         count = len(data)
-        dates = list(map(lambda backup_data: backup_data.creationDate, data))
-        sizes = list(map(lambda backup_data: backup_data.sizeMB, data))
+        print("length of data " + str(count))
+        dates = []
+        sizes = []
+        for elem in data:
+            dates.append(elem.get("creationDate"))
+            sizes.append(elem.get("sizeMB"))
         return {
             "count": count,
             "firstBackup": min(dates),
