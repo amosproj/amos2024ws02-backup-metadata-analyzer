@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
@@ -14,6 +14,7 @@ import {
   searchIcon,
   tableIcon,
   uploadCloudIcon,
+  warningStandardIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -41,9 +42,16 @@ import { AlertComponent } from './alert/component/alert.component';
   ],
   providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {
   constructor() {
-    ClarityIcons.addIcons(uploadCloudIcon, homeIcon, searchIcon, tableIcon);
+    ClarityIcons.addIcons(
+      uploadCloudIcon,
+      homeIcon,
+      searchIcon,
+      tableIcon,
+      warningStandardIcon
+    );
   }
 }

@@ -13,7 +13,7 @@ export class AlertServiceService {
     private readonly http: HttpClient
   ) {}
 
-  getAllAlerts(id: string): Observable<Alert> {
-    return this.http.get<Alert>(`${this.baseUrl}/alerting}`);
+  getAllAlerts(): Observable<Alert[]> {
+    return this.http.get<Alert[]>(`${this.baseUrl}/alerting`);
   }
 }

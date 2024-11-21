@@ -1,4 +1,27 @@
 <div class="clr-container">
   <h1>Alerts</h1>
-
+  <div class="clr-row">
+    <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
+      <div class="card" [ngClass]="getAlertClass()">
+        <div class="card-header">Status: {{ getStatus() }}</div>
+        <div class="card-block">
+          <div class="card-text">
+            <div *ngFor="let alert of alerts">
+              <clr-tooltip>
+                <div clrTooltipTrigger>
+                  <cds-icon shape="warning-standard" class="is-solid"></cds-icon>
+                  <span>{{ getAlertReason(alert) }}</span></div>
+                <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
+                  {{ getAlertDetails(alert) }}
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          Displaying Alert for the last x days
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
