@@ -2,20 +2,20 @@
   <h1>Alerts</h1>
   <div class="clr-row">
     <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
-      <div class="card" [ngClass]="getAlertClass()">
-        <div class="card-header">Status: {{ getStatus() }}</div>
+      <div class="card" [ngClass]="getStatusClass()">
+        <div class="card-header">Status: {{ status }}</div>
         <div class="card-block">
           <div class="card-text">
             <div *ngFor="let alert of alerts">
               <clr-tooltip>
-                <div clrTooltipTrigger class="alert">
+                <div clrTooltipTrigger [ngClass]="getAlertClass()" class="alert">
                   <cds-icon shape="warning-standard" class="is-solid"></cds-icon>
                   <span>{{ getAlertReason(alert) }}</span>
                 </div>
                 <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
                   <b>Backup ID:</b>
                   {{ alert.backup.id }}
-                  <br/>
+                  <br />
                   <b>Creation Date:</b>
                   {{ formatDate(alert.backup.creationDate) }}
                   <br />

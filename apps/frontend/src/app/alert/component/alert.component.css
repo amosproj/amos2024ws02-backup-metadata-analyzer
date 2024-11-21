@@ -1,16 +1,30 @@
-.alert-green {
+.status-green {
     background-color: #b2d4b2;
 }
 
-.alert-yellow {
+.status-yellow {
     background-color: #fbe870;
+}
+
+.status-red {
+    background-color: #ff0a00;
 }
 
 .alert {
     display: flex;
     align-items: center;
     border: none;
+}
+
+.alert-yellow {
     background-color: #f8f1c4;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.alert-red {
+    background-color: #ffb6b2;
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);

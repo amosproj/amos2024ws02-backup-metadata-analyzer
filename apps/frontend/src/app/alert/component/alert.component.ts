@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
 import { Alert } from '../../shared/types/alert';
-import { AlertType } from '../../../../../backend/src/app/alerting/dto/alertType';
 import { DatePipe } from '@angular/common';
+import { AlertType } from '../../shared/enums/alertType';
 
 @Component({
   selector: 'app-alert',
@@ -12,6 +12,10 @@ import { DatePipe } from '@angular/common';
 })
 export class AlertComponent implements OnInit {
   alerts: Alert[] = [];
+
+  criticalAlerts: AlertType[] = [AlertType.SIZE_INCREASED];
+
+  status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
   constructor(
     private readonly alertService: AlertServiceService,
@@ -25,21 +29,38 @@ export class AlertComponent implements OnInit {
   loadAlerts(): void {
     this.alertService.getAllAlerts().subscribe((data: Alert[]) => {
       this.alerts = data;
+      this.status = this.getStatus();
     });
   }
 
-  getAlertClass(): string {
-    if (this.alerts.length > 0) {
-      return 'alert-yellow';
+  getStatusClass(): string {
+    switch (this.status) {
+      case 'Critical':
+        return 'status-red';
+      case 'Warning':
+        return 'status-yellow';
     }
-    return 'alert-green';
+    return 'status-green';
+  }
+
+  getAlertClass(): string {
+    switch (this.status) {
+      case 'Critical':
+        return 'alert-red';
+      case 'Warning':
+        return 'alert-yellow';
+    }
+    return '';
   }
 
   getStatus() {
-    if (this.alerts.length > 0) {
-      return 'Warning';
+    if (this.alerts.length === 0) {
+      return 'OK';
     }
-    return 'OK';
+    if (this.alerts.some((alert) => this.criticalAlerts.includes(alert.type))) {
+      return 'Critical';
+    }
+    return 'Warning';
   }
 
   getAlertReason(alert: Alert) {
