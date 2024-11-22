@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { appRoutes } from './app.routes';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
@@ -21,8 +22,6 @@ import { FindTestDataComponent } from './test-upload/component/find-test-data/fi
 import { BackupsComponent } from './backups-overview/backups/backups/backups.component';
 import { BASE_URL } from './shared/types/configuration';
 
-
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -36,12 +35,11 @@ import { BASE_URL } from './shared/types/configuration';
     ClarityModule,
     NgxEchartsModule,
     FormsModule,
+    ReactiveFormsModule,
     HttpClientModule,
     RouterModule.forRoot(appRoutes),
   ],
-  providers: [
-    { provide: BASE_URL, useValue: 'http://localhost:3000/api'}
-  ],
+  providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }],
   bootstrap: [AppComponent],
 })
 export class AppModule {
