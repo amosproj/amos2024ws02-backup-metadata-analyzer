@@ -6,3 +6,8 @@
 .btn-group {
     padding-top: 20px;
 }
+
+.filter-inline {
+    display: inline-flex !important;
+    align-items: center;
+    }
