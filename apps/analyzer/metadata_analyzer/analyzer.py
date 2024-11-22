@@ -1,8 +1,9 @@
 class Analyzer:
-    def init(database, backend, simple_analyzer):
+    def init(database, backend, simple_analyzer, simple_rule_based_analyzer):
         Analyzer.database = database
         Analyzer.backend = backend
         Analyzer.simple_analyzer = simple_analyzer
+        Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
 
     def analyze():
         data = list(Analyzer.database.get_results())
@@ -53,4 +54,7 @@ class Analyzer:
 
         return {"count": count}
 
-
+    def simple_rule_based_analysis():
+        data = list(Analyzer.database.get_results())
+        result = Analyzer.simple_rule_based_analyzer.analyze(data)
+        return result

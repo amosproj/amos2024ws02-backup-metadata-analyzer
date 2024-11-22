@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 from metadata_analyzer.database import Database
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
+from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
 from metadata_analyzer.analyzer import Analyzer
 from metadata_analyzer.backend import Backend
 from flasgger import Swagger
@@ -142,12 +143,17 @@ def update_data():
     """
     return jsonify(Analyzer.update_data())
 
+@app.route("/simpleRuleBasedAnalysis", methods=["POST"])
+def simple_rule_based_analysis():
+    return jsonify(Analyzer.simple_rule_based_analysis())
+
 
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
-    Analyzer.init(database, backend, simple_analyzer)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer()
+    Analyzer.init(database, backend, simple_analyzer, simple_rule_based_analyzer)
 
     new_port = os.getenv("FLASK_RUN_PORT")
     int_port = int(new_port or 5000)
