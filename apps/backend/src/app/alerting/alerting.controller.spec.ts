@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { AlertingModule } from './alerting.module';
 import { AlertEntity } from './entity/alert.entity';
 import { CreateAlertDto } from './dto/createAlert.dto';
@@ -97,6 +97,32 @@ describe('AlertingController (e2e)', () => {
       .expect(200);
     expect(mockAlertRepository.find).toHaveBeenCalledWith({
       where: { backup: { id: 'backup-id' } },
+    });
+
+    // Convert creationDate to Date object for comparison
+    const receivedAlerts = response.body.map((alert: AlertEntity) => ({
+      ...alert,
+      backup: {
+        ...alert.backup,
+        creationDate: new Date(alert.backup.creationDate),
+      },
+    }));
+
+    expect(receivedAlerts).toEqual([mockAlertEntity]);
+  });
+
+  it('GET /alerting - should filter alerts by the last x days', async () => {
+    const days = 7;
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+
+    const response = await request(app.getHttpServer())
+      .get('/alerting')
+      .query({ days })
+      .expect(200);
+
+    expect(mockAlertRepository.find).toHaveBeenCalledWith({
+      where: { backup: { creationDate: MoreThanOrEqual(expect.any(Date)) } },
     });
 
     // Convert creationDate to Date object for comparison

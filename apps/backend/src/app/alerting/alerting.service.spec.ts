@@ -3,7 +3,7 @@ import { AlertingService } from './alerting.service';
 import { MailService } from '../utils/mail/mail.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AlertEntity } from './entity/alert.entity';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { BackupDataService } from '../backupData/backupData.service';
 import { NotFoundException } from '@nestjs/common';
 import { CreateAlertDto } from './dto/createAlert.dto';
@@ -130,6 +130,19 @@ describe('AlertingService', () => {
       expect(result).toEqual(alerts);
       expect(alertRepository.find).toHaveBeenCalledWith({
         where: { backup: { id: 'backup-id' } },
+      });
+    });
+
+    it('should return alerts for the last x days', async () => {
+      const days = 7;
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+
+      const result = await service.findAllAlerts(undefined, days);
+
+      expect(result).toEqual(alerts);
+      expect(alertRepository.find).toHaveBeenCalledWith({
+        where: { backup: { creationDate: MoreThanOrEqual(expect.any(Date)) } },
       });
     });
   });
