@@ -3,14 +3,12 @@ import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest,
-  distinctUntilChanged,
   map,
   Observable,
   startWith,
   Subject,
   switchMap,
   takeUntil,
-  tap,
 } from 'rxjs';
 import { BackupService } from '../../service/backup-service/backup-service.service';
 import { Backup } from '../../../shared/types/backup';
@@ -18,6 +16,7 @@ import { ClrDatagridStateInterface } from '@clr/angular';
 import { CustomFilter } from './backupfilter';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { ChartService } from '../../service/chart-service/chart-service.service';
+import { APIResponse } from '../../../shared/types/api-response';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -41,9 +40,8 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   backupSizeFilter: CustomFilter;
   backupDateFilter: CustomFilter;
 
-  readonly backups$: Observable<Backup[]>;
-  readonly chartBackups$: Observable<Backup[]>;
-  readonly totalItems$: Observable<number>;
+  readonly backups$: Observable<APIResponse<Backup>>;
+  readonly chartBackups$: Observable<APIResponse<Backup>>;
 
   private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
@@ -67,8 +65,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       switchMap((params) => this.backupService.getAllBackups(params)),
       takeUntil(this.destroy$)
     );
-
-    this.totalItems$ = this.backupService.getTotalBackupsCount();
   }
 
   ngOnInit(): void {
@@ -96,7 +92,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           categoryField: 'category',
           seriesName: 'SizeDistribution',
         },
-        this.backups$ // should use chartBackups$
+        this.backups$.pipe(
+          map((response: APIResponse<Backup>) => response.data)
+        ) // should use chartBackups$
       );
       this.chartService.createChart(
         {
@@ -108,7 +106,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           tooltipText:
             "[bold]{valueY}[/] MB\n{valueX.formatDate('yyyy-MM-dd HH:mm')}\nBackups: {count}",
         },
-        this.backups$, // should use chartBackups$
+        this.backups$.pipe(
+          map((response: APIResponse<Backup>) => response.data)
+        ), // should use chartBackups$
         this.selectedTimeRange
       );
     }, 100);

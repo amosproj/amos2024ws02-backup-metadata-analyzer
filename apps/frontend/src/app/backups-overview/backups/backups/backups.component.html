@@ -68,7 +68,7 @@
       </clr-dg-column>
 
       <clr-dg-placeholder>We couldn't find any backups!</clr-dg-placeholder>
-      <clr-dg-row *clrDgItems="let backup of backups" [clrDgItem]="backup">
+      <clr-dg-row *clrDgItems="let backup of backups.data" [clrDgItem]="backup">
         <clr-dg-cell>{{ backup.id }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.creationDate | date }}</clr-dg-cell>
@@ -82,13 +82,13 @@
       <clr-dg-footer>
         <clr-dg-pagination
           #pagination
-          [clrDgTotalItems]="(totalItems$ | async) || 10"
+          [clrDgTotalItems]="(backups.paginationData.total) || 10"
         >
           <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
             Backups per page
           </clr-dg-page-size>
           {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
-          {{ totalItems$ | async }} backups
+          {{ backups.paginationData.total }} backups
         </clr-dg-pagination>
       </clr-dg-footer>
     </clr-datagrid>
@@ -111,7 +111,7 @@
     </div>
 
     <!-- Timeline Chart -->
-     <h4>Last Backups</h4>
+    <h4>Last Backups</h4>
     <div
       id="backupTimelineChart"
       class="mt-4"

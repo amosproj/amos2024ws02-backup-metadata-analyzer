@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { map, Observable, shareReplay } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { BASE_URL } from '../../../shared/types/configuration';
 import { Backup } from '../../../shared/types/backup';
 import { APIResponse } from '../../../shared/types/api-response';
@@ -15,7 +15,9 @@ export class BackupService {
     private readonly http: HttpClient
   ) {}
 
-  getAllBackups(filterParams: BackupFilterParams): Observable<Backup[]> {
+  getAllBackups(
+    filterParams: BackupFilterParams
+  ): Observable<APIResponse<Backup>> {
     const mapToBackup = (data: Backup): Backup => {
       console.log(data.creationDate);
       return {
@@ -40,21 +42,9 @@ export class BackupService {
     const params = new HttpParams({ fromObject: cleanParams });
 
     return this.http
-      .get<APIResponse>(`${this.baseUrl}/backupData`, { params: params })
-      .pipe(
-        map((response) => {
-          return response.data.map(mapToBackup);
-        })
-      )
-      .pipe(shareReplay(1));
-  }
-  getTotalBackupsCount(): Observable<number> {
-    console.log('get total count');
-    return this.http.get<APIResponse>(`${this.baseUrl}/backupData`).pipe(
-      map((response) => {
-        console.log('total count === ', response.paginationData.total);
-        return response.paginationData.total;
+      .get<APIResponse<Backup>>(`${this.baseUrl}/backupData`, {
+        params: params,
       })
-    );
+      .pipe(shareReplay(1));
   }
 }
