@@ -39,11 +39,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   backupSizeFilter: CustomFilter;
   backupDateFilter: CustomFilter;
 
-  currentPage: number = 1;
-  lastPage: number = 1;
-
-  total = 0;
-
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
 
@@ -84,13 +79,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       .subscribe((params) => this.filterOptions$.next(params));
 
     this.setTimeRange('month');
-
-    this.backups$.subscribe((response: APIResponse<Backup>) => {
-      this.lastPage = Math.ceil(response.paginationData.total / this.pageSize);
-      const offset = response.paginationData.offset ?? 0;
-      this.currentPage = Math.floor(offset / this.pageSize) + 1;
-      this.total = response.paginationData.total;
-    });
   }
 
   ngAfterViewInit(): void {

@@ -82,9 +82,7 @@
       <clr-dg-footer>
         <clr-dg-pagination
           #pagination
-          [clrDgTotalItems]="(backups.paginationData.total) || 10"
-          [(clrDgPage)]="currentPage"
-          [clrDgLastPage]="lastPage"
+          [clrDgTotalItems]="backups.paginationData.total"
         >
           <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
             Backups per page
