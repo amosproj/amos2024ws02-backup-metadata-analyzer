@@ -28,8 +28,8 @@ interface ChartConfig {
 })
 export class ChartService {
   private roots: { [key: string]: am5.Root } = {};
-  private charts: { [key: string]: am5.Chart } = {};
-  private series: { [key: string]: am5.Series } = {};
+  charts: { [key: string]: am5.Chart } = {};
+  series: { [key: string]: am5.Series } = {};
   private readonly destroy$ = new Subject<void>();
 
   constructor() {}
@@ -140,7 +140,7 @@ export class ChartService {
     if (chart instanceof am5xy.XYChart && timeRange) {
       const yAxis = chart.yAxes.push(
         am5xy.ValueAxis.new(root, {
-          numberFormat: '#.# MB',
+          numberFormat: '# MB',
           renderer: am5xy.AxisRendererY.new(root, {
             pan: 'none',
           }),
@@ -228,8 +228,8 @@ export class ChartService {
     chart.appear(1000, 100);
   }
 
-  private prepareColumnData(backups: Backup[], timeRange: TimeRange): any[] {
-    console.log('Preparing column data for timeRange:', timeRange);
+  prepareColumnData(backups: Backup[], timeRange: TimeRange): any[] {
+    if (!backups?.length) return [];
 
     const sortedBackups = [...backups].sort(
       (a, b) =>
@@ -240,55 +240,62 @@ export class ChartService {
 
     sortedBackups.forEach((backup) => {
       const date = new Date(backup.creationDate);
-      let key: string;
-
-      switch (timeRange) {
-        case 'week':
-        case 'month':
-          key = this.formatDate(date, 'yyyy-MM-dd');
-          break;
-        case 'year':
-          key = `${date.getFullYear()}-W${this.getWeekNumber(date)}`;
-          break;
-        default:
-          key = this.formatDate(date, 'yyyy-MM-dd');
-      }
-
+      const key = this.getGroupKey(date, timeRange);
       groupedData.set(key, (groupedData.get(key) || 0) + backup.sizeMB);
     });
 
-    // Convert to array format required by chart
-    const chartData = Array.from(groupedData.entries()).map(([key, total]) => {
-      const [year, rest] = key.split('-');
-      let date: Date;
-
-      if (rest.startsWith('W')) {
-        // Handle weekly data
-        const weekNum = parseInt(rest.substring(1));
-        date = this.getDateOfWeek(parseInt(year), weekNum);
-      } else {
-        // Handle daily data
-        date = new Date(key);
-      }
-
-      return {
-        date: date.getTime(),
-        sizeMB: total,
-      };
-    });
-
-    console.log('Prepared chart data:', chartData); 
-    return chartData;
+    return Array.from(groupedData.entries()).map(([key, total]) => ({
+      creationDate: this.parseGroupKey(key, timeRange),
+      sizeMB: total,
+    }));
   }
 
-  // Helper method to get date from week number
+  private getGroupKey(date: Date, timeRange: TimeRange): string {
+    switch (timeRange) {
+      case 'week':
+      case 'month':
+        return date.toISOString().split('T')[0];
+      case 'year':
+        const weekNum = this.getWeekNumber(date);
+        return `${date.getFullYear()}-W${weekNum}`;
+    }
+  }
+
+  private parseGroupKey(key: string, timeRange: TimeRange): number {
+    if (timeRange === 'year' && key.includes('W')) {
+      const [year, week] = key.split('-W');
+      return this.getDateOfWeek(parseInt(year), parseInt(week)).getTime();
+    }
+    return new Date(key).getTime();
+  }
+
   private getDateOfWeek(year: number, week: number): Date {
     const date = new Date(year, 0, 1);
     date.setDate(date.getDate() + (week - 1) * 7);
     return date;
   }
 
-  private preparePieData(backups: Backup[]): any[] {
+  private getAxisFormat(timeRange: TimeRange): string {
+    switch (timeRange) {
+      case 'week':
+      case 'month':
+        return 'MMM dd';
+      case 'year':
+        return "MMM 'W'w";
+    }
+  }
+
+  private getTooltipFormat(timeRange: TimeRange): string {
+    switch (timeRange) {
+      case 'week':
+      case 'month':
+        return "[bold]{valueY}[/] MB\n{valueX.formatDate('MMM dd')}";
+      case 'year':
+        return "[bold]{valueY}[/] MB\nWeek {valueX.formatDate('w')}";
+    }
+  }
+
+  preparePieData(backups: Backup[]): any[] {
     const ranges = [
       { min: 0, max: 100, category: '0-100 MB' },
       { min: 100, max: 500, category: '100-500 MB' },
@@ -316,31 +323,6 @@ export class ChartService {
       default:
         return 'MMM dd';
     }
-  }
-
-  private getGroupingFormat(timeRange: TimeRange): string {
-    switch (timeRange) {
-      case 'week':
-      case 'month':
-        return 'yyyy-MM-dd';
-      case 'year':
-        return 'yyyy-[W]ww';
-      default:
-        return 'yyyy-MM-dd';
-    }
-  }
-
-  private formatDate(date: Date, format: string): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const week = this.getWeekNumber(date);
-
-    return format
-      .replace('yyyy', year.toString())
-      .replace('MM', month)
-      .replace('dd', day)
-      .replace('[W]ww', `W${String(week).padStart(2, '0')}`);
   }
 
   private getWeekNumber(date: Date): number {
@@ -372,31 +354,15 @@ export class ChartService {
     config: ChartConfig,
     timeRange?: TimeRange
   ): void {
-    //console.log('Subscribing to data updates', config.type);
     data$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (backups) => {
-        //console.log('xxx');
         if (backups?.length > 0) {
-          //console.log(backups);
-          //console.log('type', config.type);
           const chartData =
             config.type === 'column'
               ? this.prepareColumnData(backups, timeRange!)
               : this.preparePieData(backups);
-          console.log('chartData', chartData);  
           series.data.clear();
           series.data.setAll(chartData);
-          //console.log(series.data);
-
-/*           if (config.type === 'column') {
-            const xAxis = (series as am5xy.LineSeries).get('xAxis');
-            if (xAxis instanceof am5xy.DateAxis) {
-              xAxis.zoomToDates(
-                new Date(backups[0].creationDate),
-                new Date(backups[backups.length - 1].creationDate)
-              );
-            }
-          } */
         }
       },
       error: (error) =>
@@ -409,21 +375,20 @@ export class ChartService {
    * this is not working properly
    */
   updateTimeRange(chartId: string, timeRange: TimeRange): void {
-    console.log('updateTimeRange called with timeRange:', timeRange);
+    //const chart = this.charts.get(chartId);
     const chart = this.charts[chartId];
-    const series = this.series[chartId];
-
-    if (
-      chart instanceof am5xy.XYChart &&
-      series instanceof am5xy.ColumnSeries
-    ) {
+    if (chart instanceof am5xy.XYChart) {
       const xAxis = chart.xAxes.getIndex(0);
       if (xAxis instanceof am5xy.DateAxis) {
         xAxis.set('baseInterval', this.getBaseInterval(timeRange));
-        xAxis.set('tooltipDateFormat', this.getDateFormat(timeRange));
+        xAxis.set('tooltipDateFormat', this.getAxisFormat(timeRange));
       }
-
-      series.get('tooltip')?.set('labelText', this.getTooltipText(timeRange));
+      const series = this.series[chartId];
+      if (series?.get('tooltip')) {
+        series
+          .get('tooltip')
+          ?.set('labelText', this.getTooltipFormat(timeRange));
+      }
     }
   }
 
@@ -436,22 +401,6 @@ export class ChartService {
     this.series = {};
   }
 
-  private calculateSizeRanges(backups: Backup[]) {
-    const ranges = [
-      { min: 0, max: 100, label: '0-100 MB' },
-      { min: 100, max: 500, label: '100-500 MB' },
-      { min: 500, max: 1000, label: '500MB-1GB' },
-      { min: 1000, max: Infinity, label: '>1GB' },
-    ];
-
-    return ranges.map((range) => ({
-      category: range.label,
-      value: backups.filter(
-        (b) => b.sizeMB >= range.min && b.sizeMB < range.max
-      ).length,
-    }));
-  }
-
   private getBaseInterval(timeRange: string): ITimeInterval {
     switch (timeRange) {
       case 'week':
@@ -462,6 +411,13 @@ export class ChartService {
         return { timeUnit: 'week', count: 1 };
       default:
         return { timeUnit: 'month', count: 1 };
+    }
+  }
+
+  updateChart(chartId: string, data: any[]): void {
+    const series = this.series[chartId];
+    if (series) {
+      series.data.setAll(data);
     }
   }
 }

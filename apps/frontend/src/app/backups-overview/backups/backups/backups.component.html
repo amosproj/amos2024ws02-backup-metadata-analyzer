@@ -104,7 +104,7 @@
       <button
         *ngFor="let range of timeRanges"
         class="btn"
-        [class.btn-primary]="selectedTimeRange === range"
+        [class.btn-primary]="(timeRange$ | async) === range"
         (click)="setTimeRange(range)"
       >
         Last {{ range | titlecase }}

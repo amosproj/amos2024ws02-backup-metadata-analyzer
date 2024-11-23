@@ -2,12 +2,14 @@ import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest,
+  distinctUntilChanged,
   map,
   Observable,
   startWith,
   Subject,
   switchMap,
   takeUntil,
+  tap,
 } from 'rxjs';
 import { BackupService } from '../../service/backup-service/backup-service.service';
 import { Backup } from '../../../shared/types/backup';
@@ -21,18 +23,29 @@ const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
 };
 
+interface TimeRangeConfig {
+  fromDate: Date;
+  toDate: Date;
+  range: 'week' | 'month' | 'year';
+}
+
 @Component({
   selector: 'app-backups',
   templateUrl: './backups.component.html',
   styleUrl: './backups.component.css',
 })
 export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
-  private readonly timeRangeSubject$ = new BehaviorSubject<
-    'week' | 'month' | 'year'
-  >('month');
+  private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
+    fromDate: new Date(),
+    toDate: new Date(),
+    range: 'month',
+  });
+
   timeRanges: ('week' | 'month' | 'year')[] = ['week', 'month', 'year'];
-  readonly timeRange$ = this.timeRangeSubject$.asObservable();
-  selectedTimeRange: 'week' | 'month' | 'year' = 'month';
+  readonly timeRange$ = this.timeRangeSubject$.pipe(
+    map((config) => config.range)
+  );
+  //selectedTimeRange: 'week' | 'month' | 'year' = 'month';
 
   loading: boolean = false;
   pageSize = 10;
@@ -60,8 +73,35 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       takeUntil(this.destroy$)
     );
 
-    this.chartBackups$ = this.chartFilterOptions$.pipe(
-      switchMap((params) => this.backupService.getAllBackups(params)),
+    this.chartBackups$ = this.timeRangeSubject$.pipe(
+      distinctUntilChanged(
+        (prev, curr) =>
+          prev.range === curr.range &&
+          prev.fromDate.getTime() === curr.fromDate.getTime() &&
+          prev.toDate.getTime() === curr.toDate.getTime()
+      ),
+      map(({ fromDate, toDate }) => ({
+        fromDate: fromDate.toISOString(),
+        toDate: toDate.toISOString(),
+      })),
+      switchMap((dateRange) => this.backupService.getAllBackups(dateRange)),
+      tap((response) => {
+        if (response.data && response.data.length > 0) {
+          // Prepare and update column chart
+          const columnData = this.chartService.prepareColumnData(
+            response.data,
+            this.timeRangeSubject$.getValue().range
+          );
+          this.chartService.updateChart('backupTimelineChart', columnData);
+
+          // Prepare and update pie chart
+          const pieData = this.chartService.preparePieData(response.data);
+          this.chartService.updateChart('backupSizeChart', pieData);
+        } else {
+          // Handle the case where there's no data
+          console.warn('No data received for chart updates.');
+        }
+      }),
       takeUntil(this.destroy$)
     );
   }
@@ -108,7 +148,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
         this.chartBackups$.pipe(
           map((response: APIResponse<Backup>) => response.data)
         ),
-        this.selectedTimeRange
+        this.timeRangeSubject$.getValue().range
       );
     }, 100);
   }
@@ -137,27 +177,26 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   setTimeRange(range: 'week' | 'month' | 'year'): void {
-    console.log(range);
-    this.selectedTimeRange = range;
-
-    this.timeRangeSubject$.next(range);
-
     const toDate = new Date();
     const fromDate = new Date();
 
-    const dateRanges = {
-      week: () => fromDate.setDate(fromDate.getDate() - 7),
-      month: () => fromDate.setMonth(fromDate.getMonth() - 1),
-      year: () => fromDate.setFullYear(fromDate.getFullYear() - 1),
-    };
+    switch (range) {
+      case 'week':
+        fromDate.setDate(fromDate.getDate() - 7);
+        break;
+      case 'month':
+        fromDate.setMonth(fromDate.getMonth() - 1);
+        break;
+      case 'year':
+        fromDate.setFullYear(fromDate.getFullYear() - 1);
+        break;
+    }
 
-    dateRanges[range]();
-
-    this.chartFilterOptions$.next({
-      fromDate: fromDate.toISOString(),
-      toDate: toDate.toISOString(),
+    this.timeRangeSubject$.next({
+      fromDate,
+      toDate,
+      range,
     });
-
     this.chartService.updateTimeRange('backupTimelineChart', range);
   }
 
@@ -166,7 +205,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const params: BackupFilterParams = {
       ...INITIAL_FILTER,
-      limit: (state.page?.size ?? this.pageSize),
+      limit: state.page?.size ?? this.pageSize,
       offset: state.page?.current
         ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
         : 0,
