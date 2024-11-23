@@ -31,21 +31,7 @@ export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
   }
 
   accepts(backup: Backup): boolean {
-    if (this.filterType === 'date') {
-      const itemDate = new Date(backup.creationDate).getTime();
-      const fromDate = this.ranges.fromDate
-        ? new Date(this.ranges.fromDate).getTime()
-        : -Infinity;
-      const toDate = this.ranges.toDate
-        ? new Date(this.ranges.toDate).getTime()
-        : Infinity;
-      return itemDate >= fromDate && itemDate <= toDate;
-    } else {
-      const itemSize = backup.sizeMB;
-      const fromSize = this.ranges.fromSizeMB ?? -Infinity;
-      const toSize = this.ranges.toSizeMB ?? Infinity;
-      return itemSize >= fromSize && itemSize <= toSize;
-    }
+    return true;
   }
 
   updateRanges(ranges: Partial<typeof this.ranges>): void {

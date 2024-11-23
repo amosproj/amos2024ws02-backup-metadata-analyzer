@@ -94,6 +94,8 @@ export class BackupDataService extends PaginationService {
     }
     if (backupDataFilterDto.toDate) {
       to = new Date(backupDataFilterDto.toDate);
+      to.setDate(to.getDate() + 1);
+      to.setMilliseconds(to.getMilliseconds() - 1);
       if (Number.isNaN(to.getTime())) {
         throw new BadRequestException('parameter toDate is not a valid date');
       }

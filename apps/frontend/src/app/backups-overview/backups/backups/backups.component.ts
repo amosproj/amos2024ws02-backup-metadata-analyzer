@@ -20,8 +20,6 @@ import { APIResponse } from '../../../shared/types/api-response';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
-  orderBy: 'creationDate',
-  sortOrder: 'DESC',
 };
 
 @Component({
@@ -43,7 +41,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   backupDateFilter: CustomFilter;
 
   currentPage: number = 1;
-  lastPage: number = 5;
+  lastPage: number = 1;
 
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
@@ -178,7 +176,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
       orderBy: state.sort?.by ? state.sort.by.toString() : 'creationDate',
     };
-
+    console.log('Sort ORder:' + state.sort?.reverse);
     this.backups$.subscribe((response: APIResponse<Backup>) => {
       this.lastPage = Math.ceil(
         response.paginationData.total / (state.page?.size || this.pageSize)
