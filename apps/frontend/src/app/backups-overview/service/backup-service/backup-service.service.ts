@@ -19,7 +19,6 @@ export class BackupService {
     filterParams: BackupFilterParams
   ): Observable<APIResponse<Backup>> {
     const mapToBackup = (data: Backup): Backup => {
-      console.log(data.creationDate);
       return {
         id: data.id,
         sizeMB: data.sizeMB,

@@ -138,9 +138,28 @@ export class ChartService {
     timeRange?: TimeRange
   ): am5.Series {
     if (chart instanceof am5xy.XYChart && timeRange) {
-      const { xAxis, yAxis } = this.createAxes(chart, root, timeRange);
-      
-      return chart.series.push(
+      const yAxis = chart.yAxes.push(
+        am5xy.ValueAxis.new(root, {
+          numberFormat: '#.# MB',
+          renderer: am5xy.AxisRendererY.new(root, {
+            pan: 'none',
+          }),
+        })
+      );
+
+      const xAxis = chart.xAxes.push(
+        am5xy.DateAxis.new(root, {
+          baseInterval: this.getBaseInterval(timeRange),
+          renderer: am5xy.AxisRendererX.new(root, {
+            minGridDistance: 50,
+            pan: 'none',
+            //tooltipLocation: 0.5,
+          }),
+          tooltipDateFormat: this.getDateFormat(timeRange),
+        })
+      );
+
+      const series = chart.series.push(
         am5xy.ColumnSeries.new(root, {
           name: config.seriesName || 'Backups',
           xAxis: xAxis,
@@ -150,9 +169,24 @@ export class ChartService {
           clustered: true,
           tooltip: am5.Tooltip.new(root, {
             labelText: this.getTooltipText(timeRange),
+            pointerOrientation: 'horizontal',
           }),
         })
       );
+
+      const columnTemplate = series.columns.template;
+      columnTemplate.setAll({
+        cornerRadiusTL: 3,
+        cornerRadiusTR: 3,
+        strokeOpacity: 0,
+        fillOpacity: 0.8,
+      });
+
+      columnTemplate.states.create('hover', {
+        fillOpacity: 1,
+      });
+
+      return series;
     } else if (chart instanceof am5percent.PieChart) {
       return chart.series.push(
         am5percent.PieSeries.new(root, {
@@ -195,19 +229,63 @@ export class ChartService {
   }
 
   private prepareColumnData(backups: Backup[], timeRange: TimeRange): any[] {
-    const groupedData = new Map<string, number>();
-    const dateFormat = this.getGroupingFormat(timeRange);
+    console.log('Preparing column data for timeRange:', timeRange);
 
-    backups.forEach((backup) => {
+    const sortedBackups = [...backups].sort(
+      (a, b) =>
+        new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()
+    );
+
+    const groupedData = new Map<string, number>();
+
+    sortedBackups.forEach((backup) => {
       const date = new Date(backup.creationDate);
-      const key = this.formatDate(date, dateFormat);
+      let key: string;
+
+      switch (timeRange) {
+        case 'week':
+        case 'month':
+          key = this.formatDate(date, 'yyyy-MM-dd');
+          break;
+        case 'year':
+          key = `${date.getFullYear()}-W${this.getWeekNumber(date)}`;
+          break;
+        default:
+          key = this.formatDate(date, 'yyyy-MM-dd');
+      }
+
       groupedData.set(key, (groupedData.get(key) || 0) + backup.sizeMB);
     });
 
-    return Array.from(groupedData.entries()).map(([key, total]) => ({
-      date: new Date(key).getTime(),
-      sizeMB: total,
-    }));
+    // Convert to array format required by chart
+    const chartData = Array.from(groupedData.entries()).map(([key, total]) => {
+      const [year, rest] = key.split('-');
+      let date: Date;
+
+      if (rest.startsWith('W')) {
+        // Handle weekly data
+        const weekNum = parseInt(rest.substring(1));
+        date = this.getDateOfWeek(parseInt(year), weekNum);
+      } else {
+        // Handle daily data
+        date = new Date(key);
+      }
+
+      return {
+        date: date.getTime(),
+        sizeMB: total,
+      };
+    });
+
+    console.log('Prepared chart data:', chartData); 
+    return chartData;
+  }
+
+  // Helper method to get date from week number
+  private getDateOfWeek(year: number, week: number): Date {
+    const date = new Date(year, 0, 1);
+    date.setDate(date.getDate() + (week - 1) * 7);
+    return date;
   }
 
   private preparePieData(backups: Backup[]): any[] {
@@ -253,7 +331,6 @@ export class ChartService {
   }
 
   private formatDate(date: Date, format: string): string {
-    // Simple date formatting - you might want to use a library like date-fns
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -306,11 +383,12 @@ export class ChartService {
             config.type === 'column'
               ? this.prepareColumnData(backups, timeRange!)
               : this.preparePieData(backups);
-
+          console.log('chartData', chartData);  
+          series.data.clear();
           series.data.setAll(chartData);
           //console.log(series.data);
 
-          if (config.type === 'column') {
+/*           if (config.type === 'column') {
             const xAxis = (series as am5xy.LineSeries).get('xAxis');
             if (xAxis instanceof am5xy.DateAxis) {
               xAxis.zoomToDates(
@@ -318,7 +396,7 @@ export class ChartService {
                 new Date(backups[backups.length - 1].creationDate)
               );
             }
-          }
+          } */
         }
       },
       error: (error) =>
@@ -331,6 +409,7 @@ export class ChartService {
    * this is not working properly
    */
   updateTimeRange(chartId: string, timeRange: TimeRange): void {
+    console.log('updateTimeRange called with timeRange:', timeRange);
     const chart = this.charts[chartId];
     const series = this.series[chartId];
 
