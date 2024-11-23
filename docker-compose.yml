@@ -15,7 +15,6 @@ services:
       - 4200:4200
 
   # Nest Backend App
-
   backend:
     extends:
       file: docker-compose.base.yml
@@ -39,17 +38,30 @@ services:
 
       # - 4311:4311 # Server Debugging port
 
-  # Database
-  database:
+  # Backend Database 
+  backendDatabase:
     image: postgres
     container_name: database
     restart: always
     ports:
-      - 5433:5432
+      - 5443:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
+
+  # Analyzer Database 
+  analyzerDatabase:
+    image: postgres
+    container_name: database
+    restart: always
+    ports:
+      - 5442:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
 
 volumes:
   mono-node-modules: null
