@@ -46,6 +46,19 @@ services:
 
       # - 4311:4311 # Server Debugging port
 
+    # Python Analyzer Backend App
+
+    analyzer:
+      extends:
+        file: docker-compose.base.yml
+
+        service: nx-app-base
+
+      command: TODO
+
+      ports:
+        - 8000:8000
+
   # Backend Database
   backendDatabase:
     image: postgres
