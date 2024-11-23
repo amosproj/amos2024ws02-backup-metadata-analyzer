@@ -25,11 +25,11 @@ services:
     #command: ['npm', 'run', 'be', '--host localhost']
     command: nx serve metadata-analyzer-backend --host localhost
     environment:
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_PORT=${DATABASE_PORT}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_DATABASE=${DATABASE_DATABASE}
+      - DATABASE_HOST=${BACKEND_DATABASE_HOST}
+      - DATABASE_PORT=${BACKEND_DATABASE_PORT}
+      - DATABASE_USER=${BACKEND_DATABASE_USER}
+      - DATABASE_PASSWORD=${BACKEND_DATABASE_PASSWORD}
+      - DATABASE_DATABASE=${BACKEND_DATABASE_DATABASE}
     env_file:
       - .env.docker
 
