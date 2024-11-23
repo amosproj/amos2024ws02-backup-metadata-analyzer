@@ -25,11 +25,19 @@ services:
     #command: ['npm', 'run', 'be', '--host localhost']
     command: nx serve metadata-analyzer-backend --host localhost
     environment:
+      # Backend Database
       - DATABASE_HOST=${BACKEND_DATABASE_HOST}
       - DATABASE_PORT=${BACKEND_DATABASE_PORT}
       - DATABASE_USER=${BACKEND_DATABASE_USER}
       - DATABASE_PASSWORD=${BACKEND_DATABASE_PASSWORD}
       - DATABASE_DATABASE=${BACKEND_DATABASE_DATABASE}
+      # Mail Service
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - MAILING_LIST=${MAILING_LIST}
     env_file:
       - .env.docker
 
@@ -38,10 +46,10 @@ services:
 
       # - 4311:4311 # Server Debugging port
 
-  # Backend Database 
+  # Backend Database
   backendDatabase:
     image: postgres
-    container_name: database
+    container_name: backendDatabase
     restart: always
     ports:
       - 5443:5432
@@ -50,10 +58,10 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
 
-  # Analyzer Database 
+  # Analyzer Database
   analyzerDatabase:
     image: postgres
-    container_name: database
+    container_name: analyzerDatabase
     restart: always
     ports:
       - 5442:5432
@@ -61,7 +69,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-
 
 volumes:
   mono-node-modules: null
