@@ -37,7 +37,7 @@
         </ng-container>
       </clr-dg-column>
 
-      <clr-dg-column [clrDgField]="'creationDate'">
+      <clr-dg-column [clrDgField]="'creationDate'" [clrDgSortOrder]="ClrDatagridSortOrder.DESC">
         <ng-container *clrDgHideableColumn>
           Creation Date
           <clr-dg-filter [clrDgFilter]="backupDateFilter">
@@ -83,6 +83,7 @@
         <clr-dg-pagination
           #pagination
           [clrDgTotalItems]="(backups.paginationData.total) || 10"
+          [(clrDgPage)]="currentPage"
         >
           <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
             Backups per page

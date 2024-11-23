@@ -295,20 +295,20 @@ export class ChartService {
     config: ChartConfig,
     timeRange?: TimeRange
   ): void {
-    console.log('Subscribing to data updates', config.type);
+    //console.log('Subscribing to data updates', config.type);
     data$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (backups) => {
-        console.log('xxx');
+        //console.log('xxx');
         if (backups?.length > 0) {
-          console.log(backups);
-          console.log('type', config.type);
+          //console.log(backups);
+          //console.log('type', config.type);
           const chartData =
             config.type === 'column'
               ? this.prepareColumnData(backups, timeRange!)
               : this.preparePieData(backups);
 
           series.data.setAll(chartData);
-          console.log(series.data);
+          //console.log(series.data);
 
           if (config.type === 'column') {
             const xAxis = (series as am5xy.LineSeries).get('xAxis');

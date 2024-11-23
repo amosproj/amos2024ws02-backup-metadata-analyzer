@@ -12,7 +12,7 @@ import {
 } from 'rxjs';
 import { BackupService } from '../../service/backup-service/backup-service.service';
 import { Backup } from '../../../shared/types/backup';
-import { ClrDatagridStateInterface } from '@clr/angular';
+import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
 import { CustomFilter } from './backupfilter';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { ChartService } from '../../service/chart-service/chart-service.service';
@@ -20,6 +20,8 @@ import { APIResponse } from '../../../shared/types/api-response';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
+  orderBy: 'creationDate',
+  sortOrder: 'DESC',
 };
 
 @Component({
@@ -39,6 +41,8 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   readonly pageSize = 10;
   backupSizeFilter: CustomFilter;
   backupDateFilter: CustomFilter;
+
+  currentPage: number = 1;
 
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
@@ -171,7 +175,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
         ? (state.page.current - 1) * (state.page?.size || this.pageSize)
         : 0,
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
+      orderBy: state.sort?.by ? state.sort.by.toString() : 'creationDate',
     };
+
+    console.log('PArams:' + JSON.stringify(params));
 
     if (state.filters) {
       Object.assign(params, this.buildFilterParams());
@@ -180,4 +187,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.filterOptions$.next(params);
     this.loading = false;
   }
+
+  protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
 }
