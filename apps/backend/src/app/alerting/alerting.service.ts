@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AlertEntity } from './entity/alert.entity';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateAlertDto } from './dto/createAlert.dto';
 import { BackupDataService } from '../backupData/backupData.service';
 
@@ -35,10 +35,20 @@ export class AlertingService {
     await this.triggerAlertMail(entity);
   }
 
-  async findAllAlerts(backupId?: string): Promise<AlertEntity[]> {
+  async findAllAlerts(
+    backupId?: string,
+    days?: number
+  ): Promise<AlertEntity[]> {
     if (backupId) {
       return await this.alertRepository.find({
         where: { backup: { id: backupId } },
+      });
+    }
+    if (days) {
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+      return await this.alertRepository.find({
+        where: { backup: { creationDate: MoreThanOrEqual(date) } },
       });
     }
     return await this.alertRepository.find();

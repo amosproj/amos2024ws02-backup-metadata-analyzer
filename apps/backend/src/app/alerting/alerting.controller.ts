@@ -17,10 +17,17 @@ export class AlertingController {
     description: 'Filter alerts by backup id',
     required: false,
   })
+  @ApiQuery({
+    name: 'days',
+    description: 'Filter alerts by backups of the last x days',
+    required: false,
+    type: Number,
+  })
   async getAllAlerts(
-    @Query('backupId') backupId?: string
+    @Query('backupId') backupId?: string,
+    @Query('days') days?: number
   ): Promise<AlertEntity[]> {
-    return this.alertingService.findAllAlerts(backupId);
+    return this.alertingService.findAllAlerts(backupId, days);
   }
 
   @Post()
