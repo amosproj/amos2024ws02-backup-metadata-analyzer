@@ -11,6 +11,8 @@ import { AlertType } from '../../shared/enums/alertType';
   providers: [DatePipe],
 })
 export class AlertComponent implements OnInit {
+  readonly DAYS = 7;
+
   alerts: Alert[] = [];
   criticalAlertsCount: number = 0;
   nonCriticalAlertsCount: number = 0;
@@ -29,7 +31,7 @@ export class AlertComponent implements OnInit {
   }
 
   loadAlerts(): void {
-    this.alertService.getAllAlerts().subscribe((data: Alert[]) => {
+    this.alertService.getAllAlerts(this.DAYS).subscribe((data: Alert[]) => {
       const criticalAlerts = data.filter((alert) =>
         this.criticalAlertTypes.includes(alert.type)
       );

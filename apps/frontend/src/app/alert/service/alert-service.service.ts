@@ -13,8 +13,10 @@ export class AlertServiceService {
     private readonly http: HttpClient
   ) {}
 
-  getAllAlerts(): Observable<Alert[]> {
+  getAllAlerts(days?: number): Observable<Alert[]> {
+    if(days) {
+      return this.http.get<Alert[]>(`${this.baseUrl}/alerting?days=${days}`);
+    }
     return this.http.get<Alert[]>(`${this.baseUrl}/alerting`);
-    //return of([]);
   }
 }
