@@ -68,7 +68,7 @@
       </clr-dg-column>
 
       <clr-dg-placeholder>We couldn't find any backups!</clr-dg-placeholder>
-      <clr-dg-row *clrDgItems="let backup of backups.data" [clrDgItem]="backup">
+      <clr-dg-row *ngFor="let backup of backups.data" [clrDgItem]="backup">
         <clr-dg-cell>{{ backup.id }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.creationDate | date }}</clr-dg-cell>

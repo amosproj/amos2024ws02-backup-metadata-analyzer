@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
-
 import {
   BehaviorSubject,
   combineLatest,
@@ -43,6 +42,8 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   currentPage: number = 1;
   lastPage: number = 1;
 
+  total = 0;
+
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
 
@@ -83,6 +84,13 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       .subscribe((params) => this.filterOptions$.next(params));
 
     this.setTimeRange('month');
+
+    this.backups$.subscribe((response: APIResponse<Backup>) => {
+      this.lastPage = Math.ceil(response.paginationData.total / this.pageSize);
+      const offset = response.paginationData.offset ?? 0;
+      this.currentPage = Math.floor(offset / this.pageSize) + 1;
+      this.total = response.paginationData.total;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -97,7 +105,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
         },
         this.chartBackups$.pipe(
           map((response: APIResponse<Backup>) => response.data)
-        ) // should use chartBackups$
+        )
       );
       this.chartService.createChart(
         {
@@ -111,7 +119,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
         },
         this.chartBackups$.pipe(
           map((response: APIResponse<Backup>) => response.data)
-        ), // should use chartBackups$
+        ),
         this.selectedTimeRange
       );
     }, 100);
@@ -170,25 +178,13 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const params: BackupFilterParams = {
       ...INITIAL_FILTER,
-      limit: state.page?.size || this.pageSize,
+      limit: (state.page?.size ?? this.pageSize),
       offset: state.page?.current
-        ? (state.page.current - 1) * (state.page?.size || this.pageSize)
+        ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
         : 0,
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
       orderBy: state.sort?.by ? state.sort.by.toString() : 'creationDate',
     };
-
-    this.backups$.subscribe((response: APIResponse<Backup>) => {
-      this.lastPage = Math.ceil(
-        response.paginationData.total / (state.page?.size || this.pageSize)
-      );
-      this.currentPage =
-        response.paginationData.offset ??
-        0 / (state.page?.size || this.pageSize) + 1;
-      if (state.page?.size) {
-        this.pageSize = state.page?.size;
-      }
-    });
 
     if (state.filters) {
       Object.assign(params, this.buildFilterParams());
