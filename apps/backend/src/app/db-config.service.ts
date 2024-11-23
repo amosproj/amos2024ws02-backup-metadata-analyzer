@@ -8,7 +8,7 @@ import { BackupDataEntity } from './backupData/entity/backupData.entity';
 import { AddBackupDataTable1730491370687 } from './migrations/1730491370687-AddBackupDataTable';
 import { RemovedBio1731662089990 } from './migrations/1731662089990-RemovedBio';
 import { AlertEntity } from './alerting/entity/alert.entity';
-import { Alert1732124077181 } from './migrations/1732124077181-Alert';
+import { Alert1732390760114 } from './migrations/1732390760114-Alert';
 
 /**
  * Used by NestJS to reach database.
@@ -34,7 +34,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         Init1730126846408,
         AddBackupDataTable1730491370687,
         RemovedBio1731662089990,
-        Alert1732124077181,
+        Alert1732390760114,
       ],
       logging: true,
     };
