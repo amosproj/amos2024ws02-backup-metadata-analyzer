@@ -94,17 +94,17 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           type: 'pie',
           valueField: 'value',
           categoryField: 'category',
-          seriesName: 'Size Distribution',
+          seriesName: 'SizeDistribution',
         },
-        this.chartBackups$ // should use chartBackups$
+        this.backups$ // should use chartBackups$
       );
       this.chartService.createChart(
         {
           id: 'backupTimelineChart',
-          type: 'timeline',
+          type: 'column',
           valueYField: 'sizeMB',
-          valueXField: 'date',
-          seriesName: 'Backup Size',
+          valueXField: 'creationDate',
+          seriesName: 'BackupSize',
           tooltipText:
             "[bold]{valueY}[/] MB\n{valueX.formatDate('yyyy-MM-dd HH:mm')}\nBackups: {count}",
         },

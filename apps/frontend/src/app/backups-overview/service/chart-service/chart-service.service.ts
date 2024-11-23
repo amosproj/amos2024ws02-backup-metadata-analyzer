@@ -8,7 +8,7 @@ import { ITimeInterval } from '@amcharts/amcharts5/.internal/core/util/Time';
 import { Backup } from '../../../shared/types/backup';
 import { Observable, Subject, takeUntil } from 'rxjs';
 
-type ChartType = 'timeline' | 'pie';
+type ChartType = 'timeline' | 'pie' | 'column';
 type TimeRange = 'week' | 'month' | 'year';
 
 interface ChartConfig {
@@ -39,38 +39,19 @@ export class ChartService {
     data$: Observable<Backup[]>,
     timeRange?: TimeRange
   ): void {
-    // Initialize root
     const root = this.initializeRoot(config.id);
-
-    // Create chart based on type
     const chart = this.initializeChart(root, config);
+    const series = this.createSeries(chart, config, root, timeRange);
 
-    // Add common elements
     this.addChartControls(chart, config);
-
-    // Create series based on chart type
-    const series = this.createSeries(chart, config, root);
-
-    // Add data subscription
     this.subscribeToData(series, data$, config, timeRange);
 
-    // Store references
     this.charts[config.id] = chart;
     this.series[config.id] = series;
 
-    if (config.type === 'timeline' && timeRange) {
-      this.updateTimeRange(config.id, timeRange);
-    }
-
-    // Animate
     this.animateChart(chart, series);
-
-    console.log('Chart created:', config.id);
   }
 
-  /**
-   * Initializes chart root
-   */
   private initializeRoot(containerId: string): am5.Root {
     if (this.roots[containerId]) {
       this.roots[containerId].dispose();
@@ -89,15 +70,21 @@ export class ChartService {
     const commonConfig = {
       layout: root.verticalLayout,
       paddingRight: 20,
-      paddingLeft: 0,
-      paddingTop: 0,
+      paddingLeft: 20,
+      paddingTop: 10,
       paddingBottom: 0,
     };
 
     switch (config.type) {
-      case 'timeline':
+      case 'column':
         return root.container.children.push(
-          am5xy.XYChart.new(root, commonConfig)
+          am5xy.XYChart.new(root, {
+            ...commonConfig,
+            panX: false,
+            panY: false,
+            wheelX: 'none',
+            wheelY: 'none',
+          })
         );
       case 'pie':
         return root.container.children.push(
@@ -118,13 +105,12 @@ export class ChartService {
   private createAxes(
     chart: am5xy.XYChart,
     root: am5.Root,
-    timeRange?: TimeRange
+    timeRange: TimeRange
   ) {
     const yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(root, {
-        maxDeviation: 1,
         renderer: am5xy.AxisRendererY.new(root, {
-          pan: 'zoom',
+          pan: 'none',
         }),
         numberFormat: '#.# MB',
       })
@@ -132,48 +118,45 @@ export class ChartService {
 
     const xAxis = chart.xAxes.push(
       am5xy.DateAxis.new(root, {
-        maxDeviation: 1,
-        baseInterval: this.getBaseInterval(timeRange || 'month'),
+        baseInterval: this.getBaseInterval(timeRange),
         renderer: am5xy.AxisRendererX.new(root, {
-          pan: 'zoom',
           minGridDistance: 50,
+          pan: 'none',
+          //tooltipLocation: 0.5,
         }),
+        tooltipDateFormat: this.getDateFormat(timeRange),
       })
     );
 
     return { xAxis, yAxis };
   }
 
-  /**
-   * Creates series based on chart type
-   */
   private createSeries(
     chart: am5.Chart,
     config: ChartConfig,
-    root: am5.Root
+    root: am5.Root,
+    timeRange?: TimeRange
   ): am5.Series {
-    if (chart instanceof am5xy.XYChart) {
-      const { xAxis, yAxis } = this.createAxes(chart, root, 'month');
-      const series = chart.series.push(
-        am5xy.LineSeries.new(root, {
-          name: config.seriesName || 'Series',
+    if (chart instanceof am5xy.XYChart && timeRange) {
+      const { xAxis, yAxis } = this.createAxes(chart, root, timeRange);
+      
+      return chart.series.push(
+        am5xy.ColumnSeries.new(root, {
+          name: config.seriesName || 'Backups',
           xAxis: xAxis,
           yAxis: yAxis,
-          valueYField: config.valueYField || 'value',
-          valueXField: config.valueXField || 'date',
+          valueYField: config.valueYField || 'sizeMB',
+          valueXField: config.valueXField || 'creationDate',
+          clustered: true,
           tooltip: am5.Tooltip.new(root, {
-            labelText: config.tooltipText || '{valueY}',
-            getFillFromSprite: true,
+            labelText: this.getTooltipText(timeRange),
           }),
         })
       );
-
-      this.addBullets(series, root);
-      return series;
     } else if (chart instanceof am5percent.PieChart) {
       return chart.series.push(
         am5percent.PieSeries.new(root, {
-          name: config.seriesName || 'Series',
+          name: config.seriesName || 'Distribution',
           valueField: config.valueField || 'value',
           categoryField: config.categoryField || 'category',
           legendValueText: '{value} backups',
@@ -181,15 +164,11 @@ export class ChartService {
         })
       );
     }
-    throw new Error('Unsupported chart type');
+    throw new Error('Unsupported chart configuration');
   }
 
-  /**
-   * Adds chart controls (legend, cursor, scrollbars)
-   */
   private addChartControls(chart: am5.Chart, config: ChartConfig): void {
-    // legend
-    const legend = chart.children.push(
+    chart.children.unshift(
       am5.Legend.new(chart.root, {
         centerX: am5.percent(50),
         x: am5.percent(50),
@@ -199,7 +178,6 @@ export class ChartService {
     );
 
     if (chart instanceof am5xy.XYChart) {
-      //  cursor
       chart.set(
         'cursor',
         am5xy.XYCursor.new(chart.root, {
@@ -208,38 +186,7 @@ export class ChartService {
           yAxis: chart.yAxes.getIndex(0),
         })
       );
-
-      //  scrollbars
-      chart.set(
-        'scrollbarX',
-        am5.Scrollbar.new(chart.root, {
-          orientation: 'horizontal',
-        })
-      );
-
-      chart.set(
-        'scrollbarY',
-        am5.Scrollbar.new(chart.root, {
-          orientation: 'vertical',
-        })
-      );
     }
-  }
-
-  /**
-   * Adds bullets
-   */
-  private addBullets(series: am5xy.LineSeries, root: am5.Root): void {
-    series.bullets.push((sprite, target) => {
-      return am5.Bullet.new(root, {
-        sprite: am5.Circle.new(root, {
-          radius: 5,
-          fill: series.get('fill'),
-          stroke: root.interfaceColors.get('background'),
-          strokeWidth: 2,
-        }),
-      });
-    });
   }
 
   private animateChart(chart: am5.Chart, series: am5.Series): void {
@@ -247,28 +194,23 @@ export class ChartService {
     chart.appear(1000, 100);
   }
 
-  /**
-   * Prepares data for timeline chart
-   */
-  private prepareTimelineData(backups: Backup[]): any[] {
-    console.log('Preparing timeline data');
-    return backups
-      .sort(
-        (a, b) =>
-          new Date(a.creationDate).getTime() -
-          new Date(b.creationDate).getTime()
-      )
-      .map((backup) => ({
-        date: new Date(backup.creationDate).getTime(),
-        sizeMB: backup.sizeMB,
-        count: 1,
-      }));
+  private prepareColumnData(backups: Backup[], timeRange: TimeRange): any[] {
+    const groupedData = new Map<string, number>();
+    const dateFormat = this.getGroupingFormat(timeRange);
+
+    backups.forEach((backup) => {
+      const date = new Date(backup.creationDate);
+      const key = this.formatDate(date, dateFormat);
+      groupedData.set(key, (groupedData.get(key) || 0) + backup.sizeMB);
+    });
+
+    return Array.from(groupedData.entries()).map(([key, total]) => ({
+      date: new Date(key).getTime(),
+      sizeMB: total,
+    }));
   }
 
-  /**
-   * Prepares data for pie chart
-   */
-  private prepareSizeDistributionData(backups: Backup[]): any[] {
+  private preparePieData(backups: Backup[]): any[] {
     const ranges = [
       { min: 0, max: 100, category: '0-100 MB' },
       { min: 100, max: 500, category: '100-500 MB' },
@@ -284,6 +226,64 @@ export class ChartService {
         ).length,
       }))
       .filter((item) => item.value > 0);
+  }
+
+  private getDateFormat(timeRange: TimeRange): string {
+    switch (timeRange) {
+      case 'week':
+      case 'month':
+        return 'MMM dd';
+      case 'year':
+        return "MMM 'W'w";
+      default:
+        return 'MMM dd';
+    }
+  }
+
+  private getGroupingFormat(timeRange: TimeRange): string {
+    switch (timeRange) {
+      case 'week':
+      case 'month':
+        return 'yyyy-MM-dd';
+      case 'year':
+        return 'yyyy-[W]ww';
+      default:
+        return 'yyyy-MM-dd';
+    }
+  }
+
+  private formatDate(date: Date, format: string): string {
+    // Simple date formatting - you might want to use a library like date-fns
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const week = this.getWeekNumber(date);
+
+    return format
+      .replace('yyyy', year.toString())
+      .replace('MM', month)
+      .replace('dd', day)
+      .replace('[W]ww', `W${String(week).padStart(2, '0')}`);
+  }
+
+  private getWeekNumber(date: Date): number {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  }
+
+  private getTooltipText(timeRange: TimeRange): string {
+    switch (timeRange) {
+      case 'week':
+      case 'month':
+        return "Date: {valueX.formatDate('MMM dd')}\nSize: {valueY} MB";
+      case 'year':
+        return "Week: {valueX.formatDate('MMM W')}\nTotal Size: {valueY} MB";
+      default:
+        return 'Size: {valueY} MB';
+    }
   }
 
   /**
@@ -303,14 +303,14 @@ export class ChartService {
           console.log(backups);
           console.log('type', config.type);
           const chartData =
-            config.type === 'timeline'
-              ? this.prepareTimelineData(backups)
-              : this.prepareSizeDistributionData(backups);
+            config.type === 'column'
+              ? this.prepareColumnData(backups, timeRange!)
+              : this.preparePieData(backups);
 
           series.data.setAll(chartData);
           console.log(series.data);
 
-          if (config.type === 'timeline') {
+          if (config.type === 'column') {
             const xAxis = (series as am5xy.LineSeries).get('xAxis');
             if (xAxis instanceof am5xy.DateAxis) {
               xAxis.zoomToDates(
@@ -331,12 +331,20 @@ export class ChartService {
    * this is not working properly
    */
   updateTimeRange(chartId: string, timeRange: TimeRange): void {
+    const chart = this.charts[chartId];
     const series = this.series[chartId];
-    if (series instanceof am5xy.LineSeries) {
-      const xAxis = series.get('xAxis');
+
+    if (
+      chart instanceof am5xy.XYChart &&
+      series instanceof am5xy.ColumnSeries
+    ) {
+      const xAxis = chart.xAxes.getIndex(0);
       if (xAxis instanceof am5xy.DateAxis) {
         xAxis.set('baseInterval', this.getBaseInterval(timeRange));
+        xAxis.set('tooltipDateFormat', this.getDateFormat(timeRange));
       }
+
+      series.get('tooltip')?.set('labelText', this.getTooltipText(timeRange));
     }
   }
 
