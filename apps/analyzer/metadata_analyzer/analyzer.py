@@ -45,12 +45,12 @@ class Analyzer:
 
             # Send a full batch
             if len(batch) == 100:
-                Analyzer.backend.sendBackupDataBatched(batch)
+                Analyzer.backend.send_backup_data_batched(batch)
                 batch = []
 
         # Send the remaining results
         if len(batch) > 0:
-            Analyzer.backend.sendBackupDataBatched(batch)
+            Analyzer.backend.send_backup_data_batched(batch)
 
         return {"count": count}
 

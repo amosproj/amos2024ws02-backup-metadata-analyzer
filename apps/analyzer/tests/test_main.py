@@ -16,7 +16,7 @@ class MockBackend:
     def __init__(self):
         self.backups = []
 
-    def sendBackupDataBatched(self, batch):
+    def send_backup_data_batched(self, batch):
         self.backups += batch
 
 def test_hello_world():
@@ -32,8 +32,7 @@ def test_update_data():
 
     database = MockDatabase([mock_result])
     backend = MockBackend()
-    simple_analyzer = None
-    Analyzer.init(database, backend, simple_analyzer)
+    Analyzer.init(database, backend, None, None)
     Analyzer.update_data()
 
     assert backend.backups == [Analyzer._convert_result(mock_result)]
