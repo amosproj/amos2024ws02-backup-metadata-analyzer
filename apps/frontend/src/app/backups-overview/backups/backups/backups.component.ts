@@ -95,7 +95,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           categoryField: 'category',
           seriesName: 'SizeDistribution',
         },
-        this.backups$.pipe(
+        this.chartBackups$.pipe(
           map((response: APIResponse<Backup>) => response.data)
         ) // should use chartBackups$
       );
@@ -109,7 +109,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           tooltipText:
             "[bold]{valueY}[/] MB\n{valueX.formatDate('yyyy-MM-dd HH:mm')}\nBackups: {count}",
         },
-        this.backups$.pipe(
+        this.chartBackups$.pipe(
           map((response: APIResponse<Backup>) => response.data)
         ), // should use chartBackups$
         this.selectedTimeRange
@@ -127,6 +127,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     const params: BackupFilterParams = { ...INITIAL_FILTER };
 
     if (this.backupDateFilter.isActive()) {
+      //TODO: Adjust timezones
       params.fromDate = this.backupDateFilter.ranges.fromDate;
       params.toDate = this.backupDateFilter.ranges.toDate;
     }
@@ -176,7 +177,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
       orderBy: state.sort?.by ? state.sort.by.toString() : 'creationDate',
     };
-    console.log('Sort ORder:' + state.sort?.reverse);
+
     this.backups$.subscribe((response: APIResponse<Backup>) => {
       this.lastPage = Math.ceil(
         response.paginationData.total / (state.page?.size || this.pageSize)
