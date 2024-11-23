@@ -38,11 +38,12 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   selectedTimeRange: 'week' | 'month' | 'year' = 'month';
 
   loading: boolean = false;
-  readonly pageSize = 10;
+  pageSize = 10;
   backupSizeFilter: CustomFilter;
   backupDateFilter: CustomFilter;
 
   currentPage: number = 1;
+  lastPage: number = 5;
 
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
@@ -178,7 +179,17 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       orderBy: state.sort?.by ? state.sort.by.toString() : 'creationDate',
     };
 
-    console.log('PArams:' + JSON.stringify(params));
+    this.backups$.subscribe((response: APIResponse<Backup>) => {
+      this.lastPage = Math.ceil(
+        response.paginationData.total / (state.page?.size || this.pageSize)
+      );
+      this.currentPage =
+        response.paginationData.offset ??
+        0 / (state.page?.size || this.pageSize) + 1;
+      if (state.page?.size) {
+        this.pageSize = state.page?.size;
+      }
+    });
 
     if (state.filters) {
       Object.assign(params, this.buildFilterParams());
