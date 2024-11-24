@@ -34,8 +34,6 @@ class SimpleRuleBasedAnalyzer:
 
     # For now only search for size changes and trigger corresponding alerts
     def analyze(self, data):
-        #print(len(data), file=sys.stderr)
-
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
@@ -45,8 +43,6 @@ class SimpleRuleBasedAnalyzer:
                 or result.start_time is None):
                 continue
             groups[result.task].append(result)
-
-        #print(len(groups), file=sys.stderr)
 
         alerts = []
         # Iterate through each group to find drastic size changes
