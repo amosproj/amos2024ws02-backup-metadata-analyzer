@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
@@ -10,17 +10,19 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
 import {
-  ClarityIcons,
+  ClarityIcons, errorStandardIcon,
   homeIcon,
   searchIcon,
   tableIcon,
   uploadCloudIcon,
+  warningStandardIcon
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
 import { FindTestDataComponent } from './test-upload/component/find-test-data/find-test-data.component';
 import { BackupsComponent } from './backups-overview/backups/backups/backups.component';
 import { BASE_URL } from './shared/types/configuration';
+import { AlertComponent } from './alert/component/alert.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +30,7 @@ import { BASE_URL } from './shared/types/configuration';
     TestUploadComponent,
     FindTestDataComponent,
     BackupsComponent,
+    AlertComponent,
   ],
   imports: [
     BrowserModule,
@@ -41,9 +44,18 @@ import { BASE_URL } from './shared/types/configuration';
   ],
   providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {
   constructor() {
-    ClarityIcons.addIcons(uploadCloudIcon, homeIcon, searchIcon, tableIcon);
+    ClarityIcons.addIcons(
+      uploadCloudIcon,
+      homeIcon,
+      searchIcon,
+      tableIcon,
+      warningStandardIcon,
+      errorStandardIcon,
+
+    );
   }
 }

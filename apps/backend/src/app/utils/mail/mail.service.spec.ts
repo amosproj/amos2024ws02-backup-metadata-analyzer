@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from './mail.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { AlertEntity } from '../../alerting/entity/alert.entity';
+import { AlertType } from '../../alerting/dto/alertType';
 
 jest.mock('path', () => ({
   resolve: jest.fn().mockReturnValue('mocked/path/to/logo.png'),
@@ -41,17 +43,34 @@ describe('MailService', () => {
   });
 
   it('should send alert mail', async () => {
-    const reason = 'Test Reason';
-    const description = 'Test Description';
-    await service.sendAlertMail(reason, description);
+    const alert: AlertEntity = {
+      id: 'alert-id',
+      type: AlertType.SIZE_DECREASED,
+      value: 100,
+      referenceValue: 200,
+      backup: {
+        id: 'backup-id',
+        sizeMB: 100,
+        creationDate: new Date(),
+      },
+    };
+
+    await service.sendAlertMail(alert);
 
     expect(mailerService.sendMail).toHaveBeenCalledWith({
       to: ['test@example.com'],
       subject: 'Alert has been triggered',
       template: './alertMail',
       context: {
-        reason,
-        description,
+        reason: 'Size of latest Backup decreased by 50 %',
+        description:
+          'Size of latest Backup decreased by 50% compared to the previous Backup. This could indicate a problem with the Backup.',
+        value: '100 MB',
+        referenceValue: '200 MB',
+        valueColumnName: 'Size of backup',
+        referenceValueColumnName: 'Size of previous backup',
+        backupId: 'backup-id',
+        creationDate: alert.backup.creationDate.toLocaleString(),
       },
       attachments: [
         {

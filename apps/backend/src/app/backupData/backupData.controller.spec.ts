@@ -11,7 +11,6 @@ const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
   sizeMB: 100,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
-  bio: 'Test Bio',
 };
 
 const mockBackupDataRepository = {
@@ -56,7 +55,6 @@ describe('BackupDataController (e2e)', () => {
       id: '1',
       sizeMB: 100,
       creationDate: new Date(),
-      bio: 'Test Bio 1',
     };
 
     const response = await request(app.getHttpServer())
@@ -68,7 +66,6 @@ describe('BackupDataController (e2e)', () => {
       id: createBackupDataDto.id,
       sizeMB: createBackupDataDto.sizeMB,
       creationDate: createBackupDataDto.creationDate.toISOString(),
-      bio: createBackupDataDto.bio,
     });
 
     expect(mockBackupDataRepository.save).toBeCalledWith({
@@ -115,29 +112,6 @@ describe('BackupDataController (e2e)', () => {
       take: '1',
       order: { creationDate: 'DESC' },
       where: {},
-    });
-  });
-
-  it('/backupData (GET) with filters should return filtered backup data entries', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/backupData?bio=Test')
-      .expect(200);
-
-    expect(response.body).toEqual({
-      data: [
-        {
-          ...mockBackupDataEntity,
-          creationDate: mockBackupDataEntity.creationDate.toISOString(),
-        },
-      ],
-      paginationData: {
-        total: 1,
-      },
-    });
-
-    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
-      order: { creationDate: 'DESC' },
-      where: { bio: expect.any(Object) },
     });
   });
 

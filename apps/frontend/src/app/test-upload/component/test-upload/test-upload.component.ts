@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { TestUploadServiceService } from '../../service/test-upload-service.service';
 

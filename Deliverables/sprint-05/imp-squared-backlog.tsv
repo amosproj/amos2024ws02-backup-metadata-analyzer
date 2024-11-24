@@ -1,0 +1,15 @@
+Title	URL	Assignees	Status
+Merge features to dev before meeting, merge dev (release candidate) to main directly after meeting	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/40		Done
+Protect main branch (except deliverable folder) from commits (only with PR)	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/41		Done
+Start a thread in the slack gerneral channels for troubleshooting	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/25		Done
+SM should be asked if questions are not beeing answered	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/15		Done
+Recipient of message should be tagged	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/14		Done
+Important documents, which are not commited in Github, should be saved in the Google Drive folder	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/13		Done
+Troubleshooting and exchange of experiences related to docker in dev meeting	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/23		Done
+Agreement on one formatter	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/24		Done
+Update BOM if you add new packages	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/27		Done
+Notify everyone about dev meetings by writing a slack message	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/26		Done
+Plan time for technical reviews, no last minute implementations	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/39		In Progress
+SDs organize independently meeting with SEP about dev topics.	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/63		In Progress
+Finding meeting time via voting in slack	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/62		In Progress
+Schedule meeting with SEP for clarification of the data	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/61		In Progress

@@ -1,0 +1,41 @@
+Title	URL	Assignees	Status	Estimated size	Real size
+Unit & Integration Test Implementation Frontend	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/33	chrisklg, flo0852	In Progress	3	
+Homework: Define on Release plan	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/59		In Progress		
+Homework: Define Definition of Done	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/55		Awaiting Review		
+Homework: Define a Project Vision	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/54		Awaiting Review		
+Backend: Backup Size-Timeline API	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/29	flo0852, heskil, Omega65536	Awaiting Review	5	
+Homework: Project Mission	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/56		Awaiting Review		
+Unit & Integration Test Implementation Backend	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/45	flo0852	Awaiting Review	3	
+Backend: E-mail notification trigger	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/49	flo0852	Awaiting Review		
+Frontend: Display Backup Size-Timeline 	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/47	chrisklg, engelharddirk	Awaiting Review	3	
+Homework: Record and upload build process video	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/53	ddeli, engelharddirk	Awaiting Review	2	
+Being familiar with the Data	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/30	engelharddirk, heskil, Omega65536	Sprint Backlog	3	
+Homework: Initialize Glossary	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/57	ddeli	Awaiting Review		
+Am Charts integration	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/28	chrisklg	Feature Archive	2	2
+Build Process Review preperation	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/20	chrisklg, ddeli, engelharddirk, flo0852, Omega65536	Feature Archive	1	2
+First Test with Analysis module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/19	heskil, Omega65536	Feature Archive	3	3
+Init the Analysis module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/18	engelharddirk, flo0852, heskil, Omega65536	Feature Archive	3	3
+Analysis Methods: Rule Based Analysis	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/34	flo0852	Feature Archive	3	3
+Analysis Methods: Density Based Analysis	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/31	chrisklg, engelharddirk	Feature Archive	5	5
+Analysis Methods: Time Series Analysis	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/35	heskil	Feature Archive	5	5
+Analysis Methods: Neural Networks	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/36	ddeli, Omega65536	Feature Archive	8	5
+Implement build process for release	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/7	ddeli	Feature Archive	8	8
+Decide on Build process steps for release	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/22	ddeli, heskil	Feature Archive	2	2
+Landing page with backup data table	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/9	chrisklg, flo0852	Feature Archive	2	2
+Initialize Frontend module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/8	chrisklg	Feature Archive	2	2
+Create Architecture Diagram	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/10	ddeli	Feature Archive	1	1
+Architecture evaluation and decision	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/4	ddeli, engelharddirk, flo0852, heskil	Feature Archive	3	2
+Initialize Backend Module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/11	engelharddirk, flo0852	Feature Archive	2	8
+Dev Environment Setup	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/3	chrisklg, ddeli, engelharddirk, flo0852, heskil, Omega65536	Feature Archive	3	2
+Model analysis research	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/5	heskil, Omega65536	Feature Archive	3	2
+Concept of build process defined & local build implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/6	engelharddirk	Feature Archive	2	2
+Homework: Build Documentation	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/69		Product Backlog		
+Github Actions: Test Automation	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/32		Product Backlog		
+Frontend: Blueprint Alert Panel	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/48		Product Backlog		
+Analysis Module: First Rule Based Analysis Implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/50		Product Backlog		
+Analysis Module: First Time Series Analysis Implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/51		Product Backlog		
+Analysis Module: First Density Based Analysis Implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/52		Product Backlog		
+Secure API Endpoints	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/68		Product Backlog		
+Backend: Basic Backup Data API	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/46		Product Backlog		
+Backup sizes API	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/17		Product Backlog		
+Import Backup Data	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/16		Product Backlog		
