@@ -4,13 +4,13 @@
 }
 
 .btn-group {
-    padding-top: 20px;
+    padding-top: 10px;
 }
 
 .filter-inline {
     display: inline-flex !important;
     align-items: center;
-    }
+}
 
 .alert-info-section {
     display: flex;
