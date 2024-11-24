@@ -54,3 +54,5 @@ coverage/*
 
 # DB Dumps
 *.dmp
+*.sql
+!00-init-roles.sql
