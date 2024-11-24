@@ -18,14 +18,6 @@ export class BackupService {
   getAllBackups(
     filterParams: BackupFilterParams
   ): Observable<APIResponse<Backup>> {
-    const mapToBackup = (data: Backup): Backup => {
-      return {
-        id: data.id,
-        sizeMB: data.sizeMB,
-        creationDate: data.creationDate,
-      };
-    };
-
     const cleanParams = Object.fromEntries(
       Object.entries(filterParams).filter(
         ([_, value]) => value != null && value !== undefined
