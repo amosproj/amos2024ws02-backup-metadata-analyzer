@@ -1,170 +1,222 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
-
-// amCharts imports
-import * as am5 from '@amcharts/amcharts5';
-import * as am5xy from '@amcharts/amcharts5/xy';
-import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import {
   BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
   map,
   Observable,
-  Subscription,
+  startWith,
+  Subject,
   switchMap,
+  takeUntil,
+  tap,
 } from 'rxjs';
-import { BackupService } from '../../service/backup-service.service';
+import { BackupService } from '../../service/backup-service/backup-service.service';
 import { Backup } from '../../../shared/types/backup';
-import { ClrDatagridStateInterface } from '@clr/angular';
-import { HttpParams } from '@angular/common/http';
+import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
+import { CustomFilter } from './backupfilter';
+import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
+import { ChartService } from '../../service/chart-service/chart-service.service';
+import { APIResponse } from '../../../shared/types/api-response';
+
+const INITIAL_FILTER: BackupFilterParams = {
+  limit: 10,
+};
+
+interface TimeRangeConfig {
+  fromDate: Date;
+  toDate: Date;
+  range: 'week' | 'month' | 'year';
+}
 
 @Component({
   selector: 'app-backups',
   templateUrl: './backups.component.html',
   styleUrl: './backups.component.css',
 })
-export class BackupsComponent implements AfterViewInit {
-  selectedBackups: Backup[] = [];
+export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
+  private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
+    fromDate: new Date(),
+    toDate: new Date(),
+    range: 'month',
+  });
 
-  subscriptions: Subscription = new Subscription();
-  readonly backupSubject$ = new BehaviorSubject<Backup[]>([]);
-  backups$: Observable<Backup[]>;
-  private filterOptions$ = new BehaviorSubject<any>({});
+  timeRanges: ('week' | 'month' | 'year')[] = ['week', 'month', 'year'];
+  readonly timeRange$ = this.timeRangeSubject$.pipe(
+    map((config) => config.range)
+  );
 
-  constructor(private readonly backupService: BackupService) {
-    this.filterOptions$
-      .pipe(
-        switchMap((filterOptions) =>
-          this.backupService.getAllBackups(filterOptions)
-        )
-      )
-      .subscribe((data) => {
-        this.backupSubject$.next(data);
-      });
+  loading: boolean = false;
+  pageSize = 10;
+  backupSizeFilter: CustomFilter;
+  backupDateFilter: CustomFilter;
 
-    this.backups$ = this.backupSubject$.asObservable();
-  }
+  readonly backups$: Observable<APIResponse<Backup>>;
+  readonly chartBackups$: Observable<APIResponse<Backup>>;
 
-  trackBackupById(backup: Backup): string {
-    return backup.id;
-  }
+  private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
+    INITIAL_FILTER
+  );
+  private readonly destroy$ = new Subject<void>();
 
-  ngAfterViewInit() {
-    this.createChart();
-  }
+  constructor(
+    private readonly backupService: BackupService,
+    private readonly chartService: ChartService
+  ) {
+    this.backupSizeFilter = new CustomFilter('size');
+    this.backupDateFilter = new CustomFilter('date');
 
-  refresh(option?: ClrDatagridStateInterface<Backup>): void {
-    let params: HttpParams = new HttpParams();
+    this.backups$ = this.filterOptions$.pipe(
+      switchMap((params) => this.backupService.getAllBackups(params)),
+      takeUntil(this.destroy$)
+    );
 
-    if (option) {
-      if (option.page) {
-        if (option.page.current && option.page.size)
-          params = params.append(
-            'offset',
-            (option.page.current - 1) * option.page.size
+    this.chartBackups$ = this.timeRangeSubject$.pipe(
+      distinctUntilChanged(
+        (prev, curr) =>
+          prev.range === curr.range &&
+          prev.fromDate.getTime() === curr.fromDate.getTime() &&
+          prev.toDate.getTime() === curr.toDate.getTime()
+      ),
+      map(({ fromDate, toDate }) => ({
+        fromDate: fromDate.toISOString(),
+        toDate: toDate.toISOString(),
+      })),
+      switchMap((dateRange) => this.backupService.getAllBackups(dateRange)),
+      tap((response) => {
+        if (response.data && response.data.length > 0) {
+          // Prepare and update column chart
+          const columnData = this.chartService.prepareColumnData(
+            response.data,
+            this.timeRangeSubject$.getValue().range
           );
-        if (option.page.size) params = params.append('limit', option.page.size);
-      }
+          this.chartService.updateChart('backupTimelineChart', columnData);
 
-      if (option.sort) {
-        params = params.set('orderBy', option.sort.by as string);
-        params = params.set('sortOrder', option.sort.reverse ? 'DESC' : 'ASC');
-      }
-      if (option.filters) {
-        option.filters.forEach((filter) => {
-          params = params.append(filter.property, filter.value);
-        });
-      }
-    }
-    this.filterOptions$.next(params);
+          // Prepare and update pie chart
+          const pieData = this.chartService.preparePieData(response.data);
+          this.chartService.updateChart('backupSizeChart', pieData);
+        } else {
+          // Handle the case where there's no data
+          console.warn('No data received for chart updates.');
+        }
+      }),
+      takeUntil(this.destroy$)
+    );
   }
 
-  createChart() {
-    let chartData$ = this.backups$.pipe(
-      map((data) =>
-        data.map((item) => ({
-          date: new Date(item.creationDate),
-          sizeMB: item.sizeMB,
-        }))
+  ngOnInit(): void {
+    combineLatest([
+      this.backupDateFilter.changes.pipe(startWith(null)),
+      this.backupSizeFilter.changes.pipe(startWith(null)),
+    ])
+      .pipe(
+        map(() => this.buildFilterParams()),
+        takeUntil(this.destroy$)
       )
-    );
-    // Chart-Root erstellen
-    let root = am5.Root.new('backupSizeChart');
+      .subscribe((params) => this.filterOptions$.next(params));
 
-    // Theme hinzufügen
-    root.setThemes([am5themes_Animated.new(root)]);
-
-    // Chart erstellen
-    let chart = root.container.children.push(
-      am5xy.XYChart.new(root, {
-        layout: root.verticalLayout,
-      })
-    );
-
-    chart.children.unshift(
-      am5.Label.new(root, {
-        text: 'Size of last backups',
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        x: am5.p50,
-        centerX: am5.p50,
-      })
-    );
-
-    // X-Achse
-    let xAxis = chart.xAxes.push(
-      am5xy.CategoryAxis.new(root, {
-        maxDeviation: 0.3,
-        categoryField: 'date',
-        renderer: am5xy.AxisRendererX.new(root, {
-          minGridDistance: 30,
-        }),
-      })
-    );
-
-    xAxis.get('renderer').labels.template.setAll({
-      rotation: -45,
-      centerY: am5.p50,
-      centerX: am5.p100,
-    });
-
-    //xAxis.data.setAll(chartData);
-
-    chartData$.subscribe((chartData) => xAxis.data.setAll(chartData));
-
-    // Y-Achse
-    let yAxis = chart.yAxes.push(
-      am5xy.ValueAxis.new(root, {
-        renderer: am5xy.AxisRendererY.new(root, {}),
-      })
-    );
-
-    // Scrollbar hinzufügen
-    chart.set(
-      'scrollbarX',
-      am5.Scrollbar.new(root, {
-        orientation: 'horizontal',
-      })
-    );
-
-    // Balkenserie hinzufügen
-    let series = chart.series.push(
-      am5xy.ColumnSeries.new(root, {
-        name: 'Size',
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueYField: 'sizeMB',
-        categoryXField: 'date',
-        tooltip: am5.Tooltip.new(root, {
-          labelText: '{valueY} MB',
-        }),
-      })
-    );
-
-    //series.data.setAll(chartData);
-    chartData$.subscribe((chartData) => series.data.setAll(chartData));
-
-    // Animation für Balken
-    series.appear(1000);
-    chart.appear(1000, 100);
+    this.setTimeRange('month');
   }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.chartService.createChart(
+        {
+          id: 'backupSizeChart',
+          type: 'pie',
+          valueField: 'value',
+          categoryField: 'category',
+          seriesName: 'SizeDistribution',
+        },
+        this.chartBackups$.pipe(
+          map((response: APIResponse<Backup>) => response.data)
+        )
+      );
+      this.chartService.createChart(
+        {
+          id: 'backupTimelineChart',
+          type: 'column',
+          valueYField: 'sizeMB',
+          valueXField: 'creationDate',
+          seriesName: 'BackupSize',
+          tooltipText:
+            "[bold]{valueY}[/] MB\n{valueX.formatDate('yyyy-MM-dd HH:mm')}\nBackups: {count}",
+        },
+        this.chartBackups$.pipe(
+          map((response: APIResponse<Backup>) => response.data)
+        ),
+        this.timeRangeSubject$.getValue().range
+      );
+    }, 100);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.chartService.dispose();
+  }
+
+  private buildFilterParams(): BackupFilterParams {
+    const params: BackupFilterParams = { ...INITIAL_FILTER };
+
+    if (this.backupDateFilter.isActive()) {
+      //TODO: Adjust timezones
+      params.fromDate = this.backupDateFilter.ranges.fromDate;
+      params.toDate = this.backupDateFilter.ranges.toDate;
+    }
+
+    if (this.backupSizeFilter.isActive()) {
+      params.fromSizeMB = this.backupSizeFilter.ranges.fromSizeMB;
+      params.toSizeMB = this.backupSizeFilter.ranges.toSizeMB;
+    }
+
+    return params;
+  }
+
+  setTimeRange(range: 'week' | 'month' | 'year'): void {
+    const toDate = new Date();
+    const fromDate = new Date();
+
+    switch (range) {
+      case 'week':
+        fromDate.setDate(fromDate.getDate() - 7);
+        break;
+      case 'month':
+        fromDate.setMonth(fromDate.getMonth() - 1);
+        break;
+      case 'year':
+        fromDate.setFullYear(fromDate.getFullYear() - 1);
+        break;
+    }
+
+    this.timeRangeSubject$.next({
+      fromDate,
+      toDate,
+      range,
+    });
+    this.chartService.updateTimeRange('backupTimelineChart', range);
+  }
+
+  refresh(state: ClrDatagridStateInterface<any>): void {
+    this.loading = true;
+
+    const params: BackupFilterParams = {
+      ...INITIAL_FILTER,
+      limit: state.page?.size ?? this.pageSize,
+      offset: state.page?.current
+        ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
+        : 0,
+      sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
+      orderBy: state.sort?.by ? state.sort.by.toString() : 'creationDate',
+    };
+
+    if (state.filters) {
+      Object.assign(params, this.buildFilterParams());
+    }
+
+    this.filterOptions$.next(params);
+    this.loading = false;
+  }
+
+  protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
 }
