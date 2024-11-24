@@ -7,21 +7,11 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import { ITimeInterval } from '@amcharts/amcharts5/.internal/core/util/Time';
 import { Backup } from '../../../shared/types/backup';
 import { Observable, Subject, takeUntil } from 'rxjs';
-
-type ChartType = 'timeline' | 'pie' | 'column';
-type TimeRange = 'week' | 'month' | 'year';
-
-interface ChartConfig {
-  id: string;
-  type: ChartType;
-  height?: number;
-  tooltipText?: string;
-  valueYField?: string;
-  valueXField?: string;
-  categoryField?: string;
-  valueField?: string;
-  seriesName?: string;
-}
+import {
+  ChartConfig,
+  ChartType,
+  TimeRange,
+} from '../../../shared/types/chart-config';
 
 @Injectable({
   providedIn: 'root',
@@ -112,9 +102,10 @@ export class ChartService {
   ) {
     const yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(root, {
-        numberFormat: '#.# MB',
+        numberFormat: "#.#'MB'",
         renderer: am5xy.AxisRendererY.new(root, {
           pan: 'none',
+          minGridDistance: 30,
         }),
       })
     );
@@ -157,13 +148,10 @@ export class ChartService {
           }),
         })
       );
-
       const columnTemplate = series.columns.template;
       columnTemplate.setAll({
         cornerRadiusTL: 3,
         cornerRadiusTR: 3,
-        strokeOpacity: 0,
-        fillOpacity: 0.8,
       });
 
       columnTemplate.states.create('hover', {
@@ -374,11 +362,8 @@ export class ChartService {
 
   /**
    * Updates time range for timeline charts
-   *
-   * this is not working properly
    */
   updateTimeRange(chartId: string, timeRange: TimeRange): void {
-    //const chart = this.charts.get(chartId);
     const chart = this.charts[chartId];
     if (chart instanceof am5xy.XYChart) {
       const xAxis = chart.xAxes.getIndex(0);
@@ -408,7 +393,6 @@ export class ChartService {
     config: ChartConfig,
     chartType: ChartType
   ) {
-    //const modal = this.modals.get(config.id);
     const modal = this.modals[config.id];
 
     series.events.on('datavalidated', (ev) => {
@@ -446,7 +430,6 @@ export class ChartService {
         });
       } else if (series instanceof am5percent.PieSeries) {
         if (!hasData) {
-          // Generate placeholder data for pie chart
           const placeholder = Array(3)
             .fill(null)
             .map(() => ({
@@ -456,19 +439,15 @@ export class ChartService {
           series.data.setAll(placeholder);
         }
 
-        // Handle labels and ticks visibility
         series.labels.template.set('forceHidden', !hasData);
         series.ticks.template.set('forceHidden', !hasData);
 
-        // Handle slices appearance
         series.slices.template.setAll({
           fillOpacity: hasData ? 1 : 0.2,
           stroke: hasData ? series.get('stroke') : am5.color(0xcccccc),
           strokeOpacity: hasData ? 1 : 0.5,
         });
       }
-
-      // Handle modal visibility
       if (!hasData) {
         modal?.open();
       } else {
