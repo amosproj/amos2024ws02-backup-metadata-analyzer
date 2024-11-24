@@ -21,7 +21,7 @@ class Analyzer:
     def _convert_result(result):
         return {
             "id": result.uuid,
-            "sizeMB": result.data_size // 1_000_000,
+            "sizeMB": result.data_size / 1_000_000,
             "creationDate": result.start_time.isoformat(),
         }
 

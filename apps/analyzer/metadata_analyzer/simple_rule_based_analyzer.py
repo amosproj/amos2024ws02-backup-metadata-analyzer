@@ -25,8 +25,8 @@ class SimpleRuleBasedAnalyzer:
 
         alert = {
                 "type": 0 if relative_change > 0 else 1,
-                "value": result2.data_size // 1_000_000,
-                "referenceValue": result1.data_size // 1_000_000,
+                "value": result2.data_size / 1_000_000,
+                "referenceValue": result1.data_size / 1_000_000,
                 "backupId": result2.uuid,
         }
 
