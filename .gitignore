@@ -51,3 +51,6 @@ apps/*/.env
 apps/analyzer/.coverage
 reports/*
 coverage/*
+
+# DB Dumps
+*.dmp
