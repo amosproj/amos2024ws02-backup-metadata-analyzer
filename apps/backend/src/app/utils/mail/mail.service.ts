@@ -22,17 +22,25 @@ export class MailService {
     let description = '';
     let valueColumnName = '';
     let referenceValueColumnName = '';
-    let percentage = 0;
+    let percentage: string = 'Infinity';
     switch (alert.type) {
       case AlertType.SIZE_DECREASED:
-        percentage = Math.floor((1 - alert.value / alert.referenceValue) * 100);
+        if (alert.referenceValue !== 0) {
+          percentage = Math.floor(
+            (1 - alert.value / alert.referenceValue) * 100
+          ).toString();
+        }
         valueColumnName = 'Size of backup';
         referenceValueColumnName = 'Size of previous backup';
         reason = `Size of latest Backup decreased by ${percentage} %`;
         description = `Size of latest Backup decreased by ${percentage}% compared to the previous Backup. This could indicate a problem with the Backup.`;
         break;
       case AlertType.SIZE_INCREASED:
-        percentage = Math.floor((alert.value / alert.referenceValue - 1) * 100);
+        if (alert.referenceValue !== 0) {
+          percentage = Math.floor(
+            (alert.value / alert.referenceValue - 1) * 100
+          ).toString();
+        }
         valueColumnName = 'Size of backup';
         referenceValueColumnName = 'Size of previous backup';
         reason = `Size of latest Backup increased by ${percentage} %`;
