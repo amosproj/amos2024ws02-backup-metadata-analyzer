@@ -2,3 +2,12 @@
     background-color: white;
     justify-content: space-around;
 }
+
+.btn-group {
+    padding-top: 20px;
+}
+
+.filter-inline {
+    display: inline-flex !important;
+    align-items: center;
+    }
