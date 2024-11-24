@@ -30,6 +30,7 @@ export class ChartService {
   private roots: { [key: string]: am5.Root } = {};
   charts: { [key: string]: am5.Chart } = {};
   series: { [key: string]: am5.Series } = {};
+  private modals: { [key: string]: am5.Modal } = {};
   private readonly destroy$ = new Subject<void>();
 
   constructor() {}
@@ -77,6 +78,7 @@ export class ChartService {
 
     switch (config.type) {
       case 'column':
+        this.createModal(root, config.id);
         return root.container.children.push(
           am5xy.XYChart.new(root, {
             ...commonConfig,
@@ -87,6 +89,7 @@ export class ChartService {
           })
         );
       case 'pie':
+        this.createModal(root, config.id);
         return root.container.children.push(
           am5percent.PieChart.new(root, {
             ...commonConfig,
@@ -109,10 +112,10 @@ export class ChartService {
   ) {
     const yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(root, {
+        numberFormat: '#.# MB',
         renderer: am5xy.AxisRendererY.new(root, {
           pan: 'none',
         }),
-        numberFormat: '#.# MB',
       })
     );
 
@@ -138,26 +141,7 @@ export class ChartService {
     timeRange?: TimeRange
   ): am5.Series {
     if (chart instanceof am5xy.XYChart && timeRange) {
-      const yAxis = chart.yAxes.push(
-        am5xy.ValueAxis.new(root, {
-          numberFormat: '# MB',
-          renderer: am5xy.AxisRendererY.new(root, {
-            pan: 'none',
-          }),
-        })
-      );
-
-      const xAxis = chart.xAxes.push(
-        am5xy.DateAxis.new(root, {
-          baseInterval: this.getBaseInterval(timeRange),
-          renderer: am5xy.AxisRendererX.new(root, {
-            minGridDistance: 50,
-            pan: 'none',
-            //tooltipLocation: 0.5,
-          }),
-          tooltipDateFormat: this.getDateFormat(timeRange),
-        })
-      );
+      const { xAxis, yAxis } = this.createAxes(chart, root, timeRange);
 
       const series = chart.series.push(
         am5xy.ColumnSeries.new(root, {
@@ -168,7 +152,7 @@ export class ChartService {
           valueXField: config.valueXField || 'creationDate',
           clustered: true,
           tooltip: am5.Tooltip.new(root, {
-            labelText: this.getTooltipText(timeRange),
+            labelText: this.getTooltipFormat(timeRange),
             pointerOrientation: 'horizontal',
           }),
         })
@@ -185,10 +169,11 @@ export class ChartService {
       columnTemplate.states.create('hover', {
         fillOpacity: 1,
       });
+      this.chartHasNoDataHandler(series, config, 'column');
 
       return series;
     } else if (chart instanceof am5percent.PieChart) {
-      return chart.series.push(
+      const series = chart.series.push(
         am5percent.PieSeries.new(root, {
           name: config.seriesName || 'Distribution',
           valueField: config.valueField || 'value',
@@ -197,6 +182,9 @@ export class ChartService {
           legendLabelText: '{category}',
         })
       );
+      this.chartHasNoDataHandler(series, config, 'pie');
+
+      return series;
     }
     throw new Error('Unsupported chart configuration');
   }
@@ -274,6 +262,13 @@ export class ChartService {
     date.setDate(date.getDate() + (week - 1) * 7);
     return date;
   }
+  private getWeekNumber(date: Date): number {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  }
 
   private getAxisFormat(timeRange: TimeRange): string {
     switch (timeRange) {
@@ -292,6 +287,20 @@ export class ChartService {
         return "[bold]{valueY}[/] MB\n{valueX.formatDate('MMM dd')}";
       case 'year':
         return "[bold]{valueY}[/] MB\nWeek {valueX.formatDate('w')}";
+      default:
+        return 'Size: {valueY} MB';
+    }
+  }
+
+  private getDateFormat(timeRange: TimeRange): string {
+    switch (timeRange) {
+      case 'week':
+      case 'month':
+        return 'MMM dd';
+      case 'year':
+        return "MMM 'W'w";
+      default:
+        return 'MMM dd';
     }
   }
 
@@ -313,38 +322,6 @@ export class ChartService {
       .filter((item) => item.value > 0);
   }
 
-  private getDateFormat(timeRange: TimeRange): string {
-    switch (timeRange) {
-      case 'week':
-      case 'month':
-        return 'MMM dd';
-      case 'year':
-        return "MMM 'W'w";
-      default:
-        return 'MMM dd';
-    }
-  }
-
-  private getWeekNumber(date: Date): number {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    const yearStart = new Date(d.getFullYear(), 0, 1);
-    return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-  }
-
-  private getTooltipText(timeRange: TimeRange): string {
-    switch (timeRange) {
-      case 'week':
-      case 'month':
-        return "Date: {valueX.formatDate('MMM dd')}\nSize: {valueY} MB";
-      case 'year':
-        return "Week: {valueX.formatDate('MMM W')}\nTotal Size: {valueY} MB";
-      default:
-        return 'Size: {valueY} MB';
-    }
-  }
-
   /**
    * Subscribes to data updates
    */
@@ -356,7 +333,9 @@ export class ChartService {
   ): void {
     data$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (backups) => {
-        if (backups?.length > 0) {
+        series.data.clear();
+
+        if (backups?.length) {
           const chartData =
             config.type === 'column'
               ? this.prepareColumnData(backups, timeRange!)
@@ -369,6 +348,30 @@ export class ChartService {
         console.error(`Error updating ${config.type} chart:`, error),
     });
   }
+
+  private getBaseInterval(timeRange: string): ITimeInterval {
+    switch (timeRange) {
+      case 'week':
+        return { timeUnit: 'hour', count: 4 };
+      case 'month':
+        return { timeUnit: 'day', count: 1 };
+      case 'year':
+        return { timeUnit: 'week', count: 1 };
+      default:
+        return { timeUnit: 'month', count: 1 };
+    }
+  }
+
+  /**
+   * Updates Chart data
+   */
+  updateChart(chartId: string, data: any[]): void {
+    const series = this.series[chartId];
+    if (series) {
+      series.data.setAll(data);
+    }
+  }
+
   /**
    * Updates time range for timeline charts
    *
@@ -392,6 +395,88 @@ export class ChartService {
     }
   }
 
+  private createModal(root: am5.Root, chartId: string): am5.Modal {
+    const modal = am5.Modal.new(root, {
+      content: 'No data available',
+    });
+    this.modals[chartId] = modal;
+    return modal;
+  }
+
+  private chartHasNoDataHandler(
+    series: am5.Series,
+    config: ChartConfig,
+    chartType: ChartType
+  ) {
+    //const modal = this.modals.get(config.id);
+    const modal = this.modals[config.id];
+
+    series.events.on('datavalidated', (ev) => {
+      const currentSeries = ev.target;
+      const hasData = currentSeries.data.length > 0;
+
+      if (series instanceof am5xy.ColumnSeries) {
+        const xAxis = series.get('xAxis');
+        const yAxis = series.get('yAxis');
+
+        if (
+          xAxis instanceof am5xy.DateAxis &&
+          yAxis instanceof am5xy.ValueAxis
+        ) {
+          // Handle axis labels visibility
+          xAxis.get('renderer').labels.template.setAll({
+            forceHidden: !hasData,
+          });
+          yAxis.get('renderer').labels.template.setAll({
+            forceHidden: !hasData,
+          });
+
+          // Handle grid visibility
+          xAxis.get('renderer').grid.template.setAll({
+            forceHidden: !hasData,
+          });
+          yAxis.get('renderer').grid.template.setAll({
+            forceHidden: !hasData,
+          });
+        }
+
+        // Handle series visibility
+        series.columns.template.setAll({
+          forceHidden: !hasData,
+        });
+      } else if (series instanceof am5percent.PieSeries) {
+        if (!hasData) {
+          // Generate placeholder data for pie chart
+          const placeholder = Array(3)
+            .fill(null)
+            .map(() => ({
+              [series.get('categoryField') || 'category']: '',
+              [series.get('valueField') || 'value']: 1,
+            }));
+          series.data.setAll(placeholder);
+        }
+
+        // Handle labels and ticks visibility
+        series.labels.template.set('forceHidden', !hasData);
+        series.ticks.template.set('forceHidden', !hasData);
+
+        // Handle slices appearance
+        series.slices.template.setAll({
+          fillOpacity: hasData ? 1 : 0.2,
+          stroke: hasData ? series.get('stroke') : am5.color(0xcccccc),
+          strokeOpacity: hasData ? 1 : 0.5,
+        });
+      }
+
+      // Handle modal visibility
+      if (!hasData) {
+        modal?.open();
+      } else {
+        modal?.close();
+      }
+    });
+  }
+
   dispose(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -399,25 +484,6 @@ export class ChartService {
     this.roots = {};
     this.charts = {};
     this.series = {};
-  }
-
-  private getBaseInterval(timeRange: string): ITimeInterval {
-    switch (timeRange) {
-      case 'week':
-        return { timeUnit: 'hour', count: 4 };
-      case 'month':
-        return { timeUnit: 'day', count: 1 };
-      case 'year':
-        return { timeUnit: 'week', count: 1 };
-      default:
-        return { timeUnit: 'month', count: 1 };
-    }
-  }
-
-  updateChart(chartId: string, data: any[]): void {
-    const series = this.series[chartId];
-    if (series) {
-      series.data.setAll(data);
-    }
+    this.modals = {};
   }
 }
