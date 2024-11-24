@@ -45,7 +45,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   readonly timeRange$ = this.timeRangeSubject$.pipe(
     map((config) => config.range)
   );
-  //selectedTimeRange: 'week' | 'month' | 'year' = 'month';
 
   loading: boolean = false;
   pageSize = 10;
@@ -58,7 +57,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
   );
-  private chartFilterOptions$ = new BehaviorSubject<BackupFilterParams>({});
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -107,7 +105,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    // Initialize filters with default values
     combineLatest([
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
