@@ -1,12 +1,10 @@
-import { Backup } from './backup';
-
-export interface APIResponse {
-  data: Backup[];
-  paginatorSite: Paginator;
+export interface APIResponse<T> {
+  data: T[];
+  paginationData: PaginationData;
 }
 
-export interface Paginator {
-  offset?: string;
-  limit?: string;
+export interface PaginationData {
+  offset?: number;
+  limit?: number;
   total: number;
 }
