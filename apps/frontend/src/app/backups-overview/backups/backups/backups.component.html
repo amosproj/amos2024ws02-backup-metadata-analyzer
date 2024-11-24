@@ -37,7 +37,10 @@
         </ng-container>
       </clr-dg-column>
 
-      <clr-dg-column [clrDgField]="'creationDate'" [clrDgSortOrder]="ClrDatagridSortOrder.DESC">
+      <clr-dg-column
+        [clrDgField]="'creationDate'"
+        [clrDgSortOrder]="ClrDatagridSortOrder.DESC"
+      >
         <ng-container *clrDgHideableColumn>
           Creation Date
           <clr-dg-filter [clrDgFilter]="backupDateFilter">
@@ -87,17 +90,24 @@
           <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
             Backups per page
           </clr-dg-page-size>
-          {{ backups.paginationData.offset ? +backups.paginationData.offset + 1 : 0 }}
-          - {{ backups.paginationData.offset ? +backups.paginationData.offset + pageSize : 0 }} of
-          {{ backups.paginationData.total }} backups
+          {{
+            backups.paginationData.offset
+              ? +backups.paginationData.offset + 1
+              : 0
+          }}
+          -
+          {{
+            backups.paginationData.offset
+              ? +backups.paginationData.offset + pageSize
+              : 0
+          }}
+          of {{ backups.paginationData.total }} backups
         </clr-dg-pagination>
       </clr-dg-footer>
     </clr-datagrid>
   </div>
 </div>
-
 <div class="clr-row">
-  <!-- Timeline Chart Section -->
   <div class="clr-col-sm-12 clr-col-md-6">
     <!-- Time Range Buttons -->
     <div class="btn-group">
@@ -110,7 +120,11 @@
         Last {{ range | titlecase }}
       </button>
     </div>
-
+  </div>
+</div>
+<div class="clr-row">
+  <!-- Timeline Chart Section -->
+  <div class="clr-col-sm-12 clr-col-md-6">
     <!-- Timeline Chart -->
     <h4>Last Backups</h4>
     <div
