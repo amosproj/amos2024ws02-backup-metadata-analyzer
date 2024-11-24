@@ -150,5 +150,6 @@ def main():
     Analyzer.init(database, backend, simple_analyzer)
 
     new_port = os.getenv("FLASK_RUN_PORT")
+    new_host = os.getenv("FLASK_RUN_HOST", "localhost")
     int_port = int(new_port or 5000)
-    app.run(host="localhost", port=int_port, debug=False)
+    app.run(host=new_host, port=int_port, debug=False)

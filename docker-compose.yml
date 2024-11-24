@@ -23,7 +23,7 @@ services:
 
     #command: npm run backend:dev:docker
     #command: ['npm', 'run', 'be', '--host localhost']
-    command: nx serve metadata-analyzer-backend --host localhost
+    command: nx serve metadata-analyzer-backend --host 0.0.0.0
     environment:
       # Backend Database
       - DATABASE_HOST=${BACKEND_DATABASE_HOST}
@@ -48,16 +48,30 @@ services:
 
     # Python Analyzer Backend App
 
-    analyzer:
-      extends:
-        file: docker-compose.base.yml
+  analyzer:
+    # extends:
+    #   file: docker-compose.base.yml
 
-        service: nx-app-base
+    #   service: nx-app-base
+    build:
+      context: ./apps/analyzer
+      dockerfile: Dockerfile
+    command: ['/app/.venv/bin/python3', 'main.py', '--host', '0.0.0.0']
+    environment:
+      # Flask
+      - FLASK_RUN_HOST=${ANALYZER_FLASK_RUN_HOST}
+      - FLASK_RUN_PORT=${ANALYZER_FLASK_RUN_PORT}
+      # Analyzer Database
+      - DATABASE_HOST=${ANALYZER_DATABASE_HOST}
+      - DATABASE_PORT=${ANALYZER_DATABASE_PORT}
+      - DATABASE_USER=${ANALYZER_DATABASE_USER}
+      - DATABASE_PASSWORD=${ANALYZER_DATABASE_PASSWORD}
+      - DATABASE_DATABASE=${ANALYZER_DATABASE_DATABASE}
+    env_file:
+      - .env.docker
 
-      command: TODO
-
-      ports:
-        - 8000:8000
+    ports:
+      - 8000:8000
 
   # Backend Database
   backendDatabase:
