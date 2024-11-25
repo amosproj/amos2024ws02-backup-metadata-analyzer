@@ -44,11 +44,11 @@ Make sure the following are installed on your machine:
 6. **Build and start Docker container**:
 
    ```bash
-    docker compose --env-file .env.docker.example up --build
+    docker compose --env-file .env.docker up --build
 
    ```
 
 7. **Stop Docker Container**:
    ```bash
-    docker compose --env-file .env.docker.example down
+    docker compose --env-file .env.docker down
    ```
