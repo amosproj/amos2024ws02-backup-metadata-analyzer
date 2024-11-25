@@ -1,0 +1,41 @@
+name: Backend Tests
+
+# Trigger on push to dev and on pull request creation, excluding "deliverables" folder
+on:
+  push:
+    branches:
+      - 32-github-actions-backend-and-analyzer-test-automation
+    paths-ignore:
+      - 'deliverables/**'
+  pull_request:
+    paths-ignore:
+      - 'deliverables/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Run tests
+      - name: Run tests
+        run: nx run metadata-analyzer-backend:test
+
+  # Prevent merging if tests fail
+  rules:
+    - requires: test
+      conditions:
+        success: true
