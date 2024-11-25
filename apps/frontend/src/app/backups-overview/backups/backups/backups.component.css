@@ -4,10 +4,47 @@
 }
 
 .btn-group {
-    padding-top: 20px;
+    padding-top: 10px;
 }
 
 .filter-inline {
     display: inline-flex !important;
     align-items: center;
-    }
+}
+
+.alert-info-section {
+    display: flex;
+    gap: 40px;
+    margin: 20px 0;
+    align-items: center;
+}
+
+.alert-panel, .info {
+    flex: 1;
+}
+
+.card.info {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+}
+
+.card-block {
+    padding: 20px;
+}
+
+.card-text ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.card-text ul li {
+    margin-bottom: 10px;
+}
+
+.card-text p {
+    margin-top: 20px;
+    font-style: italic;
+}
