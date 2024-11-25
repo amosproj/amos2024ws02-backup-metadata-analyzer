@@ -1,3 +1,7 @@
+networks:
+  app-network:
+    driver: bridge
+
 services:
   # Angular Frontend App
 
@@ -13,6 +17,11 @@ services:
 
     ports:
       - 4200:4200
+
+    depends_on:
+      - backendDatabase
+    networks:
+      - app-network
 
   # Nest Backend App
   backend:
@@ -44,6 +53,11 @@ services:
     ports:
       - 3000:3000 # API Entry port
 
+    depends_on:
+      - backendDatabase
+    networks:
+      - app-network
+
       # - 4311:4311 # Server Debugging port
 
     # Python Analyzer Backend App
@@ -61,6 +75,7 @@ services:
       # Flask
       - FLASK_RUN_HOST=${ANALYZER_FLASK_RUN_HOST}
       - FLASK_RUN_PORT=${ANALYZER_FLASK_RUN_PORT}
+      - BACKEND_URL=${BACKEND_URL}
       # Analyzer Database
       - DATABASE_HOST=${ANALYZER_DATABASE_HOST}
       - DATABASE_PORT=${ANALYZER_DATABASE_PORT}
@@ -72,6 +87,11 @@ services:
 
     ports:
       - 8000:8000
+    depends_on:
+      - analyzerDatabase
+      - backend
+    networks:
+      - app-network
 
   # Backend Database
   backendDatabase:
@@ -84,7 +104,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-
+    networks:
+      - app-network
   # Analyzer Database
   analyzerDatabase:
     image: postgres
@@ -96,6 +117,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
+    networks:
+      - app-network
     volumes:
       - ./db_dump.sql:/docker-entrypoint-initdb.d/db_dump.sql
       - ./00-init-roles.sql:/docker-entrypoint-initdb.d/00-init-roles.sql
@@ -116,5 +139,6 @@ services:
   #     "
   #   volumes:
   #     - ./db_dump.dmp:/db_dump.dmp
+
 volumes:
   mono-node-modules: null
