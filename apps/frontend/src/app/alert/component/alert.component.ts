@@ -3,6 +3,7 @@ import { AlertServiceService } from '../service/alert-service.service';
 import { Alert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
 import { AlertType } from '../../shared/enums/alertType';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-alert',
@@ -21,6 +22,8 @@ export class AlertComponent implements OnInit {
 
   status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
+  private readonly destroy$ = new Subject<void>();
+
   constructor(
     private readonly alertService: AlertServiceService,
     private datePipe: DatePipe
@@ -31,18 +34,21 @@ export class AlertComponent implements OnInit {
   }
 
   loadAlerts(): void {
-    this.alertService.getAllAlerts(this.DAYS).subscribe((data: Alert[]) => {
-      const criticalAlerts = data.filter((alert) =>
-        this.criticalAlertTypes.includes(alert.type)
-      );
-      const nonCriticalAlerts = data.filter(
-        (alert) => !this.criticalAlertTypes.includes(alert.type)
-      );
-      this.criticalAlertsCount = criticalAlerts.length;
-      this.nonCriticalAlertsCount = nonCriticalAlerts.length;
-      this.alerts = [...criticalAlerts, ...nonCriticalAlerts];
-      this.status = this.getStatus();
-    });
+    this.alertService
+      .getAllAlerts(this.DAYS)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data: Alert[]) => {
+        const criticalAlerts = data.filter((alert) =>
+          this.criticalAlertTypes.includes(alert.type)
+        );
+        const nonCriticalAlerts = data.filter(
+          (alert) => !this.criticalAlertTypes.includes(alert.type)
+        );
+        this.criticalAlertsCount = criticalAlerts.length;
+        this.nonCriticalAlertsCount = nonCriticalAlerts.length;
+        this.alerts = [...criticalAlerts, ...nonCriticalAlerts];
+        this.status = this.getStatus();
+      });
   }
 
   getStatusClass(): string {
