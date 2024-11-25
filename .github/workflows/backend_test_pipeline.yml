@@ -35,9 +35,3 @@ jobs:
       # Step 4: Run tests
       - name: Run tests
         run: nx run metadata-analyzer-backend:test
-
-  # Prevent merging if tests fail
-  rules:
-    - requires: test
-      conditions:
-        success: true
