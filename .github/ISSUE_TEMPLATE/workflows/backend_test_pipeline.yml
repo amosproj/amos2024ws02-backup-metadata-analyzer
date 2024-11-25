@@ -8,6 +8,8 @@ on:
     paths-ignore:
       - 'deliverables/**'
   pull_request:
+    branches:
+      - 32-github-actions-backend-and-analyzer-test-automation
     paths-ignore:
       - 'deliverables/**'
 
