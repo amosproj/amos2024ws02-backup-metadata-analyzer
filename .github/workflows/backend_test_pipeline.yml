@@ -34,4 +34,4 @@ jobs:
 
       # Step 4: Run tests
       - name: Run tests
-        run: nx run metadata-analyzer-backend:test
+        run: npx nx run metadata-analyzer-backend:test
