@@ -35,14 +35,20 @@ Make sure the following are installed on your machine:
 
    Copy the database dump .dmp file in the projects root folder and rename it to **db_dump.sql**
 
-5. **Build and start Docker container**:
+5. **Clean Docker node_modules**:
+
+   ```bash
+   docker volume rm amos2024ws02-backup-metadata-analyzer_mono-node-modules
+   ```
+
+6. **Build and start Docker container**:
 
    ```bash
     docker compose --env-file .env.docker.example up --build
 
    ```
 
-6. **Stop Docker Container**:
+7. **Stop Docker Container**:
    ```bash
     docker compose --env-file .env.docker.example down
    ```
