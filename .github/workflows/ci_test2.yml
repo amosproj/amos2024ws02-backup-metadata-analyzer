@@ -3,7 +3,7 @@ name: CI Test 2
 on:
   push:
     branches:
-      - nest-setup-docker
+      - 32-github-actions-backend-and-analyzer-test-automation
 
 jobs:
   hello:
