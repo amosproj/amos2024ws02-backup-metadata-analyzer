@@ -10,7 +10,7 @@ import os
 
 app = Flask(__name__)
 swagger = Swagger(app)
-
+load_dotenv(dotenv_path=".env")
 
 @app.route("/")
 def hello_world():
@@ -149,6 +149,11 @@ def main():
     simple_analyzer = SimpleAnalyzer()
     Analyzer.init(database, backend, simple_analyzer)
 
+    print(f"FLASK_RUN_HOST: {os.getenv('FLASK_RUN_HOST')}")
+    print(f"FLASK_RUN_PORT: {os.getenv('FLASK_RUN_PORT')}")
+    print(f"BACKEND_URL: {os.getenv('BACKEND_URL')}")
+
     new_port = os.getenv("FLASK_RUN_PORT")
+    new_host = os.getenv("FLASK_RUN_HOST", "localhost")
     int_port = int(new_port or 5000)
-    app.run(host="localhost", port=int_port, debug=False)
+    app.run(host=new_host, port=int_port, debug=False)

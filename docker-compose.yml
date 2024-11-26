@@ -1,3 +1,7 @@
+networks:
+  app-network:
+    driver: bridge
+
 services:
   # Angular Frontend App
 
@@ -14,8 +18,12 @@ services:
     ports:
       - 4200:4200
 
-  # Nest Backend App
+    depends_on:
+      - backendDatabase
+    networks:
+      - app-network
 
+  # Nest Backend App
   backend:
     extends:
       file: docker-compose.base.yml
@@ -24,32 +32,97 @@ services:
 
     #command: npm run backend:dev:docker
     #command: ['npm', 'run', 'be', '--host localhost']
-    command: nx serve metadata-analyzer-backend --host localhost
+    command: nx serve metadata-analyzer-backend --host 0.0.0.0
     environment:
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_PORT=${DATABASE_PORT}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_DATABASE=${DATABASE_DATABASE}
+      - ANALYZER_URL=${ANALYZER_URL}
+      # Backend Database
+      - DATABASE_HOST=${BACKEND_DATABASE_HOST}
+      - DATABASE_PORT=${BACKEND_DATABASE_PORT}
+      - DATABASE_USER=${BACKEND_DATABASE_USER}
+      - DATABASE_PASSWORD=${BACKEND_DATABASE_PASSWORD}
+      - DATABASE_DATABASE=${BACKEND_DATABASE_DATABASE}
+      # Mail Service
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - MAILING_LIST=${MAILING_LIST}
     env_file:
       - .env.docker
 
     ports:
       - 3000:3000 # API Entry port
 
+    depends_on:
+      - backendDatabase
+    networks:
+      - app-network
+
       # - 4311:4311 # Server Debugging port
 
-  # Database
-  database:
+    # Python Analyzer Backend App
+
+  analyzer:
+    # extends:
+    #   file: docker-compose.base.yml
+
+    #   service: nx-app-base
+    build:
+      context: ./apps/analyzer
+      dockerfile: Dockerfile
+    command: ['/app/.venv/bin/python3', 'main.py', '--host', '0.0.0.0']
+    environment:
+      # Flask
+      - FLASK_RUN_HOST=${ANALYZER_FLASK_RUN_HOST}
+      - FLASK_RUN_PORT=${ANALYZER_FLASK_RUN_PORT}
+      - BACKEND_URL=${BACKEND_URL}
+      # Analyzer Database
+      - DATABASE_HOST=${ANALYZER_DATABASE_HOST}
+      - DATABASE_PORT=${ANALYZER_DATABASE_PORT}
+      - DATABASE_USER=${ANALYZER_DATABASE_USER}
+      - DATABASE_PASSWORD=${ANALYZER_DATABASE_PASSWORD}
+      - DATABASE_DATABASE=${ANALYZER_DATABASE_DATABASE}
+    env_file:
+      - .env.docker
+
+    ports:
+      - 8000:8000
+    depends_on:
+      - analyzerDatabase
+      - backend
+    networks:
+      - app-network
+
+  # Backend Database
+  backendDatabase:
     image: postgres
-    container_name: database
+    container_name: backendDatabase
     restart: always
     ports:
-      - 5433:5432
+      - 5443:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
+    networks:
+      - app-network
+  # Analyzer Database
+  analyzerDatabase:
+    image: postgres
+    container_name: analyzerDatabase
+    restart: always
+    ports:
+      - 5442:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - app-network
+    volumes:
+      - ./db_dump.sql:/docker-entrypoint-initdb.d/db_dump.sql
+      - ./00-init-roles.sql:/docker-entrypoint-initdb.d/00-init-roles.sql
 
 volumes:
   mono-node-modules: null
