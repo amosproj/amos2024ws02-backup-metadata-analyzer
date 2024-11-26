@@ -1,8 +1,9 @@
 class Analyzer:
-    def init(database, backend, simple_analyzer):
+    def init(database, backend, simple_analyzer, simple_rule_based_analyzer):
         Analyzer.database = database
         Analyzer.backend = backend
         Analyzer.simple_analyzer = simple_analyzer
+        Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
 
     def analyze():
         data = list(Analyzer.database.get_results())
@@ -20,7 +21,7 @@ class Analyzer:
     def _convert_result(result):
         return {
             "id": result.uuid,
-            "sizeMB": result.data_size // 1_000_000,
+            "sizeMB": result.data_size / 1_000_000,
             "creationDate": result.start_time.isoformat(),
         }
 
@@ -44,13 +45,26 @@ class Analyzer:
 
             # Send a full batch
             if len(batch) == 100:
-                Analyzer.backend.sendBackupDataBatched(batch)
+                Analyzer.backend.send_backup_data_batched(batch)
                 batch = []
 
         # Send the remaining results
         if len(batch) > 0:
-            Analyzer.backend.sendBackupDataBatched(batch)
+            Analyzer.backend.send_backup_data_batched(batch)
 
         return {"count": count}
 
-
+    def simple_rule_based_analysis(alert_limit):
+        data = list(Analyzer.database.get_results())
+        result = Analyzer.simple_rule_based_analyzer.analyze(data, alert_limit)
+        return result
+    
+    def simple_rule_based_analysis_diff(alert_limit):
+        data = list(Analyzer.database.get_results())
+        result = Analyzer.simple_rule_based_analyzer.analyze_diff(data,alert_limit)
+        return result
+    
+    def simple_rule_based_analysis_inc(alert_limit):
+        data = list(Analyzer.database.get_results())
+        result = Analyzer.simple_rule_based_analyzer.analyze_inc(data,alert_limit)
+        return result
