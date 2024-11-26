@@ -261,3 +261,56 @@ def test_alert_backup_size_complex_nok_diff():
         "backupId": mock_result7.uuid
     }]
 
+# large increase of inc size
+def test_alert_backup_size_zero_inc():
+    mock_result1 = _create_mock_result("foo", "1", "I", 100_000_000, datetime.fromisoformat("2000-01-01"))
+    mock_result2 = _create_mock_result("foo", "2", "I", 0, datetime.fromisoformat("2000-01-02"))
+
+    database = MockDatabase([mock_result1, mock_result2])
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.simple_rule_based_analysis_inc(1)
+
+    assert backend.alerts == [{
+        "type": 1,
+        "value": mock_result2.data_size / 1_000_000,
+        "referenceValue": mock_result1.data_size / 1_000_000,
+        "backupId": mock_result2.uuid
+    }]
+
+# irregular backup times that should not be alerted
+def test_alert_backup_size_irregular_inc():
+    mock_result1 = _create_mock_result("foo", "1", "I", 100_000_000, datetime.fromisoformat("2000-01-01"))
+    mock_result2 = _create_mock_result("foo", "2", "I", 0, datetime.fromisoformat("2000-01-08"))
+    mock_result3 = _create_mock_result("foo", "3", "I", 100_000_000, datetime.fromisoformat("2000-01-09"))
+    mock_result4 = _create_mock_result("foo", "4", "I", 100_000_000, datetime.fromisoformat("2000-01-10"))
+
+    database = MockDatabase([mock_result1, mock_result2, mock_result3,mock_result4])
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.simple_rule_based_analysis_inc(1)
+
+    assert backend.alerts == []
+
+# irregular backup sizes
+def test_alert_backup_size_irregularSize_inc():
+    mock_result1 = _create_mock_result("foo", "1", "I", 100_000_000, datetime.fromisoformat("2000-01-07"))
+    mock_result2 = _create_mock_result("foo", "2", "I", 100_000_000, datetime.fromisoformat("2000-01-08"))
+    mock_result3 = _create_mock_result("foo", "3", "I", 72_000_000, datetime.fromisoformat("2000-01-09"))
+    mock_result4 = _create_mock_result("foo", "4", "I", 100_000_000, datetime.fromisoformat("2000-01-10"))
+    avg = (mock_result1.data_size + mock_result2.data_size + mock_result3.data_size + mock_result4.data_size)/4
+
+    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.simple_rule_based_analysis_inc(1)
+
+    assert backend.alerts == [{
+        "type": 1,
+        "value":72,
+        "referenceValue": avg / 1_000_000,
+        "backupId": mock_result3.uuid
+    }]

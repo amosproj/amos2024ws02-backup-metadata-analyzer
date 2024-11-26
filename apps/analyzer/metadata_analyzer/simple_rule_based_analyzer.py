@@ -14,7 +14,6 @@ class SimpleRuleBasedAnalyzer:
     # Analyze a pair of consecutive results, returns a list of created alerts
     def _analyze_pair(self, result1, result2, bound):
         relative_change = self.handle_zero(result1, result2)
-
         # Skip pairs of results with changes inside the bounds
         if -bound <= relative_change <= bound:
             return []
@@ -25,7 +24,6 @@ class SimpleRuleBasedAnalyzer:
                 "referenceValue": result1.data_size / 1_000_000,
                 "backupId": result2.uuid,
         }
-
         return [alert]
     
     def handle_zero(self,result1, result2):
@@ -134,7 +132,6 @@ class SimpleRuleBasedAnalyzer:
                 or result.start_time is None):
                 continue
             groups[result.task].append(result)
-        print(groups)
 
         alerts = []
         # Iterates through groups to ensure size increases except when a full backup was done
@@ -147,33 +144,26 @@ class SimpleRuleBasedAnalyzer:
             prev_time = results[0].start_time
             avg_time = timedelta(0)
 
-            print("start time is " + str(avg_time))
 
             for result in results:
                 avg_size += result.data_size
                 avg_time +=  result.start_time - prev_time
-                print("current delta is " + str(result.start_time - prev_time))
+                prev_time = result.start_time
 
             avg_size = avg_size/(len(results))
-            print("avg size is " + str(avg_size))
             avg_time = avg_time/(len(results)-1)
-            print("avg time is " + str(avg_time))
             
                 #if(True): # so times are regular in margin and data sizes are same in margin
 
             for prev, current in zip(results[:-1], results[1:]):
         
                 interval = current.start_time - prev.start_time
-                print("current interval is " + str(interval))
                 # only compares if incs happened at quasi-regular intervals
                 if(interval >= avg_time * (1 - self.inc_date_percentage) and interval <= avg_time * (1 + self.inc_date_percentage)):
-                    print("analyzing pair of avg size " + str(avg_size) + " and " + str(current.data_size))
                     # converts prev to a result with the average size
                     prev.data_size = avg_size
                     new_alerts = self._analyze_pair(prev, current, self.inc_data_percentage)
                     alerts += new_alerts
-                else:
-                    print("current interval was not in set bounds")
     
         # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
