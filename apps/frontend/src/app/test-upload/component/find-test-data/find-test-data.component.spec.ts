@@ -4,6 +4,7 @@ import { FindTestDataComponent } from './find-test-data.component';
 import { TestUploadServiceService } from '../../service/test-upload-service.service';
 import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ClarityModule } from '@clr/angular';
 
 describe('FindTestDataComponent', () => {
   let component: FindTestDataComponent;
@@ -12,7 +13,7 @@ describe('FindTestDataComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [FindTestDataComponent],
-      imports: [HttpClientTestingModule],
+      imports: [HttpClientTestingModule, ClarityModule],
       providers: [
         {provide: BASE_URL, useValue: TestUploadServiceService},
         TestUploadServiceService

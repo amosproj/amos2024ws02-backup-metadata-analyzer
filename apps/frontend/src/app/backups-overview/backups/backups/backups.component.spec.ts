@@ -5,6 +5,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { BackupService } from '../../service/backup-service.service';
 import { BASE_URL } from '../../../shared/types/configuration';
 import { HttpClient, HttpHandler } from '@angular/common/http';
+import { ClarityModule } from '@clr/angular';
 
 // Mock the getContext method for HTMLCanvasElement
 Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
@@ -21,7 +22,7 @@ describe('BackupsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [BackupsComponent],
-      imports: [HttpClientTestingModule, ApplicationModule],
+      imports: [HttpClientTestingModule, ApplicationModule, ClarityModule],
       providers: [
         {provide: BASE_URL, useValue: BackupService},
         BackupService

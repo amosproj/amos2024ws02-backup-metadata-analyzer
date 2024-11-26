@@ -1,18 +1,34 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { ClarityModule } from '@clr/angular';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('AppComponent', () => {
+  let fixture: ComponentFixture<AppComponent>;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideRouter([])],
+      imports: [HttpClientTestingModule, ClarityModule, RouterTestingModule, BrowserAnimationsModule],
+      providers: [
+        provideRouter([]),
+      ],
       declarations: [AppComponent],
     }).compileComponents();
+
+    fixture = TestBed.createComponent(AppComponent);
+  });
+
+  afterEach(() => {
+    if (fixture !== undefined) {
+      fixture.destroy(); // Ensure the fixture is destroyed after each test
+    }
   });
 
   it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const titleElement = compiled.querySelector('h1');
@@ -20,7 +36,7 @@ describe('AppComponent', () => {
   });
 
   it(`should have as title 'metadata-analyzer-frontend'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
     const app = fixture.componentInstance;
     expect(app).toBeDefined();
     expect(app.title).toEqual('metadata-analyzer-frontend');

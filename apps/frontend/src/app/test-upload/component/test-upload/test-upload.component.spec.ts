@@ -5,6 +5,8 @@ import { TestUploadServiceService } from '../../service/test-upload-service.serv
 import { BASE_URL } from '../../../shared/types/configuration';
 import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ClarityModule } from '@clr/angular';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('TestUploadComponent', () => {
   let component: TestUploadComponent;
@@ -13,7 +15,7 @@ describe('TestUploadComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TestUploadComponent],
-      imports: [HttpClientTestingModule],
+      imports: [HttpClientTestingModule, ClarityModule, RouterTestingModule],
       providers: [
         {provide: BASE_URL, useValue: TestUploadServiceService},
         TestUploadServiceService
