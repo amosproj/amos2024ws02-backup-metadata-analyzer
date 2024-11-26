@@ -3,12 +3,12 @@ name: Analyzer Tests
 on:
   push:
     branches:
-      - 32-github-actions-backend-and-analyzer-test-automation
+      - dev
     paths-ignore:
       - 'deliverables/**'
   pull_request:
     branches:
-      - 32-github-actions-backend-and-analyzer-test-automation
+      - dev
     paths-ignore:
       - 'deliverables/**'
 
