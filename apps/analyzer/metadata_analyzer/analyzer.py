@@ -54,7 +54,7 @@ class Analyzer:
 
         return {"count": count}
 
-    def simple_rule_based_analysis():
+    def simple_rule_based_analysis(alert_limit):
         data = list(Analyzer.database.get_results())
-        result = Analyzer.simple_rule_based_analyzer.analyze(data)
+        result = Analyzer.simple_rule_based_analyzer.analyze(data, alert_limit)
         return result

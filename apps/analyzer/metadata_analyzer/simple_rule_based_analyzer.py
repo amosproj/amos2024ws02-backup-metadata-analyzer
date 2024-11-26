@@ -33,7 +33,7 @@ class SimpleRuleBasedAnalyzer:
         return [alert]
 
     # For now only search for size changes and trigger corresponding alerts
-    def analyze(self, data):
+    def analyze(self, data, alert_limit):
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
@@ -53,10 +53,12 @@ class SimpleRuleBasedAnalyzer:
                 new_alerts = self._analyze_pair(result1, result2)
                 alerts += new_alerts
     
+        # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
+        count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
         # Send the alerts to the backend
-        for alert in alerts:
+        for alert in alerts[:count]:
             self.backend.create_alert(alert)
 
         return {
-            "count": len(alerts)
+            "count": count
         }

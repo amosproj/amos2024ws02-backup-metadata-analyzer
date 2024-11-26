@@ -145,7 +145,9 @@ def update_data():
 
 @app.route("/simpleRuleBasedAnalysis", methods=["POST"])
 def simple_rule_based_analysis():
-    return jsonify(Analyzer.simple_rule_based_analysis())
+    json = request.get_json()
+    alert_limit = json["alertLimit"]
+    return jsonify(Analyzer.simple_rule_based_analysis(alert_limit))
 
 
 def main():
