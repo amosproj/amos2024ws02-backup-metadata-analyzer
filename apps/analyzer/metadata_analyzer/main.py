@@ -149,12 +149,23 @@ def simple_rule_based_analysis():
     alert_limit = json["alertLimit"]
     return jsonify(Analyzer.simple_rule_based_analysis(alert_limit))
 
+@app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
+def simple_rule_based_analysis_diff():
+    json = request.get_json()
+    alert_limit = json["alertLimit"]
+    return jsonify(Analyzer.simple_rule_based_analysis_diff(alert_limit))
+
+@app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
+def simple_rule_based_analysis_inc():
+    json = request.get_json()
+    alert_limit = json["alertLimit"]
+    return jsonify(Analyzer.simple_rule_based_analysis_inc(alert_limit))
 
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, simple_analyzer, simple_rule_based_analyzer)
 
     new_port = os.getenv("FLASK_RUN_PORT")

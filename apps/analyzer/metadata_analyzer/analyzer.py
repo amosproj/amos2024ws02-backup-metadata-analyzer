@@ -58,3 +58,13 @@ class Analyzer:
         data = list(Analyzer.database.get_results())
         result = Analyzer.simple_rule_based_analyzer.analyze(data, alert_limit)
         return result
+    
+    def simple_rule_based_analysis_diff(alert_limit):
+        data = list(Analyzer.database.get_results())
+        result = Analyzer.simple_rule_based_analyzer.analyze_diff(data,alert_limit)
+        return result
+    
+    def simple_rule_based_analysis_inc(alert_limit):
+        data = list(Analyzer.database.get_results())
+        result = Analyzer.simple_rule_based_analyzer.analyze_inc(data,alert_limit)
+        return result
