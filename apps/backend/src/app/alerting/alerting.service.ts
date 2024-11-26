@@ -19,12 +19,13 @@ export class AlertingService {
     const alert = new AlertEntity();
 
     alert.type = createAlertDto.type;
-    alert.value = createAlertDto.value;
-    alert.referenceValue = createAlertDto.referenceValue;
+    alert.value = Math.floor(createAlertDto.value);
+    alert.referenceValue = Math.floor(createAlertDto.referenceValue);
     const backupDataEntity = await this.backupDataService.findOneById(
       createAlertDto.backupId
     );
     if (!backupDataEntity) {
+      console.log(`Backup with id ${createAlertDto.backupId} not found`);
       throw new NotFoundException(
         `Backup with id ${createAlertDto.backupId} not found`
       );
