@@ -91,7 +91,7 @@ class SimpleRuleBasedAnalyzer:
             "count": count
         }
     
-     # Searches for size increases in diffs and trigger corresponding alerts if not applicable
+    # Searches for size increases in diffs and trigger corresponding alerts if not applicable
     def analyze_diff(self, data, alert_limit):
         # Group the 'full' and 'diff results by their task
         groups = defaultdict(list)
@@ -130,3 +130,5 @@ class SimpleRuleBasedAnalyzer:
         return {
             "count": count
         }
+    
+    
