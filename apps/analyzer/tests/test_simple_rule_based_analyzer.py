@@ -20,7 +20,7 @@ def test_alert():
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis(-1)
 
@@ -39,7 +39,7 @@ def test_alerts_different_tasks():
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis(-1)
 
@@ -61,7 +61,7 @@ def test_alert_backup_size_zero():
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis(-1)
 
@@ -78,7 +78,7 @@ def test_no_alert_size_diff_too_small():
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis(-1)
 
@@ -90,7 +90,7 @@ def test_no_alert_wrong_type():
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis(-1)
 
@@ -102,7 +102,7 @@ def test_no_alert_different_tasks():
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis(-1)
 
@@ -115,7 +115,7 @@ def test_alert_limit():
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis(1)
 
@@ -128,7 +128,7 @@ def test_alert_backup_size_zero_diff():
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_diff(1)
 
@@ -147,7 +147,7 @@ def test_alert_backup_size_decrease_ok_diff():
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_diff(1)
 
@@ -160,7 +160,7 @@ def test_alert_backup_size_decrease_nok_diff():
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_diff(1)
 
@@ -178,7 +178,7 @@ def test_alert_backup_size_decrease_large_nok_diff():
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_diff(1)
 
@@ -198,7 +198,7 @@ def test_alert_backup_size_decrease_large_ok_diff():
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_diff(1)
 
@@ -212,7 +212,7 @@ def test_alert_backup_size_increase_large_nok_diff():
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_diff(1)
 
@@ -232,7 +232,7 @@ def test_alert_backup_size_increase_large_ok_diff():
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_diff(1)
 
@@ -250,7 +250,7 @@ def test_alert_backup_size_complex_nok_diff():
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4, mock_result5, mock_result6, mock_result7])
     backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_diff(1)
 
@@ -260,3 +260,4 @@ def test_alert_backup_size_complex_nok_diff():
         "referenceValue": mock_result6.data_size / 1_000_000,
         "backupId": mock_result7.uuid
     }]
+

@@ -165,7 +165,7 @@ def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2)
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, simple_analyzer, simple_rule_based_analyzer)
 
     new_port = os.getenv("FLASK_RUN_PORT")
