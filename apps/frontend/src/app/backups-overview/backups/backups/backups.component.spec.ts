@@ -2,10 +2,10 @@ import { ComponentFixture, TestBed, inject } from '@angular/core/testing';
 import { ApplicationModule, InjectionToken } from '@angular/core';
 import { BackupsComponent } from './backups.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { BackupService } from '../../service/backup-service.service';
 import { BASE_URL } from '../../../shared/types/configuration';
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ClarityModule } from '@clr/angular';
+import { BackupService } from '../../service/backup-service/backup-service.service';
 
 // Mock the getContext method for HTMLCanvasElement
 Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
