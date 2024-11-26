@@ -12,6 +12,7 @@
   },
   "files": [],
   "include": [],
+  "types": ["vitest/globals"],
   "references": [
     {
       "path": "./tsconfig.editor.json"

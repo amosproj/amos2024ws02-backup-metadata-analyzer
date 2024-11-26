@@ -2,13 +2,19 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
-    "target": "es2016",
-    "types": ["jest", "node"]
+    "module": "ESNext",
+    "target": "es2020",
+    "types": ["vitest/globals"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@environments/*": ["src/environments/*"]
+    }
   },
   "files": ["src/test-setup.ts"],
   "include": [
-    "jest.config.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.d.ts"
