@@ -4,7 +4,7 @@
   "description": "Something something something",
   "type": "module",
   "scripts": {
-    "test": "npx @analogjs/vitest-angular --config vitest.config.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "be": "nx serve metadata-analyzer-backend",
     "fe": "nx serve metadata-analyzer-frontend",
     "py": "nx serve metadata-analyzer",
