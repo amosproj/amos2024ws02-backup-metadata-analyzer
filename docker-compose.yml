@@ -123,23 +123,6 @@ services:
     volumes:
       - ./db_dump.sql:/docker-entrypoint-initdb.d/db_dump.sql
       - ./00-init-roles.sql:/docker-entrypoint-initdb.d/00-init-roles.sql
-  # dbInitializer:
-  #   image: postgres
-  #   depends_on:
-  #     - analyzerDatabase
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #   entrypoint: >
-  #     sh -c "
-  #     until pg_isready -h analyzerDatabase -p 5432 -U postgres; do
-  #       echo 'Waiting for analyzerDatabase...';
-  #       sleep 2;
-  #     done;
-  #     pg_restore -U postgres -d postgres -h analyzerDatabase -p 5432 /db_dump.dmp
-  #     "
-  #   volumes:
-  #     - ./db_dump.dmp:/db_dump.dmp
 
 volumes:
   mono-node-modules: null
