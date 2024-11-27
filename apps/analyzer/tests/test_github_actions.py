@@ -13,5 +13,5 @@ from tests.mock_database import MockDatabase
 #     assert False
 
 def test_force_pass():
-    """Forced passing Test"""
+    """Forced passing Test 2"""
     assert True
