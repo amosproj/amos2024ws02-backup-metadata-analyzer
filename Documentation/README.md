@@ -11,11 +11,8 @@ cd ./apps/analyzer/metadata_analyzer ; poetry install
 
 - `npm ci`: dependency install
 
-- copy `.env.example` file in backend and rename to `.env` (adjust database properties according to database setup if
-  necessary)
-- copy `.env.example` file in analyzer and rename to `.env` (adjust port properties according to backend setup if
-  necessary)
-- To insert dummy data into table backupData you can use the SQL script `dummyData.sql` in `apps/backend/src/app/utils`
+- copy `.env.example` file in backend and rename to `.env` (adjust database properties according to database setup if necessary)
+- copy `.env.example` file in analyzer and rename to `.env` (adjust port properties according to backend setup if necessary)
 
 ### Running the code locally:
 
@@ -29,7 +26,7 @@ cd ./apps/analyzer/metadata_analyzer ; poetry install
 - the entity files need to be annotated with `@Entity(<table-name>)`
 - append the entity file to the `entities` array in `db-config.service.ts`
 - run the following command to generate a migration file:
-    - `nx run metadata-analyzer-backend:migrations:generate --name <migration-name>`
+  - `nx run metadata-analyzer-backend:migrations:generate --name <migration-name>`
 - append the generated file to the `migrations` array in `db-config.service.ts`
 
 ### Running tests
