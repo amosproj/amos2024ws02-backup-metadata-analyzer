@@ -3,17 +3,17 @@ name: Analyzer Tests
 on:
   push:
     branches:
-      - dev
+      - Github-actions-pipeline-demo-2
     paths-ignore:
       - 'deliverables/**'
   pull_request:
     branches:
-      - dev
+      - Github-actions-pipeline-demo-2
     paths-ignore:
       - 'deliverables/**'
 
 jobs:
-  test:
+  analyzer test:
     runs-on: ubuntu-latest
 
     steps:
