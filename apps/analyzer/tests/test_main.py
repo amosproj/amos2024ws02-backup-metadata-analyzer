@@ -38,6 +38,6 @@ def test_update_data():
 
     assert backend.backups == [Analyzer._convert_result(mock_result)]
 
-def test_force_false():
-    """This_test_should_fail"""
-    assert True
+def test_force_failure():
+    """This test is designed to always fail."""
+    assert False, "This test is intentionally failing."
