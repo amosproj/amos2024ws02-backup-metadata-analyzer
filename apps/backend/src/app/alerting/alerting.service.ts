@@ -37,7 +37,7 @@ export class AlertingService {
       type: alert.type,
     });
     if (existingAlertEntity) {
-      console.log('Alert already exists');
+      console.log('Alert already exists -> ignoring it');
       return;
     }
     const entity = await this.alertRepository.save(alert);

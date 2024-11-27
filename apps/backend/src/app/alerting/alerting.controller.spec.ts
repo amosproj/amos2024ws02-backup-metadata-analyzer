@@ -28,6 +28,7 @@ const mockAlertEntity: AlertEntity = {
 const mockAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
   find: jest.fn().mockImplementation(() => Promise.resolve([mockAlertEntity])),
+  findOneBy: jest.fn().mockResolvedValue(null),
 };
 
 describe('AlertingController (e2e)', () => {

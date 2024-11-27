@@ -46,6 +46,7 @@ describe('AlertingService', () => {
           provide: getRepositoryToken(AlertEntity),
           useValue: {
             find: jest.fn().mockResolvedValue(alerts),
+            findOneBy: jest.fn().mockResolvedValue(null),
             save: jest.fn(),
           },
         },

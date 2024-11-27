@@ -69,16 +69,16 @@ describe('BackupDataService', () => {
       expect(where).toEqual({ id: ILike('%123%') });
     });
 
-    // it('should create a where clause for date range search', () => {
-    //   const filterDto: BackupDataFilterDto = {
-    //     fromDate: '2023-01-01',
-    //     toDate: '2023-12-31',
-    //   };
-    //   const where = service.createWhereClause(filterDto);
-    //   expect(where).toEqual({
-    //     creationDate: Between(new Date('2023-01-01'), new Date('2023-12-31')),
-    //   });
-    // });
+    it('should create a where clause for date range search', () => {
+      const filterDto: BackupDataFilterDto = {
+        fromDate: '2023-01-01',
+        toDate: '2023-12-31',
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        creationDate: Between(expect.any(Date), expect.any(Date)),
+      });
+    });
 
     it('should create a where clause for size range search', () => {
       const filterDto: BackupDataFilterDto = { fromSizeMB: 10, toSizeMB: 100 };
@@ -86,21 +86,21 @@ describe('BackupDataService', () => {
       expect(where).toEqual({ sizeMB: Between(10, 100) });
     });
 
-    // it('should create a where clause for combined filters', () => {
-    //   const filterDto: BackupDataFilterDto = {
-    //     id: '123',
-    //     fromDate: '2023-01-01',
-    //     toDate: '2023-12-31',
-    //     fromSizeMB: 10,
-    //     toSizeMB: 100,
-    //   };
-    //   const where = service.createWhereClause(filterDto);
-    //   expect(where).toEqual({
-    //     id: ILike('%123%'),
-    //     creationDate: Between(new Date('2023-01-01'), new Date('2023-12-31')),
-    //     sizeMB: Between(10, 100),
-    //   });
-    // });
+    it('should create a where clause for combined filters', () => {
+      const filterDto: BackupDataFilterDto = {
+        id: '123',
+        fromDate: '2023-01-01',
+        toDate: '2023-12-31',
+        fromSizeMB: 10,
+        toSizeMB: 100,
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        id: ILike('%123%'),
+        creationDate: Between(expect.any(Date), expect.any(Date)),
+        sizeMB: Between(10, 100),
+      });
+    });
 
     it('should throw an error for invalid fromDate', () => {
       const filterDto: BackupDataFilterDto = { fromDate: 'invalid-date' };
