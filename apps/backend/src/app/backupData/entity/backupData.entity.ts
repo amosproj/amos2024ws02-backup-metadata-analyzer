@@ -15,7 +15,7 @@ export class BackupDataEntity {
     nullable: false,
     required: true,
   })
-  @Column()
+  @Column({ type: 'decimal', precision: 20, scale: 6 })
   sizeMB!: number;
 
   @ApiProperty({

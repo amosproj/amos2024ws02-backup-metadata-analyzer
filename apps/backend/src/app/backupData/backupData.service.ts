@@ -58,7 +58,7 @@ export class BackupDataService extends PaginationService {
   ): Promise<BackupDataEntity> {
     return await this.backupDataRepository.save({
       ...createBackupDataDto,
-      sizeMB: Math.floor(createBackupDataDto.sizeMB),
+      sizeMB: createBackupDataDto.sizeMB,
     });
   }
 
@@ -72,7 +72,7 @@ export class BackupDataService extends PaginationService {
     await this.backupDataRepository.save(
       createBackupDataDtos.map((dto) => ({
         ...dto,
-        sizeMB: Math.floor(dto.sizeMB),
+        sizeMB: dto.sizeMB,
       }))
     );
   }
