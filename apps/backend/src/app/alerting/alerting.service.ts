@@ -32,6 +32,14 @@ export class AlertingService {
     }
     alert.backup = backupDataEntity;
 
+    const existingAlertEntity = await this.alertRepository.findOneBy({
+      backup: backupDataEntity,
+      type: alert.type,
+    });
+    if (existingAlertEntity) {
+      console.log('Alert already exists');
+      return;
+    }
     const entity = await this.alertRepository.save(alert);
     await this.triggerAlertMail(entity);
   }
