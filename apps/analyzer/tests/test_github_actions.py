@@ -9,7 +9,7 @@ from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
 
 def test_force_fail():
-    """Forced failing Test"""
+    """Forced failing Test2"""
     assert False
 
 # def test_force_pass():
