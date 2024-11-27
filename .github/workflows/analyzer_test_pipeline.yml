@@ -3,12 +3,12 @@ name: Analyzer Tests
 on:
   push:
     branches:
-      - Github-actions-pipeline-demo-2
+      - Github-actions-Pipeline-demo-2
     paths-ignore:
       - 'deliverables/**'
   pull_request:
     branches:
-      - Github-actions-pipeline-demo-2
+      - Github-actions-Pipeline-demo-2
     paths-ignore:
       - 'deliverables/**'
 
