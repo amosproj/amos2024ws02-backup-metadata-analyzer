@@ -28,6 +28,7 @@ describe('MailService', () => {
           provide: ConfigService,
           useValue: {
             getOrThrow: jest.fn().mockReturnValue('test@example.com'),
+            get: jest.fn().mockReturnValue('true'),
           },
         },
       ],
