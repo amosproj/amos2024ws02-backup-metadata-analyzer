@@ -11,12 +11,12 @@ export class BackupDataEntity {
   id!: string;
 
   @ApiProperty({
-    description: 'Size of Backup in MB',
+    description: 'Size of Backup in Bytes',
     nullable: false,
     required: true,
   })
   @Column()
-  sizeMB!: number;
+  size!: number;
 
   @ApiProperty({
     description: 'Creation Date of Backup',

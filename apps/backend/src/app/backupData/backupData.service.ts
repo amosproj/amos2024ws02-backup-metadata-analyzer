@@ -58,7 +58,7 @@ export class BackupDataService extends PaginationService {
   ): Promise<BackupDataEntity> {
     return await this.backupDataRepository.save({
       ...createBackupDataDto,
-      sizeMB: Math.floor(createBackupDataDto.sizeMB),
+      size: Math.floor(createBackupDataDto.size),
     });
   }
 
@@ -72,7 +72,7 @@ export class BackupDataService extends PaginationService {
     await this.backupDataRepository.save(
       createBackupDataDtos.map((dto) => ({
         ...dto,
-        sizeMB: Math.floor(dto.sizeMB),
+        size: Math.floor(dto.size),
       }))
     );
   }
@@ -130,15 +130,15 @@ export class BackupDataService extends PaginationService {
     }
 
     //Size search
-    if (backupDataFilterDto.fromSizeMB && backupDataFilterDto.toSizeMB) {
-      where.sizeMB = Between(
-        backupDataFilterDto.fromSizeMB,
-        backupDataFilterDto.toSizeMB
+    if (backupDataFilterDto.fromSize && backupDataFilterDto.toSize) {
+      where.size = Between(
+        backupDataFilterDto.fromSize,
+        backupDataFilterDto.toSize
       );
-    } else if (backupDataFilterDto.fromSizeMB) {
-      where.sizeMB = MoreThanOrEqual(backupDataFilterDto.fromSizeMB);
-    } else if (backupDataFilterDto.toSizeMB) {
-      where.sizeMB = LessThanOrEqual(backupDataFilterDto.toSizeMB);
+    } else if (backupDataFilterDto.fromSize) {
+      where.size = MoreThanOrEqual(backupDataFilterDto.fromSize);
+    } else if (backupDataFilterDto.toSize) {
+      where.size = LessThanOrEqual(backupDataFilterDto.toSize);
     }
 
     return where;

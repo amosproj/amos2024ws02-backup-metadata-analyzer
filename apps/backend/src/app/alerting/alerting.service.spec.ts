@@ -12,7 +12,7 @@ import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
-  sizeMB: 100,
+  size: 100,
   creationDate: new Date(),
 };
 

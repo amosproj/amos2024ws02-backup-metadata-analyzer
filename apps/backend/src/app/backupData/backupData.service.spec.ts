@@ -11,7 +11,7 @@ import { SortOrder } from '../utils/pagination/SortOrder';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
-  sizeMB: 100,
+  size: 100,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
 
@@ -81,9 +81,9 @@ describe('BackupDataService', () => {
     });
 
     it('should create a where clause for size range search', () => {
-      const filterDto: BackupDataFilterDto = { fromSizeMB: 10, toSizeMB: 100 };
+      const filterDto: BackupDataFilterDto = { fromSize: 10, toSize: 100 };
       const where = service.createWhereClause(filterDto);
-      expect(where).toEqual({ sizeMB: Between(10, 100) });
+      expect(where).toEqual({ size: Between(10, 100) });
     });
 
     it('should create a where clause for combined filters', () => {
@@ -91,14 +91,14 @@ describe('BackupDataService', () => {
         id: '123',
         fromDate: '2023-01-01',
         toDate: '2023-12-31',
-        fromSizeMB: 10,
-        toSizeMB: 100,
+        fromSize: 10,
+        toSize: 100,
       };
       const where = service.createWhereClause(filterDto);
       expect(where).toEqual({
         id: ILike('%123%'),
         creationDate: Between(expect.any(Date), expect.any(Date)),
-        sizeMB: Between(10, 100),
+        size: Between(10, 100),
       });
     });
 
@@ -123,12 +123,12 @@ describe('BackupDataService', () => {
       expect(orderClause).toEqual({ creationDate: 'DESC' });
     });
 
-    it('should create an order clause for sizeMB in ASC order', () => {
+    it('should create an order clause for size in ASC order', () => {
       const orderClause = service.createOrderClause({
         orderBy: BackupDataOrderByOptions.SIZE,
         sortOrder: SortOrder.ASC,
       });
-      expect(orderClause).toEqual({ sizeMB: 'ASC' });
+      expect(orderClause).toEqual({ size: 'ASC' });
     });
 
     it('should create an order clause for id in ASC order', () => {
@@ -154,8 +154,8 @@ describe('BackupDataService', () => {
   describe('createBatched', () => {
     it('should create new backup data entities batched', async () => {
       const createBackupDataDtos: CreateBackupDataDto[] = [
-        { id: '1', sizeMB: 100, creationDate: new Date() },
-        { id: '2', sizeMB: 200, creationDate: new Date() },
+        { id: '1', size: 100, creationDate: new Date() },
+        { id: '2', size: 200, creationDate: new Date() },
       ];
 
       await service.createBatched(createBackupDataDtos);

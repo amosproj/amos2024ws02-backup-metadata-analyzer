@@ -13,7 +13,7 @@ import { MailService } from '../utils/mail/mail.service';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
-  sizeMB: 100,
+  size: 100,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
 

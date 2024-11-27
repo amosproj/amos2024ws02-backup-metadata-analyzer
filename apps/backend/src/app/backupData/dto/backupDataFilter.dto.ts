@@ -27,16 +27,16 @@ export class BackupDataFilterDto {
   toDate?: string;
 
   @ApiProperty({
-    description: 'From size in MB',
+    description: 'From size in Bytes',
     required: false,
   })
   @IsOptional()
-  fromSizeMB?: number;
+  fromSize?: number;
 
   @ApiProperty({
-    description: 'To size in MB',
+    description: 'To size in Bytes',
     required: false,
   })
   @IsOptional()
-  toSizeMB?: number;
+  toSize?: number;
 }

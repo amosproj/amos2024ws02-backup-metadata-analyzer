@@ -56,8 +56,8 @@ export class MailService {
     const context = {
       reason,
       description,
-      value: alert.value.toString() + ' MB',
-      referenceValue: alert.referenceValue.toString() + ' MB',
+      value: alert.value.toString() + ' Bytes',
+      referenceValue: alert.referenceValue.toString() + ' Bytes',
       valueColumnName,
       referenceValueColumnName,
       backupId: alert.backup.id,
