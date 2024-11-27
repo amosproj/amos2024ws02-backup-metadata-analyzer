@@ -9,10 +9,12 @@ import { NotFoundException } from '@nestjs/common';
 import { CreateAlertDto } from './dto/createAlert.dto';
 import { AlertType } from './dto/alertType';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
+import { BackupType } from '../backupData/dto/backupType';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
   sizeMB: 100,
+  type: BackupType.FULL,
   creationDate: new Date(),
 };
 
@@ -46,6 +48,7 @@ describe('AlertingService', () => {
           provide: getRepositoryToken(AlertEntity),
           useValue: {
             find: jest.fn().mockResolvedValue(alerts),
+            findOneBy: jest.fn().mockResolvedValue(null),
             save: jest.fn(),
           },
         },

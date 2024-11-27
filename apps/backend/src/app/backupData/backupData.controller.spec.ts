@@ -6,10 +6,12 @@ import { Repository } from 'typeorm';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataModule } from './backupData.module';
+import { BackupType } from './dto/backupType';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
   sizeMB: 100,
+  type: BackupType.FULL,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
 
@@ -111,7 +113,7 @@ describe('BackupDataController (e2e)', () => {
       skip: '0',
       take: '1',
       order: { creationDate: 'DESC' },
-      where: {},
+      where: { type: BackupType.FULL },
     });
   });
 
@@ -134,7 +136,7 @@ describe('BackupDataController (e2e)', () => {
 
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
-      where: { creationDate: expect.any(Object) },
+      where: { creationDate: expect.any(Object), type: BackupType.FULL },
     });
   });
 });

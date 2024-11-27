@@ -10,10 +10,12 @@ import { AlertType } from './dto/alertType';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailService } from '../utils/mail/mail.service';
+import { BackupType } from '../backupData/dto/backupType';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
   sizeMB: 100,
+  type: BackupType.FULL,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
 
@@ -28,6 +30,7 @@ const mockAlertEntity: AlertEntity = {
 const mockAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
   find: jest.fn().mockImplementation(() => Promise.resolve([mockAlertEntity])),
+  findOneBy: jest.fn().mockResolvedValue(null),
 };
 
 describe('AlertingController (e2e)', () => {

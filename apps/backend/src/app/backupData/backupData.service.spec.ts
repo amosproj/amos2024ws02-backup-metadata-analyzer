@@ -8,10 +8,12 @@ import { BadRequestException } from '@nestjs/common';
 import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataOrderByOptions } from './dto/backupDataOrderOptions.dto';
 import { SortOrder } from '../utils/pagination/SortOrder';
+import { BackupType } from './dto/backupType';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
   sizeMB: 100,
+  type: BackupType.FULL,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
 
@@ -57,7 +59,9 @@ describe('BackupDataService', () => {
       expect(repository.findAndCount).toHaveBeenCalledWith({
         take: 5,
         order: { creationDate: 'DESC' },
-        where: {},
+        where: {
+          type: BackupType.FULL,
+        },
       });
     });
   });
@@ -66,41 +70,46 @@ describe('BackupDataService', () => {
     it('should create a where clause for ID search', () => {
       const filterDto: BackupDataFilterDto = { id: '123' };
       const where = service.createWhereClause(filterDto);
-      expect(where).toEqual({ id: ILike('%123%') });
+      expect(where).toEqual({ id: ILike('%123%'), type: BackupType.FULL });
     });
 
-    // it('should create a where clause for date range search', () => {
-    //   const filterDto: BackupDataFilterDto = {
-    //     fromDate: '2023-01-01',
-    //     toDate: '2023-12-31',
-    //   };
-    //   const where = service.createWhereClause(filterDto);
-    //   expect(where).toEqual({
-    //     creationDate: Between(new Date('2023-01-01'), new Date('2023-12-31')),
-    //   });
-    // });
+    it('should create a where clause for date range search', () => {
+      const filterDto: BackupDataFilterDto = {
+        fromDate: '2023-01-01',
+        toDate: '2023-12-31',
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        creationDate: Between(expect.any(Date), expect.any(Date)),
+        type: BackupType.FULL,
+      });
+    });
 
     it('should create a where clause for size range search', () => {
       const filterDto: BackupDataFilterDto = { fromSizeMB: 10, toSizeMB: 100 };
       const where = service.createWhereClause(filterDto);
-      expect(where).toEqual({ sizeMB: Between(10, 100) });
+      expect(where).toEqual({
+        sizeMB: Between(10, 100),
+        type: BackupType.FULL,
+      });
     });
 
-    // it('should create a where clause for combined filters', () => {
-    //   const filterDto: BackupDataFilterDto = {
-    //     id: '123',
-    //     fromDate: '2023-01-01',
-    //     toDate: '2023-12-31',
-    //     fromSizeMB: 10,
-    //     toSizeMB: 100,
-    //   };
-    //   const where = service.createWhereClause(filterDto);
-    //   expect(where).toEqual({
-    //     id: ILike('%123%'),
-    //     creationDate: Between(new Date('2023-01-01'), new Date('2023-12-31')),
-    //     sizeMB: Between(10, 100),
-    //   });
-    // });
+    it('should create a where clause for combined filters', () => {
+      const filterDto: BackupDataFilterDto = {
+        id: '123',
+        fromDate: '2023-01-01',
+        toDate: '2023-12-31',
+        fromSizeMB: 10,
+        toSizeMB: 100,
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        id: ILike('%123%'),
+        creationDate: Between(expect.any(Date), expect.any(Date)),
+        sizeMB: Between(10, 100),
+        type: BackupType.FULL,
+      });
+    });
 
     it('should throw an error for invalid fromDate', () => {
       const filterDto: BackupDataFilterDto = { fromDate: 'invalid-date' };

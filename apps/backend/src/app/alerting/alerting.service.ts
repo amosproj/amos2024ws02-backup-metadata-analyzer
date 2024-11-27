@@ -19,8 +19,8 @@ export class AlertingService {
     const alert = new AlertEntity();
 
     alert.type = createAlertDto.type;
-    alert.value = Math.floor(createAlertDto.value);
-    alert.referenceValue = Math.floor(createAlertDto.referenceValue);
+    alert.value = createAlertDto.value;
+    alert.referenceValue = createAlertDto.referenceValue;
     const backupDataEntity = await this.backupDataService.findOneById(
       createAlertDto.backupId
     );
@@ -32,6 +32,14 @@ export class AlertingService {
     }
     alert.backup = backupDataEntity;
 
+    const existingAlertEntity = await this.alertRepository.findOneBy({
+      backup: backupDataEntity,
+      type: alert.type,
+    });
+    if (existingAlertEntity) {
+      console.log('Alert already exists -> ignoring it');
+      return;
+    }
     const entity = await this.alertRepository.save(alert);
     await this.triggerAlertMail(entity);
   }

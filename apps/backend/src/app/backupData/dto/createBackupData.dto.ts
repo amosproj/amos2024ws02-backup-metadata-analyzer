@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { BackupType } from './backupType';
 
 export class CreateBackupDataDto {
   @ApiProperty({
@@ -16,6 +17,17 @@ export class CreateBackupDataDto {
   })
   @IsNumber()
   sizeMB!: number;
+
+  @ApiProperty({
+    description: 'Backup Type, default is FULL',
+    nullable: false,
+    required: true,
+    enum: BackupType,
+    default: BackupType.FULL
+  })
+  @IsOptional()
+  @IsEnum(BackupType)
+  type?: BackupType;
 
   @ApiProperty({
     description: 'Creation Date of Backup',
