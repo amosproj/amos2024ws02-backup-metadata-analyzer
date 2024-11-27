@@ -8,10 +8,10 @@ from datetime import datetime
 from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
 
-# def test_force_fail():
-#     """Forced failing Test"""
-#     assert False
+def test_force_fail():
+    """Forced failing Test"""
+    assert False
 
-def test_force_pass():
-    """Forced passing Test"""
-    assert True
+# def test_force_pass():
+#     """Forced passing Test"""
+#     assert True
