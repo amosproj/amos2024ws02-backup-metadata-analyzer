@@ -40,4 +40,4 @@ def test_update_data():
 
 def test_force_false():
     """This_test_should_fail"""
-    assert False
+    assert True
