@@ -37,3 +37,7 @@ def test_update_data():
     Analyzer.update_data()
 
     assert backend.backups == [Analyzer._convert_result(mock_result)]
+
+def test_force_false():
+    """This_test_should_fail"""
+    assert False
