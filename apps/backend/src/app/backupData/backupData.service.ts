@@ -15,6 +15,7 @@ import { PaginationService } from '../utils/pagination/paginationService';
 import { BackupDataDto } from './dto/backupData.dto';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
 import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
+import { BackupType } from './dto/backupType';
 
 @Injectable()
 export class BackupDataService extends PaginationService {
@@ -140,6 +141,8 @@ export class BackupDataService extends PaginationService {
     } else if (backupDataFilterDto.toSizeMB) {
       where.sizeMB = LessThanOrEqual(backupDataFilterDto.toSizeMB);
     }
+
+    where.type = BackupType.FULL;
 
     return where;
   }

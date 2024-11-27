@@ -10,6 +10,7 @@ import { RemovedBio1731662089990 } from './migrations/1731662089990-RemovedBio';
 import { AlertEntity } from './alerting/entity/alert.entity';
 import { Alert1732390760114 } from './migrations/1732390760114-Alert';
 import { ChangedSizeToDecimal1732720032144 } from './migrations/1732720032144-ChangedSizeToDecimal';
+import { BackupType1732720927342 } from './migrations/1732720927342-BackupType';
 
 /**
  * Used by NestJS to reach database.
@@ -37,6 +38,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         RemovedBio1731662089990,
         Alert1732390760114,
         ChangedSizeToDecimal1732720032144,
+        BackupType1732720927342,
       ],
       logging: true,
     };
