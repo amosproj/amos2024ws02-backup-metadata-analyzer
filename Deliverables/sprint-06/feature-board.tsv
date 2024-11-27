@@ -37,11 +37,14 @@ Model analysis research	https://github.com/amosproj/amos2024ws02-backup-metadata
 Concept of build process defined & local build implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/6	engelharddirk	Feature Archive	2	2
 Analysis Module: First Time Series Analysis Implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/51		Product Backlog		
 Secure API Endpoints	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/68		Product Backlog		
+Clean Up Task: Technical debt clean up	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/92	flo0852	Product Backlog		
 Bug: Fix local setup for every chip based system (Win, linux,  MacOS intel, MacOS arm)	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/88		Product Backlog		
 Analysis Module: Rule Based Alert - Backup creation time alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/82		Product Backlog		
 Backend: Alert API - Backup creation time alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/84		Product Backlog		
 Frontend: Alert Panel for Backup creation time alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/85		Product Backlog		
+Backend: Alert deactivation	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/91		Product Backlog		
 Frontend: Alert Panel Component - Deactivate option	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/86		Product Backlog		
+Backend: Email notification reciever list	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/93		Product Backlog		
 Frontend: Email notification reciever list	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/87		Product Backlog		
 Analysis Module: First Density Based Analysis Implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/52		Product Backlog		
 Backend: Basic Backup Data API	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/46		Product Backlog		
