@@ -35,7 +35,7 @@ Make sure the following are installed on your machine:
 
    Copy the database dump .dmp file in the projects root folder and rename it to **db_dump.sql**
 
-5. **Clean Docker node_modules**:
+5. **Delete Docker node_modules Volume**:
 
    ```bash
    docker volume rm amos2024ws02-backup-metadata-analyzer_mono-node-modules
