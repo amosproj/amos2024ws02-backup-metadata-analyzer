@@ -10,12 +10,12 @@ export class BackupDataDto {
     id!: string;
 
     @ApiProperty({
-        description: 'Size of Backup in Bytes',
+        description: 'Size of Backup in MB',
         nullable: false,
         required: true,
     })
     @IsNumber()
-    size!: number;
+    sizeMB!: number;
 
     @ApiProperty({
         description: 'Creation Date of Backup',

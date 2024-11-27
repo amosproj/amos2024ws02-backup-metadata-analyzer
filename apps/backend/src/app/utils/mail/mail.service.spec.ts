@@ -51,7 +51,7 @@ describe('MailService', () => {
       referenceValue: 200,
       backup: {
         id: 'backup-id',
-        size: 100,
+        sizeMB: 100,
         creationDate: new Date(),
       },
     };
@@ -66,8 +66,8 @@ describe('MailService', () => {
         reason: 'Size of latest Backup decreased by 50 %',
         description:
           'Size of latest Backup decreased by 50% compared to the previous Backup. This could indicate a problem with the Backup.',
-        value: '100 Bytes',
-        referenceValue: '200 Bytes',
+        value: '100 MB',
+        referenceValue: '200 MB',
         valueColumnName: 'Size of backup',
         referenceValueColumnName: 'Size of previous backup',
         backupId: 'backup-id',

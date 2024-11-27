@@ -4,7 +4,7 @@ import { SortOrder } from '../../utils/pagination/SortOrder';
 
 export enum BackupDataOrderByOptions {
   ID = 'id',
-  SIZE = 'size',
+  SIZE = 'sizeMB',
   BACKUP_DATE = 'creationDate',
 }
 

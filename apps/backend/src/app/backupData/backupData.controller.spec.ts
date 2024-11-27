@@ -9,7 +9,7 @@ import { BackupDataModule } from './backupData.module';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
-  size: 100,
+  sizeMB: 100,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
 
@@ -53,7 +53,7 @@ describe('BackupDataController (e2e)', () => {
   it('/backupData (POST) should create new backup data entry', async () => {
     const createBackupDataDto: CreateBackupDataDto = {
       id: '1',
-      size: 100,
+      sizeMB: 100,
       creationDate: new Date(),
     };
 
@@ -64,7 +64,7 @@ describe('BackupDataController (e2e)', () => {
 
     expect(response.body).toEqual({
       id: createBackupDataDto.id,
-      size: createBackupDataDto.size,
+      sizeMB: createBackupDataDto.sizeMB,
       creationDate: createBackupDataDto.creationDate.toISOString(),
     });
 
