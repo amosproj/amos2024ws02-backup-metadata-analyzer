@@ -13,6 +13,7 @@ app = Flask(__name__)
 swagger = Swagger(app)
 load_dotenv(dotenv_path=".env")
 
+
 @app.route("/")
 def hello_world():
     """Most basic example endpoint that returns a hello world message.
@@ -110,6 +111,7 @@ def analyze():
     """
     return jsonify(Analyzer.analyze())
 
+
 @app.route("/updateBasicBackupData", methods=["POST"])
 def update_data():
     """Updates the backend database with values taken from the analyzer database.
@@ -143,23 +145,42 @@ def update_data():
     """
     return jsonify(Analyzer.update_data())
 
+
 @app.route("/simpleRuleBasedAnalysis", methods=["POST"])
 def simple_rule_based_analysis():
-    json = request.get_json()
-    alert_limit = json["alertLimit"]
-    return jsonify(Analyzer.simple_rule_based_analysis(alert_limit))
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(Analyzer.simple_rule_based_analysis(int(alert_limit)))
+    except ValueError:
+        print("Alert limit is not a number")
+        return "Invalid value for alert limit", 400
+
 
 @app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
 def simple_rule_based_analysis_diff():
-    json = request.get_json()
-    alert_limit = json["alertLimit"]
-    return jsonify(Analyzer.simple_rule_based_analysis_diff(alert_limit))
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(Analyzer.simple_rule_based_analysis_diff(int(alert_limit)))
+    except ValueError:
+        print("Alert limit is not a number")
+        return "Invalid value for alert limit", 400
+
 
 @app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
 def simple_rule_based_analysis_inc():
-    json = request.get_json()
-    alert_limit = json["alertLimit"]
-    return jsonify(Analyzer.simple_rule_based_analysis_inc(alert_limit))
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(Analyzer.simple_rule_based_analysis_inc(int(alert_limit)))
+    except ValueError:
+        print("Alert limit is not a number")
+        return "Invalid value for alert limit", 400
+
 
 def main():
     database = Database()
