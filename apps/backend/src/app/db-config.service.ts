@@ -14,6 +14,7 @@ import { BackupType1732720927342 } from './migrations/1732720927342-BackupType';
 import { COPYBackupType1732873335062 } from './migrations/1732873335062-COPYBackupType';
 import { AlertTypeEntity } from './alerting/entity/alertType.entity';
 import { AlertType1732873882256 } from './migrations/1732873882256-AlertType';
+import { AlertTypeNameUnique1732874749343 } from './migrations/1732874749343-AlertTypeNameUnique';
 
 /**
  * Used by NestJS to reach database.
@@ -44,6 +45,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         BackupType1732720927342,
         COPYBackupType1732873335062,
         AlertType1732873882256,
+        AlertTypeNameUnique1732874749343,
       ],
       logging: true,
     };

@@ -15,8 +15,9 @@ export class AlertTypeEntity {
   @ApiProperty({
     description: 'Name of the Alert Type',
     required: true,
+    uniqueItems: true,
   })
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   name!: string;
 
   @ApiProperty({

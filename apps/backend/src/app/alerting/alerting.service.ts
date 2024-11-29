@@ -1,19 +1,53 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AlertEntity } from './entity/alert.entity';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { FindOptionsWhere, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateAlertDto } from './dto/createAlert.dto';
 import { BackupDataService } from '../backupData/backupData.service';
+import { CreateAlertTypeDto } from './dto/createAlertType.dto';
+import { AlertTypeEntity } from './entity/alertType.entity';
 
 @Injectable()
 export class AlertingService {
   constructor(
     @InjectRepository(AlertEntity)
     private alertRepository: Repository<AlertEntity>,
+    @InjectRepository(AlertTypeEntity)
+    private alertTypeRepository: Repository<AlertTypeEntity>,
     private mailService: MailService,
     private backupDataService: BackupDataService
   ) {}
+
+  async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
+    const entity = await this.alertTypeRepository.findOneBy({
+      name: createAlertTypeDto.name,
+    });
+    if (entity) {
+      throw new ConflictException(
+        `Alert type with name ${createAlertTypeDto.name} already exists`
+      );
+    }
+    return await this.alertTypeRepository.save(createAlertTypeDto);
+  }
+
+  async findAllAlertTypes(
+    user_active?: boolean,
+    master_active?: boolean
+  ): Promise<AlertTypeEntity[]> {
+    const where: FindOptionsWhere<AlertTypeEntity> = {};
+    if (user_active) {
+      where.user_active = user_active;
+    }
+    if (master_active) {
+      where.master_active = master_active;
+    }
+    return await this.alertTypeRepository.find({ where });
+  }
 
   async createAlert(createAlertDto: CreateAlertDto) {
     const alert = new AlertEntity();
