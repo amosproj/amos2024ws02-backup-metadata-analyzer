@@ -10,16 +10,16 @@
               <cds-icon shape="warning-standard" class="is-solid"></cds-icon>
               {{ nonCriticalAlertsCount }}
             </span>
-          </span>
+    </span>
   </div>
   <div class="card-block">
     <div class="card-text">
       <div *ngFor="let alert of alerts">
         <clr-tooltip>
           <div clrTooltipTrigger [ngClass]="getAlertClass(alert)" class="alert">
-            <cds-icon *ngIf="!criticalAlertTypes.includes(alert.type)" shape="warning-standard"
+            <cds-icon *ngIf="alert.alertType.severity === SeverityType.CRITICAL" shape="warning-standard"
                       class="is-solid"></cds-icon>
-            <cds-icon *ngIf="criticalAlertTypes.includes(alert.type)" shape="error-standard"
+            <cds-icon *ngIf="alert.alertType.severity === SeverityType.WARNING" shape="error-standard"
                       class="is-solid"></cds-icon>
             <span>{{ getAlertReason(alert) }}</span>
           </div>
@@ -41,6 +41,6 @@
     </div>
   </div>
   <div class="card-footer">
-    {{ alerts.length }} Alerts have been triggered for backups in the last {{DAYS}} days.
+    {{ alerts.length }} Alerts have been triggered for backups in the last {{ DAYS }} days.
   </div>
 </div>

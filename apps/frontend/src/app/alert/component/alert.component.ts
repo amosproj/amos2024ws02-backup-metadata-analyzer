@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
-import { Alert } from '../../shared/types/alert';
+import { Alert, SizeAlert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
-import { AlertType } from '../../shared/enums/alertType';
 import { Subject, takeUntil } from 'rxjs';
+import { SeverityType } from '../../shared/enums/severityType';
+import { AlertType } from '../../shared/types/alertType';
 
+//TODO: Handle info alerts
 @Component({
   selector: 'app-alert',
   templateUrl: './alert.component.html',
@@ -17,8 +19,6 @@ export class AlertComponent implements OnInit {
   alerts: Alert[] = [];
   criticalAlertsCount: number = 0;
   nonCriticalAlertsCount: number = 0;
-
-  criticalAlertTypes: AlertType[] = [];
 
   status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
@@ -38,11 +38,11 @@ export class AlertComponent implements OnInit {
       .getAllAlerts(this.DAYS)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data: Alert[]) => {
-        const criticalAlerts = data.filter((alert) =>
-          this.criticalAlertTypes.includes(alert.type)
+        const criticalAlerts = data.filter(
+          (alert) => alert.alertType.severity === SeverityType.CRITICAL
         );
         const nonCriticalAlerts = data.filter(
-          (alert) => !this.criticalAlertTypes.includes(alert.type)
+          (alert) => alert.alertType.severity === SeverityType.WARNING
         );
         this.criticalAlertsCount = criticalAlerts.length;
         this.nonCriticalAlertsCount = nonCriticalAlerts.length;
@@ -62,7 +62,7 @@ export class AlertComponent implements OnInit {
   }
 
   getAlertClass(alert: Alert): string {
-    if (this.criticalAlertTypes.includes(alert.type)) {
+    if (alert.alertType.severity === SeverityType.CRITICAL) {
       return 'alert-red';
     } else {
       return 'alert-yellow';
@@ -74,7 +74,9 @@ export class AlertComponent implements OnInit {
       return 'OK';
     }
     if (
-      this.alerts.some((alert) => this.criticalAlertTypes.includes(alert.type))
+      this.alerts.some(
+        (alert) => alert.alertType.severity === SeverityType.CRITICAL
+      )
     ) {
       return 'Critical';
     }
@@ -84,15 +86,22 @@ export class AlertComponent implements OnInit {
   getAlertReason(alert: Alert) {
     let reason = '';
     let percentage = 0;
-    switch (alert.type) {
-      case AlertType.SIZE_DECREASED:
-        percentage = Math.floor((1 - alert.value / alert.referenceValue) * 100);
-        reason = `Size of backup decreased`;
-        break;
-      case AlertType.SIZE_INCREASED:
-        percentage = Math.floor((alert.value / alert.referenceValue - 1) * 100);
-        reason = `Size of backup increased`;
-        break;
+    switch (alert.alertType.name) {
+      case 'SIZE_ALERT':
+        const sizeAlert = alert as SizeAlert;
+        if (sizeAlert.size < sizeAlert.referenceSize) {
+          percentage = Math.floor(
+            (1 - sizeAlert.size / sizeAlert.referenceSize) * 100
+          );
+          reason = `Size of backup decreased`;
+          break;
+        } else {
+          percentage = Math.floor(
+            (sizeAlert.size / sizeAlert.referenceSize - 1) * 100
+          );
+          reason = `Size of backup increased`;
+          break;
+        }
     }
     return reason;
   }
@@ -100,15 +109,22 @@ export class AlertComponent implements OnInit {
   getAlertDetails(alert: Alert) {
     let description = '';
     let percentage = 0;
-    switch (alert.type) {
-      case AlertType.SIZE_DECREASED:
-        percentage = Math.floor((1 - alert.value / alert.referenceValue) * 100);
-        description = `Size of backup decreased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
-        break;
-      case AlertType.SIZE_INCREASED:
-        percentage = Math.floor((alert.value / alert.referenceValue - 1) * 100);
-        description = `Size of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
-        break;
+    switch (alert.alertType.name) {
+      case 'SIZE_ALERT':
+        const sizeAlert = alert as SizeAlert;
+        if (sizeAlert.size < sizeAlert.referenceSize) {
+          percentage = Math.floor(
+            (1 - sizeAlert.size / sizeAlert.referenceSize) * 100
+          );
+          description = `Size of backup decreased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
+          break;
+        } else {
+          percentage = Math.floor(
+            (sizeAlert.size / sizeAlert.referenceSize - 1) * 100
+          );
+          description = `Size of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
+          break;
+        }
     }
     return description;
   }
@@ -116,4 +132,7 @@ export class AlertComponent implements OnInit {
   formatDate(date: Date): string {
     return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
   }
+
+  protected readonly AlertType = AlertType;
+  protected readonly SeverityType = SeverityType;
 }

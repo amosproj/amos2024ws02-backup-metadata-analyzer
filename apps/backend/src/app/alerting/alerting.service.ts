@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AlertEntity } from './entity/alert.entity';
 import { FindOptionsWhere, MoreThanOrEqual, Repository } from 'typeorm';
 import { BackupDataService } from '../backupData/backupData.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
@@ -16,12 +15,9 @@ import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 
 @Injectable()
 export class AlertingService {
-  const;
   alertRepositories: Repository<any>[] = [];
 
   constructor(
-    @InjectRepository(AlertEntity)
-    private alertRepository: Repository<AlertEntity>,
     @InjectRepository(AlertTypeEntity)
     private alertTypeRepository: Repository<AlertTypeEntity>,
     //Alert Repositories

@@ -1,7 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { SeverityType } from '../dto/severityType';
-import { AlertType } from '../dto/alertType';
 
 @Entity('AlertType')
 export class AlertTypeEntity {
