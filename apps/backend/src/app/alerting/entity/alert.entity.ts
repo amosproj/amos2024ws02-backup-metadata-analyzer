@@ -31,23 +31,21 @@ export class AlertEntity {
 
   @ApiProperty({
     description: 'Value of the Backup, which is the reason for the alert',
-    required: true,
   })
-  @Column({ nullable: false })
+  @Column({ type: 'decimal', precision: 20, scale: 6 })
   value!: number;
 
   @ApiProperty({
     description:
       'Reference Value to the value of the Backup, in which comparison the alert was triggered',
-    required: true,
   })
-  @Column({ nullable: false })
+  @Column({ type: 'decimal', precision: 20, scale: 6 })
   referenceValue!: number;
 
   @ManyToOne(() => BackupDataEntity, {
     nullable: false,
     eager: true,
   })
-  @JoinColumn({ name: 'backupId' , referencedColumnName: 'id'})
+  @JoinColumn({ name: 'backupId', referencedColumnName: 'id' })
   backup!: BackupDataEntity;
 }

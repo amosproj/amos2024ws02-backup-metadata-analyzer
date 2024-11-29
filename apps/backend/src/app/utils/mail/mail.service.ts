@@ -8,11 +8,16 @@ import { AlertType } from '../../alerting/dto/alertType';
 @Injectable()
 export class MailService {
   readonly logger = new Logger(MailService.name);
+  MAILING_ACTIVE = true;
 
   constructor(
     private mailerService: MailerService,
     private configService: ConfigService
-  ) {}
+  ) {
+    if (this.configService.get('MAILING_ACTIVE') === 'false') {
+      this.MAILING_ACTIVE = false;
+    }
+  }
 
   async sendAlertMail(alert: AlertEntity) {
     const receivers =
@@ -85,6 +90,14 @@ export class MailService {
     context: Record<string, string>,
     attachments?: any[]
   ) {
+    if (!this.MAILING_ACTIVE) {
+      this.logger.log(
+        `Mailing is disabled. Would have sent mail to: ${receivers.join(
+          ','
+        )} with subject "${subject}`
+      );
+      return;
+    }
     this.logger.log(
       `Sending mail to: ${receivers.join(',')} with subject "${subject}"`
     );
