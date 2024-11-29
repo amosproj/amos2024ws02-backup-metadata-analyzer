@@ -207,6 +207,12 @@ export class ChartService {
   prepareColumnData(backups: Backup[], timeRange: TimeRange): any[] {
     if (!backups?.length) return [];
 
+    backups = backups.map((backup) => {
+      return {
+        ...backup,
+        sizeMB: Math.floor(backup.sizeMB),
+      };
+    });
     const sortedBackups = [...backups].sort(
       (a, b) =>
         new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()
@@ -250,6 +256,7 @@ export class ChartService {
     date.setDate(date.getDate() + (week - 1) * 7);
     return date;
   }
+
   private getWeekNumber(date: Date): number {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);

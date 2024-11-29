@@ -4,6 +4,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { AlertEntity } from '../../alerting/entity/alert.entity';
 import { AlertType } from '../../alerting/dto/alertType';
+import { BackupType } from '../../backupData/dto/backupType';
 
 jest.mock('path', () => ({
   resolve: jest.fn().mockReturnValue('mocked/path/to/logo.png'),
@@ -28,6 +29,7 @@ describe('MailService', () => {
           provide: ConfigService,
           useValue: {
             getOrThrow: jest.fn().mockReturnValue('test@example.com'),
+            get: jest.fn().mockReturnValue('true'),
           },
         },
       ],
@@ -51,6 +53,7 @@ describe('MailService', () => {
       backup: {
         id: 'backup-id',
         sizeMB: 100,
+        type: BackupType.FULL,
         creationDate: new Date(),
       },
     };

@@ -1,5 +1,10 @@
 import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiConflictResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
 import { AlertEntity } from './entity/alert.entity';
 import { CreateAlertDto } from './dto/createAlert.dto';
