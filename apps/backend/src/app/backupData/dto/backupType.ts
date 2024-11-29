@@ -2,4 +2,5 @@ export enum BackupType {
   FULL = 'FULL',
   INCREMENTAL = 'INCREMENTAL',
   DIFFERENTIAL = 'DIFFERENTIAL',
+  COPY = 'COPY',
 }
