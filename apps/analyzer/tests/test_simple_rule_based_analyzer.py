@@ -26,8 +26,8 @@ def test_alert():
 
     assert backend.alerts == [{
         "type": 0,
-        "value": mock_result2.data_size / 1_000_000,
-        "referenceValue": mock_result1.data_size / 1_000_000,
+        "size": mock_result2.data_size / 1_000_000,
+        "referenceSize": mock_result1.data_size / 1_000_000,
         "backupId": mock_result2.uuid
     }]
 
@@ -45,13 +45,13 @@ def test_alerts_different_tasks():
 
     assert backend.alerts == [{
         "type": 0,
-        "value": mock_result2.data_size / 1_000_000,
-        "referenceValue": mock_result1.data_size / 1_000_000,
+        "size": mock_result2.data_size / 1_000_000,
+        "referenceSize": mock_result1.data_size / 1_000_000,
         "backupId": mock_result2.uuid
     }, {
         "type": 1,
-        "value": mock_result4.data_size / 1_000_000,
-        "referenceValue": mock_result3.data_size / 1_000_000,
+        "size": mock_result4.data_size / 1_000_000,
+        "referenceSize": mock_result3.data_size / 1_000_000,
         "backupId": mock_result4.uuid
     }]
 
@@ -67,8 +67,8 @@ def test_alert_backup_size_zero():
 
     assert backend.alerts == [{
         "type": 1,
-        "value": mock_result2.data_size / 1_000_000,
-        "referenceValue": mock_result1.data_size / 1_000_000,
+        "size": mock_result2.data_size / 1_000_000,
+        "referenceSize": mock_result1.data_size / 1_000_000,
         "backupId": mock_result2.uuid
     }]
 
@@ -134,8 +134,8 @@ def test_alert_backup_size_zero_diff():
 
     assert backend.alerts == [{
         "type": 1,
-        "value": mock_result2.data_size / 1_000_000,
-        "referenceValue": mock_result1.data_size / 1_000_000,
+        "size": mock_result2.data_size / 1_000_000,
+        "referenceSize": mock_result1.data_size / 1_000_000,
         "backupId": mock_result2.uuid
     }]
 
@@ -166,8 +166,8 @@ def test_alert_backup_size_decrease_nok_diff():
 
     assert backend.alerts == [{
         "type": 1,
-        "value": mock_result2.data_size / 1_000_000,
-        "referenceValue": mock_result1.data_size / 1_000_000,
+        "size": mock_result2.data_size / 1_000_000,
+        "referenceSize": mock_result1.data_size / 1_000_000,
         "backupId": mock_result2.uuid
     }]
 
@@ -184,8 +184,8 @@ def test_alert_backup_size_decrease_large_nok_diff():
 
     assert backend.alerts == [{
         "type": 1,
-        "value": mock_result2.data_size / 1_000_000,
-        "referenceValue": mock_result1.data_size / 1_000_000,
+        "size": mock_result2.data_size / 1_000_000,
+        "referenceSize": mock_result1.data_size / 1_000_000,
         "backupId": mock_result2.uuid
     }]
 
@@ -218,8 +218,8 @@ def test_alert_backup_size_increase_large_nok_diff():
 
     assert backend.alerts == [{
         "type": 0,
-        "value": mock_result3.data_size / 1_000_000,
-        "referenceValue": mock_result2.data_size / 1_000_000,
+        "size": mock_result3.data_size / 1_000_000,
+        "referenceSize": mock_result2.data_size / 1_000_000,
         "backupId": mock_result3.uuid
     }]
 
@@ -256,8 +256,8 @@ def test_alert_backup_size_complex_nok_diff():
 
     assert backend.alerts == [{
         "type": 1,
-        "value": mock_result7.data_size / 1_000_000,
-        "referenceValue": mock_result6.data_size / 1_000_000,
+        "size": mock_result7.data_size / 1_000_000,
+        "referenceSize": mock_result6.data_size / 1_000_000,
         "backupId": mock_result7.uuid
     }]
 
@@ -274,8 +274,8 @@ def test_alert_backup_size_zero_inc():
 
     assert backend.alerts == [{
         "type": 1,
-        "value": mock_result2.data_size / 1_000_000,
-        "referenceValue": mock_result1.data_size / 1_000_000,
+        "size": mock_result2.data_size / 1_000_000,
+        "referenceSize": mock_result1.data_size / 1_000_000,
         "backupId": mock_result2.uuid
     }]
 
@@ -310,7 +310,7 @@ def test_alert_backup_size_irregularSize_inc():
 
     assert backend.alerts == [{
         "type": 1,
-        "value":72,
-        "referenceValue": avg / 1_000_000,
+        "size":72,
+        "referenceSize": avg / 1_000_000,
         "backupId": mock_result3.uuid
     }]
