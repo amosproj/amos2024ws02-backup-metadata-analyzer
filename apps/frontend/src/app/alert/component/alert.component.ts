@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
 import { Alert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
@@ -11,7 +11,7 @@ import { Subject, takeUntil } from 'rxjs';
   styleUrl: './alert.component.css',
   providers: [DatePipe],
 })
-export class AlertComponent implements OnInit {
+export class AlertComponent implements OnInit, OnDestroy {
   readonly DAYS = 7;
 
   alerts: Alert[] = [];
@@ -115,5 +115,10 @@ export class AlertComponent implements OnInit {
 
   formatDate(date: Date): string {
     return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
