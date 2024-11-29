@@ -7,11 +7,10 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
-import { AlertEntity } from './entity/alert.entity';
-import { CreateAlertDto } from './dto/createAlert.dto';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
+import { Alert } from './entity/alerts/alert';
 
 @Controller('alerting')
 export class AlertingController {
@@ -64,15 +63,8 @@ export class AlertingController {
   async getAllAlerts(
     @Query('backupId') backupId?: string,
     @Query('days') days?: number
-  ): Promise<AlertEntity[]> {
-    return this.alertingService.findAllAlerts(backupId, days);
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Create a new alert.' })
-  @ApiNotFoundResponse({ description: 'Backup not found' })
-  async createAlert(@Body() createAlertDto: CreateAlertDto): Promise<void> {
-    await this.alertingService.createAlert(createAlertDto);
+  ): Promise<Alert[]> {
+    return this.alertingService.getAllAlerts(backupId, days);
   }
 
   @Post('size')

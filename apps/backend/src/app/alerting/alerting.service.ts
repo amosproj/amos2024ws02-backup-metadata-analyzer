@@ -7,7 +7,6 @@ import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AlertEntity } from './entity/alert.entity';
 import { FindOptionsWhere, MoreThanOrEqual, Repository } from 'typeorm';
-import { CreateAlertDto } from './dto/createAlert.dto';
 import { BackupDataService } from '../backupData/backupData.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
@@ -60,63 +59,25 @@ export class AlertingService {
     return await this.alertTypeRepository.find({ where });
   }
 
-  async createAlert(createAlertDto: CreateAlertDto) {
-    const alert = new AlertEntity();
-
-    alert.type = createAlertDto.type;
-    alert.value = createAlertDto.value;
-    alert.referenceValue = createAlertDto.referenceValue;
-    const backupDataEntity = await this.backupDataService.findOneById(
-      createAlertDto.backupId
-    );
-    if (!backupDataEntity) {
-      console.log(`Backup with id ${createAlertDto.backupId} not found`);
-      throw new NotFoundException(
-        `Backup with id ${createAlertDto.backupId} not found`
-      );
-    }
-    alert.backup = backupDataEntity;
-
-    const existingAlertEntity = await this.alertRepository.findOneBy({
-      backup: backupDataEntity,
-      type: alert.type,
-    });
-    if (existingAlertEntity) {
-      console.log('Alert already exists -> ignoring it');
-      return;
-    }
-    const entity = await this.alertRepository.save(alert);
-    await this.triggerAlertMail(entity);
+  async triggerAlertMail(alert: Alert) {
+    await this.mailService.sendAlertMail(alert);
   }
 
-  async findAllAlerts(
-    backupId?: string,
-    days?: number
-  ): Promise<AlertEntity[]> {
+  async getAllAlerts(backupId?: string, days?: number): Promise<Alert[]> {
+    const where: FindOptionsWhere<Alert> = {};
     if (backupId) {
-      return await this.alertRepository.find({
-        where: { backup: { id: backupId } },
-      });
+      where.backup = { id: backupId };
     }
     if (days) {
       const date = new Date();
       date.setDate(date.getDate() - days);
-      return await this.alertRepository.find({
-        where: { backup: { creationDate: MoreThanOrEqual(date) } },
-      });
+      where.backup = { creationDate: MoreThanOrEqual(date) };
     }
-    return await this.alertRepository.find();
-  }
 
-  async triggerAlertMail(alert: AlertEntity) {
-    await this.mailService.sendAlertMail(alert);
-  }
-
-  async getAllAlerts(): Promise<Alert[]> {
     //Iterate over all alert repositories and get all alerts
     const alerts: Alert[] = [];
     for (const alertRepository of this.alertRepositories) {
-      alerts.push(...(await alertRepository.find()));
+      alerts.push(...(await alertRepository.find({ where })));
     }
     return alerts;
   }
@@ -157,7 +118,7 @@ export class AlertingService {
     await this.sizeAlertRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
-      //await this.triggerAlertMail(alert);
+      await this.triggerAlertMail(alert);
     }
   }
 }
