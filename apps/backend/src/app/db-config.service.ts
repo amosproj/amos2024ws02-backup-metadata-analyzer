@@ -11,6 +11,7 @@ import { AlertEntity } from './alerting/entity/alert.entity';
 import { Alert1732390760114 } from './migrations/1732390760114-Alert';
 import { ChangedSizeToDecimal1732720032144 } from './migrations/1732720032144-ChangedSizeToDecimal';
 import { BackupType1732720927342 } from './migrations/1732720927342-BackupType';
+import { COPYBackupType1732873335062 } from './migrations/1732873335062-COPYBackupType';
 
 /**
  * Used by NestJS to reach database.
@@ -39,6 +40,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         Alert1732390760114,
         ChangedSizeToDecimal1732720032144,
         BackupType1732720927342,
+        COPYBackupType1732873335062,
       ],
       logging: true,
     };
