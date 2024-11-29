@@ -148,6 +148,43 @@ def update_data():
 
 @app.route("/simpleRuleBasedAnalysis", methods=["POST"])
 def simple_rule_based_analysis():
+    """Fulfills a simple rule based analysis on full backups.
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    definitions:
+        Alerts:
+            type: object
+            properties:
+                type:
+                    type: int
+                    example: 1
+                value:
+                    type: int
+                    example: 12345
+                referenceValue:
+                    type: int
+                    example: 12300
+                backupId:
+                    type: string
+        AlertLimit:
+            type: object
+            properties:
+                alertLimit:
+                    type: int
+                    example: 1
+    responses:
+        200:
+            description: Alerts for the analyzed data
+            schema:
+                $ref: '#/definitions/Alerts'
+        400:
+            description: The value set for the alert limit was not valid
+    """
     alert_limit = request.args.get("alertLimit")
 
     try:
@@ -160,6 +197,43 @@ def simple_rule_based_analysis():
 
 @app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
 def simple_rule_based_analysis_diff():
+    """Fulfills a simple rule based analysis on diff backups.
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    definitions:
+        Alerts:
+            type: object
+            properties:
+                type:
+                    type: int
+                    example: 1
+                value:
+                    type: int
+                    example: 12345
+                referenceValue:
+                    type: int
+                    example: 12300
+                backupId:
+                    type: string
+        AlertLimit:
+            type: object
+            properties:
+                alertLimit:
+                    type: int
+                    example: 1
+    responses:
+        200:
+            description: Alerts for the analyzed data
+            schema:
+                $ref: '#/definitions/Alerts'
+        400:
+            description: The value set for the alert limit was not valid
+    """
     alert_limit = request.args.get("alertLimit")
 
     try:
@@ -172,6 +246,43 @@ def simple_rule_based_analysis_diff():
 
 @app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
 def simple_rule_based_analysis_inc():
+    """Fulfills a simple rule based analysis on inc backups.
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    definitions:
+        Alerts:
+            type: object
+            properties:
+                type:
+                    type: int
+                    example: 1
+                value:
+                    type: int
+                    example: 12345
+                referenceValue:
+                    type: int
+                    example: 12300
+                backupId:
+                    type: string
+        AlertLimit:
+            type: object
+            properties:
+                alertLimit:
+                    type: int
+                    example: 1
+    responses:
+        200:
+            description: Alerts for the analyzed data
+            schema:
+                $ref: '#/definitions/Alerts'
+        400:
+            description: The value set for the alert limit was not valid
+    """
     alert_limit = request.args.get("alertLimit")
 
     try:
