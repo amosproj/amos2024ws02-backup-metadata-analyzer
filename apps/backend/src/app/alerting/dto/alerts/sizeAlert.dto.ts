@@ -5,11 +5,11 @@ export class SizeAlertDto {
     type: 'number',
     description: 'Size of the Backup',
   })
-  size: number;
+  size!: number;
 
   @ApiProperty({
     type: 'number',
     description: 'Size of the Backup before',
   })
-  referenceSize: number;
+  referenceSize!: number;
 }

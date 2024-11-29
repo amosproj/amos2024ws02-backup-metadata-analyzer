@@ -12,6 +12,8 @@ import { Alert1732390760114 } from './migrations/1732390760114-Alert';
 import { ChangedSizeToDecimal1732720032144 } from './migrations/1732720032144-ChangedSizeToDecimal';
 import { BackupType1732720927342 } from './migrations/1732720927342-BackupType';
 import { COPYBackupType1732873335062 } from './migrations/1732873335062-COPYBackupType';
+import { AlertTypeEntity } from './alerting/entity/alertType.entity';
+import { AlertType1732873882256 } from './migrations/1732873882256-AlertType';
 
 /**
  * Used by NestJS to reach database.
@@ -31,7 +33,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
       username: this.configService.getOrThrow<string>('DATABASE_USER'),
       password: this.configService.getOrThrow<string>('DATABASE_PASSWORD'),
       database: this.configService.getOrThrow<string>('DATABASE_DATABASE'),
-      entities: [DemoEntity, BackupDataEntity, AlertEntity],
+      entities: [DemoEntity, BackupDataEntity, AlertEntity, AlertTypeEntity],
       migrationsRun: true,
       migrations: [
         Init1730126846408,
@@ -41,6 +43,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         ChangedSizeToDecimal1732720032144,
         BackupType1732720927342,
         COPYBackupType1732873335062,
+        AlertType1732873882256,
       ],
       logging: true,
     };
