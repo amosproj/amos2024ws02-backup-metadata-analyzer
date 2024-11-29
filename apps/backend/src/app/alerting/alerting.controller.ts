@@ -11,6 +11,7 @@ import { AlertEntity } from './entity/alert.entity';
 import { CreateAlertDto } from './dto/createAlert.dto';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
+import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 
 @Controller('alerting')
 export class AlertingController {
@@ -72,5 +73,15 @@ export class AlertingController {
   @ApiNotFoundResponse({ description: 'Backup not found' })
   async createAlert(@Body() createAlertDto: CreateAlertDto): Promise<void> {
     await this.alertingService.createAlert(createAlertDto);
+  }
+
+  @Post('size')
+  @ApiOperation({ summary: 'Create a new size alert.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateSizeAlertDto })
+  async createSIzeAlert(
+    @Body() createSizeAlertDto: CreateSizeAlertDto
+  ): Promise<void> {
+    await this.alertingService.createSizeAlert(createSizeAlertDto);
   }
 }

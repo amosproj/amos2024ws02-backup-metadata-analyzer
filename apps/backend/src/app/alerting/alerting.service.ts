@@ -11,17 +11,28 @@ import { CreateAlertDto } from './dto/createAlert.dto';
 import { BackupDataService } from '../backupData/backupData.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
+import { Alert } from './entity/alerts/alert';
+import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
+import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 
 @Injectable()
 export class AlertingService {
+  const;
+  alertRepositories: Repository<any>[] = [];
+
   constructor(
     @InjectRepository(AlertEntity)
     private alertRepository: Repository<AlertEntity>,
     @InjectRepository(AlertTypeEntity)
     private alertTypeRepository: Repository<AlertTypeEntity>,
+    //Alert Repositories
+    @InjectRepository(SizeAlertEntity)
+    private sizeAlertRepository: Repository<SizeAlertEntity>,
     private mailService: MailService,
     private backupDataService: BackupDataService
-  ) {}
+  ) {
+    this.alertRepositories.push(this.sizeAlertRepository);
+  }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
     const entity = await this.alertTypeRepository.findOneBy({
@@ -99,5 +110,54 @@ export class AlertingService {
 
   async triggerAlertMail(alert: AlertEntity) {
     await this.mailService.sendAlertMail(alert);
+  }
+
+  async getAllAlerts(): Promise<Alert[]> {
+    //Iterate over all alert repositories and get all alerts
+    const alerts: Alert[] = [];
+    for (const alertRepository of this.alertRepositories) {
+      alerts.push(...(await alertRepository.find()));
+    }
+    return alerts;
+  }
+
+  async createSizeAlert(createSizeAlertDto: CreateSizeAlertDto) {
+    // Check if alert already exists
+    const existingAlertEntity = await this.sizeAlertRepository.findOneBy({
+      backup: { id: createSizeAlertDto.backupId },
+    });
+
+    if (existingAlertEntity) {
+      console.log('Alert already exists -> ignoring it');
+      return;
+    }
+
+    const alert = new SizeAlertEntity();
+    alert.size = createSizeAlertDto.size;
+    alert.referenceSize = createSizeAlertDto.referenceSize;
+
+    const backup = await this.backupDataService.findOneById(
+      createSizeAlertDto.backupId
+    );
+    if (!backup) {
+      throw new NotFoundException(
+        `Backup with id ${createSizeAlertDto.backupId} not found`
+      );
+    }
+    alert.backup = backup;
+
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: 'SIZE_ALERT',
+    });
+    if (!alertType) {
+      throw new NotFoundException('Alert type SIZE_ALERT not found');
+    }
+    alert.alertType = alertType;
+
+    await this.sizeAlertRepository.save(alert);
+
+    if (alert.alertType.user_active && alert.alertType.master_active) {
+      //await this.triggerAlertMail(alert);
+    }
   }
 }
