@@ -11,8 +11,6 @@ services:
 
       service: nx-app-base
 
-    #command: npm run frontend:dev:docker
-    #command: ['npm', 'run', 'fe-docker']
     command: nx serve metadata-analyzer-frontend --host 0.0.0.0
 
     ports:
@@ -30,8 +28,6 @@ services:
 
       service: nx-app-base
 
-    #command: npm run backend:dev:docker
-    #command: ['npm', 'run', 'be', '--host localhost']
     command: nx serve metadata-analyzer-backend --host 0.0.0.0
     environment:
       - ANALYZER_URL=${ANALYZER_URL}
@@ -61,7 +57,7 @@ services:
 
       # - 4311:4311 # Server Debugging port
 
-    # Python Analyzer Backend App
+  # Python Analyzer Backend App
 
   analyzer:
     # extends:
