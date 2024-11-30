@@ -4,9 +4,7 @@ import { Alert, SizeAlert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../shared/enums/severityType';
-import { AlertType } from '../../shared/types/alertType';
 
-//TODO: Handle info alerts
 @Component({
   selector: 'app-alert',
   templateUrl: './alert.component.html',
@@ -14,11 +12,12 @@ import { AlertType } from '../../shared/types/alertType';
   providers: [DatePipe],
 })
 export class AlertComponent implements OnInit {
-  readonly DAYS = 700;
+  readonly DAYS = 7;
 
   alerts: Alert[] = [];
   criticalAlertsCount: number = 0;
-  nonCriticalAlertsCount: number = 0;
+  warningAlertsCount: number = 0;
+  infoAlertsCount: number = 0;
 
   status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
@@ -41,12 +40,16 @@ export class AlertComponent implements OnInit {
         const criticalAlerts = data.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL
         );
-        const nonCriticalAlerts = data.filter(
+        const warningAlerts = data.filter(
           (alert) => alert.alertType.severity === SeverityType.WARNING
         );
+        const infoAlerts = data.filter(
+          (alert) => alert.alertType.severity === SeverityType.INFO
+        );
         this.criticalAlertsCount = criticalAlerts.length;
-        this.nonCriticalAlertsCount = nonCriticalAlerts.length;
-        this.alerts = [...criticalAlerts, ...nonCriticalAlerts];
+        this.warningAlertsCount = warningAlerts.length;
+        this.infoAlertsCount = infoAlerts.length;
+        this.alerts = [...criticalAlerts, ...warningAlerts, ...infoAlerts];
         this.status = this.getStatus();
       });
   }
@@ -64,23 +67,28 @@ export class AlertComponent implements OnInit {
   getAlertClass(alert: Alert): string {
     if (alert.alertType.severity === SeverityType.CRITICAL) {
       return 'alert-red';
-    } else {
+    } else if (alert.alertType.severity === SeverityType.WARNING) {
       return 'alert-yellow';
+    } else {
+      return 'alert-blue';
     }
   }
 
   getStatus() {
-    if (this.alerts.length === 0) {
-      return 'OK';
-    }
     if (
       this.alerts.some(
         (alert) => alert.alertType.severity === SeverityType.CRITICAL
       )
     ) {
       return 'Critical';
+    } else if (
+      this.alerts.some(
+        (alert) => alert.alertType.severity === SeverityType.WARNING
+      )
+    ) {
+      return 'Warning';
     }
-    return 'Warning';
+    return 'OK';
   }
 
   getAlertReason(alert: Alert) {
@@ -133,6 +141,5 @@ export class AlertComponent implements OnInit {
     return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
   }
 
-  protected readonly AlertType = AlertType;
   protected readonly SeverityType = SeverityType;
 }
