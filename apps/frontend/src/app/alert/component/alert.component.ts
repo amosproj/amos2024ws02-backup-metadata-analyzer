@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
-import { Alert, SizeAlert } from '../../shared/types/alert';
+import { Alert, CreationTimeAlert, SizeAlert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../shared/enums/severityType';
@@ -110,6 +110,31 @@ export class AlertComponent implements OnInit {
           reason = `Size of backup increased`;
           break;
         }
+      case 'CREATION_TIME_ALERT':
+        const creationTimeAlert = alert as CreationTimeAlert;
+        if (
+          creationTimeAlert.creationInterval -
+            creationTimeAlert.referenceCreationInterval <
+          0
+        ) {
+          percentage = Math.floor(
+            (1 -
+              creationTimeAlert.creationInterval /
+                creationTimeAlert.referenceCreationInterval) *
+              100
+          );
+          description = `Creation time inverval of backup decreased `;
+          break;
+        } else {
+          percentage = Math.floor(
+            (creationTimeAlert.creationInterval /
+              creationTimeAlert.referenceCreationInterval -
+              1) *
+              100
+          );
+          description = `Creation time inverval of backup increased`;
+          break;
+        }
     }
     return reason;
   }
@@ -131,6 +156,31 @@ export class AlertComponent implements OnInit {
             (sizeAlert.size / sizeAlert.referenceSize - 1) * 100
           );
           description = `Size of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
+          break;
+        }
+      case 'CREATION_TIME_ALERT':
+        const creationTimeAlert = alert as CreationTimeAlert;
+        if (
+          creationTimeAlert.creationInterval -
+            creationTimeAlert.referenceCreationInterval <
+          0
+        ) {
+          percentage = Math.floor(
+            (1 -
+              creationTimeAlert.creationInterval /
+                creationTimeAlert.referenceCreationInterval) *
+              100
+          );
+          description = `Creation time inverval of backup decreased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
+          break;
+        } else {
+          percentage = Math.floor(
+            (creationTimeAlert.creationInterval /
+              creationTimeAlert.referenceCreationInterval -
+              1) *
+              100
+          );
+          description = `Creation time inverval of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
           break;
         }
     }
