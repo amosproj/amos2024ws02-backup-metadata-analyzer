@@ -4,69 +4,76 @@ import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { AlertingModule } from './alerting.module';
-import { AlertEntity } from './entity/alert.entity';
-import { CreateAlertDto } from './dto/createAlert.dto';
-import { AlertType } from './dto/alertType';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailService } from '../utils/mail/mail.service';
 import { BackupType } from '../backupData/dto/backupType';
+import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
+import { AlertTypeEntity } from './entity/alertType.entity';
+import { SeverityType } from './dto/severityType';
+import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 
-const mockBackupDataEntity: BackupDataEntity = {
+const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
   sizeMB: 100,
   type: BackupType.FULL,
-  creationDate: new Date('2023-12-30 00:00:00.000000'),
+  creationDate: new Date(),
 };
 
-const mockAlertEntity: AlertEntity = {
+const mockedAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id',
+  name: 'SIZE_ALERT',
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const sizeAlert: SizeAlertEntity = {
   id: 'alert-id',
-  type: AlertType.SIZE_DECREASED,
-  value: 100,
-  referenceValue: 200,
-  backup: mockBackupDataEntity,
+  size: 100,
+  referenceSize: 200,
+  backup: mockedBackupDataEntity,
+  alertType: mockedAlertTypeEntity,
 };
-
 const mockAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
-  find: jest.fn().mockImplementation(() => Promise.resolve([mockAlertEntity])),
+  find: jest.fn().mockImplementation(() => Promise.resolve([sizeAlert])),
   findOneBy: jest.fn().mockResolvedValue(null),
 };
 
 describe('AlertingController (e2e)', () => {
   let app: INestApplication;
-  let repository: Repository<AlertEntity>;
+  let repository: Repository<SizeAlertEntity>;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AlertingModule, await ConfigModule.forRoot({ isGlobal: true })],
+      imports: [AlertingModule, ConfigModule.forRoot({ isGlobal: true })],
     })
       .overrideProvider(ConfigService)
       .useValue({
-        getOrThrow: jest.fn(() => {
-          return 'test';
-        }),
+        getOrThrow: jest.fn(() => 'test'),
       })
-
       .overrideProvider(getRepositoryToken(BackupDataEntity))
       .useValue({
-        findOne: jest
-          .fn()
-          .mockImplementation(() => Promise.resolve(mockBackupDataEntity)),
+        findOne: jest.fn().mockResolvedValue(mockedBackupDataEntity),
       })
-
       .overrideProvider(MailService)
       .useValue({
         sendAlertMail: jest.fn(),
       })
-
-      .overrideProvider(getRepositoryToken(AlertEntity))
+      .overrideProvider(getRepositoryToken(SizeAlertEntity))
       .useValue(mockAlertRepository)
-
+      .overrideProvider(getRepositoryToken(AlertTypeEntity))
+      .useValue({
+        findOneBy: jest.fn().mockImplementation(({ name }) => {
+          return name === 'SIZE_ALERT' ? mockedAlertTypeEntity : null;
+        }),
+        save: jest.fn(),
+        find: jest.fn().mockResolvedValue([]),
+      })
       .compile();
 
-    repository = module.get(getRepositoryToken(AlertEntity));
-
+    repository = module.get(getRepositoryToken(SizeAlertEntity));
     app = module.createNestApplication();
     await app.init();
   });
@@ -80,9 +87,8 @@ describe('AlertingController (e2e)', () => {
       .get('/alerting')
       .expect(200);
 
-    expect(mockAlertRepository.find).toHaveBeenCalledWith();
-    // Convert creationDate to Date object for comparison
-    const receivedAlerts = response.body.map((alert: AlertEntity) => ({
+    expect(mockAlertRepository.find).toHaveBeenCalledWith({ where: {} });
+    const receivedAlerts = response.body.map((alert: SizeAlertEntity) => ({
       ...alert,
       backup: {
         ...alert.backup,
@@ -90,7 +96,7 @@ describe('AlertingController (e2e)', () => {
       },
     }));
 
-    expect(receivedAlerts).toEqual([mockAlertEntity]);
+    expect(receivedAlerts).toEqual([sizeAlert]);
   });
 
   it('GET /alerting - should filter alerts by backupId', async () => {
@@ -98,12 +104,12 @@ describe('AlertingController (e2e)', () => {
       .get('/alerting')
       .query({ backupId: 'backup-id' })
       .expect(200);
+
     expect(mockAlertRepository.find).toHaveBeenCalledWith({
       where: { backup: { id: 'backup-id' } },
     });
 
-    // Convert creationDate to Date object for comparison
-    const receivedAlerts = response.body.map((alert: AlertEntity) => ({
+    const receivedAlerts = response.body.map((alert: SizeAlertEntity) => ({
       ...alert,
       backup: {
         ...alert.backup,
@@ -111,7 +117,7 @@ describe('AlertingController (e2e)', () => {
       },
     }));
 
-    expect(receivedAlerts).toEqual([mockAlertEntity]);
+    expect(receivedAlerts).toEqual([sizeAlert]);
   });
 
   it('GET /alerting - should filter alerts by the last x days', async () => {
@@ -128,8 +134,7 @@ describe('AlertingController (e2e)', () => {
       where: { backup: { creationDate: MoreThanOrEqual(expect.any(Date)) } },
     });
 
-    // Convert creationDate to Date object for comparison
-    const receivedAlerts = response.body.map((alert: AlertEntity) => ({
+    const receivedAlerts = response.body.map((alert: SizeAlertEntity) => ({
       ...alert,
       backup: {
         ...alert.backup,
@@ -137,39 +142,28 @@ describe('AlertingController (e2e)', () => {
       },
     }));
 
-    expect(receivedAlerts).toEqual([mockAlertEntity]);
+    expect(receivedAlerts).toEqual([sizeAlert]);
   });
 
-  it('POST /alerting - should create a new alert', async () => {
-    const createAlertDto: CreateAlertDto = {
-      type: AlertType.SIZE_DECREASED,
-      value: 100,
-      referenceValue: 200,
+  it('POST /alerting/size - should create a new size alert', async () => {
+    const createAlertDto: CreateSizeAlertDto = {
+      size: 100,
+      referenceSize: 200,
       backupId: 'backup-id',
     };
 
     await request(app.getHttpServer())
-      .post('/alerting')
+      .post('/alerting/size')
       .send(createAlertDto)
       .expect(201);
 
     expect(mockAlertRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: createAlertDto.type,
-        value: createAlertDto.value,
-        referenceValue: createAlertDto.referenceValue,
+        size: createAlertDto.size,
+        referenceSize: createAlertDto.referenceSize,
         backup: expect.objectContaining({ id: createAlertDto.backupId }),
+        alertType: expect.objectContaining({ name: 'SIZE_ALERT' }),
       })
     );
-  });
-  it('GET /alerting/:id - should return 404 if alert not found', async () => {
-    const nonExistentId = 'non-existent-id';
-    mockAlertRepository.find.mockImplementationOnce(() =>
-      Promise.resolve(null)
-    );
-
-    const response = await request(app.getHttpServer())
-      .get(`/alerting/${nonExistentId}`)
-      .expect(404);
   });
 });

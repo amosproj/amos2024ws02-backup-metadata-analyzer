@@ -44,8 +44,8 @@ export class MailService {
           referenceValueColumnName = 'Size of previous backup';
           reason = `Size of latest Backup decreased by ${percentage} %`;
           description = `Size of latest Backup decreased by ${percentage}% compared to the previous Backup. This could indicate a problem with the Backup.`;
-          value = sizeAlert.size.toString();
-          referenceValue = sizeAlert.referenceSize.toString();
+          value = sizeAlert.size.toString() + ' MB';
+          referenceValue = sizeAlert.referenceSize.toString() + ' MB';
           break;
         } else {
           if (sizeAlert.referenceSize !== 0) {
@@ -57,8 +57,8 @@ export class MailService {
           referenceValueColumnName = 'Size of previous backup';
           reason = `Size of latest Backup increased by ${percentage} %`;
           description = `Size of latest Backup increased by ${percentage}% compared to the previous Backup. This could indicate a problem with the Backup.`;
-          value = sizeAlert.size.toString();
-          referenceValue = sizeAlert.referenceSize.toString();
+          value = sizeAlert.size.toString() + ' MB';
+          referenceValue = sizeAlert.referenceSize.toString() + ' MB';
           break;
         }
     }
