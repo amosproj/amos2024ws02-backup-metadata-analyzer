@@ -12,6 +12,7 @@ import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { SeverityType } from './dto/severityType';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
+import { SIZE_ALERT } from '../utils/constants';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -22,7 +23,7 @@ const mockedBackupDataEntity: BackupDataEntity = {
 
 const mockedAlertTypeEntity: AlertTypeEntity = {
   id: 'alert-type-id',
-  name: 'SIZE_ALERT',
+  name: SIZE_ALERT,
   severity: SeverityType.WARNING,
   user_active: true,
   master_active: true,
@@ -66,7 +67,7 @@ describe('AlertingController (e2e)', () => {
       .overrideProvider(getRepositoryToken(AlertTypeEntity))
       .useValue({
         findOneBy: jest.fn().mockImplementation(({ name }) => {
-          return name === 'SIZE_ALERT' ? mockedAlertTypeEntity : null;
+          return name === SIZE_ALERT ? mockedAlertTypeEntity : null;
         }),
         save: jest.fn(),
         find: jest.fn().mockResolvedValue([]),
@@ -162,7 +163,7 @@ describe('AlertingController (e2e)', () => {
         size: createAlertDto.size,
         referenceSize: createAlertDto.referenceSize,
         backup: expect.objectContaining({ id: createAlertDto.backupId }),
-        alertType: expect.objectContaining({ name: 'SIZE_ALERT' }),
+        alertType: expect.objectContaining({ name: SIZE_ALERT }),
       })
     );
   });

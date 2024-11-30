@@ -14,6 +14,7 @@ import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { CreationDateEntity } from './entity/alerts/creationDate.entity';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { CREATIONDATE_ALERT, SIZE_ALERT } from '../utils/constants';
 
 @Injectable()
 export class AlertingService {
@@ -110,10 +111,10 @@ export class AlertingService {
     alert.backup = backup;
 
     const alertType = await this.alertTypeRepository.findOneBy({
-      name: 'SIZE_ALERT',
+      name: SIZE_ALERT,
     });
     if (!alertType) {
-      throw new NotFoundException('Alert type SIZE_ALERT not found');
+      throw new NotFoundException(`Alert type ${SIZE_ALERT} not found`);
     }
     alert.alertType = alertType;
 
@@ -151,10 +152,10 @@ export class AlertingService {
     alert.backup = backup;
 
     const alertType = await this.alertTypeRepository.findOneBy({
-      name: 'CREATIONDATE_ALERT',
+      name: CREATIONDATE_ALERT,
     });
     if (!alertType) {
-      throw new NotFoundException('Alert type CREATIONDATE_ALERT not found');
+      throw new NotFoundException(`Alert type ${CREATIONDATE_ALERT} not found`);
     }
     alert.alertType = alertType;
 

@@ -13,6 +13,7 @@ import { SeverityType } from './dto/severityType';
 import { Alert } from './entity/alerts/alert';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { BackupType } from '../backupData/dto/backupType';
+import { SIZE_ALERT } from '../utils/constants';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -23,7 +24,7 @@ const mockedBackupDataEntity: BackupDataEntity = {
 
 const mockedAlertTypeEntity: AlertTypeEntity = {
   id: 'alert-type-id',
-  name: 'SIZE_ALERT',
+  name: SIZE_ALERT,
   severity: SeverityType.WARNING,
   user_active: true,
   master_active: true,
@@ -62,7 +63,7 @@ describe('AlertingService', () => {
           provide: getRepositoryToken(AlertTypeEntity),
           useValue: {
             findOneBy: jest.fn().mockImplementation(({ name }) => {
-              return name === 'SIZE_ALERT' ? mockedAlertTypeEntity : null;
+              return name === SIZE_ALERT ? mockedAlertTypeEntity : null;
             }),
             save: jest.fn(),
             find: jest.fn().mockResolvedValue([]),
@@ -152,7 +153,7 @@ describe('AlertingService', () => {
     it('should throw ConflictException if alert type already exists', async () => {
       const createAlertTypeDto: CreateAlertTypeDto = {
         severity: SeverityType.WARNING,
-        name: 'SIZE_ALERT',
+        name: SIZE_ALERT,
         master_active: true,
       };
 
