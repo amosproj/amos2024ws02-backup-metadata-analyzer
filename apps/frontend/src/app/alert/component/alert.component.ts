@@ -14,7 +14,7 @@ import { AlertType } from '../../shared/types/alertType';
   providers: [DatePipe],
 })
 export class AlertComponent implements OnInit {
-  readonly DAYS = 7;
+  readonly DAYS = 700;
 
   alerts: Alert[] = [];
   criticalAlertsCount: number = 0;
@@ -89,8 +89,7 @@ export class AlertComponent implements OnInit {
     switch (alert.alertType.name) {
       case 'SIZE_ALERT':
         const sizeAlert = alert as SizeAlert;
-        //TODO: fix this comparison
-        if (sizeAlert.size < sizeAlert.referenceSize) {
+        if (sizeAlert.size - sizeAlert.referenceSize < 0) {
           percentage = Math.floor(
             (1 - sizeAlert.size / sizeAlert.referenceSize) * 100
           );
@@ -113,8 +112,7 @@ export class AlertComponent implements OnInit {
     switch (alert.alertType.name) {
       case 'SIZE_ALERT':
         const sizeAlert = alert as SizeAlert;
-        //TODO: fix this comparison
-        if (sizeAlert.size < sizeAlert.referenceSize) {
+        if (sizeAlert.size - sizeAlert.referenceSize < 0) {
           percentage = Math.floor(
             (1 - sizeAlert.size / sizeAlert.referenceSize) * 100
           );
