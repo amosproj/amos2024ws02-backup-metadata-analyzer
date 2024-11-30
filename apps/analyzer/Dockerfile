@@ -14,16 +14,18 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Install Poetry
 RUN pip install --no-cache --upgrade pip setuptools && \
-    pip install poetry && \
-    pip install flask
+    pip install poetry
+    #pip install poetry && \
+    #pip install flask
 
 # Copy the dependency files
 WORKDIR /app
 COPY pyproject.toml poetry.lock ./
 
 # Install dependencies with Poetry
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi
+# RUN poetry config virtualenvs.create false && \
+#     poetry install --no-interaction --no-ansi
+RUN poetry install
 
 #Copy the remaining code
 COPY . .
