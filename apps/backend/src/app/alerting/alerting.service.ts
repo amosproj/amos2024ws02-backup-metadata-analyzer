@@ -12,6 +12,8 @@ import { AlertTypeEntity } from './entity/alertType.entity';
 import { Alert } from './entity/alerts/alert';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
+import { CreationDateEntity } from './entity/alerts/creationDate.entity';
+import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 
 @Injectable()
 export class AlertingService {
@@ -23,10 +25,14 @@ export class AlertingService {
     //Alert Repositories
     @InjectRepository(SizeAlertEntity)
     private sizeAlertRepository: Repository<SizeAlertEntity>,
+    @InjectRepository(CreationDateEntity)
+    private creationDateRepository: Repository<CreationDateEntity>,
+    //Services
     private mailService: MailService,
     private backupDataService: BackupDataService
   ) {
     this.alertRepositories.push(this.sizeAlertRepository);
+    this.alertRepositories.push(this.creationDateRepository);
   }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
@@ -112,6 +118,47 @@ export class AlertingService {
     alert.alertType = alertType;
 
     await this.sizeAlertRepository.save(alert);
+
+    if (alert.alertType.user_active && alert.alertType.master_active) {
+      await this.triggerAlertMail(alert);
+    }
+  }
+
+  async createCreationDateAlert(
+    createCreationDateAlertDto: CreateCreationDateAlertDto
+  ) {
+    // Check if alert already exists
+    const existingAlertEntity = await this.creationDateRepository.findOneBy({
+      backup: { id: createCreationDateAlertDto.backupId },
+    });
+
+    if (existingAlertEntity) {
+      console.log('Alert already exists -> ignoring it');
+      return;
+    }
+
+    const alert = new CreationDateEntity();
+    //TODO: Implement the missing properties
+
+    const backup = await this.backupDataService.findOneById(
+      createCreationDateAlertDto.backupId
+    );
+    if (!backup) {
+      throw new NotFoundException(
+        `Backup with id ${createCreationDateAlertDto.backupId} not found`
+      );
+    }
+    alert.backup = backup;
+
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: 'CREATIONDATE_ALERT',
+    });
+    if (!alertType) {
+      throw new NotFoundException('Alert type CREATIONDATE_ALERT not found');
+    }
+    alert.alertType = alertType;
+
+    await this.creationDateRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
       await this.triggerAlertMail(alert);

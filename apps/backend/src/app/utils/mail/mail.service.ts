@@ -61,6 +61,9 @@ export class MailService {
           referenceValue = sizeAlert.referenceSize.toString() + ' MB';
           break;
         }
+      case 'CREATIONDATE_ALERT':
+        //TODO: implement
+        break;
     }
 
     const context = {

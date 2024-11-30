@@ -6,12 +6,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BackupDataModule } from '../backupData/backupData.module';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
+import { CreationDateEntity } from './entity/alerts/creationDate.entity';
 
 @Module({
   imports: [
     MailModule,
     BackupDataModule,
-    TypeOrmModule.forFeature([AlertTypeEntity, SizeAlertEntity]),
+    TypeOrmModule.forFeature([
+      AlertTypeEntity,
+      SizeAlertEntity,
+      CreationDateEntity,
+    ]),
   ],
   providers: [AlertingService],
   controllers: [AlertingController],
