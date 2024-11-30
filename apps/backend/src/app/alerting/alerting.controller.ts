@@ -4,8 +4,8 @@ import {
   Get,
   Logger,
   Param,
+  Patch,
   Post,
-  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -35,28 +35,28 @@ export class AlertingController {
     await this.alertingService.createAlertType(createAlertTypeDto);
   }
 
-  @Put('type/:alertTypeId/activate/user')
+  @Patch('type/:alertTypeId/activate/user')
   @ApiOperation({ summary: 'Activate Alert Type by user.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   async userActivateAlertType(@Param('alertTypeId') alertTypeId: string) {
     await this.alertingService.userActivateAlertType(alertTypeId);
   }
 
-  @Put('type/:alertTypeId/deactivate/user')
+  @Patch('type/:alertTypeId/deactivate/user')
   @ApiOperation({ summary: 'Deactivate Alert Type by user' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   async userDeactivateAlertType(@Param('alertTypeId') alertTypeId: string) {
     await this.alertingService.userDeactivateAlertType(alertTypeId);
   }
 
-  @Put('type/:alertTypeId/activate/admin')
+  @Patch('type/:alertTypeId/activate/admin')
   @ApiOperation({ summary: 'Activate Alert Type by admin.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   async adminActivateAlertType(@Param('alertTypeId') alertTypeId: string) {
     await this.alertingService.adminActivateAlertType(alertTypeId);
   }
 
-  @Put('type/:alertTypeId/deactivate/admin')
+  @Patch('type/:alertTypeId/deactivate/admin')
   @ApiOperation({ summary: 'Deactivate Alert Type by admin' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   async adminDeactivateAlertType(@Param('alertTypeId') alertTypeId: string) {
@@ -108,7 +108,7 @@ export class AlertingController {
   @ApiOperation({ summary: 'Create a new size alert.' })
   @ApiNotFoundResponse({ description: 'Backup not found' })
   @ApiBody({ type: CreateSizeAlertDto })
-  async createSIzeAlert(
+  async createSizeAlert(
     @Body() createSizeAlertDto: CreateSizeAlertDto
   ): Promise<void> {
     await this.alertingService.createSizeAlert(createSizeAlertDto);

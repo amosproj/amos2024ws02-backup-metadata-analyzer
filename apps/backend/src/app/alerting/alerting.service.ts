@@ -84,7 +84,7 @@ export class AlertingService {
   }
 
   async getAllAlerts(backupId?: string, days?: number): Promise<Alert[]> {
-    const where: FindOptionsWhere<Alert> = {};
+    const where: FindOptionsWhere<Alert> = { alertType: { user_active: true, master_active: true } };
     if (backupId) {
       where.backup = { id: backupId };
     }
