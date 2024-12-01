@@ -7,6 +7,7 @@ import { BASE_URL } from '../../../shared/types/configuration';
 import { APIResponse } from '../../../shared/types/api-response';
 import { Backup } from '../../../shared/types/backup';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
+import { fail } from 'assert';
 
 describe('BackupService', () => {
   let service: BackupService;
@@ -146,6 +147,21 @@ describe('BackupService', () => {
 
         const passedParams = httpClientMock.get.mock.calls[0][1].params;
         expect(passedParams.keys().length).toBe(0);
+      });
+    });
+
+    it('should propagate HTTP errors', () => {
+      const mockFilterParams: BackupFilterParams = {
+        offset: 0,
+        limit: 10,
+      };
+
+      const mockError = new Error('Network error');
+
+      httpClientMock.get.mockReturnValue(throwError(() => mockError));
+      service.getAllBackups(mockFilterParams).subscribe({
+        next: () => fail('expected an error, not backups'),
+        error: (error) => expect(error).toBe(mockError),
       });
     });
   });
