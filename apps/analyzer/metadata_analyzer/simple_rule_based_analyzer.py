@@ -27,10 +27,9 @@ class SimpleRuleBasedAnalyzer:
             return []
 
         alert = {
-            "type": 0 if relative_change > 0 else 1,
-            "value": result2.data_size / 1_000_000,
-            "referenceValue": result1.data_size / 1_000_000,
-            "backupId": result2.uuid,
+                "size": result2.data_size / 1_000_000,
+                "referenceSize": result1.data_size / 1_000_000,
+                "backupId": result2.uuid,
         }
         return [alert]
 
@@ -57,10 +56,9 @@ class SimpleRuleBasedAnalyzer:
             return []
 
         alert = {
-            "type": 0 if relative_change > 0 else 1,
-            "value": result2.data_size / 1_000_000,
-            "referenceValue": result1.data_size / 1_000_000,
-            "backupId": result2.uuid,
+                "size": result2.data_size / 1_000_000,
+                "referenceSize": result1.data_size / 1_000_000,
+                "backupId": result2.uuid,
         }
 
         return [alert]

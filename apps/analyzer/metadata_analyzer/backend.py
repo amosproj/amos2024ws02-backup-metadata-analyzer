@@ -10,6 +10,6 @@ class Backend:
         r.raise_for_status()
 
     def create_alert(self, alert):
-        url = self.backend_url + "alerting"
+        url = self.backend_url + "alerting/size"
         r = requests.post(url, json=alert)
         r.raise_for_status()

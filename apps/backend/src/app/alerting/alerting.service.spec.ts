@@ -2,12 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AlertingService } from './alerting.service';
 import { MailService } from '../utils/mail/mail.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { AlertEntity } from './entity/alert.entity';
+import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { BackupDataService } from '../backupData/backupData.service';
-import { NotFoundException } from '@nestjs/common';
-import { CreateAlertDto } from './dto/createAlert.dto';
-import { AlertType } from './dto/alertType';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
+import { AlertTypeEntity } from './entity/alertType.entity';
+import { CreateAlertTypeDto } from './dto/createAlertType.dto';
+import { SeverityType } from './dto/severityType';
+import { Alert } from './entity/alerts/alert';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { BackupType } from '../backupData/dto/backupType';
 
@@ -18,25 +21,28 @@ const mockedBackupDataEntity: BackupDataEntity = {
   creationDate: new Date(),
 };
 
-const alerts: AlertEntity[] = [
+const mockedAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id',
+  name: 'SIZE_ALERT',
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const alerts: SizeAlertEntity[] = [
   {
-    id: 'alert-id-1',
-    type: AlertType.SIZE_DECREASED,
-    value: 100,
-    referenceValue: 200,
+    id: 'alert-id',
+    size: 100,
+    referenceSize: 200,
     backup: mockedBackupDataEntity,
-  },
-  {
-    id: 'alert-id-2',
-    type: AlertType.SIZE_INCREASED,
-    value: 200,
-    referenceValue: 100,
-    backup: mockedBackupDataEntity,
+    alertType: mockedAlertTypeEntity,
   },
 ];
+
 describe('AlertingService', () => {
   let service: AlertingService;
-  let alertRepository: Repository<AlertEntity>;
+  let sizeAlertRepository: Repository<SizeAlertEntity>;
+  let alertTypeRepository: Repository<AlertTypeEntity>;
   let mailService: MailService;
   let backupDataService: BackupDataService;
 
@@ -45,11 +51,31 @@ describe('AlertingService', () => {
       providers: [
         AlertingService,
         {
-          provide: getRepositoryToken(AlertEntity),
+          provide: getRepositoryToken(SizeAlertEntity),
           useValue: {
             find: jest.fn().mockResolvedValue(alerts),
             findOneBy: jest.fn().mockResolvedValue(null),
             save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(AlertTypeEntity),
+          useValue: {
+            findOneBy: jest.fn().mockImplementation(({ name, id }) => {
+              if (name === 'SIZE_ALERT' || id === 'active-id') {
+                return mockedAlertTypeEntity;
+              } else if (id === 'not-active-id') {
+                return {
+                  ...mockedAlertTypeEntity,
+                  user_active: false,
+                  master_active: false,
+                };
+              } else {
+                return null;
+              }
+            }),
+            save: jest.fn(),
+            find: jest.fn().mockResolvedValue([]),
           },
         },
         {
@@ -73,7 +99,8 @@ describe('AlertingService', () => {
     }).compile();
 
     service = module.get(AlertingService);
-    alertRepository = module.get(getRepositoryToken(AlertEntity));
+    sizeAlertRepository = module.get(getRepositoryToken(SizeAlertEntity));
+    alertTypeRepository = module.get(getRepositoryToken(AlertTypeEntity));
     mailService = module.get(MailService);
     backupDataService = module.get(BackupDataService);
   });
@@ -82,23 +109,21 @@ describe('AlertingService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('createAlert', () => {
-    it('should create and save an alert', async () => {
-      const createAlertDto: CreateAlertDto = {
-        type: AlertType.SIZE_DECREASED,
-        value: 100,
-        referenceValue: 200,
+  describe('createSizeAlert', () => {
+    it('should create and save a size alert', async () => {
+      const createSizeAlertDto: CreateSizeAlertDto = {
+        size: 100,
+        referenceSize: 200,
         backupId: 'backup-id',
       };
 
-      await service.createAlert(createAlertDto);
+      await service.createSizeAlert(createSizeAlertDto);
 
       expect(backupDataService.findOneById).toHaveBeenCalledWith('backup-id');
-      expect(alertRepository.save).toHaveBeenCalledWith(
+      expect(sizeAlertRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 1,
-          value: 100,
-          referenceValue: 200,
+          size: 100,
+          referenceSize: 200,
           backup: mockedBackupDataEntity,
         })
       );
@@ -106,33 +131,127 @@ describe('AlertingService', () => {
     });
 
     it('should throw NotFoundException if backup not found', async () => {
-      const createAlertDto: CreateAlertDto = {
-        type: AlertType.SIZE_DECREASED,
-        value: 100,
-        referenceValue: 200,
+      const createSizeAlertDto: CreateSizeAlertDto = {
+        size: 100,
+        referenceSize: 200,
         backupId: 'not-existing-id',
       };
 
-      await expect(service.createAlert(createAlertDto)).rejects.toThrow(
+      await expect(service.createSizeAlert(createSizeAlertDto)).rejects.toThrow(
         NotFoundException
       );
     });
   });
 
+  describe('createAlertType', () => {
+    it('should create and save an alert type', async () => {
+      const createAlertTypeDto: CreateAlertTypeDto = {
+        severity: SeverityType.WARNING,
+        name: 'CREATION_TIME_ALERT',
+        master_active: true,
+      };
+
+      await service.createAlertType(createAlertTypeDto);
+
+      expect(alertTypeRepository.findOneBy).toHaveBeenCalledWith({
+        name: 'CREATION_TIME_ALERT',
+      });
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(createAlertTypeDto);
+    });
+
+    it('should throw ConflictException if alert type already exists', async () => {
+      const createAlertTypeDto: CreateAlertTypeDto = {
+        severity: SeverityType.WARNING,
+        name: 'SIZE_ALERT',
+        master_active: true,
+      };
+
+      await expect(service.createAlertType(createAlertTypeDto)).rejects.toThrow(
+        ConflictException
+      );
+    });
+  });
+
+  describe('findAllAlertTypes', () => {
+    it('should return all alert types', async () => {
+      const result = await service.findAllAlertTypes();
+
+      expect(result).toEqual([]);
+      expect(alertTypeRepository.find).toHaveBeenCalled();
+    });
+
+    it('should return alert types with user_active and master_active filters', async () => {
+      const result = await service.findAllAlertTypes(true, true);
+
+      expect(result).toEqual([]);
+      expect(alertTypeRepository.find).toHaveBeenCalledWith({
+        where: { user_active: true, master_active: true },
+      });
+    });
+  });
+  describe('activate/deactivate', () => {
+    it('should activate alert type by user', async () => {
+      const alertTypeId = 'not-active-id';
+
+      await service.userActivateAlertType(alertTypeId);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        user_active: true,
+        master_active: false,
+      });
+    });
+    it('should deactivate alert type by user', async () => {
+      const alertTypeId = 'active-id';
+
+      await service.userDeactivateAlertType(alertTypeId);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        user_active: false,
+        master_active: true,
+      });
+    });
+    it('should activate alert type by admin', async () => {
+      const alertTypeId = 'not-active-id';
+
+      await service.adminActivateAlertType(alertTypeId);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        user_active: false,
+        master_active: true,
+      });
+    });
+    it('should deactivate alert type by admin', async () => {
+      const alertTypeId = 'active-id';
+
+      await service.adminDeactivateAlertType(alertTypeId);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        master_active: false,
+      });
+    });
+  });
+
   describe('findAllAlerts', () => {
     it('should return all alerts', async () => {
-      const result = await service.findAllAlerts();
+      const result = await service.getAllAlerts();
 
       expect(result).toEqual(alerts);
-      expect(alertRepository.find).toHaveBeenCalled();
+      expect(sizeAlertRepository.find).toHaveBeenCalled();
     });
 
     it('should return alerts for a specific backup', async () => {
-      const result = await service.findAllAlerts('backup-id');
+      const result = await service.getAllAlerts('backup-id');
 
       expect(result).toEqual(alerts);
-      expect(alertRepository.find).toHaveBeenCalledWith({
-        where: { backup: { id: 'backup-id' } },
+      expect(sizeAlertRepository.find).toHaveBeenCalledWith({
+        where: {
+          backup: { id: 'backup-id' },
+          alertType: { user_active: true, master_active: true },
+        },
       });
     });
 
@@ -141,18 +260,21 @@ describe('AlertingService', () => {
       const date = new Date();
       date.setDate(date.getDate() - days);
 
-      const result = await service.findAllAlerts(undefined, days);
+      const result = await service.getAllAlerts(undefined, days);
 
       expect(result).toEqual(alerts);
-      expect(alertRepository.find).toHaveBeenCalledWith({
-        where: { backup: { creationDate: MoreThanOrEqual(expect.any(Date)) } },
+      expect(sizeAlertRepository.find).toHaveBeenCalledWith({
+        where: {
+          backup: { creationDate: MoreThanOrEqual(expect.any(Date)) },
+          alertType: { user_active: true, master_active: true },
+        },
       });
     });
   });
 
   describe('triggerAlertMail', () => {
     it('should call sendAlertMail of MailService', async () => {
-      const alert = alerts[0];
+      const alert: Alert = alerts[0];
 
       await service.triggerAlertMail(alert);
 

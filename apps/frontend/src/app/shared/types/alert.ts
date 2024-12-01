@@ -1,10 +1,13 @@
 import { Backup } from './backup';
-import { AlertType } from '../enums/alertType';
+import { AlertType } from './alertType';
 
 export interface Alert {
   id: string;
-  type: AlertType;
-  value: number;
-  referenceValue: number;
+  alertType: AlertType;
   backup: Backup;
+}
+
+export interface SizeAlert extends Alert {
+  size: number;
+  referenceSize: number;
 }
