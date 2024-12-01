@@ -111,28 +111,12 @@ export class AlertComponent implements OnInit {
           break;
         }
       case 'CREATION_TIME_ALERT':
-        const creationTimeAlert = alert as CreationTimeAlert;
+        const creationDateAlert = alert as CreationDateAlert;
         if (
-          creationTimeAlert.creationInterval -
-            creationTimeAlert.referenceCreationInterval <
-          0
+          creationDateAlert.date.getTime() !==
+          creationDateAlert.referenceDate.getTime()
         ) {
-          percentage = Math.floor(
-            (1 -
-              creationTimeAlert.creationInterval /
-                creationTimeAlert.referenceCreationInterval) *
-              100
-          );
-          description = `Creation time inverval of backup decreased `;
-          break;
-        } else {
-          percentage = Math.floor(
-            (creationTimeAlert.creationInterval /
-              creationTimeAlert.referenceCreationInterval -
-              1) *
-              100
-          );
-          description = `Creation time inverval of backup increased`;
+          reason = `Backup was started at an unusual time`;
           break;
         }
     }
@@ -159,28 +143,12 @@ export class AlertComponent implements OnInit {
           break;
         }
       case 'CREATION_TIME_ALERT':
-        const creationTimeAlert = alert as CreationTimeAlert;
+        const creationDateAlert = alert as CreationDateAlert;
         if (
-          creationTimeAlert.creationInterval -
-            creationTimeAlert.referenceCreationInterval <
-          0
+          creationDateAlert.date.getTime() !==
+          creationDateAlert.referenceDate.getTime()
         ) {
-          percentage = Math.floor(
-            (1 -
-              creationTimeAlert.creationInterval /
-                creationTimeAlert.referenceCreationInterval) *
-              100
-          );
-          description = `Creation time inverval of backup decreased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
-          break;
-        } else {
-          percentage = Math.floor(
-            (creationTimeAlert.creationInterval /
-              creationTimeAlert.referenceCreationInterval -
-              1) *
-              100
-          );
-          description = `Creation time inverval of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
+          description = `Backup was started at ${creationDateAlert.date.toString()}%, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}%`;
           break;
         }
     }
