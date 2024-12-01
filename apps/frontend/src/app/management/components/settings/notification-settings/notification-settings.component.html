@@ -1,0 +1,51 @@
+<clr-modal
+  [(clrModalOpen)]="isOpen"
+  [clrModalClosable]="false"
+  clrModalSize="md"
+>
+  <div class="modal-title">Notification Settings</div>
+  <div class="modal-body">
+    <ng-container *ngIf="settings$ | async as settings">
+
+    </ng-container>
+
+
+    <form clrForm [formGroup]="settingsForm">
+      <clr-toggle-container>
+        <clr-toggle-wrapper>
+          <input
+            type="checkbox"
+            clrToggle
+            value="creationDateAlertNotification"
+            name="option"
+            formControlName="creationDateAlert"
+          />
+          <label>Creation Date Alert</label>
+        </clr-toggle-wrapper>
+        <clr-toggle-wrapper>
+          <input
+            type="checkbox"
+            clrToggle
+            value="sizeAlertNotification"
+            name="option"
+            formArrayName="sizeAlert"
+          />
+          <label>Size Alert</label>
+        </clr-toggle-wrapper>
+        <clr-toggle-wrapper>
+          <input
+            type="checkbox"
+            clrToggle
+            name="option"
+            formControlName="alertEmails"
+          />
+          <label>Email Notification</label>
+        </clr-toggle-wrapper>
+      </clr-toggle-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" (click)="close()">Cancel</button>
+    <button class="btn btn-primary" [clrLoading]="isSaving" (click)="save()">Save</button>
+  </div>
+</clr-modal>
