@@ -5,57 +5,57 @@ networks:
 services:
   # # Angular Frontend App
 
-  # frontend:
-  #   extends:
-  #     file: docker-compose.base.yml
+  frontend:
+    extends:
+      file: docker-compose.base.yml
 
-  #     service: nx-app-base
+      service: nx-app-base
 
-  #   command: nx serve metadata-analyzer-frontend --host 0.0.0.0
+    command: nx serve metadata-analyzer-frontend --host 0.0.0.0
 
-  #   ports:
-  #     - 4200:4200
+    ports:
+      - 4200:4200
 
-  #   depends_on:
-  #     - backendDatabase
-  #   networks:
-  #     - app-network
+    depends_on:
+      - backendDatabase
+    networks:
+      - app-network
 
-  # # Nest Backend App
-  # backend:
-  #   extends:
-  #     file: docker-compose.base.yml
+  # Nest Backend App
+  backend:
+    extends:
+      file: docker-compose.base.yml
 
-  #     service: nx-app-base
+      service: nx-app-base
 
-  #   command: nx serve metadata-analyzer-backend --host 0.0.0.0
-  #   environment:
-  #     - ANALYZER_URL=${ANALYZER_URL}
-  #     # Backend Database
-  #     - DATABASE_HOST=${BACKEND_DATABASE_HOST}
-  #     - DATABASE_PORT=${BACKEND_DATABASE_PORT}
-  #     - DATABASE_USER=${BACKEND_DATABASE_USER}
-  #     - DATABASE_PASSWORD=${BACKEND_DATABASE_PASSWORD}
-  #     - DATABASE_DATABASE=${BACKEND_DATABASE_DATABASE}
-  #     # Mail Service
-  #     - MAIL_HOST=${MAIL_HOST}
-  #     - MAIL_PORT=${MAIL_PORT}
-  #     - MAIL_USER=${MAIL_USER}
-  #     - MAIL_PASSWORD=${MAIL_PASSWORD}
-  #     - MAIL_FROM=${MAIL_FROM}
-  #     - MAILING_LIST=${MAILING_LIST}
-  #   env_file:
-  #     - .env.docker
+    command: nx serve metadata-analyzer-backend --host 0.0.0.0
+    environment:
+      - ANALYZER_URL=${ANALYZER_URL}
+      # Backend Database
+      - DATABASE_HOST=${BACKEND_DATABASE_HOST}
+      - DATABASE_PORT=${BACKEND_DATABASE_PORT}
+      - DATABASE_USER=${BACKEND_DATABASE_USER}
+      - DATABASE_PASSWORD=${BACKEND_DATABASE_PASSWORD}
+      - DATABASE_DATABASE=${BACKEND_DATABASE_DATABASE}
+      # Mail Service
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - MAILING_LIST=${MAILING_LIST}
+    env_file:
+      - .env.docker
 
-  #   ports:
-  #     - 3000:3000 # API Entry port
+    ports:
+      - 3000:3000 # API Entry port
 
-  #   depends_on:
-  #     - backendDatabase
-  #   networks:
-  #     - app-network
+    depends_on:
+      - backendDatabase
+    networks:
+      - app-network
 
-  #     # - 4311:4311 # Server Debugging port
+      # - 4311:4311 # Server Debugging port
 
   # Python Analyzer Backend App
 
@@ -86,40 +86,40 @@ services:
 
     ports:
       - 8000:8000
-    # depends_on:
-    #   - analyzerDatabase
-    #   - backend
+    depends_on:
+      - analyzerDatabase
+      - backend
     networks:
       - app-network
-#   # Backend Database
-#   backendDatabase:
-#     image: postgres
-#     container_name: backendDatabase
-#     restart: always
-#     ports:
-#       - 5443:5432
-#     environment:
-#       POSTGRES_USER: postgres
-#       POSTGRES_PASSWORD: postgres
-#       POSTGRES_DB: postgres
-#     networks:
-#       - app-network
-#   # Analyzer Database
-#   analyzerDatabase:
-#     image: postgres
-#     container_name: analyzerDatabase
-#     restart: always
-#     ports:
-#       - 5442:5432
-#     environment:
-#       POSTGRES_USER: postgres
-#       POSTGRES_PASSWORD: postgres
-#       POSTGRES_DB: postgres
-#     networks:
-#       - app-network
-#     volumes:
-#       - ./db_dump.sql:/docker-entrypoint-initdb.d/db_dump.sql
-#       - ./00-init-roles.sql:/docker-entrypoint-initdb.d/00-init-roles.sql
+  # Backend Database
+  backendDatabase:
+    image: postgres
+    container_name: backendDatabase
+    restart: always
+    ports:
+      - 5443:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - app-network
+  # Analyzer Database
+  analyzerDatabase:
+    image: postgres
+    container_name: analyzerDatabase
+    restart: always
+    ports:
+      - 5442:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - app-network
+    volumes:
+      - ./db_dump.sql:/docker-entrypoint-initdb.d/db_dump.sql
+      - ./00-init-roles.sql:/docker-entrypoint-initdb.d/00-init-roles.sql
 
-# volumes:
-#   mono-node-modules: null
+volumes:
+  mono-node-modules: null
