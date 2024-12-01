@@ -3,14 +3,15 @@ import { AlertingService } from './alerting.service';
 import { MailModule } from '../utils/mail/mail.module';
 import { AlertingController } from './alerting.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AlertEntity } from './entity/alert.entity';
 import { BackupDataModule } from '../backupData/backupData.module';
+import { AlertTypeEntity } from './entity/alertType.entity';
+import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 
 @Module({
   imports: [
     MailModule,
     BackupDataModule,
-    TypeOrmModule.forFeature([AlertEntity]),
+    TypeOrmModule.forFeature([AlertTypeEntity, SizeAlertEntity]),
   ],
   providers: [AlertingService],
   controllers: [AlertingController],
