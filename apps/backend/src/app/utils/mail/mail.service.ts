@@ -5,6 +5,7 @@ import * as path from 'path';
 import { Alert } from '../../alerting/entity/alerts/alert';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
 import { CREATION_DATE_ALERT, SIZE_ALERT } from '../constants';
+import { CreationDateAlertEntity } from '../../alerting/entity/alerts/creationDateAlert.entity';
 
 @Injectable()
 export class MailService {
@@ -32,7 +33,6 @@ export class MailService {
     let value: string = '-';
     let referenceValue: string = '-';
     switch (alert.alertType.name) {
-      //TODO: create constant for that
       case SIZE_ALERT:
         const sizeAlert = alert as SizeAlertEntity;
         if (sizeAlert.size < sizeAlert.referenceSize) {
@@ -63,7 +63,13 @@ export class MailService {
           break;
         }
       case CREATION_DATE_ALERT:
-        //TODO: implement
+        const creationDateAlert = alert as CreationDateAlertEntity;
+        valueColumnName = 'Creation Date of Backup';
+        referenceValueColumnName = 'Date the backup should have been started';
+        reason = `Backup was started at an unusual time`;
+        description = `Backup was started at ${creationDateAlert.date.toString()}%, but based on previous backups, it should have been started at around ${creationDateAlert.date.toString()}%`;
+        value = creationDateAlert.date.toString();
+        referenceValue = creationDateAlert.referenceDate.toString();
         break;
     }
 

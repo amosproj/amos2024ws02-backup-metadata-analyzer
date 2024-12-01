@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BackupDataModule } from '../backupData/backupData.module';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
-import { CreationDateEntity } from './entity/alerts/creationDate.entity';
+import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { CreationDateEntity } from './entity/alerts/creationDate.entity';
     TypeOrmModule.forFeature([
       AlertTypeEntity,
       SizeAlertEntity,
-      CreationDateEntity,
+      CreationDateAlertEntity,
     ]),
   ],
   providers: [AlertingService],

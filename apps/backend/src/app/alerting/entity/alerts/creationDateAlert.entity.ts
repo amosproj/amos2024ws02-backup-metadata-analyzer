@@ -1,21 +1,18 @@
+import { Column, Entity } from 'typeorm';
+import { Alert } from './alert';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateCreationDateAlertDto {
-  @ApiProperty({
-    description: 'Id of the belonging Backup',
-    required: true,
-  })
-  backupId!: string;
-
+@Entity('CreationDateAlert')
+export class CreationDateAlertEntity extends Alert {
   @ApiProperty({
     description: 'Date, the backup started',
-    required: true,
   })
+  @Column()
   date!: Date;
 
   @ApiProperty({
     description: 'Date, the backup should have been started',
-    required: true,
   })
+  @Column()
   referenceDate!: Date;
 }

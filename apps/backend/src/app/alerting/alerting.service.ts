@@ -12,7 +12,7 @@ import { AlertTypeEntity } from './entity/alertType.entity';
 import { Alert } from './entity/alerts/alert';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
-import { CreationDateEntity } from './entity/alerts/creationDate.entity';
+import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
 
@@ -26,8 +26,8 @@ export class AlertingService {
     //Alert Repositories
     @InjectRepository(SizeAlertEntity)
     private sizeAlertRepository: Repository<SizeAlertEntity>,
-    @InjectRepository(CreationDateEntity)
-    private creationDateRepository: Repository<CreationDateEntity>,
+    @InjectRepository(CreationDateAlertEntity)
+    private creationDateRepository: Repository<CreationDateAlertEntity>,
     //Services
     private mailService: MailService,
     private backupDataService: BackupDataService
@@ -138,8 +138,9 @@ export class AlertingService {
       return;
     }
 
-    const alert = new CreationDateEntity();
-    //TODO: Implement the missing properties
+    const alert = new CreationDateAlertEntity();
+    alert.date = createCreationDateAlertDto.date;
+    alert.referenceDate = createCreationDateAlertDto.referenceDate;
 
     const backup = await this.backupDataService.findOneById(
       createCreationDateAlertDto.backupId
@@ -155,7 +156,9 @@ export class AlertingService {
       name: CREATION_DATE_ALERT,
     });
     if (!alertType) {
-      throw new NotFoundException(`Alert type ${CREATION_DATE_ALERT} not found`);
+      throw new NotFoundException(
+        `Alert type ${CREATION_DATE_ALERT} not found`
+      );
     }
     alert.alertType = alertType;
 
