@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiConflictResponse,
@@ -25,6 +34,34 @@ export class AlertingController {
   @ApiBody({ type: CreateAlertTypeDto })
   async createAlertType(@Body() createAlertTypeDto: CreateAlertTypeDto) {
     await this.alertingService.createAlertType(createAlertTypeDto);
+  }
+
+  @Patch('type/:alertTypeId/activate/user')
+  @ApiOperation({ summary: 'Activate Alert Type by user.' })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  async userActivateAlertType(@Param('alertTypeId') alertTypeId: string) {
+    await this.alertingService.userActivateAlertType(alertTypeId);
+  }
+
+  @Patch('type/:alertTypeId/deactivate/user')
+  @ApiOperation({ summary: 'Deactivate Alert Type by user' })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  async userDeactivateAlertType(@Param('alertTypeId') alertTypeId: string) {
+    await this.alertingService.userDeactivateAlertType(alertTypeId);
+  }
+
+  @Patch('type/:alertTypeId/activate/admin')
+  @ApiOperation({ summary: 'Activate Alert Type by admin.' })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  async adminActivateAlertType(@Param('alertTypeId') alertTypeId: string) {
+    await this.alertingService.adminActivateAlertType(alertTypeId);
+  }
+
+  @Patch('type/:alertTypeId/deactivate/admin')
+  @ApiOperation({ summary: 'Deactivate Alert Type by admin' })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  async adminDeactivateAlertType(@Param('alertTypeId') alertTypeId: string) {
+    await this.alertingService.adminDeactivateAlertType(alertTypeId);
   }
 
   @Get('type')

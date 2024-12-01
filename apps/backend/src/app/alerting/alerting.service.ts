@@ -48,6 +48,30 @@ export class AlertingService {
     return await this.alertTypeRepository.save(createAlertTypeDto);
   }
 
+  async userActivateAlertType(alertTypeId: string) {
+    const alertType = await this.findAlertTypeByIdOrThrow(alertTypeId);
+    alertType.user_active = true;
+    return await this.alertTypeRepository.save(alertType);
+  }
+
+  async userDeactivateAlertType(alertTypeId: string) {
+    const alertType = await this.findAlertTypeByIdOrThrow(alertTypeId);
+    alertType.user_active = false;
+    return await this.alertTypeRepository.save(alertType);
+  }
+
+  async adminActivateAlertType(alertTypeId: string) {
+    const alertType = await this.findAlertTypeByIdOrThrow(alertTypeId);
+    alertType.master_active = true;
+    return await this.alertTypeRepository.save(alertType);
+  }
+
+  async adminDeactivateAlertType(alertTypeId: string) {
+    const alertType = await this.findAlertTypeByIdOrThrow(alertTypeId);
+    alertType.master_active = false;
+    return await this.alertTypeRepository.save(alertType);
+  }
+
   async findAllAlertTypes(
     user_active?: boolean,
     master_active?: boolean
@@ -67,7 +91,7 @@ export class AlertingService {
   }
 
   async getAllAlerts(backupId?: string, days?: number): Promise<Alert[]> {
-    const where: FindOptionsWhere<Alert> = {};
+    const where: FindOptionsWhere<Alert> = { alertType: { user_active: true, master_active: true } };
     if (backupId) {
       where.backup = { id: backupId };
     }
@@ -167,5 +191,13 @@ export class AlertingService {
     if (alert.alertType.user_active && alert.alertType.master_active) {
       await this.triggerAlertMail(alert);
     }
+  }
+
+  private async findAlertTypeByIdOrThrow(id: string): Promise<AlertTypeEntity> {
+    const entity = await this.alertTypeRepository.findOneBy({ id });
+    if (!entity) {
+      throw new NotFoundException(`Alert type with id ${id} not found`);
+    }
+    return entity;
   }
 }
