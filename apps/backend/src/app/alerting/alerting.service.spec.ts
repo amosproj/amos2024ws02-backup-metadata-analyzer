@@ -254,7 +254,7 @@ describe('AlertingService', () => {
       await service.userActivateAlertType(alertTypeId);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         user_active: true,
         master_active: false,
       });
@@ -265,7 +265,7 @@ describe('AlertingService', () => {
       await service.userDeactivateAlertType(alertTypeId);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         user_active: false,
         master_active: true,
       });
@@ -276,7 +276,7 @@ describe('AlertingService', () => {
       await service.adminActivateAlertType(alertTypeId);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         user_active: false,
         master_active: true,
       });
@@ -287,7 +287,7 @@ describe('AlertingService', () => {
       await service.adminDeactivateAlertType(alertTypeId);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         master_active: false,
       });
     });
