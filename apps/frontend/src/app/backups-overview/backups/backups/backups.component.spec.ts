@@ -7,15 +7,34 @@ import { BackupService } from '../../service/backup-service/backup-service.servi
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { CustomFilter } from './backupfilter';
 import { ClrDatagridStateInterface } from '@clr/angular';
+import { APIResponse } from '../../../shared/types/api-response';
+import { Backup } from '../../../shared/types/backup';
 
 describe('BackupsComponent', () => {
   let component: BackupsComponent;
   let mockBackupService: any;
   let mockChartService: any;
+  const mockBackups: APIResponse<Backup> = {
+    data: [
+      {
+        id: '1',
+        sizeMB: 500,
+        creationDate: new Date(),
+      },
+      {
+        id: '2',
+        sizeMB: 750,
+        creationDate: new Date(),
+      },
+    ],
+    paginationData: {
+      total: 2,
+    },
+  };
 
   beforeEach(() => {
     mockBackupService = {
-      getAllBackups: vi.fn().mockReturnValue(of({ data: [], total: 0 })),
+      getAllBackups: vi.fn().mockReturnValue(of(mockBackups)),
     };
 
     mockChartService = {
@@ -149,6 +168,70 @@ describe('BackupsComponent', () => {
 
       expect(mockChartService.createChart).toHaveBeenCalledTimes(2);
       vi.useRealTimers();
+    });
+  });
+  describe('Data Fetching and Filtering Integration', () => {
+    it('should fetch backups with initial filter', async () => {
+      const getAllBackupsSpy = vi.spyOn(mockBackupService, 'getAllBackups');
+
+      component.backups$.subscribe((response) => {
+        expect(response.data.length).toBe(2);
+        expect(response.paginationData.total).toBe(2);
+      });
+
+      expect(getAllBackupsSpy).toHaveBeenCalledWith({ limit: 10 });
+    });
+
+    it('should apply date filter correctly', async () => {
+      const dateFilter = new CustomFilter('date');
+      dateFilter.ranges = {
+        fromDate: new Date('2023-01-01').toISOString(),
+        toDate: new Date('2023-12-31').toISOString(),
+        fromSizeMB: null,
+        toSizeMB: null,
+      };
+      (dateFilter.ranges as any)['_isActive'] = true;
+
+      component['backupDateFilter'] = dateFilter;
+
+      const getAllBackupsSpy = vi.spyOn(mockBackupService, 'getAllBackups');
+      component.ngOnInit();
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(getAllBackupsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromDate: dateFilter.ranges.fromDate,
+          toDate: dateFilter.ranges.toDate,
+          fromSizeMB: null,
+          toSizeMB: null,
+        })
+      );
+    });
+  });
+
+  describe('Time Range and Chart Data Integration', () => {
+    it('should update charts with fetched backup data', async () => {
+      component.ngAfterViewInit();
+
+      await vi.dynamicImportSettled();
+
+      expect(mockChartService.createChart).toHaveBeenCalledTimes(2);
+
+      expect(mockChartService.prepareColumnData).toHaveBeenCalledWith(
+        mockBackups.data
+      );
+      expect(mockChartService.preparePieData).toHaveBeenCalledWith(
+        mockBackups.data
+      );
+    });
+
+    it('should handle time range changes and update charts', () => {
+      component.setTimeRange('week');
+
+      expect(mockChartService.updateTimeRange).toHaveBeenCalledWith(
+        'backupTimelineChart',
+        'week'
+      );
     });
   });
 });
