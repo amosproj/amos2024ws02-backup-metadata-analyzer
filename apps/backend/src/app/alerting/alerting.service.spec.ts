@@ -61,8 +61,18 @@ describe('AlertingService', () => {
         {
           provide: getRepositoryToken(AlertTypeEntity),
           useValue: {
-            findOneBy: jest.fn().mockImplementation(({ name }) => {
-              return name === 'SIZE_ALERT' ? mockedAlertTypeEntity : null;
+            findOneBy: jest.fn().mockImplementation(({ name, id }) => {
+              if (name === 'SIZE_ALERT' || id === 'active-id') {
+                return mockedAlertTypeEntity;
+              } else if (id === 'not-active-id') {
+                return {
+                  ...mockedAlertTypeEntity,
+                  user_active: false,
+                  master_active: false,
+                };
+              } else {
+                return null;
+              }
             }),
             save: jest.fn(),
             find: jest.fn().mockResolvedValue([]),
@@ -179,6 +189,51 @@ describe('AlertingService', () => {
       });
     });
   });
+  describe('activate/deactivate', () => {
+    it('should activate alert type by user', async () => {
+      const alertTypeId = 'not-active-id';
+
+      await service.userActivateAlertType(alertTypeId);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        user_active: true,
+        master_active: false,
+      });
+    });
+    it('should deactivate alert type by user', async () => {
+      const alertTypeId = 'active-id';
+
+      await service.userDeactivateAlertType(alertTypeId);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        user_active: false,
+        master_active: true,
+      });
+    });
+    it('should activate alert type by admin', async () => {
+      const alertTypeId = 'not-active-id';
+
+      await service.adminActivateAlertType(alertTypeId);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        user_active: false,
+        master_active: true,
+      });
+    });
+    it('should deactivate alert type by admin', async () => {
+      const alertTypeId = 'active-id';
+
+      await service.adminDeactivateAlertType(alertTypeId);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        master_active: false,
+      });
+    });
+  });
 
   describe('findAllAlerts', () => {
     it('should return all alerts', async () => {
@@ -193,7 +248,10 @@ describe('AlertingService', () => {
 
       expect(result).toEqual(alerts);
       expect(sizeAlertRepository.find).toHaveBeenCalledWith({
-        where: { backup: { id: 'backup-id' } },
+        where: {
+          backup: { id: 'backup-id' },
+          alertType: { user_active: true, master_active: true },
+        },
       });
     });
 
@@ -206,7 +264,10 @@ describe('AlertingService', () => {
 
       expect(result).toEqual(alerts);
       expect(sizeAlertRepository.find).toHaveBeenCalledWith({
-        where: { backup: { creationDate: MoreThanOrEqual(expect.any(Date)) } },
+        where: {
+          backup: { creationDate: MoreThanOrEqual(expect.any(Date)) },
+          alertType: { user_active: true, master_active: true },
+        },
       });
     });
   });
