@@ -60,16 +60,12 @@ services:
   # Python Analyzer Backend App
 
   analyzer:
-    # extends:
-    #   file: docker-compose.base.yml
-
-    #   service: nx-app-base
     build:
       context: ./apps/analyzer
       dockerfile: Dockerfile
-    #command: ['/app/.venv/bin/python3', 'main.py', '--host', '0.0.0.0']
+
     command: ['python3.11', 'main.py', '--host', '0.0.0.0']
-    #command: ['poetry', 'run', 'python3', 'main.py', '--host', '0.0.0.0']
+
     environment:
       # Flask
       - FLASK_RUN_HOST=${ANALYZER_FLASK_RUN_HOST}
@@ -91,6 +87,7 @@ services:
       - backend
     networks:
       - app-network
+
   # Backend Database
   backendDatabase:
     image: postgres
@@ -104,6 +101,7 @@ services:
       POSTGRES_DB: postgres
     networks:
       - app-network
+
   # Analyzer Database
   analyzerDatabase:
     image: postgres

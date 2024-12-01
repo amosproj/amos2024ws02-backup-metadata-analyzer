@@ -24,5 +24,3 @@ RUN poetry install --no-interaction --no-ansi --verbose
 #Copy the remaining code
 COPY . .
 
-# Standard command to start the application
-#CMD ["python3", "main.py" , "--host", "0.0.0.0"]
