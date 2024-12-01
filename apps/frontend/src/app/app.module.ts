@@ -26,6 +26,7 @@ import { FindTestDataComponent } from './test-upload/component/find-test-data/fi
 import { BackupsComponent } from './backups-overview/backups/backups/backups.component';
 import { BASE_URL } from './shared/types/configuration';
 import { AlertComponent } from './alert/component/alert.component';
+import { NotificationSettingsComponent } from './management/components/settings/notification-settings/notification-settings.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { AlertComponent } from './alert/component/alert.component';
     FindTestDataComponent,
     BackupsComponent,
     AlertComponent,
+    NotificationSettingsComponent,
   ],
   imports: [
     BrowserModule,

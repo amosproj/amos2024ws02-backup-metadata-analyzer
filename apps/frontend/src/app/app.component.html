@@ -7,16 +7,14 @@
         <button class="nav-icon" clrDropdownTrigger>
           <cds-icon shape="cog"></cds-icon>
         </button>
-        <clr-dropdown-menu
-          *clrIfOpen
-          clrPosition="bottom-right"
-        >
-          <a class="nav-link" style="cursor: pointer;" clrDropdownItem>
+        <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
+          <button clrDropdownItem (click)="openNotificationSettingsModal()">
             <cds-icon shape="bell"></cds-icon>
             <span class="nav-text">Notifications</span>
-          </a>
+          </button>
         </clr-dropdown-menu>
       </clr-dropdown>
+      <app-notification-settings></app-notification-settings>
     </div>
   </clr-header>
 
