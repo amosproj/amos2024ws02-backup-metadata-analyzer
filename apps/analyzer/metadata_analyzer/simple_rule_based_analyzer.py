@@ -75,7 +75,7 @@ class SimpleRuleBasedAnalyzer:
                 alerts += new_alerts
 
             # Find creation time alerts
-            self._analyze_creation_times(results)
+            alerts += self._analyze_creation_times(results)
     
         # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
@@ -187,22 +187,28 @@ class SimpleRuleBasedAnalyzer:
         # Skip the first result
         for result in results[1:]:
             time = result.start_time
+            # The smallest diff in seconds to the time of a previous backup
             smallest_diff = SECONDS_PER_DAY
+            reference_time = None
             for ref_time in times:
                 diff = (time - ref_time).seconds
+                # Considers the wrap around on midnight
                 if diff > SECONDS_PER_DAY / 2:
                     diff = SECONDS_PER_DAY - diff
-                smallest_diff = min(smallest_diff, diff)
+                if diff < smallest_diff:
+                    smallest_diff = diff
+                    reference_time = ref_time.time()
 
-            if diff > 60 * 60:
+            reference_date = datetime.combine(result.start_time, reference_time)
+            if smallest_diff > 60 * 60:
                 alerts.append({
-                    "time": result.start_time,
-                    "difference": diff,
+                    "date": result.start_time,
+                    "referenceDate": reference_date,
                     "backupId": result.uuid
                 })
 
             times.append(time)
         print(alerts)
-        return times
+        return alerts
 
 
