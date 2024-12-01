@@ -142,7 +142,7 @@ export class AlertComponent implements OnInit {
           description = `Size of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
           break;
         }
-      case 'CREATION_TIME_ALERT':
+      case 'CREATION_DATE_ALERT':
         const creationDateAlert = alert as CreationDateAlert;
         if (
           creationDateAlert.date.getTime() !==
