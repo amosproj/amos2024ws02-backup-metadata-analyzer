@@ -225,4 +225,23 @@ describe('AlertComponent', () => {
       expect(formattedDate).toBe('');
     });
   });
+
+  describe('loadAlerts', () => {
+    it('should categorize alerts and set status correctly', () => {
+      const mockAlerts: Alert[] = [
+        { id: '1', type: AlertType.SIZE_DECREASED, value: 50, referenceValue: 100, backup: { id: '1', sizeMB: 100, creationDate: new Date() } },
+        { id: '2', type: AlertType.SIZE_INCREASED, value: 150, referenceValue: 100, backup: { id: '2', sizeMB: 200, creationDate: new Date() } },
+      ];
+  
+      vi.spyOn(mockAlertService, 'getAllAlerts').mockReturnValue(of(mockAlerts));
+  
+      component.loadAlerts();
+  
+      expect(component.criticalAlertsCount).toBe(0);
+      expect(component.nonCriticalAlertsCount).toBe(2);
+      expect(component.status).toBe('Warning');
+    });
+  });
 });
+
+
