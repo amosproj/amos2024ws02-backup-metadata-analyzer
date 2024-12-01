@@ -73,6 +73,9 @@ class SimpleRuleBasedAnalyzer:
             for result1, result2 in zip(results[:-1], results[1:]):
                 new_alerts = self._analyze_pair(result1, result2, self.size_alert_percentage)
                 alerts += new_alerts
+
+            # Find creation time alerts
+            self._analyze_creation_times(results)
     
         # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
@@ -174,4 +177,32 @@ class SimpleRuleBasedAnalyzer:
         }
     
 
-    
+    # Analyzes the creation times of a group of results from one task
+    def _analyze_creation_times(self, results):
+        SECONDS_PER_DAY = 24 * 60 * 60
+
+        alerts = []
+        print("NEW")
+        times = [results[0].start_time]
+        # Skip the first result
+        for result in results[1:]:
+            time = result.start_time
+            smallest_diff = SECONDS_PER_DAY
+            for ref_time in times:
+                diff = (time - ref_time).seconds
+                if diff > SECONDS_PER_DAY / 2:
+                    diff = SECONDS_PER_DAY - diff
+                smallest_diff = min(smallest_diff, diff)
+
+            if diff > 60 * 60:
+                alerts.append({
+                    "time": result.start_time,
+                    "difference": diff,
+                    "backupId": result.uuid
+                })
+
+            times.append(time)
+        print(alerts)
+        return times
+
+
