@@ -14,6 +14,7 @@ import { SeverityType } from './dto/severityType';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -54,13 +55,15 @@ const mockSizeAlertRepository = {
 const mockAlertTypeRepository = {
   findOneBy: jest.fn().mockImplementation(({ name, id }) => {
     if (name === 'SIZE_ALERT' || id === 'active-id') {
-      return mockedAlertTypeEntity;
+      return mockedSizeAlertTypeEntity;
     } else if (id === 'not-active-id') {
       return {
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         user_active: false,
         master_active: false,
       };
+    } else if (name === CREATION_DATE_ALERT) {
+      return mockedCreationDateAlertTypeEntity;
     } else {
       return null;
     }
@@ -97,6 +100,8 @@ describe('AlertingController (e2e)', () => {
       })
       .overrideProvider(getRepositoryToken(SizeAlertEntity))
       .useValue(mockSizeAlertRepository)
+      .overrideProvider(getRepositoryToken(CreationDateAlertEntity))
+      .useValue(mockCreationDateAlertRepository)
       .overrideProvider(getRepositoryToken(AlertTypeEntity))
       .useValue(mockAlertTypeRepository)
       .compile();
@@ -157,7 +162,7 @@ describe('AlertingController (e2e)', () => {
       .expect(200);
 
     expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
+      ...mockedSizeAlertTypeEntity,
       user_active: true,
       master_active: false,
     });
@@ -170,7 +175,7 @@ describe('AlertingController (e2e)', () => {
       .expect(200);
 
     expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
+      ...mockedSizeAlertTypeEntity,
       user_active: false,
       master_active: true,
     });
@@ -183,7 +188,7 @@ describe('AlertingController (e2e)', () => {
       .expect(200);
 
     expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
+      ...mockedSizeAlertTypeEntity,
       user_active: false,
       master_active: true,
     });
@@ -234,8 +239,11 @@ describe('AlertingController (e2e)', () => {
       .query({ days })
       .expect(200);
 
-    expect(mockAlertRepository.find).toHaveBeenCalledWith({
-      where: { backup: { creationDate: MoreThanOrEqual(expect.any(Date)) } },
+    expect(mockSizeAlertRepository.find).toHaveBeenCalledWith({
+      where: {
+        backup: { creationDate: MoreThanOrEqual(expect.any(Date)) },
+        alertType: { user_active: true, master_active: true },
+      },
     });
 
     const receivedAlerts = response.body.map((alert: SizeAlertEntity) => ({
@@ -288,11 +296,6 @@ describe('AlertingController (e2e)', () => {
       referenceDate: new Date('2024-12-01T17:53:33.239Z').toISOString(),
       backup: mockedBackupDataEntity,
       alertType: mockedCreationDateAlertTypeEntity,
-    expect(mockSizeAlertRepository.find).toHaveBeenCalledWith({
-      where: {
-        backup: { creationDate: MoreThanOrEqual(expect.any(Date)) },
-        alertType: { user_active: true, master_active: true },
-      },
     });
   });
 });
