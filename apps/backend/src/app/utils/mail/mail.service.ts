@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { Alert } from '../../alerting/entity/alerts/alert';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
-import { CREATIONDATE_ALERT, SIZE_ALERT } from '../constants';
+import { CREATION_DATE_ALERT, SIZE_ALERT } from '../constants';
 
 @Injectable()
 export class MailService {
@@ -62,7 +62,7 @@ export class MailService {
           referenceValue = sizeAlert.referenceSize.toString() + ' MB';
           break;
         }
-      case CREATIONDATE_ALERT:
+      case CREATION_DATE_ALERT:
         //TODO: implement
         break;
     }
