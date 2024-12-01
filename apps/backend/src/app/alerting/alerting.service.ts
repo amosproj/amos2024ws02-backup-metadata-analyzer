@@ -5,13 +5,19 @@ import {
 } from '@nestjs/common';
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, MoreThanOrEqual, Repository } from 'typeorm';
+import {
+  FindOneOptions,
+  FindOptionsWhere,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { BackupDataService } from '../backupData/backupData.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { Alert } from './entity/alerts/alert';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
+import { BackupType } from '../backupData/dto/backupType';
 
 @Injectable()
 export class AlertingService {
@@ -84,7 +90,9 @@ export class AlertingService {
   }
 
   async getAllAlerts(backupId?: string, days?: number): Promise<Alert[]> {
-    const where: FindOptionsWhere<Alert> = { alertType: { user_active: true, master_active: true } };
+    const where: FindOptionsWhere<Alert> = {
+      alertType: { user_active: true, master_active: true },
+    };
     if (backupId) {
       where.backup = { id: backupId };
     }
@@ -148,5 +156,41 @@ export class AlertingService {
       throw new NotFoundException(`Alert type with id ${id} not found`);
     }
     return entity;
+  }
+
+  async getBackupDateFromLatestAlert(
+    alertTypeName: string,
+    backupType?: BackupType
+  ): Promise<Date | null> {
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: alertTypeName,
+    });
+    if (!alertType) {
+      throw new NotFoundException(`Alert type ${alertTypeName} not found`);
+    }
+
+    const options: FindOneOptions = {
+      where: {
+        alertType: { id: alertType.id },
+        backup: { type: backupType },
+      },
+      order: {
+        backup: { creationDate: 'DESC' },
+      },
+    };
+
+    let alert: Alert | null = null;
+    switch (alertType.name) {
+      case 'SIZE_ALERT': {
+        alert = await this.sizeAlertRepository.findOne(options);
+      }
+      //TODO: add creationDate Alert as soon as it is implemented
+    }
+
+    if (!alert) {
+      return null;
+    }
+
+    return alert.backup.creationDate;
   }
 }

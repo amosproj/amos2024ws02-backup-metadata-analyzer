@@ -20,6 +20,7 @@ import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { Alert } from './entity/alerts/alert';
+import { BackupType } from '../backupData/dto/backupType';
 
 @Controller('alerting')
 export class AlertingController {
@@ -112,5 +113,27 @@ export class AlertingController {
     @Body() createSizeAlertDto: CreateSizeAlertDto
   ): Promise<void> {
     await this.alertingService.createSizeAlert(createSizeAlertDto);
+  }
+
+  @Get('type/:typeName/latest/date')
+  @ApiOperation({
+    summary:
+      'Get the date of the latest backup an alert of the given type exists for',
+  })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  @ApiQuery({
+    name: 'backupType',
+    description: 'Filter by backup type',
+    required: false,
+    enum: BackupType,
+  })
+  async getBackupDateFromLatestAlert(
+    @Param('typeName') typeName: string,
+    @Query('backupType') backupType?: BackupType
+  ): Promise<Date | null> {
+    return this.alertingService.getBackupDateFromLatestAlert(
+      typeName,
+      backupType
+    );
   }
 }
