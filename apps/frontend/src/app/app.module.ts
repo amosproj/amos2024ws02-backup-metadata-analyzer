@@ -10,12 +10,15 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
 import {
-  ClarityIcons, errorStandardIcon,
+  ClarityIcons,
+  errorStandardIcon,
   homeIcon,
   searchIcon,
   tableIcon,
   uploadCloudIcon,
-  warningStandardIcon
+  warningStandardIcon,
+  cogIcon,
+  bellIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -55,7 +58,8 @@ export class AppModule {
       tableIcon,
       warningStandardIcon,
       errorStandardIcon,
-
+      cogIcon,
+      bellIcon
     );
   }
 }
