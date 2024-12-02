@@ -5,21 +5,36 @@ import { Observable } from 'rxjs';
 import { NotificationSettings } from '../../shared/types/notifications';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationService {
+  constructor(
+    @Inject(BASE_URL) private readonly baseUrl: string,
+    private readonly http: HttpClient
+  ) {}
 
-  constructor(    @Inject(BASE_URL) private readonly baseUrl: string,
-  private readonly http: HttpClient) { }
+  // Lade aktuelle Einstellungen
+  getNotificationSettings(): Observable<NotificationSettings[]> {
+    return this.http.get<NotificationSettings[]>(
+      `${this.baseUrl}/alerting/type`
+    );
+  }
 
-      // Lade aktuelle Einstellungen
-      getNotificationSettings(): Observable<NotificationSettings> {
-        return this.http.get<NotificationSettings>(this.baseUrl); // add url path to load settings
+  // Speichere neue Einstellungen
+  updateNotificationSettings(
+    notification: NotificationSettings
+  ): Observable<NotificationSettings> {
+
+    if (notification.user_active) {
+      return this.http.patch<NotificationSettings>(
+        `${this.baseUrl}/alerting/type/${notification.id}/activate/user`,
+        { params: notification }
+      );
+    } else {
+      return this.http.patch<NotificationSettings>(
+        `${this.baseUrl}/alerting/type/${notification.id}/deactivate/user`,
+        { params: notification }
+      );
     }
-
-    // Speichere neue Einstellungen
-    updateNotificationSettings(settings: NotificationSettings): Observable<NotificationSettings> {
-        return this.http.put<NotificationSettings>(this.baseUrl, {params: settings});
-    }
-
+  }
 }
