@@ -12,6 +12,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 import { BackupDataService } from './backupData.service';
 import { BackupDataDto } from './dto/backupData.dto';
@@ -21,6 +22,7 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
 import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
 
+@ApiTags('Backup Data')
 @Controller('backupData')
 export class BackupDataController {
   readonly logger = new Logger(BackupDataController.name);

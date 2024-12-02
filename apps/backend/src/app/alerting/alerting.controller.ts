@@ -13,7 +13,7 @@ import {
   ApiConflictResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiQuery,
+  ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
@@ -22,6 +22,7 @@ import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { Alert } from './entity/alerts/alert';
 import { BackupType } from '../backupData/dto/backupType';
 
+@ApiTags('Alerting')
 @Controller('alerting')
 export class AlertingController {
   readonly logger = new Logger(AlertingController.name);
