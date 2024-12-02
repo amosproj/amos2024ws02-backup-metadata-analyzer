@@ -1,36 +1,15 @@
-import { Component } from '@angular/core';
-import {
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
-import {
-  BehaviorSubject,
-  finalize,
-  forkJoin,
-  map,
-  Observable,
-  Subject,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { Component, OnDestroy } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { BehaviorSubject, forkJoin, Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../../../services/notification.service';
 import { NotificationSettings } from 'apps/frontend/src/app/shared/types/notifications';
-
-/* interface NotificationSettingsFormGroup {
-  creationDateAlert: FormControl<boolean | null>;
-  sizeAlert: FormControl<boolean | null>;
-  alertEmails: FormControl<boolean | null>;
-} */
 
 @Component({
   selector: 'app-notification-settings',
   templateUrl: './notification-settings.component.html',
   styleUrl: './notification-settings.component.css',
 })
-export class NotificationSettingsComponent {
+export class NotificationSettingsComponent implements OnDestroy {
   isLoading = false;
   isSaving = false;
   isOpen = false;
@@ -59,7 +38,6 @@ export class NotificationSettingsComponent {
 
   open() {
     this.isOpen = true;
-    //this.loadSettings();
   }
 
   loadNotificationSettings(): void {
@@ -94,10 +72,6 @@ export class NotificationSettingsComponent {
     this.settingsForm.setControl('notifications', notificationArray);
   }
 
-  close() {
-    this.isOpen = false;
-  }
-
   saveSettings(): void {
     if (this.settingsForm.valid) {
       this.isLoading = true;
@@ -108,16 +82,28 @@ export class NotificationSettingsComponent {
         this.settingsService.updateNotificationSettings(notification)
       );
 
-      forkJoin(updateRequests).subscribe({
-        next: (updatedSettings) => {
-          this.notificationSubject$.next(updatedSettings);
-          this.isLoading = false;
-          this.isOpen = false;
-        },
-        error: () => {
-          this.isLoading = false;
-        },
-      });
+      forkJoin(updateRequests)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedSettings) => {
+            this.notificationSubject$.next(updatedSettings);
+            this.isLoading = false;
+            this.isOpen = false;
+          },
+          error: () => {
+            this.isLoading = false;
+          },
+        });
     }
+  }
+
+  close() {
+    this.isOpen = false;
+  }
+
+  ngOnDestroy(): void {
+    this.isOpen = false;
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
