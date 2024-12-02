@@ -73,9 +73,6 @@ class SimpleRuleBasedAnalyzer:
             for result1, result2 in zip(results[:-1], results[1:]):
                 new_alerts = self._analyze_pair(result1, result2, self.size_alert_percentage)
                 alerts += new_alerts
-
-            # Find creation time alerts
-            alerts += self._analyze_creation_times(results)
     
         # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
@@ -177,12 +174,41 @@ class SimpleRuleBasedAnalyzer:
         }
     
 
+    # Search for unusual creation times of 'full' backups
+    def analyze_creation_dates(self, data, alert_limit):
+        # Group the 'full' results by their task
+        groups = defaultdict(list)
+        for result in data:
+            if (result.task == ""
+                or result.fdi_type != 'F'
+                or result.data_size is None
+                or result.start_time is None):
+                continue
+            groups[result.task].append(result)
+
+        alerts = []
+        # Iterate through each group to find drastic size changes
+        for task, unordered_results in groups.items():
+            results = sorted(unordered_results, key=lambda result: result.start_time)
+            alerts += self._analyze_creation_dates_of_one_task(results)
+    
+        # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
+        count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+        # Send the alerts to the backend
+        for alert in alerts[:count]:
+            self.backend.create_alert(alert)
+
+        return {
+            "count": count
+        }
+    
+
     # Analyzes the creation times of a group of results from one task.
-    def _analyze_creation_times(self, results):
+    def _analyze_creation_dates_of_one_task(self, results):
         SECONDS_PER_DAY = 24 * 60 * 60
 
         alerts = []
-        print(f"NEW {len(results)}")
+        # Array that holds the previous creation dates as references times
         times = [results[0].start_time]
         # Skip the first result
         for result in results[1:]:

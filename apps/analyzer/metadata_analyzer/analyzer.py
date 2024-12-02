@@ -68,3 +68,8 @@ class Analyzer:
         data = list(Analyzer.database.get_results())
         result = Analyzer.simple_rule_based_analyzer.analyze_inc(data,alert_limit)
         return result
+
+    def simple_rule_based_analysis_creation_dates(alert_limit):
+        data = list(Analyzer.database.get_results())
+        result = Analyzer.simple_rule_based_analyzer.analyze_creation_dates(data, alert_limit)
+        return result

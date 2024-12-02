@@ -161,6 +161,16 @@ def simple_rule_based_analysis_inc():
     alert_limit = json["alertLimit"]
     return jsonify(Analyzer.simple_rule_based_analysis_inc(alert_limit))
 
+@app.route("/simpleRuleBasedAnalysisCreationDates", methods=["POST"])
+def simple_rule_based_analysis_creation_dates():
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(Analyzer.simple_rule_based_analysis_creation_dates(int(alert_limit)))
+    except ValueError:
+        return "Invalid value for alert limit", 400
+
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
