@@ -7,11 +7,27 @@ import { of } from 'rxjs';
 import { id } from '@cds/core/internal';
 import { ChartConfig } from '../../../shared/types/chart-config';
 
+Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+  value: () => ({
+    imageSmoothingEnabled: false,
+  }),
+});
+
 describe('ChartService', () => {
   let service: ChartService;
 
   beforeEach(() => {
     service = new ChartService();
+    const testContainer = document.createElement('div');
+    testContainer.id = 'testContainer';
+    document.body.appendChild(testContainer);
+  });
+
+  afterEach(() => {
+    const testContainer = document.getElementById('testContainer');
+    if (testContainer) {
+      document.body.removeChild(testContainer);
+    }
   });
 
   describe('prepareColumnData', () => {
@@ -128,6 +144,29 @@ describe('ChartService', () => {
       expect(service['charts']).toEqual({});
       expect(service['series']).toEqual({});
       expect(service['modals']).toEqual({});
+    });
+  });
+
+
+  describe('initializeRoot', () => {
+    it('should initialize the root correctly', () => {
+      const containerId = 'testContainer';
+      const root = service['initializeRoot'](containerId);
+  
+      expect(root).toBeDefined();
+      expect(service['roots'][containerId]).toBe(root);
+    });
+  
+    it('should dispose of the existing root if it exists', () => {
+      const containerId = 'testContainer';
+      const existingRoot = am5.Root.new(containerId);
+      service['roots'][containerId] = existingRoot;
+  
+      const newRoot = service['initializeRoot'](containerId);
+  
+      expect(newRoot).toBeDefined();
+      expect(service['roots'][containerId]).toBe(newRoot);
+      expect(existingRoot.isDisposed()).toBe(true);
     });
   });
 });
