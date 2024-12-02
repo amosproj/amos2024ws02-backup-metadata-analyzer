@@ -1,0 +1,12 @@
+.notification-item {
+  margin-bottom: 1rem;
+}
+
+.badge {
+  margin-left: 0.5rem;
+}
+
+clr-toggle-container {
+  display: flex;
+  align-items: center;
+}
