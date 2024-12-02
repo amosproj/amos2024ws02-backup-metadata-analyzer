@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
-import { Alert, CreationTimeAlert, SizeAlert } from '../../shared/types/alert';
+import { Alert, CreationDateAlert, SizeAlert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../shared/enums/severityType';
