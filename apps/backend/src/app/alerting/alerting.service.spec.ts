@@ -189,51 +189,6 @@ describe('AlertingService', () => {
       });
     });
   });
-  describe('activate/deactivate', () => {
-    it('should activate alert type by user', async () => {
-      const alertTypeId = 'not-active-id';
-
-      await service.userActivateAlertType(alertTypeId);
-
-      expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
-        user_active: true,
-        master_active: false,
-      });
-    });
-    it('should deactivate alert type by user', async () => {
-      const alertTypeId = 'active-id';
-
-      await service.userDeactivateAlertType(alertTypeId);
-
-      expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
-        user_active: false,
-        master_active: true,
-      });
-    });
-    it('should activate alert type by admin', async () => {
-      const alertTypeId = 'not-active-id';
-
-      await service.adminActivateAlertType(alertTypeId);
-
-      expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
-        user_active: false,
-        master_active: true,
-      });
-    });
-    it('should deactivate alert type by admin', async () => {
-      const alertTypeId = 'active-id';
-
-      await service.adminDeactivateAlertType(alertTypeId);
-
-      expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
-        master_active: false,
-      });
-    });
-  });
 
   describe('findAllAlerts', () => {
     it('should return all alerts', async () => {
@@ -279,6 +234,58 @@ describe('AlertingService', () => {
       await service.triggerAlertMail(alert);
 
       expect(mailService.sendAlertMail).toHaveBeenCalledWith(alert);
+    });
+  });
+
+  describe('adminChangeActiveStatusAlertType', () => {
+    it('should activate alert type by admin', async () => {
+      const alertTypeId = 'not-active-id';
+      const alertStatusDto = { status: true };
+
+      await service.adminChangeActiveStatusAlertType(alertTypeId, true);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        master_active: true,
+        user_active: false,
+      });
+    });
+
+    it('should deactivate alert type by admin', async () => {
+      const alertTypeId = 'active-id';
+
+      await service.adminChangeActiveStatusAlertType(alertTypeId, false);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        master_active: false,
+      });
+    });
+  });
+
+  describe('userChangeActiveStatusAlertType', () => {
+    it('should activate alert type by admin', async () => {
+      const alertTypeId = 'not-active-id';
+      const alertStatusDto = { status: true };
+
+      await service.userChangeActiveStatusAlertType(alertTypeId, true);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        master_active: false,
+        user_active: true,
+      });
+    });
+
+    it('should deactivate alert type by admin', async () => {
+      const alertTypeId = 'active-id';
+
+      await service.userChangeActiveStatusAlertType(alertTypeId, false);
+
+      expect(alertTypeRepository.save).toHaveBeenCalledWith({
+        ...mockedAlertTypeEntity,
+        user_active: false,
+      });
     });
   });
 });
