@@ -20,6 +20,7 @@ import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { Alert } from './entity/alerts/alert';
+import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { AlertStatusDto } from './dto/alertStatus.dto';
 
 @Controller('alerting')
@@ -113,5 +114,17 @@ export class AlertingController {
     @Body() createSizeAlertDto: CreateSizeAlertDto
   ): Promise<void> {
     await this.alertingService.createSizeAlert(createSizeAlertDto);
+  }
+
+  @Post('creationDate')
+  @ApiOperation({ summary: 'Create a new creation Date alert.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateCreationDateAlertDto })
+  async createCreationDateAlert(
+    @Body() createCreationDateAlertDto: CreateCreationDateAlertDto
+  ): Promise<void> {
+    await this.alertingService.createCreationDateAlert(
+      createCreationDateAlertDto
+    );
   }
 }

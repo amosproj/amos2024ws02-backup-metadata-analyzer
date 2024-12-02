@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { BackupType } from '../../backupData/dto/backupType';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
 import { SeverityType } from '../../alerting/dto/severityType';
+import { SIZE_ALERT } from '../constants';
 
 jest.mock('path', () => ({
   resolve: jest.fn().mockReturnValue('mocked/path/to/logo.png'),
@@ -49,7 +50,7 @@ describe('MailService', () => {
       id: 'alert-id',
       alertType: {
         id: 'alert-type-id',
-        name: 'SIZE_ALERT',
+        name: SIZE_ALERT,
         severity: SeverityType.CRITICAL,
         user_active: true,
         master_active: true,
