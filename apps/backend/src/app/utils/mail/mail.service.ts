@@ -2,8 +2,10 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
-import { AlertEntity } from '../../alerting/entity/alert.entity';
-import { AlertType } from '../../alerting/dto/alertType';
+import { Alert } from '../../alerting/entity/alerts/alert';
+import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
+import { CREATION_DATE_ALERT, SIZE_ALERT } from '../constants';
+import { CreationDateAlertEntity } from '../../alerting/entity/alerts/creationDateAlert.entity';
 
 @Injectable()
 export class MailService {
@@ -19,7 +21,7 @@ export class MailService {
     }
   }
 
-  async sendAlertMail(alert: AlertEntity) {
+  async sendAlertMail(alert: Alert) {
     const receivers =
       this.configService.getOrThrow<string>('MAILING_LIST').split(',') || [];
 
@@ -28,36 +30,54 @@ export class MailService {
     let valueColumnName = '';
     let referenceValueColumnName = '';
     let percentage: string = 'Infinity';
-    switch (alert.type) {
-      case AlertType.SIZE_DECREASED:
-        if (alert.referenceValue !== 0) {
-          percentage = Math.floor(
-            (1 - alert.value / alert.referenceValue) * 100
-          ).toString();
+    let value: string = '-';
+    let referenceValue: string = '-';
+    switch (alert.alertType.name) {
+      case SIZE_ALERT:
+        const sizeAlert = alert as SizeAlertEntity;
+        if (sizeAlert.size < sizeAlert.referenceSize) {
+          if (sizeAlert.referenceSize !== 0) {
+            percentage = Math.floor(
+              (1 - sizeAlert.size / sizeAlert.referenceSize) * 100
+            ).toString();
+          }
+          valueColumnName = 'Size of backup';
+          referenceValueColumnName = 'Size of previous backup';
+          reason = `Size of latest Backup decreased by ${percentage} %`;
+          description = `Size of latest Backup decreased by ${percentage}% compared to the previous Backup. This could indicate a problem with the Backup.`;
+          value = sizeAlert.size.toString() + ' MB';
+          referenceValue = sizeAlert.referenceSize.toString() + ' MB';
+          break;
+        } else {
+          if (sizeAlert.referenceSize !== 0) {
+            percentage = Math.floor(
+              (sizeAlert.size / sizeAlert.referenceSize - 1) * 100
+            ).toString();
+          }
+          valueColumnName = 'Size of backup';
+          referenceValueColumnName = 'Size of previous backup';
+          reason = `Size of latest Backup increased by ${percentage} %`;
+          description = `Size of latest Backup increased by ${percentage}% compared to the previous Backup. This could indicate a problem with the Backup.`;
+          value = sizeAlert.size.toString() + ' MB';
+          referenceValue = sizeAlert.referenceSize.toString() + ' MB';
+          break;
         }
-        valueColumnName = 'Size of backup';
-        referenceValueColumnName = 'Size of previous backup';
-        reason = `Size of latest Backup decreased by ${percentage} %`;
-        description = `Size of latest Backup decreased by ${percentage}% compared to the previous Backup. This could indicate a problem with the Backup.`;
-        break;
-      case AlertType.SIZE_INCREASED:
-        if (alert.referenceValue !== 0) {
-          percentage = Math.floor(
-            (alert.value / alert.referenceValue - 1) * 100
-          ).toString();
-        }
-        valueColumnName = 'Size of backup';
-        referenceValueColumnName = 'Size of previous backup';
-        reason = `Size of latest Backup increased by ${percentage} %`;
-        description = `Size of latest Backup increased by ${percentage}% compared to the previous Backup. This could indicate a problem with the Backup.`;
+      case CREATION_DATE_ALERT:
+        const creationDateAlert = alert as CreationDateAlertEntity;
+        valueColumnName = 'Creation Date of Backup';
+        referenceValueColumnName = 'Date the backup should have been started';
+        reason = `Backup was started at an unusual time`;
+        description = `Backup was started at ${creationDateAlert.date.toString()}%, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}%`;
+        value = creationDateAlert.date.toString();
+        referenceValue = creationDateAlert.referenceDate.toString();
         break;
     }
 
     const context = {
       reason,
       description,
-      value: alert.value.toString() + ' MB',
-      referenceValue: alert.referenceValue.toString() + ' MB',
+      value,
+      referenceValue,
       valueColumnName,
       referenceValueColumnName,
       backupId: alert.backup.id,

@@ -2,9 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from './mail.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { AlertEntity } from '../../alerting/entity/alert.entity';
-import { AlertType } from '../../alerting/dto/alertType';
 import { BackupType } from '../../backupData/dto/backupType';
+import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
+import { SeverityType } from '../../alerting/dto/severityType';
+import { SIZE_ALERT } from '../constants';
 
 jest.mock('path', () => ({
   resolve: jest.fn().mockReturnValue('mocked/path/to/logo.png'),
@@ -45,11 +46,17 @@ describe('MailService', () => {
   });
 
   it('should send alert mail', async () => {
-    const alert: AlertEntity = {
+    const alert: SizeAlertEntity = {
       id: 'alert-id',
-      type: AlertType.SIZE_DECREASED,
-      value: 100,
-      referenceValue: 200,
+      alertType: {
+        id: 'alert-type-id',
+        name: SIZE_ALERT,
+        severity: SeverityType.CRITICAL,
+        user_active: true,
+        master_active: true,
+      },
+      size: 100,
+      referenceSize: 200,
       backup: {
         id: 'backup-id',
         sizeMB: 100,
