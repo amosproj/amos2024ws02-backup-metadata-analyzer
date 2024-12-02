@@ -115,10 +115,10 @@ export class AlertingController {
     await this.alertingService.createSizeAlert(createSizeAlertDto);
   }
 
-  @Get('type/:typeName/latest/date')
+  @Get('type/:typeName/latest')
   @ApiOperation({
     summary:
-      'Get the date of the latest backup an alert of the given type exists for',
+      'Gets the id of the backup with the latest alert of the given type.',
   })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiQuery({
@@ -130,10 +130,7 @@ export class AlertingController {
   async getBackupDateFromLatestAlert(
     @Param('typeName') typeName: string,
     @Query('backupType') backupType?: BackupType
-  ): Promise<Date | null> {
-    return this.alertingService.getBackupDateFromLatestAlert(
-      typeName,
-      backupType
-    );
+  ): Promise<string | null> {
+    return this.alertingService.getLatestAlertsBackup(typeName, backupType);
   }
 }

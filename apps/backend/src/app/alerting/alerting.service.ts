@@ -158,10 +158,10 @@ export class AlertingService {
     return entity;
   }
 
-  async getBackupDateFromLatestAlert(
+  async getLatestAlertsBackup(
     alertTypeName: string,
     backupType?: BackupType
-  ): Promise<Date | null> {
+  ): Promise<string | null> {
     const alertType = await this.alertTypeRepository.findOneBy({
       name: alertTypeName,
     });
@@ -191,6 +191,6 @@ export class AlertingService {
       return null;
     }
 
-    return alert.backup.creationDate;
+    return alert.backup.id;
   }
 }
