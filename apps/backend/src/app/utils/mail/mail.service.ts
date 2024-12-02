@@ -67,7 +67,7 @@ export class MailService {
         valueColumnName = 'Creation Date of Backup';
         referenceValueColumnName = 'Date the backup should have been started';
         reason = `Backup was started at an unusual time`;
-        description = `Backup was started at ${creationDateAlert.date.toString()}%, but based on previous backups, it should have been started at around ${creationDateAlert.date.toString()}%`;
+        description = `Backup was started at ${creationDateAlert.date.toString()}%, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}%`;
         value = creationDateAlert.date.toString();
         referenceValue = creationDateAlert.referenceDate.toString();
         break;
