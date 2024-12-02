@@ -1,3 +1,5 @@
+import datetime
+
 class Analyzer:
     def init(database, backend, simple_analyzer, simple_rule_based_analyzer):
         Analyzer.database = database
@@ -24,6 +26,16 @@ class Analyzer:
             "sizeMB": result.data_size / 1_000_000,
             "creationDate": result.start_time.isoformat(),
         }
+
+    def _get_start_date(data, alert_type, backup_type):
+        latest_id = Analyzer.backend.get_latest_alert_id(alert_type, backup_type)
+        if latest_id == "":
+            return datetime.datetime.min
+        else:
+            latest_alerts = [result.start_time for result in data if result.uuid == latest_id]
+            assert len(latest_alerts) == 1
+            return latest_alerts[0]
+
 
     def update_data():
         results = list(Analyzer.database.get_results())
@@ -56,15 +68,19 @@ class Analyzer:
 
     def simple_rule_based_analysis(alert_limit):
         data = list(Analyzer.database.get_results())
-        result = Analyzer.simple_rule_based_analyzer.analyze(data, alert_limit)
+        start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "FULL")
+        print(f"Analyzing with start_date: {start_date}")
+        result = Analyzer.simple_rule_based_analyzer.analyze(data, alert_limit, start_date)
         return result
     
     def simple_rule_based_analysis_diff(alert_limit):
         data = list(Analyzer.database.get_results())
-        result = Analyzer.simple_rule_based_analyzer.analyze_diff(data,alert_limit)
+        start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "DIFFERENTIAL")
+        result = Analyzer.simple_rule_based_analyzer.analyze_diff(data, alert_limit, start_date)
         return result
     
     def simple_rule_based_analysis_inc(alert_limit):
         data = list(Analyzer.database.get_results())
-        result = Analyzer.simple_rule_based_analyzer.analyze_inc(data,alert_limit)
+        start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "INCREMENTAL")
+        result = Analyzer.simple_rule_based_analyzer.analyze_inc(data, alert_limit, start_date)
         return result

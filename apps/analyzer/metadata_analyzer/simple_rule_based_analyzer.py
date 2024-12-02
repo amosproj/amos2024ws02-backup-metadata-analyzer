@@ -2,6 +2,7 @@ import sys
 from collections import defaultdict
 import metadata_analyzer.backend
 from datetime import datetime, timedelta
+from metadata_analyzer.size_alert import SizeAlert
 
 
 class SimpleRuleBasedAnalyzer:
@@ -26,11 +27,7 @@ class SimpleRuleBasedAnalyzer:
         if -bound <= relative_change <= bound:
             return []
 
-        alert = {
-                "size": result2.data_size / 1_000_000,
-                "referenceSize": result1.data_size / 1_000_000,
-                "backupId": result2.uuid,
-        }
+        alert = SizeAlert(result2, result1.data_size)
         return [alert]
 
     def handle_zero(self, result1, result2):
@@ -55,16 +52,11 @@ class SimpleRuleBasedAnalyzer:
         if relative_change > 0 and relative_change <= self.diff_percentage:
             return []
 
-        alert = {
-                "size": result2.data_size / 1_000_000,
-                "referenceSize": result1.data_size / 1_000_000,
-                "backupId": result2.uuid,
-        }
-
+        alert = SizeAlert(result2, result1.data_size)
         return [alert]
 
     # For now only search for size changes and trigger corresponding alerts
-    def analyze(self, data, alert_limit):
+    def analyze(self, data, alert_limit, start_date):
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
@@ -83,10 +75,15 @@ class SimpleRuleBasedAnalyzer:
             results = sorted(unordered_results, key=lambda result: result.start_time)
             # Iterate through each pair of consecutive results and compare their sizes
             for result1, result2 in zip(results[:-1], results[1:]):
-                new_alerts = self._analyze_pair(
-                    result1, result2, self.size_alert_percentage
-                )
-                alerts += new_alerts
+                # Only create alerts for unanalyzed results
+                if result2.start_time > start_date:
+                    alerts += self._analyze_pair(
+                        result1, result2, self.size_alert_percentage
+                    )
+
+        # Because we ignore alerts which would be created earlier than the current latest alert,
+        # we have to sort the alerts to not miss any alerts in the future
+        alerts = sorted(alerts, key=lambda alert: alert.date)
 
         # If no alert limit was passed set it to default value
         if alert_limit is None:
@@ -96,12 +93,12 @@ class SimpleRuleBasedAnalyzer:
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
         # Send the alerts to the backend
         for alert in alerts[:count]:
-            self.backend.create_alert(alert)
+            self.backend.create_size_alert(alert.as_json())
 
         return {"count": count}
 
     # Searches for size increases in diffs and trigger corresponding alerts if not applicable
-    def analyze_diff(self, data, alert_limit):
+    def analyze_diff(self, data, alert_limit, start_date):
         # Group the 'full' and 'diff results by their task
         groups = defaultdict(list)
         groupNum = 0
@@ -135,12 +132,12 @@ class SimpleRuleBasedAnalyzer:
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
         # Send the alerts to the backend
         for alert in alerts[:count]:
-            self.backend.create_alert(alert)
+            self.backend.create_size_alert(alert.as_json())
 
         return {"count": count}
 
     # Searches for size changes in incs and triggers corresponding alerts if not applicable
-    def analyze_inc(self, data, alert_limit):
+    def analyze_inc(self, data, alert_limit, start_date):
 
         groups = defaultdict(list)
         for result in data:
@@ -196,6 +193,6 @@ class SimpleRuleBasedAnalyzer:
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
         # Send the alerts to the backend
         for alert in alerts[:count]:
-            self.backend.create_alert(alert)
+            self.backend.create_size_alert(alert.as_json())
 
         return {"count": count}
