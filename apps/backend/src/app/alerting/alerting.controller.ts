@@ -21,6 +21,7 @@ import { AlertTypeEntity } from './entity/alertType.entity';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { Alert } from './entity/alerts/alert';
 import { BackupType } from '../backupData/dto/backupType';
+import { AlertStatusDto } from './dto/alertStatus.dto';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -37,32 +38,32 @@ export class AlertingController {
     await this.alertingService.createAlertType(createAlertTypeDto);
   }
 
-  @Patch('type/:alertTypeId/activate/user')
+  @Patch('type/:alertTypeId/user')
   @ApiOperation({ summary: 'Activate Alert Type by user.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
-  async userActivateAlertType(@Param('alertTypeId') alertTypeId: string) {
-    await this.alertingService.userActivateAlertType(alertTypeId);
+  @ApiBody({ type: AlertStatusDto })
+  async userChangeActiveStatusAlertType(
+    @Param('alertTypeId') alertTypeId: string,
+    @Body() alertStatusDto: AlertStatusDto
+  ) {
+    await this.alertingService.userChangeActiveStatusAlertType(
+      alertTypeId,
+      alertStatusDto.status
+    );
   }
 
-  @Patch('type/:alertTypeId/deactivate/user')
-  @ApiOperation({ summary: 'Deactivate Alert Type by user' })
-  @ApiNotFoundResponse({ description: 'Alert type not found' })
-  async userDeactivateAlertType(@Param('alertTypeId') alertTypeId: string) {
-    await this.alertingService.userDeactivateAlertType(alertTypeId);
-  }
-
-  @Patch('type/:alertTypeId/activate/admin')
+  @Patch('type/:alertTypeId/admin')
   @ApiOperation({ summary: 'Activate Alert Type by admin.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
-  async adminActivateAlertType(@Param('alertTypeId') alertTypeId: string) {
-    await this.alertingService.adminActivateAlertType(alertTypeId);
-  }
-
-  @Patch('type/:alertTypeId/deactivate/admin')
-  @ApiOperation({ summary: 'Deactivate Alert Type by admin' })
-  @ApiNotFoundResponse({ description: 'Alert type not found' })
-  async adminDeactivateAlertType(@Param('alertTypeId') alertTypeId: string) {
-    await this.alertingService.adminDeactivateAlertType(alertTypeId);
+  @ApiBody({ type: AlertStatusDto })
+  async adminChangeActiveStatusAlertType(
+    @Param('alertTypeId') alertTypeId: string,
+    @Body() alertStatusDto: AlertStatusDto
+  ) {
+    await this.alertingService.adminChangeActiveStatusAlertType(
+      alertTypeId,
+      alertStatusDto.status
+    );
   }
 
   @Get('type')
