@@ -154,57 +154,7 @@ describe('AlertingController (e2e)', () => {
       expect.objectContaining(createAlertTypeDto)
     );
   });
-  it('PATCH /alerting/type/:id/activate/user - should activate alert type by user', async () => {
-    const alertTypeId = 'not-active-id';
 
-    await request(app.getHttpServer())
-      .patch(`/alerting/type/${alertTypeId}/activate/user`)
-      .expect(200);
-
-    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedSizeAlertTypeEntity,
-      user_active: true,
-      master_active: false,
-    });
-  });
-  it('PATCH /alerting/type/:id/deactivate/user - should deactivate alert type by user', async () => {
-    const alertTypeId = 'active-id';
-
-    await request(app.getHttpServer())
-      .patch(`/alerting/type/${alertTypeId}/deactivate/user`)
-      .expect(200);
-
-    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedSizeAlertTypeEntity,
-      user_active: false,
-      master_active: true,
-    });
-  });
-  it('PATCH /alerting/type/:id/activate/admin - should activate alert type by admin', async () => {
-    const alertTypeId = 'not-active-id';
-
-    await request(app.getHttpServer())
-      .patch(`/alerting/type/${alertTypeId}/activate/admin`)
-      .expect(200);
-
-    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedSizeAlertTypeEntity,
-      user_active: false,
-      master_active: true,
-    });
-  });
-  it('PATCH /alerting/type/:id/deactivate/admin - should deactivate alert type by admin', async () => {
-    const alertTypeId = 'active-id';
-
-    await request(app.getHttpServer())
-      .patch(`/alerting/type/${alertTypeId}/deactivate/admin`)
-      .expect(200);
-
-    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedSizeAlertTypeEntity,
-      master_active: false,
-    });
-  });
   it('GET /alerting - should filter alerts by backupId', async () => {
     const response = await request(app.getHttpServer())
       .get('/alerting')
@@ -296,6 +246,38 @@ describe('AlertingController (e2e)', () => {
       referenceDate: new Date('2024-12-01T17:53:33.239Z').toISOString(),
       backup: mockedBackupDataEntity,
       alertType: mockedCreationDateAlertTypeEntity,
+    });
+  });
+
+  it('PATCH /alerting/type/:alertTypeId/admin - should activate alert type by admin', async () => {
+    const alertTypeId = 'not-active-id';
+    const alertStatusDto = { status: true };
+
+    await request(app.getHttpServer())
+      .patch(`/alerting/type/${alertTypeId}/admin`)
+      .send(alertStatusDto)
+      .expect(200);
+
+    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
+      ...mockedAlertTypeEntity,
+      master_active: true,
+      user_active: false,
+    });
+  });
+
+  it('PATCH /alerting/type/:alertTypeId/user - should activate alert type by user', async () => {
+    const alertTypeId = 'not-active-id';
+    const alertStatusDto = { status: true };
+
+    await request(app.getHttpServer())
+      .patch(`/alerting/type/${alertTypeId}/user`)
+      .send(alertStatusDto)
+      .expect(200);
+
+    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
+      ...mockedAlertTypeEntity,
+      master_active: false,
+      user_active: true,
     });
   });
 });

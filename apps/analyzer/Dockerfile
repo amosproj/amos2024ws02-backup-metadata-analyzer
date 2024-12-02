@@ -1,29 +1,26 @@
 # Use Alpine 3.17, which supports Python 3.11
-FROM node:18-alpine3.17
 
-# Install Python 3.11 and other dependencies
-RUN apk add --no-cache python3 py3-pip python3-dev gcc musl-dev libffi-dev openssl-dev bash
+FROM python:3.11-slim-buster
 
-# Create the virtual environment
-RUN python3 -m venv /app/.venv
-
-# Set the virtual environment path
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Install Poetry
-RUN pip install --no-cache --upgrade pip setuptools && \
-    pip install poetry
-
-# Copy the dependency files
 WORKDIR /app
+
 COPY pyproject.toml poetry.lock ./
 
-# Install dependencies with Poetry
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi
+#Install Python and Pipx
+RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir pipx && \
+    pipx ensurepath
+
+# Install Poetry with pipx
+RUN pipx install poetry
+
+# Add Poetry to PATH
+ENV PATH="/root/.local/bin:$PATH"
+
+#Install dependencies outside of the venv
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-interaction --no-ansi --verbose
 
 #Copy the remaining code
 COPY . .
 
-# Standard command to start the application
-#CMD ["/app/.venv/bin/python3", "main.py" , "--host", "0.0.0.0"]
