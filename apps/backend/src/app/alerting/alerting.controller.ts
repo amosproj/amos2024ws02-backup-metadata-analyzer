@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiConflictResponse,
@@ -11,6 +20,8 @@ import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { Alert } from './entity/alerts/alert';
+import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { AlertStatusDto } from './dto/alertStatus.dto';
 
 @Controller('alerting')
 export class AlertingController {
@@ -24,6 +35,34 @@ export class AlertingController {
   @ApiBody({ type: CreateAlertTypeDto })
   async createAlertType(@Body() createAlertTypeDto: CreateAlertTypeDto) {
     await this.alertingService.createAlertType(createAlertTypeDto);
+  }
+
+  @Patch('type/:alertTypeId/user')
+  @ApiOperation({ summary: 'Activate Alert Type by user.' })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  @ApiBody({ type: AlertStatusDto })
+  async userChangeActiveStatusAlertType(
+    @Param('alertTypeId') alertTypeId: string,
+    @Body() alertStatusDto: AlertStatusDto
+  ) {
+    await this.alertingService.userChangeActiveStatusAlertType(
+      alertTypeId,
+      alertStatusDto.status
+    );
+  }
+
+  @Patch('type/:alertTypeId/admin')
+  @ApiOperation({ summary: 'Activate Alert Type by admin.' })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  @ApiBody({ type: AlertStatusDto })
+  async adminChangeActiveStatusAlertType(
+    @Param('alertTypeId') alertTypeId: string,
+    @Body() alertStatusDto: AlertStatusDto
+  ) {
+    await this.alertingService.adminChangeActiveStatusAlertType(
+      alertTypeId,
+      alertStatusDto.status
+    );
   }
 
   @Get('type')
@@ -71,9 +110,21 @@ export class AlertingController {
   @ApiOperation({ summary: 'Create a new size alert.' })
   @ApiNotFoundResponse({ description: 'Backup not found' })
   @ApiBody({ type: CreateSizeAlertDto })
-  async createSIzeAlert(
+  async createSizeAlert(
     @Body() createSizeAlertDto: CreateSizeAlertDto
   ): Promise<void> {
     await this.alertingService.createSizeAlert(createSizeAlertDto);
+  }
+
+  @Post('creationDate')
+  @ApiOperation({ summary: 'Create a new creation Date alert.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateCreationDateAlertDto })
+  async createCreationDateAlert(
+    @Body() createCreationDateAlertDto: CreateCreationDateAlertDto
+  ): Promise<void> {
+    await this.alertingService.createCreationDateAlert(
+      createCreationDateAlertDto
+    );
   }
 }

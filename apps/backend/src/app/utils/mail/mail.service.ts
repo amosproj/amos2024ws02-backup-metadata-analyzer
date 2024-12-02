@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { Alert } from '../../alerting/entity/alerts/alert';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
+import { CREATION_DATE_ALERT, SIZE_ALERT } from '../constants';
+import { CreationDateAlertEntity } from '../../alerting/entity/alerts/creationDateAlert.entity';
 
 @Injectable()
 export class MailService {
@@ -31,8 +33,7 @@ export class MailService {
     let value: string = '-';
     let referenceValue: string = '-';
     switch (alert.alertType.name) {
-      //TODO: create constant for that
-      case 'SIZE_ALERT':
+      case SIZE_ALERT:
         const sizeAlert = alert as SizeAlertEntity;
         if (sizeAlert.size < sizeAlert.referenceSize) {
           if (sizeAlert.referenceSize !== 0) {
@@ -61,6 +62,15 @@ export class MailService {
           referenceValue = sizeAlert.referenceSize.toString() + ' MB';
           break;
         }
+      case CREATION_DATE_ALERT:
+        const creationDateAlert = alert as CreationDateAlertEntity;
+        valueColumnName = 'Creation Date of Backup';
+        referenceValueColumnName = 'Date the backup should have been started';
+        reason = `Backup was started at an unusual time`;
+        description = `Backup was started at ${creationDateAlert.date.toString()}%, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}%`;
+        value = creationDateAlert.date.toString();
+        referenceValue = creationDateAlert.referenceDate.toString();
+        break;
     }
 
     const context = {
