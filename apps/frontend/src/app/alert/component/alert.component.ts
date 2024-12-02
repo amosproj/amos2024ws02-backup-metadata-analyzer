@@ -112,13 +112,8 @@ export class AlertComponent implements OnInit {
         }
       case 'CREATION_DATE_ALERT':
         const creationDateAlert = alert as CreationDateAlert;
-        if (
-          creationDateAlert.date.getTime() !==
-          creationDateAlert.referenceDate.getTime()
-        ) {
-          reason = `Backup was started at an unusual time`;
-          break;
-        }
+        reason = `Backup was started at an unusual time`;
+        break;
     }
     return reason;
   }
@@ -144,13 +139,9 @@ export class AlertComponent implements OnInit {
         }
       case 'CREATION_DATE_ALERT':
         const creationDateAlert = alert as CreationDateAlert;
-        if (
-          creationDateAlert.date.getTime() !==
-          creationDateAlert.referenceDate.getTime()
-        ) {
-          description = `Backup was started at ${creationDateAlert.date.toString()}%, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}%`;
-          break;
-        }
+
+        description = `Backup was started at ${creationDateAlert.date.toString()}, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
+        break;
     }
     return description;
   }
