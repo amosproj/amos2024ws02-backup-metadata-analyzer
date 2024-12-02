@@ -11,3 +11,8 @@ export interface SizeAlert extends Alert {
   size: number;
   referenceSize: number;
 }
+
+export interface CreationDateAlert extends Alert {
+  date: Date;
+  referenceDate: Date;
+}
