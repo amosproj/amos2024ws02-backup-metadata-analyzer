@@ -163,6 +163,20 @@ def simple_rule_based_analysis_inc():
 
 @app.route("/simpleRuleBasedAnalysisCreationDates", methods=["POST"])
 def simple_rule_based_analysis_creation_dates():
+    """Runs a simple rule based analysis on full backups searching for unusual creation times
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    responses:
+        200:
+            description: Number of created alerts
+        400:
+            description: The value set for the alert limit was not valid
+    """
     alert_limit = request.args.get("alertLimit")
 
     try:

@@ -196,7 +196,7 @@ class SimpleRuleBasedAnalyzer:
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
         # Send the alerts to the backend
         for alert in alerts[:count]:
-            self.backend.create_alert(alert)
+            self.backend.create_creation_date_alert(alert)
 
         return {
             "count": count

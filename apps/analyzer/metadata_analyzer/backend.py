@@ -13,3 +13,7 @@ class Backend:
         url = self.backend_url + "alerting/size"
         r = requests.post(url, json=alert)
         r.raise_for_status()
+
+    def create_creation_date_alert(self, alert):
+        url = self.backend_url + "alerting/creationDate"
+        r = requests.post(url, json=alert)
