@@ -100,9 +100,9 @@ describe('AlertingService', () => {
                   user_active: false,
                   master_active: false,
                 };
-              }  else if (name === CREATION_DATE_ALERT) {
+              } else if (name === CREATION_DATE_ALERT) {
                 return mockedCreationDateAlertTypeEntity;
-              }else {
+              } else {
                 return null;
               }
             }),
@@ -312,7 +312,7 @@ describe('AlertingService', () => {
       await service.adminChangeActiveStatusAlertType(alertTypeId, true);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         master_active: true,
         user_active: false,
       });
@@ -324,7 +324,7 @@ describe('AlertingService', () => {
       await service.adminChangeActiveStatusAlertType(alertTypeId, false);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         master_active: false,
       });
     });
@@ -333,12 +333,11 @@ describe('AlertingService', () => {
   describe('userChangeActiveStatusAlertType', () => {
     it('should activate alert type by admin', async () => {
       const alertTypeId = 'not-active-id';
-      const alertStatusDto = { status: true };
 
       await service.userChangeActiveStatusAlertType(alertTypeId, true);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         master_active: false,
         user_active: true,
       });
@@ -350,7 +349,7 @@ describe('AlertingService', () => {
       await service.userChangeActiveStatusAlertType(alertTypeId, false);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         user_active: false,
       });
     });

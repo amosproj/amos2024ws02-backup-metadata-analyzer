@@ -259,7 +259,7 @@ describe('AlertingController (e2e)', () => {
       .expect(200);
 
     expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
+      ...mockedSizeAlertTypeEntity,
       master_active: true,
       user_active: false,
     });
@@ -275,7 +275,7 @@ describe('AlertingController (e2e)', () => {
       .expect(200);
 
     expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
+      ...mockedSizeAlertTypeEntity,
       master_active: false,
       user_active: true,
     });
