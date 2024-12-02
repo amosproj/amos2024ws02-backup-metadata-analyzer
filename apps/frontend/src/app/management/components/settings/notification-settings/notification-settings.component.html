@@ -3,49 +3,53 @@
   [clrModalClosable]="false"
   clrModalSize="md"
 >
-  <div class="modal-title">Notification Settings</div>
+  <h3 class="modal-title">Notification Settings</h3>
   <div class="modal-body">
-    <ng-container *ngIf="settings$ | async as settings">
+    <form clrForm [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+      <clr-spinner *ngIf="isLoading"></clr-spinner>
 
-    </ng-container>
-
-
-    <form clrForm [formGroup]="settingsForm">
-      <clr-toggle-container>
-        <clr-toggle-wrapper>
-          <input
-            type="checkbox"
-            clrToggle
-            value="creationDateAlertNotification"
-            name="option"
-            formControlName="creationDateAlert"
-          />
-          <label>Creation Date Alert</label>
-        </clr-toggle-wrapper>
-        <clr-toggle-wrapper>
-          <input
-            type="checkbox"
-            clrToggle
-            value="sizeAlertNotification"
-            name="option"
-            formArrayName="sizeAlert"
-          />
-          <label>Size Alert</label>
-        </clr-toggle-wrapper>
-        <clr-toggle-wrapper>
-          <input
-            type="checkbox"
-            clrToggle
-            name="option"
-            formControlName="alertEmails"
-          />
-          <label>Email Notification</label>
-        </clr-toggle-wrapper>
-      </clr-toggle-container>
+      <div formArrayName="notifications">
+        <div
+          *ngFor="
+            let notification of notificationControls.controls;
+            let i = index
+          "
+          [formGroupName]="i"
+          class="notification-item"
+        >
+          <clr-control-container>
+            <clr-toggle-wrapper>
+              <input type="checkbox" clrToggle formControlName="user_active" />
+              <label>{{ notification.get('name')?.value }}</label>
+            </clr-toggle-wrapper>
+            <span
+              class="badge"
+              [ngClass]="{
+                'badge-warning':
+                  notification.get('severity')?.value === 'WARNING',
+                'badge-danger': notification.get('severity')?.value === 'ERROR',
+                'badge-info': notification.get('severity')?.value === 'INFO'
+              }"
+            >
+              {{ notification.get('severity')?.value }}
+            </span>
+          </clr-control-container>
+        </div>
+      </div>
     </form>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-outline" (click)="close()">Cancel</button>
-    <button class="btn btn-primary" [clrLoading]="isSaving" (click)="save()">Save</button>
+    <button type="button" class="btn btn-outline" (click)="close()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [clrLoading]="isSaving"
+      (click)="saveSettings()"
+      [disabled]="isLoading || !settingsForm.valid"
+    >
+      Save
+    </button>
   </div>
 </clr-modal>
