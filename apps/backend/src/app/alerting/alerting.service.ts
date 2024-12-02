@@ -41,27 +41,15 @@ export class AlertingService {
     return await this.alertTypeRepository.save(createAlertTypeDto);
   }
 
-  async userActivateAlertType(alertTypeId: string) {
+  async userChangeActiveStatusAlertType(alertTypeId: string, status: boolean) {
     const alertType = await this.findAlertTypeByIdOrThrow(alertTypeId);
-    alertType.user_active = true;
+    alertType.user_active = status;
     return await this.alertTypeRepository.save(alertType);
   }
 
-  async userDeactivateAlertType(alertTypeId: string) {
+  async adminChangeActiveStatusAlertType(alertTypeId: string, status: boolean) {
     const alertType = await this.findAlertTypeByIdOrThrow(alertTypeId);
-    alertType.user_active = false;
-    return await this.alertTypeRepository.save(alertType);
-  }
-
-  async adminActivateAlertType(alertTypeId: string) {
-    const alertType = await this.findAlertTypeByIdOrThrow(alertTypeId);
-    alertType.master_active = true;
-    return await this.alertTypeRepository.save(alertType);
-  }
-
-  async adminDeactivateAlertType(alertTypeId: string) {
-    const alertType = await this.findAlertTypeByIdOrThrow(alertTypeId);
-    alertType.master_active = false;
+    alertType.master_active = status;
     return await this.alertTypeRepository.save(alertType);
   }
 
@@ -84,7 +72,9 @@ export class AlertingService {
   }
 
   async getAllAlerts(backupId?: string, days?: number): Promise<Alert[]> {
-    const where: FindOptionsWhere<Alert> = { alertType: { user_active: true, master_active: true } };
+    const where: FindOptionsWhere<Alert> = {
+      alertType: { user_active: true, master_active: true },
+    };
     if (backupId) {
       where.backup = { id: backupId };
     }
