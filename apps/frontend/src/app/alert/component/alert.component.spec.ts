@@ -3,8 +3,9 @@ import { AlertComponent } from './alert.component';
 import { AlertServiceService } from '../service/alert-service.service';
 import { DatePipe } from '@angular/common';
 import { of } from 'rxjs';
-import { Alert } from '../../shared/types/alert';
-import { AlertType } from '../../shared/enums/alertType';
+import { Alert, SizeAlert } from '../../shared/types/alert';
+import { randomUUID } from 'crypto';
+import { SeverityType } from '../../shared/enums/severityType';
 
 describe('AlertComponent', () => {
   let component: AlertComponent;
@@ -36,36 +37,44 @@ describe('AlertComponent', () => {
     it('should load and process alerts correctly', () => {
       const mockAlerts: Alert[] = [
         {
-          id: '1',
-          type: AlertType.SIZE_DECREASED,
-          value: 50,
-          referenceValue: 100,
-          backup: {
-            id: '1',
-            sizeMB: 100,
-            creationDate: new Date(),
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(), name: 'test',
+            severity: SeverityType.CRITICAL,
+            user_active: false,
+            master_active: false
           },
+          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
         },
         {
-          id: '2',
-          type: AlertType.SIZE_INCREASED,
-          value: 150,
-          referenceValue: 100,
-          backup: {
-            id: '2',
-            sizeMB: 200,
-            creationDate: new Date(),
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(), name: 'test',
+            severity: SeverityType.INFO,
+            user_active: false,
+            master_active: false
           },
+          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+        },
+        {
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(), name: 'test',
+            severity: SeverityType.WARNING,
+            user_active: false,
+            master_active: false
+          },
+          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
         },
       ];
 
-      component.criticalAlertTypes = [AlertType.SIZE_DECREASED];
       mockAlertService.getAllAlerts.mockReturnValue(of(mockAlerts));
 
       component.loadAlerts();
 
       expect(component.criticalAlertsCount).toBe(1);
-      expect(component.nonCriticalAlertsCount).toBe(1);
+      expect(component.infoAlertsCount).toBe(1);
+      expect(component.warningAlertsCount).toBe(1);
       expect(component.status).toBe('Critical');
     });
 
@@ -86,36 +95,32 @@ describe('AlertComponent', () => {
     });
 
     it('should return Critical when critical alerts exist', () => {
-      component.criticalAlertTypes = [AlertType.SIZE_DECREASED];
       component.alerts = [
         {
-          id: '1',
-          type: AlertType.SIZE_DECREASED,
-          value: 50,
-          referenceValue: 100,
-          backup: {
-            id: '1',
-            sizeMB: 100,
-            creationDate: new Date(),
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(), name: 'test',
+            severity: SeverityType.CRITICAL,
+            user_active: false,
+            master_active: false
           },
+          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
         },
       ];
       expect(component.getStatus()).toBe('Critical');
     });
 
     it('should return Warning when non-critical alerts exist', () => {
-      component.criticalAlertTypes = [AlertType.SIZE_DECREASED];
       component.alerts = [
         {
-          id: '2',
-          type: AlertType.SIZE_INCREASED,
-          value: 150,
-          referenceValue: 100,
-          backup: {
-            id: '2',
-            sizeMB: 200,
-            creationDate: new Date(),
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(), name: 'test',
+            severity: SeverityType.WARNING,
+            user_active: false,
+            master_active: false
           },
+          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
         },
       ];
       expect(component.getStatus()).toBe('Warning');
@@ -137,30 +142,27 @@ describe('AlertComponent', () => {
 
   describe('getAlertClass', () => {
     it('should return correct alert class based on alert type', () => {
-      component.criticalAlertTypes = [AlertType.SIZE_DECREASED];
 
       const criticalAlert: Alert = {
-        id: '1',
-        type: AlertType.SIZE_DECREASED,
-        value: 50,
-        referenceValue: 100,
-        backup: {
-          id: '1',
-          sizeMB: 100,
-          creationDate: new Date(),
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(), name: 'test',
+          severity: SeverityType.CRITICAL,
+          user_active: false,
+          master_active: false
         },
+        backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
       };
 
-      const nonCriticalAlert: Alert = {
-        id: '2',
-        type: AlertType.SIZE_INCREASED,
-        value: 150,
-        referenceValue: 100,
-        backup: {
-          id: '2',
-          sizeMB: 200,
-          creationDate: new Date(),
+      const nonCriticalAlert: Alert =         {
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(), name: 'test',
+          severity: SeverityType.WARNING,
+          user_active: false,
+          master_active: false
         },
+        backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
       };
 
       expect(component.getAlertClass(criticalAlert)).toBe('alert-red');
@@ -170,32 +172,34 @@ describe('AlertComponent', () => {
 
   describe('getAlertReason', () => {
     it('should return correct reason for size decreased alert', () => {
-      const alert: Alert = {
-        id: '1',
-        type: AlertType.SIZE_DECREASED,
-        value: 50,
-        referenceValue: 100,
-        backup: {
-          id: '1',
-          sizeMB: 100,
-          creationDate: new Date(),
+      const alert: SizeAlert = {
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(), name: 'SIZE_ALERT',
+          severity: SeverityType.WARNING,
+          user_active: false,
+          master_active: false
         },
+        backup: { id: randomUUID().toString(), sizeMB: 20, creationDate: new Date() },
+        size: 20,
+        referenceSize: 100
       };
 
       expect(component.getAlertReason(alert)).toBe('Size of backup decreased');
     });
 
     it('should return correct reason for size increased alert', () => {
-      const alert: Alert = {
-        id: '1',
-        type: AlertType.SIZE_INCREASED,
-        value: 50,
-        referenceValue: 100,
-        backup: {
-          id: '1',
-          sizeMB: 100,
-          creationDate: new Date(),
+      const alert: SizeAlert = {
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(), name: 'SIZE_ALERT',
+          severity: SeverityType.WARNING,
+          user_active: false,
+          master_active: false
         },
+        backup: { id: randomUUID().toString(), sizeMB: 100, creationDate: new Date() },
+        size: 100,
+        referenceSize: 20
       };
 
       expect(component.getAlertReason(alert)).toBe('Size of backup increased');
@@ -223,23 +227,6 @@ describe('AlertComponent', () => {
       const formattedDate = component.formatDate(testDate);
 
       expect(formattedDate).toBe('');
-    });
-  });
-
-  describe('loadAlerts', () => {
-    it('should categorize alerts and set status correctly', () => {
-      const mockAlerts: Alert[] = [
-        { id: '1', type: AlertType.SIZE_DECREASED, value: 50, referenceValue: 100, backup: { id: '1', sizeMB: 100, creationDate: new Date() } },
-        { id: '2', type: AlertType.SIZE_INCREASED, value: 150, referenceValue: 100, backup: { id: '2', sizeMB: 200, creationDate: new Date() } },
-      ];
-  
-      vi.spyOn(mockAlertService, 'getAllAlerts').mockReturnValue(of(mockAlerts));
-  
-      component.loadAlerts();
-  
-      expect(component.criticalAlertsCount).toBe(0);
-      expect(component.nonCriticalAlertsCount).toBe(2);
-      expect(component.status).toBe('Warning');
     });
   });
 });
