@@ -141,7 +141,7 @@ describe('AlertingController (e2e)', () => {
   it('POST /alerting/type - should create a new alert type', async () => {
     const createAlertTypeDto = {
       severity: SeverityType.WARNING,
-      name: 'CREATION_TIME_ALERT',
+      name: 'TEST_ALERT',
       master_active: true,
     };
 
