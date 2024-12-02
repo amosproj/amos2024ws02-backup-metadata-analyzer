@@ -177,12 +177,12 @@ class SimpleRuleBasedAnalyzer:
         }
     
 
-    # Analyzes the creation times of a group of results from one task
+    # Analyzes the creation times of a group of results from one task.
     def _analyze_creation_times(self, results):
         SECONDS_PER_DAY = 24 * 60 * 60
 
         alerts = []
-        print("NEW")
+        print(f"NEW {len(results)}")
         times = [results[0].start_time]
         # Skip the first result
         for result in results[1:]:
@@ -199,6 +199,12 @@ class SimpleRuleBasedAnalyzer:
                     smallest_diff = diff
                     reference_time = ref_time.time()
 
+                # Early abort if the diff is already small enough
+                if diff < 60 * 60:
+                    break
+
+            # Reference date consists of the time of the nearest backup in the past and
+            # the date of the actual backup
             reference_date = datetime.combine(result.start_time, reference_time)
             if smallest_diff > 60 * 60:
                 alerts.append({
@@ -207,8 +213,8 @@ class SimpleRuleBasedAnalyzer:
                     "backupId": result.uuid
                 })
 
+            # Put the current backup time into the reference times
             times.append(time)
-        print(alerts)
         return alerts
 
 
