@@ -1,14 +1,29 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { finalize, map, Observable, Subject, takeUntil, tap } from 'rxjs';
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import {
+  BehaviorSubject,
+  finalize,
+  forkJoin,
+  map,
+  Observable,
+  Subject,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { NotificationService } from '../../../services/notification.service';
 import { NotificationSettings } from 'apps/frontend/src/app/shared/types/notifications';
 
-interface NotificationSettingsFormGroup {
+/* interface NotificationSettingsFormGroup {
   creationDateAlert: FormControl<boolean | null>;
   sizeAlert: FormControl<boolean | null>;
   alertEmails: FormControl<boolean | null>;
-}
+} */
 
 @Component({
   selector: 'app-notification-settings',
@@ -19,49 +34,27 @@ export class NotificationSettingsComponent {
   isLoading = false;
   isSaving = false;
   isOpen = false;
+  settingsForm: FormGroup;
 
-  private notificationSubject$ = new Subject<void>();
-  readonly settings$: Observable<NotificationSettings>;
-  private desttroy$ = new Subject<void>();
+  private notificationSubject$ = new BehaviorSubject<NotificationSettings[]>(
+    []
+  );
+  private destroy$ = new Subject<void>();
 
-  readonly settingsForm: FormGroup<NotificationSettingsFormGroup>;
-
-  constructor(private settingsService: NotificationService) {
-    this.settingsForm = new FormGroup<NotificationSettingsFormGroup>({
-      creationDateAlert: new FormControl(false, Validators.required),
-      sizeAlert: new FormControl(false, Validators.required),
-      alertEmails: new FormControl(false, Validators.required),
+  constructor(
+    private settingsService: NotificationService,
+    private fb: FormBuilder
+  ) {
+    this.settingsForm = this.fb.group({
+      notifications: this.fb.array([]),
     });
-
-    // Initialisiere das Observable
-    this.settings$ = this.settingsService.getNotificationSettings().pipe(
-      map(settings => ({
-          creationDateAlert: settings.creationDateAlert ?? true,
-          sizeAlert: settings.sizeAlert ?? true,
-          alertEmails: settings.alertEmails ?? true
-      })),
-      tap(normalizedSettings => {
-          this.settingsForm.patchValue(normalizedSettings, { emitEvent: true });
-      })
-    );
+  }
+  get notificationControls(): FormArray {
+    return this.settingsForm.get('notifications') as FormArray;
   }
 
   ngOnInit(): void {
-    this.isLoading = true;
-    this.settingsService
-      .getNotificationSettings()
-      .pipe(takeUntil(this.desttroy$))
-      .pipe(finalize(() => (this.isLoading = false)))
-      .subscribe({
-        next: (updatedSettings) => {
-          console.log(updatedSettings);
-          this.close();
-        },
-        error: (error) => {
-          console.error('Fehler beim Speichern:', error);
-          //  Fehlerbehandlung
-        },
-      });
+    this.loadNotificationSettings();
   }
 
   open() {
@@ -69,18 +62,62 @@ export class NotificationSettingsComponent {
     //this.loadSettings();
   }
 
-  private loadSettings() {}
+  loadNotificationSettings(): void {
+    this.isLoading = true;
+    this.settingsService
+      .getNotificationSettings()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (settings) => {
+          this.notificationSubject$.next(settings);
+          this.initForm(settings);
+          this.isLoading = false;
+        },
+        error: () => {
+          this.isLoading = false;
+        },
+      });
+  }
+
+  initForm(settings: NotificationSettings[]): void {
+    const notificationArray = this.fb.array(
+      settings.map((notification) =>
+        this.fb.group({
+          id: [notification.id],
+          name: [notification.name],
+          severity: [notification.severity],
+          user_active: [notification.user_active],
+          master_active: [notification.master_active],
+        })
+      )
+    );
+    this.settingsForm.setControl('notifications', notificationArray);
+  }
 
   close() {
     this.isOpen = false;
   }
 
-  save() {
+  saveSettings(): void {
     if (this.settingsForm.valid) {
-        this.isSaving = true;
-        const settings = this.settingsForm.value;
-        //this.settingsService.updateNotificationSettings(this.settingsForm.value)
-        this.close();
+      this.isLoading = true;
+      const notifications = this.notificationControls
+        .value as NotificationSettings[];
+
+      const updateRequests = notifications.map((notification) =>
+        this.settingsService.updateNotificationSettings(notification)
+      );
+
+      forkJoin(updateRequests).subscribe({
+        next: (updatedSettings) => {
+          this.notificationSubject$.next(updatedSettings);
+          this.isLoading = false;
+          this.isOpen = false;
+        },
+        error: () => {
+          this.isLoading = false;
+        },
+      });
     }
-}
+  }
 }
