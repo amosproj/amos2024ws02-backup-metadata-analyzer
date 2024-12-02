@@ -7,7 +7,10 @@ import { AlertServiceService } from './alert-service.service';
 import { BASE_URL } from '../../shared/types/configuration';
 import { Alert } from '../../shared/types/alert';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AlertType } from '../../shared/enums/alertType';
+import { AlertType } from '../../shared/types/alertType';
+import { BackupService } from '../../backups-overview/service/backup-service/backup-service.service';
+import { randomUUID } from 'node:crypto';
+import { SeverityType } from '../../shared/enums/severityType';
 
 describe('AlertServiceService', () => {
   let service: AlertServiceService;
@@ -38,19 +41,25 @@ describe('AlertServiceService', () => {
   it('should fetch all alerts without days parameter', () => {
     const mockAlerts: Alert[] = [
       {
-        id: '1',
-        type: AlertType.SIZE_DECREASED,
-        value: 100,
-        referenceValue: 50,
-        backup: { id: '1', sizeMB: 100, creationDate: new Date() },
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(), name: 'test',
+          severity: SeverityType.INFO,
+          user_active: false,
+          master_active: false
+        },
+        backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
       },
       {
-        id: '2',
-        type: AlertType.SIZE_INCREASED,
-        value: 200,
-        referenceValue: 100,
-        backup: { id: '2', sizeMB: 200, creationDate: new Date() },
-      },
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(), name: 'test',
+          severity: SeverityType.INFO,
+          user_active: false,
+          master_active: false
+        },
+        backup: { id: randomUUID().toString(), sizeMB: 10, creationDate: new Date() },
+      }
     ];
 
     service.getAllAlerts().subscribe((alerts) => {
@@ -65,19 +74,25 @@ describe('AlertServiceService', () => {
   it('should fetch alerts with days parameter', () => {
     const mockAlerts: Alert[] = [
       {
-        id: '1',
-        type: AlertType.SIZE_DECREASED,
-        value: 100,
-        referenceValue: 50,
-        backup: { id: '1', sizeMB: 100, creationDate: new Date() },
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(), name: 'test',
+          severity: SeverityType.INFO,
+          user_active: false,
+          master_active: false
+        },
+        backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
       },
       {
-        id: '2',
-        type: AlertType.SIZE_INCREASED,
-        value: 200,
-        referenceValue: 100,
-        backup: { id: '2', sizeMB: 200, creationDate: new Date() },
-      },
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(), name: 'test',
+          severity: SeverityType.INFO,
+          user_active: false,
+          master_active: false
+        },
+        backup: { id: randomUUID().toString(), sizeMB: 10, creationDate: new Date() },
+      }
     ];
     const days = 7;
 
