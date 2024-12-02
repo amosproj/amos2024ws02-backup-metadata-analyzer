@@ -1,5 +1,7 @@
 export interface NotificationSettings {
-  creationDateAlert: boolean;
-  sizeAlert: boolean;
-  alertEmails: boolean;
+  id: string;
+  name: string;
+  severity: string;
+  user_active: boolean;
+  master_active: boolean;
 }
