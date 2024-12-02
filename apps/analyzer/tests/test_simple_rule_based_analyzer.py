@@ -341,7 +341,7 @@ def test_alert_exact_time():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == []
+    assert backend.creation_date_alerts == []
 
 # Deviations up to 15 mins from the first backup
 def test_alert_small_time_deviation():
@@ -357,7 +357,7 @@ def test_alert_small_time_deviation():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == []
+    assert backend.creation_date_alerts == []
 
 # Backups with a diff of exactly one hour trigger no alert
 def test_alert_time_on_the_limit():
@@ -370,7 +370,7 @@ def test_alert_time_on_the_limit():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == []
+    assert backend.creation_date_alerts == []
 
 # Check if all past backups are considered as a reference
 def test_alert_moving_schedule():
@@ -386,7 +386,7 @@ def test_alert_moving_schedule():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == []
+    assert backend.creation_date_alerts == []
 
 # Check behaviour around midnight
 def test_alert_time_midnight_no_alert():
@@ -402,7 +402,7 @@ def test_alert_time_midnight_no_alert():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == []
+    assert backend.creation_date_alerts == []
 
 # Alerts should be triggered when the diff is greater than one hour
 def test_alert_unusual_time():
@@ -417,9 +417,9 @@ def test_alert_unusual_time():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == [{
-        "date": mock_result4.start_time,
-        "referenceDate": datetime.fromisoformat("2000-01-04T12:00:00"),
+    assert backend.creation_date_alerts == [{
+        "date": mock_result4.start_time.isoformat(),
+        "referenceDate": "2000-01-04T12:00:00",
         "backupId": mock_result4.uuid
     }]
 
@@ -436,9 +436,9 @@ def test_alert_two_different_schedules_same_task():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == [{
-        "date": mock_result2.start_time,
-        "referenceDate": datetime.fromisoformat("2020-12-25T18:00:00"),
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2020-12-25T18:00:00",
         "backupId": mock_result2.uuid
     }]
 
@@ -454,13 +454,13 @@ def test_alert_time_midnight_alerts():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == [{
-        "date": mock_result2.start_time,
-        "referenceDate": datetime.fromisoformat("2000-01-02T00:00:00"),
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-02T00:00:00",
         "backupId": mock_result2.uuid
     }, {
-        "date": mock_result3.start_time,
-        "referenceDate": datetime.fromisoformat("2000-01-03T00:00:00"),
+        "date": mock_result3.start_time.isoformat(),
+        "referenceDate": "2000-01-03T00:00:00",
         "backupId": mock_result3.uuid
     }]
 
@@ -477,13 +477,13 @@ def test_alert_creation_date_unordered():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == [{
-        "date": mock_result2.start_time,
-        "referenceDate": datetime.fromisoformat("2020-01-02T18:00:00"),
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2020-01-02T18:00:00",
         "backupId": mock_result2.uuid
     }, {
-        "date": mock_result4.start_time,
-        "referenceDate": datetime.fromisoformat("2020-01-04T18:30:00"),
+        "date": mock_result4.start_time.isoformat(),
+        "referenceDate": "2020-01-04T18:30:00",
         "backupId": mock_result4.uuid
     }]
 
@@ -500,8 +500,8 @@ def test_alert_creation_date_different_tasks():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.alerts == [{
-        "date": mock_result4.start_time,
-        "referenceDate": datetime.fromisoformat("2020-01-02T19:00:00"),
+    assert backend.creation_date_alerts == [{
+        "date": mock_result4.start_time.isoformat(),
+        "referenceDate": "2020-01-02T19:00:00",
         "backupId": mock_result4.uuid
     }]

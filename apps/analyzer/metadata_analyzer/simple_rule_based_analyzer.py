@@ -234,8 +234,8 @@ class SimpleRuleBasedAnalyzer:
             reference_date = datetime.combine(result.start_time, reference_time)
             if smallest_diff > 60 * 60:
                 alerts.append({
-                    "date": result.start_time,
-                    "referenceDate": reference_date,
+                    "date": result.start_time.isoformat(),
+                    "referenceDate": reference_date.isoformat(),
                     "backupId": result.uuid
                 })
 
