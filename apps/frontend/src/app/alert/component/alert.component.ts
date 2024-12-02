@@ -110,7 +110,7 @@ export class AlertComponent implements OnInit {
           reason = `Size of backup increased`;
           break;
         }
-      case 'CREATION_TIME_ALERT':
+      case 'CREATION_DATE_ALERT':
         const creationDateAlert = alert as CreationDateAlert;
         if (
           creationDateAlert.date.getTime() !==
