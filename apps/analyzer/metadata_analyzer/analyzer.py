@@ -44,10 +44,6 @@ class Analyzer:
         batch = []
         count = 0
         for result in results:
-            # Only send 'full' backups
-            if result.fdi_type != "F":
-                continue
-
             # Only send backups where the relevant data is not null
             if result.data_size is None or result.start_time is None:
                 continue
@@ -76,6 +72,7 @@ class Analyzer:
     def simple_rule_based_analysis_diff(alert_limit):
         data = list(Analyzer.database.get_results())
         start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "DIFFERENTIAL")
+        print(f"Analyzing with start_date: {start_date}")
         result = Analyzer.simple_rule_based_analyzer.analyze_diff(data, alert_limit, start_date)
         return result
     

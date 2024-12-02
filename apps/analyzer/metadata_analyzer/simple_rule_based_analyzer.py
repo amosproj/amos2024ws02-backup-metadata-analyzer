@@ -121,8 +121,13 @@ class SimpleRuleBasedAnalyzer:
             results = sorted(unordered_results, key=lambda result: result.start_time)
             # Iterate through each pair of consecutive results and compare their sizes
             for result1, result2 in zip(results[:-1], results[1:]):
-                new_alerts = self._analyze_pair_diff(result1, result2)
-                alerts += new_alerts
+                # Only create alerts for unanalyzed results
+                if result2.start_time > start_date:
+                    alerts += self._analyze_pair_diff(result1, result2)
+
+        # Because we ignore alerts which would be created earlier than the current latest alert,
+        # we have to sort the alerts to not miss any alerts in the future
+        alerts = sorted(alerts, key=lambda alert: alert.date)
 
         # If no alert limit was passed set it to default value
         if alert_limit is None:
@@ -180,10 +185,16 @@ class SimpleRuleBasedAnalyzer:
                 ) and interval <= avg_time * (1 + self.inc_date_percentage):
                     # converts prev to a result with the average size
                     prev.data_size = avg_size
-                    new_alerts = self._analyze_pair(
-                        prev, current, self.inc_data_percentage
-                    )
-                    alerts += new_alerts
+
+                    # Only create alerts for unanalyzed results
+                    if current.start_time > start_date:
+                        alerts += self._analyze_pair(
+                            prev, current, self.inc_data_percentage
+                        )
+
+        # Because we ignore alerts which would be created earlier than the current latest alert,
+        # we have to sort the alerts to not miss any alerts in the future
+        alerts = sorted(alerts, key=lambda alert: alert.date)
 
         # If no alert limit was passed set it to default value
         if alert_limit is None:
