@@ -174,8 +174,8 @@ class SimpleRuleBasedAnalyzer:
         }
     
 
-    # Search for unusual creation times of 'full' backups
-    def analyze_creation_dates(self, data, alert_limit):
+    # Search for unusual creation times of 'full' backups made after start_date
+    def analyze_creation_dates(self, data, alert_limit, start_date):
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
@@ -190,7 +190,7 @@ class SimpleRuleBasedAnalyzer:
         # Iterate through each group to find drastic size changes
         for task, unordered_results in groups.items():
             results = sorted(unordered_results, key=lambda result: result.start_time)
-            alerts += self._analyze_creation_dates_of_one_task(results)
+            alerts += self._analyze_creation_dates_of_one_task(results, start_date)
     
         # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
@@ -204,7 +204,7 @@ class SimpleRuleBasedAnalyzer:
     
 
     # Analyzes the creation times of a group of results from one task.
-    def _analyze_creation_dates_of_one_task(self, results):
+    def _analyze_creation_dates_of_one_task(self, results, start_date):
         SECONDS_PER_DAY = 24 * 60 * 60
 
         alerts = []
@@ -212,35 +212,36 @@ class SimpleRuleBasedAnalyzer:
         times = [results[0].start_time]
         # Skip the first result
         for result in results[1:]:
-            time = result.start_time
-            # The smallest diff in seconds to the time of a previous backup
-            smallest_diff = SECONDS_PER_DAY
-            reference_time = None
-            for ref_time in times:
-                diff = (time - ref_time).seconds
-                # Considers the wrap around on midnight
-                if diff > SECONDS_PER_DAY / 2:
-                    diff = SECONDS_PER_DAY - diff
-                if diff < smallest_diff:
-                    smallest_diff = diff
-                    reference_time = ref_time.time()
+            # Don't generate alerts for results older than the start_date
+            if result.start_time > start_date:
+                # The smallest diff in seconds to the time of a previous backup
+                smallest_diff = SECONDS_PER_DAY
+                reference_time = None
+                for ref_time in times:
+                    diff = (result.start_time - ref_time).seconds
+                    # Considers the wrap around on midnight
+                    if diff > SECONDS_PER_DAY / 2:
+                        diff = SECONDS_PER_DAY - diff
+                    if diff < smallest_diff:
+                        smallest_diff = diff
+                        reference_time = ref_time.time()
 
-                # Early abort if the diff is already small enough
-                if diff < 60 * 60:
-                    break
+                    # Early abort if the diff is already small enough
+                    if diff < 60 * 60:
+                        break
 
-            # Reference date consists of the time of the nearest backup in the past and
-            # the date of the actual backup
-            reference_date = datetime.combine(result.start_time, reference_time)
-            if smallest_diff > 60 * 60:
-                alerts.append({
-                    "date": result.start_time.isoformat(),
-                    "referenceDate": reference_date.isoformat(),
-                    "backupId": result.uuid
-                })
+                # Reference date consists of the time of the nearest backup in the past and
+                # the date of the actual backup
+                reference_date = datetime.combine(result.start_time, reference_time)
+                if smallest_diff > 60 * 60:
+                    alerts.append({
+                        "date": result.start_time.isoformat(),
+                        "referenceDate": reference_date.isoformat(),
+                        "backupId": result.uuid
+                    })
 
             # Put the current backup time into the reference times
-            times.append(time)
+            times.append(result.start_time)
         return alerts
 
 

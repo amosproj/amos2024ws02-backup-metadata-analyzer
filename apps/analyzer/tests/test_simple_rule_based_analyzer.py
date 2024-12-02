@@ -505,3 +505,23 @@ def test_alert_creation_date_different_tasks():
         "referenceDate": "2020-01-02T19:00:00",
         "backupId": mock_result4.uuid
     }]
+
+# Alerts should be triggered when the diff is greater than one hour
+def test_alert_latest_creation_date():
+    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
+    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T14:00:00"))
+    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-03T16:00:00"))
+    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-04T18:00:00"))
+
+    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
+    backend = MockBackend()
+    backend.set_latest_creation_date_alert("3")
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result4.start_time.isoformat(),
+        "referenceDate": "2000-01-04T16:00:00",
+        "backupId": mock_result4.uuid
+    }]

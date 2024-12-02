@@ -18,3 +18,9 @@ class Backend:
         url = self.backend_url + "alerting/creationDate"
         r = requests.post(url, json=alert)
         r.raise_for_status()
+
+    def get_latest_creation_date_alert(self):
+        url = self.backend_url + "alerting/type/creationDate/latest"
+        r = requests.get(url)
+        r.raise_for_status()
+        return r.text
