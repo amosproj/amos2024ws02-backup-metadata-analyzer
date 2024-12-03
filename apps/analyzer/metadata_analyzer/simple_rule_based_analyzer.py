@@ -3,6 +3,7 @@ from collections import defaultdict
 import metadata_analyzer.backend
 from datetime import datetime, timedelta
 from metadata_analyzer.size_alert import SizeAlert
+from metadata_analyzer.creation_date_alert import CreationDateAlert
 
 
 class SimpleRuleBasedAnalyzer:
@@ -229,11 +230,20 @@ class SimpleRuleBasedAnalyzer:
             results = sorted(unordered_results, key=lambda result: result.start_time)
             alerts += self._analyze_creation_dates_of_one_task(results, start_date)
     
+
+        # Because we ignore alerts which would be created earlier than the current latest alert,
+        # we have to sort the alerts to not miss any alerts in the future
+        alerts = sorted(alerts, key=lambda alert: alert.date)
+
+        # If no alert limit was passed set it to default value:
+        if alert_limit is None:
+            alert_limit = 10
+
         # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
         # Send the alerts to the backend
         for alert in alerts[:count]:
-            self.backend.create_creation_date_alert(alert)
+            self.backend.create_creation_date_alert(alert.as_json())
 
         return {"count": count}
     
@@ -269,12 +279,9 @@ class SimpleRuleBasedAnalyzer:
                 # the date of the actual backup
                 reference_date = datetime.combine(result.start_time, reference_time)
                 if smallest_diff > 60 * 60:
-                    alerts.append({
-                        "date": result.start_time.isoformat(),
-                        "referenceDate": reference_date.isoformat(),
-                        "backupId": result.uuid
-                    })
+                    alerts.append(CreationDateAlert(result, reference_date))
 
             # Put the current backup time into the reference times
             times.append(result.start_time)
+
         return alerts

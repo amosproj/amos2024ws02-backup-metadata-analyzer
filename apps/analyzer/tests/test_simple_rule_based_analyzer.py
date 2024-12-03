@@ -569,7 +569,7 @@ def test_alert_latest_creation_date():
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
     backend = MockBackend()
-    backend.set_latest_creation_date_alert("3")
+    backend.set_latest_alert_id("CREATION_DATE_ALERT", None, "3")
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)

@@ -93,13 +93,6 @@ class Analyzer:
 
     def simple_rule_based_analysis_creation_dates(alert_limit):
         data = list(Analyzer.database.get_results())
-        latest_creation_alert_id = Analyzer.backend.get_latest_creation_date_alert()
-        if latest_creation_alert_id == "":
-            start_date = datetime.datetime.min
-        else:
-            latest_creation_alerts = [result.start_time for result in data if result.uuid == latest_creation_alert_id]
-            assert len(latest_creation_alerts) == 1
-            start_date = latest_creation_alerts[0]
-
+        start_date = Analyzer._get_start_date(data, "CREATION_DATE_ALERT", None)
         result = Analyzer.simple_rule_based_analyzer.analyze_creation_dates(data, alert_limit, start_date)
         return result
