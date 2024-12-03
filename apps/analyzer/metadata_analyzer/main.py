@@ -4,6 +4,7 @@ from metadata_analyzer.database import Database
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
 from metadata_analyzer.analyzer import Analyzer
+from metadata_analyzer.time_series_analyzer import Time_series_analyzer
 from metadata_analyzer.backend import Backend
 from flasgger import Swagger
 import requests
@@ -160,6 +161,11 @@ def simple_rule_based_analysis_inc():
     json = request.get_json()
     alert_limit = json["alertLimit"]
     return jsonify(Analyzer.simple_rule_based_analysis_inc(alert_limit))
+
+@app.route("/timeSeriesTests", methods=["GET"])
+def runTimeSeriesTests():
+        result = Time_series_analyzer.analyze_basic()
+        return 'Time series analysis not yet supported', 501
 
 def main():
     database = Database()
