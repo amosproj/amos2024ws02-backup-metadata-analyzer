@@ -13,6 +13,9 @@ import { SeverityType } from './dto/severityType';
 import { Alert } from './entity/alerts/alert';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { BackupType } from '../backupData/dto/backupType';
+import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
+import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -21,27 +24,46 @@ const mockedBackupDataEntity: BackupDataEntity = {
   creationDate: new Date(),
 };
 
-const mockedAlertTypeEntity: AlertTypeEntity = {
-  id: 'alert-type-id',
-  name: 'SIZE_ALERT',
+const mockedSizeAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id1',
+  name: SIZE_ALERT,
   severity: SeverityType.WARNING,
   user_active: true,
   master_active: true,
 };
 
-const alerts: SizeAlertEntity[] = [
+const mockedCreationDateAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id2',
+  name: CREATION_DATE_ALERT,
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const sizeAlertEntities: SizeAlertEntity[] = [
   {
     id: 'alert-id',
     size: 100,
     referenceSize: 200,
     backup: mockedBackupDataEntity,
-    alertType: mockedAlertTypeEntity,
+    alertType: mockedSizeAlertTypeEntity,
+  },
+];
+
+const creationDateAlertEntities: CreationDateAlertEntity[] = [
+  {
+    id: 'alert-id',
+    date: new Date(),
+    referenceDate: new Date(),
+    backup: mockedBackupDataEntity,
+    alertType: mockedCreationDateAlertTypeEntity,
   },
 ];
 
 describe('AlertingService', () => {
   let service: AlertingService;
   let sizeAlertRepository: Repository<SizeAlertEntity>;
+  let creationDateAlertEntityRepository: Repository<CreationDateAlertEntity>;
   let alertTypeRepository: Repository<AlertTypeEntity>;
   let mailService: MailService;
   let backupDataService: BackupDataService;
@@ -53,7 +75,15 @@ describe('AlertingService', () => {
         {
           provide: getRepositoryToken(SizeAlertEntity),
           useValue: {
-            find: jest.fn().mockResolvedValue(alerts),
+            find: jest.fn().mockResolvedValue(sizeAlertEntities),
+            findOneBy: jest.fn().mockResolvedValue(null),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(CreationDateAlertEntity),
+          useValue: {
+            find: jest.fn().mockResolvedValue(creationDateAlertEntities),
             findOneBy: jest.fn().mockResolvedValue(null),
             save: jest.fn(),
           },
@@ -63,13 +93,15 @@ describe('AlertingService', () => {
           useValue: {
             findOneBy: jest.fn().mockImplementation(({ name, id }) => {
               if (name === 'SIZE_ALERT' || id === 'active-id') {
-                return mockedAlertTypeEntity;
+                return mockedSizeAlertTypeEntity;
               } else if (id === 'not-active-id') {
                 return {
-                  ...mockedAlertTypeEntity,
+                  ...mockedSizeAlertTypeEntity,
                   user_active: false,
                   master_active: false,
                 };
+              } else if (name === CREATION_DATE_ALERT) {
+                return mockedCreationDateAlertTypeEntity;
               } else {
                 return null;
               }
@@ -100,6 +132,9 @@ describe('AlertingService', () => {
 
     service = module.get(AlertingService);
     sizeAlertRepository = module.get(getRepositoryToken(SizeAlertEntity));
+    creationDateAlertEntityRepository = module.get(
+      getRepositoryToken(CreationDateAlertEntity)
+    );
     alertTypeRepository = module.get(getRepositoryToken(AlertTypeEntity));
     mailService = module.get(MailService);
     backupDataService = module.get(BackupDataService);
@@ -129,17 +164,40 @@ describe('AlertingService', () => {
       );
       expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
     });
+  });
 
-    it('should throw NotFoundException if backup not found', async () => {
-      const createSizeAlertDto: CreateSizeAlertDto = {
-        size: 100,
-        referenceSize: 200,
-        backupId: 'not-existing-id',
+  describe('createCreationDateAlert', () => {
+    it('should create and save a creation date alert', async () => {
+      const createCreationDateAlertDto: CreateCreationDateAlertDto = {
+        backupId: 'backup-id',
+        date: new Date('2021-01-01'),
+        referenceDate: new Date('2021-01-02'),
       };
 
-      await expect(service.createSizeAlert(createSizeAlertDto)).rejects.toThrow(
-        NotFoundException
+      await service.createCreationDateAlert(createCreationDateAlertDto);
+
+      expect(backupDataService.findOneById).toHaveBeenCalledWith('backup-id');
+      expect(creationDateAlertEntityRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          date: new Date('2021-01-01'),
+          referenceDate: new Date('2021-01-02'),
+          backup: mockedBackupDataEntity,
+          alertType: mockedCreationDateAlertTypeEntity,
+        })
       );
+      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw NotFoundException if backup not found', async () => {
+      const createCreationDateAlertDto: CreateCreationDateAlertDto = {
+        backupId: 'not-existing-id',
+        date: new Date('2021-01-01'),
+        referenceDate: new Date('2021-01-02'),
+      };
+
+      await expect(
+        service.createCreationDateAlert(createCreationDateAlertDto)
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -147,14 +205,14 @@ describe('AlertingService', () => {
     it('should create and save an alert type', async () => {
       const createAlertTypeDto: CreateAlertTypeDto = {
         severity: SeverityType.WARNING,
-        name: 'CREATION_TIME_ALERT',
+        name: 'TEST_ALERT',
         master_active: true,
       };
 
       await service.createAlertType(createAlertTypeDto);
 
       expect(alertTypeRepository.findOneBy).toHaveBeenCalledWith({
-        name: 'CREATION_TIME_ALERT',
+        name: 'TEST_ALERT',
       });
       expect(alertTypeRepository.save).toHaveBeenCalledWith(createAlertTypeDto);
     });
@@ -162,7 +220,7 @@ describe('AlertingService', () => {
     it('should throw ConflictException if alert type already exists', async () => {
       const createAlertTypeDto: CreateAlertTypeDto = {
         severity: SeverityType.WARNING,
-        name: 'SIZE_ALERT',
+        name: SIZE_ALERT,
         master_active: true,
       };
 
@@ -194,14 +252,20 @@ describe('AlertingService', () => {
     it('should return all alerts', async () => {
       const result = await service.getAllAlerts();
 
-      expect(result).toEqual(alerts);
+      expect(result).toEqual([
+        ...sizeAlertEntities,
+        ...creationDateAlertEntities,
+      ]);
       expect(sizeAlertRepository.find).toHaveBeenCalled();
     });
 
     it('should return alerts for a specific backup', async () => {
       const result = await service.getAllAlerts('backup-id');
 
-      expect(result).toEqual(alerts);
+      expect(result).toEqual([
+        ...sizeAlertEntities,
+        ...creationDateAlertEntities,
+      ]);
       expect(sizeAlertRepository.find).toHaveBeenCalledWith({
         where: {
           backup: { id: 'backup-id' },
@@ -217,7 +281,10 @@ describe('AlertingService', () => {
 
       const result = await service.getAllAlerts(undefined, days);
 
-      expect(result).toEqual(alerts);
+      expect(result).toEqual([
+        ...sizeAlertEntities,
+        ...creationDateAlertEntities,
+      ]);
       expect(sizeAlertRepository.find).toHaveBeenCalledWith({
         where: {
           backup: { creationDate: MoreThanOrEqual(expect.any(Date)) },
@@ -229,7 +296,7 @@ describe('AlertingService', () => {
 
   describe('triggerAlertMail', () => {
     it('should call sendAlertMail of MailService', async () => {
-      const alert: Alert = alerts[0];
+      const alert: Alert = sizeAlertEntities[0];
 
       await service.triggerAlertMail(alert);
 
@@ -245,7 +312,7 @@ describe('AlertingService', () => {
       await service.adminChangeActiveStatusAlertType(alertTypeId, true);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         master_active: true,
         user_active: false,
       });
@@ -257,7 +324,7 @@ describe('AlertingService', () => {
       await service.adminChangeActiveStatusAlertType(alertTypeId, false);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         master_active: false,
       });
     });
@@ -266,12 +333,11 @@ describe('AlertingService', () => {
   describe('userChangeActiveStatusAlertType', () => {
     it('should activate alert type by admin', async () => {
       const alertTypeId = 'not-active-id';
-      const alertStatusDto = { status: true };
 
       await service.userChangeActiveStatusAlertType(alertTypeId, true);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         master_active: false,
         user_active: true,
       });
@@ -283,7 +349,7 @@ describe('AlertingService', () => {
       await service.userChangeActiveStatusAlertType(alertTypeId, false);
 
       expect(alertTypeRepository.save).toHaveBeenCalledWith({
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         user_active: false,
       });
     });

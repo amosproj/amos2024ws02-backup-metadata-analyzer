@@ -16,6 +16,8 @@ import { AlertType1732873882256 } from './migrations/1732873882256-AlertType';
 import { AlertTypeNameUnique1732874749343 } from './migrations/1732874749343-AlertTypeNameUnique';
 import { SizeAlertEntity } from './alerting/entity/alerts/sizeAlert.entity';
 import { NewAlertStructure1732887680122 } from './migrations/1732887680122-NewAlertStructure';
+import { CreationDateAlertEntity } from './alerting/entity/alerts/creationDateAlert.entity';
+import { CreationDateAlert1733070019992 } from './migrations/1733070019992-CreationDateAlert';
 
 /**
  * Used by NestJS to reach database.
@@ -40,6 +42,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         BackupDataEntity,
         AlertTypeEntity,
         SizeAlertEntity,
+        CreationDateAlertEntity,
       ],
       migrationsRun: true,
       migrations: [
@@ -53,6 +56,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AlertType1732873882256,
         AlertTypeNameUnique1732874749343,
         NewAlertStructure1732887680122,
+        CreationDateAlert1733070019992,
       ],
       logging: true,
     };
