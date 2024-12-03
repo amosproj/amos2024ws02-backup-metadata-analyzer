@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { BASE_URL } from '../../shared/types/configuration';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { NotificationSettings } from '../../shared/types/notifications';
+import { AlertType } from '../../shared/types/alertType';
 
 @Injectable({
   providedIn: 'root',
@@ -14,24 +14,19 @@ export class NotificationService {
   ) {}
 
   // Lade aktuelle Einstellungen
-  getNotificationSettings(): Observable<NotificationSettings[]> {
-    return this.http.get<NotificationSettings[]>(
-      `${this.baseUrl}/alerting/type`
-    );
+  getNotificationSettings(): Observable<AlertType[]> {
+    return this.http.get<AlertType[]>(`${this.baseUrl}/alerting/type`);
   }
 
   // Speichere neue Einstellungen
-  updateNotificationSettings(
-    notification: NotificationSettings
-  ): Observable<NotificationSettings> {
-
+  updateNotificationSettings(notification: AlertType): Observable<AlertType> {
     if (notification.user_active) {
-      return this.http.patch<NotificationSettings>(
+      return this.http.patch<AlertType>(
         `${this.baseUrl}/alerting/type/${notification.id}/activate/user`,
         { params: notification }
       );
     } else {
-      return this.http.patch<NotificationSettings>(
+      return this.http.patch<AlertType>(
         `${this.baseUrl}/alerting/type/${notification.id}/deactivate/user`,
         { params: notification }
       );

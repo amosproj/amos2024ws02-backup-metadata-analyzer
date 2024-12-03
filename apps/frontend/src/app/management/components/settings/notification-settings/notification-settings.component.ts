@@ -2,7 +2,8 @@ import { Component, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { BehaviorSubject, forkJoin, Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../../../services/notification.service';
-import { NotificationSettings } from 'apps/frontend/src/app/shared/types/notifications';
+import { AlertType } from 'apps/frontend/src/app/shared/types/alertType';
+import { AlertServiceService } from 'apps/frontend/src/app/alert/service/alert-service.service';
 
 @Component({
   selector: 'app-notification-settings',
@@ -15,13 +16,12 @@ export class NotificationSettingsComponent implements OnDestroy {
   isOpen = false;
   settingsForm: FormGroup;
 
-  private notificationSubject$ = new BehaviorSubject<NotificationSettings[]>(
-    []
-  );
+  private notificationSubject$ = new BehaviorSubject<AlertType[]>([]);
   private destroy$ = new Subject<void>();
 
   constructor(
     private settingsService: NotificationService,
+    private alertService: AlertServiceService,
     private fb: FormBuilder
   ) {
     this.settingsForm = this.fb.group({
@@ -57,7 +57,7 @@ export class NotificationSettingsComponent implements OnDestroy {
       });
   }
 
-  initForm(settings: NotificationSettings[]): void {
+  initForm(settings: AlertType[]): void {
     const notificationArray = this.fb.array(
       settings.map((notification) =>
         this.fb.group({
@@ -75,8 +75,7 @@ export class NotificationSettingsComponent implements OnDestroy {
   saveSettings(): void {
     if (this.settingsForm.valid) {
       this.isLoading = true;
-      const notifications = this.notificationControls
-        .value as NotificationSettings[];
+      const notifications = this.notificationControls.value as AlertType[];
 
       const updateRequests = notifications.map((notification) =>
         this.settingsService.updateNotificationSettings(notification)
@@ -89,12 +88,12 @@ export class NotificationSettingsComponent implements OnDestroy {
             this.notificationSubject$.next(updatedSettings);
             this.isLoading = false;
             this.isOpen = false;
+            this.alertService.refresh();
           },
           error: () => {
             this.isLoading = false;
           },
         });
-        window.location.reload();
     }
   }
 

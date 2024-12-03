@@ -30,6 +30,12 @@ export class AlertComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAlerts();
+    this.alertService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadAlerts();
+      });
   }
 
   loadAlerts(): void {
