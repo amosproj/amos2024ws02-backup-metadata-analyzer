@@ -5,13 +5,19 @@ import {
 } from '@nestjs/common';
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, MoreThanOrEqual, Repository } from 'typeorm';
+import {
+  FindOneOptions,
+  FindOptionsWhere,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { BackupDataService } from '../backupData/backupData.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { Alert } from './entity/alerts/alert';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
+import { BackupType } from '../backupData/dto/backupType';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
@@ -189,5 +195,45 @@ export class AlertingService {
       throw new NotFoundException(`Alert type with id ${id} not found`);
     }
     return entity;
+  }
+
+  async getLatestAlertsBackup(
+    alertTypeName: string,
+    backupType?: BackupType
+  ): Promise<string | null> {
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: alertTypeName,
+    });
+    if (!alertType) {
+      throw new NotFoundException(`Alert type ${alertTypeName} not found`);
+    }
+
+    const options: FindOneOptions = {
+      where: {
+        alertType: { id: alertType.id },
+        backup: { type: backupType },
+      },
+      order: {
+        backup: { creationDate: 'DESC' },
+      },
+    };
+
+    let alert: Alert | null = null;
+    switch (alertType.name) {
+      case 'SIZE_ALERT': {
+        alert = await this.sizeAlertRepository.findOne(options);
+        break;
+      }
+      case 'CREATION_DATE_ALERT': {
+        alert = await this.creationDateRepository.findOne(options);
+        break;
+      }
+    }
+
+    if (!alert) {
+      return null;
+    }
+
+    return alert.backup.id;
   }
 }

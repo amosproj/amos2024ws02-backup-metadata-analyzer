@@ -57,10 +57,8 @@ export class BackupDataService extends PaginationService {
   async create(
     createBackupDataDto: CreateBackupDataDto
   ): Promise<BackupDataEntity> {
-    return await this.backupDataRepository.save({
-      ...createBackupDataDto,
-      sizeMB: createBackupDataDto.sizeMB,
-    });
+    const entity = Object.assign(new BackupDataEntity(), createBackupDataDto);
+    return await this.backupDataRepository.save(entity);
   }
 
   /**
@@ -70,12 +68,10 @@ export class BackupDataService extends PaginationService {
   async createBatched(
     createBackupDataDtos: CreateBackupDataDto[]
   ): Promise<void> {
-    await this.backupDataRepository.save(
-      createBackupDataDtos.map((dto) => ({
-        ...dto,
-        sizeMB: dto.sizeMB,
-      }))
+    const entities = createBackupDataDtos.map((dto) =>
+      Object.assign(new BackupDataEntity(), dto)
     );
+    await this.backupDataRepository.save(entities);
   }
 
   /**
