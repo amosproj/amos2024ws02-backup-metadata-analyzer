@@ -3,7 +3,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 
 import { BackupService } from './backup-service.service';
-import { BASE_URL } from '../../../shared/types/configuration';
 import { APIResponse } from '../../../shared/types/api-response';
 import { Backup } from '../../../shared/types/backup';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
