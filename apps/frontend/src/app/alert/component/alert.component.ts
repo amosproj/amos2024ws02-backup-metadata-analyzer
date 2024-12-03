@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
 import { Alert, CreationDateAlert, SizeAlert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
@@ -11,7 +11,7 @@ import { SeverityType } from '../../shared/enums/severityType';
   styleUrl: './alert.component.css',
   providers: [DatePipe],
 })
-export class AlertComponent implements OnInit {
+export class AlertComponent implements OnInit, OnDestroy {
   readonly DAYS = 7;
 
   alerts: Alert[] = [];
@@ -154,4 +154,9 @@ export class AlertComponent implements OnInit {
   }
 
   protected readonly SeverityType = SeverityType;
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }
