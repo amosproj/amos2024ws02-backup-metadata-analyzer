@@ -3,6 +3,7 @@ from collections import defaultdict
 import metadata_analyzer.backend
 from datetime import datetime, timedelta
 from metadata_analyzer.size_alert import SizeAlert
+from metadata_analyzer.creation_date_alert import CreationDateAlert
 
 
 class SimpleRuleBasedAnalyzer:
@@ -208,5 +209,79 @@ class SimpleRuleBasedAnalyzer:
         # Send the alerts to the backend
         for alert in alerts[:count]:
             self.backend.create_size_alert(alert.as_json())
+            
+        return {"count": count}
+
+    # Search for unusual creation times of 'full' backups made after start_date
+    def analyze_creation_dates(self, data, alert_limit, start_date):
+        # Group the 'full' results by their task
+        groups = defaultdict(list)
+        for result in data:
+            if (result.task == ""
+                or result.fdi_type != 'F'
+                or result.data_size is None
+                or result.start_time is None):
+                continue
+            groups[result.task].append(result)
+
+        alerts = []
+        # Iterate through each group to find drastic size changes
+        for task, unordered_results in groups.items():
+            results = sorted(unordered_results, key=lambda result: result.start_time)
+            alerts += self._analyze_creation_dates_of_one_task(results, start_date)
+    
+
+        # Because we ignore alerts which would be created earlier than the current latest alert,
+        # we have to sort the alerts to not miss any alerts in the future
+        alerts = sorted(alerts, key=lambda alert: alert.date)
+
+        # If no alert limit was passed set it to default value:
+        if alert_limit is None:
+            alert_limit = 10
+
+        # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
+        count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+        # Send the alerts to the backend
+        for alert in alerts[:count]:
+            self.backend.create_creation_date_alert(alert.as_json())
 
         return {"count": count}
+    
+
+    # Analyzes the creation times of a group of results from one task.
+    def _analyze_creation_dates_of_one_task(self, results, start_date):
+        SECONDS_PER_DAY = 24 * 60 * 60
+
+        alerts = []
+        # Array that holds the previous creation dates as references times
+        times = [results[0].start_time]
+        # Skip the first result
+        for result in results[1:]:
+            # Don't generate alerts for results older than the start_date
+            if result.start_time > start_date:
+                # The smallest diff in seconds to the time of a previous backup
+                smallest_diff = SECONDS_PER_DAY
+                reference_time = None
+                for ref_time in times:
+                    diff = (result.start_time - ref_time).seconds
+                    # Considers the wrap around on midnight
+                    if diff > SECONDS_PER_DAY / 2:
+                        diff = SECONDS_PER_DAY - diff
+                    if diff < smallest_diff:
+                        smallest_diff = diff
+                        reference_time = ref_time.time()
+
+                    # Early abort if the diff is already small enough
+                    if diff < 60 * 60:
+                        break
+
+                # Reference date consists of the time of the nearest backup in the past and
+                # the date of the actual backup
+                reference_date = datetime.combine(result.start_time, reference_time)
+                if smallest_diff > 60 * 60:
+                    alerts.append(CreationDateAlert(result, reference_date))
+
+            # Put the current backup time into the reference times
+            times.append(result.start_time)
+
+        return alerts

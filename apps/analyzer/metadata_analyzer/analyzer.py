@@ -90,3 +90,9 @@ class Analyzer:
         start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "INCREMENTAL")
         result = Analyzer.simple_rule_based_analyzer.analyze_inc(data, alert_limit, start_date)
         return result
+
+    def simple_rule_based_analysis_creation_dates(alert_limit):
+        data = list(Analyzer.database.get_results())
+        start_date = Analyzer._get_start_date(data, "CREATION_DATE_ALERT", None)
+        result = Analyzer.simple_rule_based_analyzer.analyze_creation_dates(data, alert_limit, start_date)
+        return result

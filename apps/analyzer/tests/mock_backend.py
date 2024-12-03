@@ -2,10 +2,14 @@ class MockBackend:
     def __init__(self):
         self.backups = []
         self.size_alerts = []
+        self.creation_date_alerts = []        
         self.latest_alert_ids = {}
 
     def send_backup_data_batched(self, batch):
         self.backups += batch
+
+    def create_creation_date_alert(self, alert):
+        self.creation_date_alerts.append(alert)
 
     def create_size_alert(self, alert):
         self.size_alerts.append(alert)
