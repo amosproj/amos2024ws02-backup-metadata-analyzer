@@ -160,6 +160,9 @@ class SimpleRuleBasedAnalyzer:
         for task, unordered_results in groups.items():
             results = sorted(unordered_results, key=lambda result: result.start_time)
 
+            if len(results) <= 1:
+                continue
+
             # For now assumes that average size of incs is base value from which to judge all incs, may be subject to change
             # Iterate through each results get an average value
             avg_size = 0
