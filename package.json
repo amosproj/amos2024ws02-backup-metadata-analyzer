@@ -82,7 +82,7 @@
     "@clr/angular": "^17.4.0",
     "@clr/icons": "^13.0.2",
     "@clr/ui": "^17.3.1",
-    "@nestjs-modules/mailer": "^1.6.1",
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^3.1.1",
     "@nestjs/common": "^10.0.2",
     "@nestjs/config": "^3.3.0",
