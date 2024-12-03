@@ -5,22 +5,62 @@ import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5percent from '@amcharts/amcharts5/percent';
 import { of } from 'rxjs';
 import { id } from '@cds/core/internal';
-import { ChartConfig } from '../../../shared/types/chart-config';
+import type { ChartConfig } from '../../../shared/types/chart-config';
 
 Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
   value: () => ({
+    save: () => {},
+    restore: () => {},
+    scale: () => {},
+    clearRect: () => {},
+    fillRect: () => {},
+    beginPath: () => {},
+    moveTo: () => {},
+    lineTo: () => {},
+    closePath: () => {},
+    fill: () => {},
+    stroke: () => {},
+    arc: () => {},
+    fillText: () => {},
+    measureText: () => ({ width: 0 }),
+    setTransform: () => {},
+    transform: () => {},
+    translate: () => {},
+    rotate: () => {},
+    drawImage: () => {},
+    createLinearGradient: () => ({
+      addColorStop: () => {},
+    }),
+    createPattern: () => ({}),
+    createRadialGradient: () => ({
+      addColorStop: () => {},
+    }),
+    getImageData: () => ({
+      data: [],
+    }),
+    putImageData: () => {},
+    createImageData: () => ({}),
+    getContextAttributes: () => ({}),
+    isPointInPath: () => false,
+    isPointInStroke: () => false,
+    getLineDash: () => [],
+    setLineDash: () => {},
+    lineDashOffset: 0,
     imageSmoothingEnabled: false,
   }),
 });
 
 describe('ChartService', () => {
   let service: ChartService;
+  let canvas: HTMLCanvasElement;
 
   beforeEach(() => {
     service = new ChartService();
     const testContainer = document.createElement('div');
     testContainer.id = 'testContainer';
     document.body.appendChild(testContainer);
+    canvas = document.createElement('canvas');
+    testContainer.appendChild(canvas);
   });
 
   afterEach(() => {

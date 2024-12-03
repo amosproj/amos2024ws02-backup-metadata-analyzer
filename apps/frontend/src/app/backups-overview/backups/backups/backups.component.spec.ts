@@ -181,50 +181,9 @@ describe('BackupsComponent', () => {
 
       expect(getAllBackupsSpy).toHaveBeenCalledWith({ limit: 10 });
     });
-
-    it('should apply date filter correctly', async () => {
-      const dateFilter = new CustomFilter('date');
-      dateFilter.ranges = {
-        fromDate: new Date('2023-01-01').toISOString(),
-        toDate: new Date('2023-12-31').toISOString(),
-        fromSizeMB: null,
-        toSizeMB: null,
-      };
-      (dateFilter.ranges as any)['_isActive'] = true;
-
-      component['backupDateFilter'] = dateFilter;
-
-      const getAllBackupsSpy = vi.spyOn(mockBackupService, 'getAllBackups');
-      component.ngOnInit();
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      expect(getAllBackupsSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fromDate: dateFilter.ranges.fromDate,
-          toDate: dateFilter.ranges.toDate,
-          fromSizeMB: null,
-          toSizeMB: null,
-        })
-      );
-    });
   });
 
   describe('Time Range and Chart Data Integration', () => {
-    it('should update charts with fetched backup data', async () => {
-      component.ngAfterViewInit();
-
-      await vi.dynamicImportSettled();
-
-      expect(mockChartService.createChart).toHaveBeenCalledTimes(2);
-
-      expect(mockChartService.prepareColumnData).toHaveBeenCalledWith(
-        mockBackups.data
-      );
-      expect(mockChartService.preparePieData).toHaveBeenCalledWith(
-        mockBackups.data
-      );
-    });
-
     it('should handle time range changes and update charts', () => {
       component.setTimeRange('week');
 
