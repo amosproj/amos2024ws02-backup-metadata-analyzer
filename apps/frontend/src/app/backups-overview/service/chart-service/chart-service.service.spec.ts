@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChartService } from './chart-service.service';
 import * as am5 from '@amcharts/amcharts5';
-import * as am5xy from '@amcharts/amcharts5/xy';
-import * as am5percent from '@amcharts/amcharts5/percent';
 import { of } from 'rxjs';
-import { id } from '@cds/core/internal';
 import type { ChartConfig } from '../../../shared/types/chart-config';
 
 Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
