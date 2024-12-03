@@ -12,6 +12,9 @@ import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { SeverityType } from './dto/severityType';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
+import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
+import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -20,9 +23,17 @@ const mockedBackupDataEntity: BackupDataEntity = {
   creationDate: new Date(),
 };
 
-const mockedAlertTypeEntity: AlertTypeEntity = {
-  id: 'alert-type-id',
-  name: 'SIZE_ALERT',
+const mockedSizeAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id1',
+  name: SIZE_ALERT,
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const mockedCreationDateAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id2',
+  name: CREATION_DATE_ALERT,
   severity: SeverityType.WARNING,
   user_active: true,
   master_active: true,
@@ -33,9 +44,10 @@ const sizeAlert: SizeAlertEntity = {
   size: 100,
   referenceSize: 200,
   backup: mockedBackupDataEntity,
-  alertType: mockedAlertTypeEntity,
+  alertType: mockedSizeAlertTypeEntity,
 };
-const mockAlertRepository = {
+
+const mockSizeAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
   find: jest.fn().mockImplementation(() => Promise.resolve([sizeAlert])),
   findOneBy: jest.fn().mockResolvedValue(null),
@@ -43,19 +55,27 @@ const mockAlertRepository = {
 const mockAlertTypeRepository = {
   findOneBy: jest.fn().mockImplementation(({ name, id }) => {
     if (name === 'SIZE_ALERT' || id === 'active-id') {
-      return mockedAlertTypeEntity;
+      return mockedSizeAlertTypeEntity;
     } else if (id === 'not-active-id') {
       return {
-        ...mockedAlertTypeEntity,
+        ...mockedSizeAlertTypeEntity,
         user_active: false,
         master_active: false,
       };
+    } else if (name === CREATION_DATE_ALERT) {
+      return mockedCreationDateAlertTypeEntity;
     } else {
       return null;
     }
   }),
   save: jest.fn(),
   find: jest.fn().mockResolvedValue([]),
+};
+
+const mockCreationDateAlertRepository = {
+  save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  find: jest.fn().mockImplementation(() => Promise.resolve([])),
+  findOneBy: jest.fn().mockResolvedValue(null),
 };
 
 describe('AlertingController (e2e)', () => {
@@ -79,7 +99,9 @@ describe('AlertingController (e2e)', () => {
         sendAlertMail: jest.fn(),
       })
       .overrideProvider(getRepositoryToken(SizeAlertEntity))
-      .useValue(mockAlertRepository)
+      .useValue(mockSizeAlertRepository)
+      .overrideProvider(getRepositoryToken(CreationDateAlertEntity))
+      .useValue(mockCreationDateAlertRepository)
       .overrideProvider(getRepositoryToken(AlertTypeEntity))
       .useValue(mockAlertTypeRepository)
       .compile();
@@ -98,7 +120,7 @@ describe('AlertingController (e2e)', () => {
       .get('/alerting')
       .expect(200);
 
-    expect(mockAlertRepository.find).toHaveBeenCalledWith({
+    expect(mockSizeAlertRepository.find).toHaveBeenCalledWith({
       where: {
         alertType: {
           user_active: true,
@@ -119,7 +141,7 @@ describe('AlertingController (e2e)', () => {
   it('POST /alerting/type - should create a new alert type', async () => {
     const createAlertTypeDto = {
       severity: SeverityType.WARNING,
-      name: 'CREATION_TIME_ALERT',
+      name: 'TEST_ALERT',
       master_active: true,
     };
 
@@ -132,64 +154,14 @@ describe('AlertingController (e2e)', () => {
       expect.objectContaining(createAlertTypeDto)
     );
   });
-  it('PATCH /alerting/type/:id/activate/user - should activate alert type by user', async () => {
-    const alertTypeId = 'not-active-id';
 
-    await request(app.getHttpServer())
-      .patch(`/alerting/type/${alertTypeId}/activate/user`)
-      .expect(200);
-
-    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
-      user_active: true,
-      master_active: false,
-    });
-  });
-  it('PATCH /alerting/type/:id/deactivate/user - should deactivate alert type by user', async () => {
-    const alertTypeId = 'active-id';
-
-    await request(app.getHttpServer())
-      .patch(`/alerting/type/${alertTypeId}/deactivate/user`)
-      .expect(200);
-
-    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
-      user_active: false,
-      master_active: true,
-    });
-  });
-  it('PATCH /alerting/type/:id/activate/admin - should activate alert type by admin', async () => {
-    const alertTypeId = 'not-active-id';
-
-    await request(app.getHttpServer())
-      .patch(`/alerting/type/${alertTypeId}/activate/admin`)
-      .expect(200);
-
-    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
-      user_active: false,
-      master_active: true,
-    });
-  });
-  it('PATCH /alerting/type/:id/deactivate/admin - should deactivate alert type by admin', async () => {
-    const alertTypeId = 'active-id';
-
-    await request(app.getHttpServer())
-      .patch(`/alerting/type/${alertTypeId}/deactivate/admin`)
-      .expect(200);
-
-    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
-      ...mockedAlertTypeEntity,
-      master_active: false,
-    });
-  });
   it('GET /alerting - should filter alerts by backupId', async () => {
     const response = await request(app.getHttpServer())
       .get('/alerting')
       .query({ backupId: 'backup-id' })
       .expect(200);
 
-    expect(mockAlertRepository.find).toHaveBeenCalledWith({
+    expect(mockSizeAlertRepository.find).toHaveBeenCalledWith({
       where: {
         backup: { id: 'backup-id' },
         alertType: { user_active: true, master_active: true },
@@ -217,7 +189,7 @@ describe('AlertingController (e2e)', () => {
       .query({ days })
       .expect(200);
 
-    expect(mockAlertRepository.find).toHaveBeenCalledWith({
+    expect(mockSizeAlertRepository.find).toHaveBeenCalledWith({
       where: {
         backup: { creationDate: MoreThanOrEqual(expect.any(Date)) },
         alertType: { user_active: true, master_active: true },
@@ -247,13 +219,65 @@ describe('AlertingController (e2e)', () => {
       .send(createAlertDto)
       .expect(201);
 
-    expect(mockAlertRepository.save).toHaveBeenCalledWith(
+    expect(mockSizeAlertRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
         size: createAlertDto.size,
         referenceSize: createAlertDto.referenceSize,
         backup: expect.objectContaining({ id: createAlertDto.backupId }),
-        alertType: expect.objectContaining({ name: 'SIZE_ALERT' }),
+        alertType: expect.objectContaining({ name: SIZE_ALERT }),
       })
     );
+  });
+
+  it('POST /alerting/creationDate - should create a new size alert', async () => {
+    const createCreationDateAlertDto: CreateCreationDateAlertDto = {
+      date: new Date('2024-12-01T17:53:33.239Z'),
+      backupId: 'backup-id',
+      referenceDate: new Date('2024-12-01T17:53:33.239Z'),
+    };
+
+    await request(app.getHttpServer())
+      .post('/alerting/creationDate')
+      .send(createCreationDateAlertDto)
+      .expect(201);
+
+    expect(mockCreationDateAlertRepository.save).toHaveBeenCalledWith({
+      date: new Date('2024-12-01T17:53:33.239Z').toISOString(),
+      referenceDate: new Date('2024-12-01T17:53:33.239Z').toISOString(),
+      backup: mockedBackupDataEntity,
+      alertType: mockedCreationDateAlertTypeEntity,
+    });
+  });
+
+  it('PATCH /alerting/type/:alertTypeId/admin - should activate alert type by admin', async () => {
+    const alertTypeId = 'not-active-id';
+    const alertStatusDto = { status: true };
+
+    await request(app.getHttpServer())
+      .patch(`/alerting/type/${alertTypeId}/admin`)
+      .send(alertStatusDto)
+      .expect(200);
+
+    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
+      ...mockedSizeAlertTypeEntity,
+      master_active: true,
+      user_active: false,
+    });
+  });
+
+  it('PATCH /alerting/type/:alertTypeId/user - should activate alert type by user', async () => {
+    const alertTypeId = 'not-active-id';
+    const alertStatusDto = { status: true };
+
+    await request(app.getHttpServer())
+      .patch(`/alerting/type/${alertTypeId}/user`)
+      .send(alertStatusDto)
+      .expect(200);
+
+    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
+      ...mockedSizeAlertTypeEntity,
+      master_active: false,
+      user_active: true,
+    });
   });
 });

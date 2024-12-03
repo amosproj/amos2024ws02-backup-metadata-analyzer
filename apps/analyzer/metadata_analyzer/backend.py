@@ -9,7 +9,7 @@ class Backend:
         r = requests.post(url, json=batch)
         r.raise_for_status()
 
-    def create_alert(self, alert):
+    def create_size_alert(self, alert):
         url = self.backend_url + "alerting/size"
         r = requests.post(url, json=alert)
         r.raise_for_status()
@@ -19,8 +19,10 @@ class Backend:
         r = requests.post(url, json=alert)
         r.raise_for_status()
 
-    def get_latest_creation_date_alert(self):
-        url = self.backend_url + "alerting/type/creationDate/latest"
+    def get_latest_alert_id(self, alert_type, backup_type=None):
+        url = self.backend_url + f"alerting/type/{alert_type}/latest"
+        if backup_type != None:
+            url += f"?backupType={backup_type}"
         r = requests.get(url)
         r.raise_for_status()
         return r.text

@@ -37,6 +37,6 @@ export class BackupDataEntity {
     nullable: false,
     required: true,
   })
-  @Column()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   creationDate!: Date;
 }

@@ -13,14 +13,18 @@ import {
   ApiConflictResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiQuery,
+  ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { Alert } from './entity/alerts/alert';
+import { BackupType } from '../backupData/dto/backupType';
+import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { AlertStatusDto } from './dto/alertStatus.dto';
 
+@ApiTags('Alerting')
 @Controller('alerting')
 export class AlertingController {
   readonly logger = new Logger(AlertingController.name);
@@ -35,32 +39,32 @@ export class AlertingController {
     await this.alertingService.createAlertType(createAlertTypeDto);
   }
 
-  @Patch('type/:alertTypeId/activate/user')
+  @Patch('type/:alertTypeId/user')
   @ApiOperation({ summary: 'Activate Alert Type by user.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
-  async userActivateAlertType(@Param('alertTypeId') alertTypeId: string) {
-    await this.alertingService.userActivateAlertType(alertTypeId);
+  @ApiBody({ type: AlertStatusDto })
+  async userChangeActiveStatusAlertType(
+    @Param('alertTypeId') alertTypeId: string,
+    @Body() alertStatusDto: AlertStatusDto
+  ) {
+    await this.alertingService.userChangeActiveStatusAlertType(
+      alertTypeId,
+      alertStatusDto.status
+    );
   }
 
-  @Patch('type/:alertTypeId/deactivate/user')
-  @ApiOperation({ summary: 'Deactivate Alert Type by user' })
-  @ApiNotFoundResponse({ description: 'Alert type not found' })
-  async userDeactivateAlertType(@Param('alertTypeId') alertTypeId: string) {
-    await this.alertingService.userDeactivateAlertType(alertTypeId);
-  }
-
-  @Patch('type/:alertTypeId/activate/admin')
+  @Patch('type/:alertTypeId/admin')
   @ApiOperation({ summary: 'Activate Alert Type by admin.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
-  async adminActivateAlertType(@Param('alertTypeId') alertTypeId: string) {
-    await this.alertingService.adminActivateAlertType(alertTypeId);
-  }
-
-  @Patch('type/:alertTypeId/deactivate/admin')
-  @ApiOperation({ summary: 'Deactivate Alert Type by admin' })
-  @ApiNotFoundResponse({ description: 'Alert type not found' })
-  async adminDeactivateAlertType(@Param('alertTypeId') alertTypeId: string) {
-    await this.alertingService.adminDeactivateAlertType(alertTypeId);
+  @ApiBody({ type: AlertStatusDto })
+  async adminChangeActiveStatusAlertType(
+    @Param('alertTypeId') alertTypeId: string,
+    @Body() alertStatusDto: AlertStatusDto
+  ) {
+    await this.alertingService.adminChangeActiveStatusAlertType(
+      alertTypeId,
+      alertStatusDto.status
+    );
   }
 
   @Get('type')
@@ -112,5 +116,36 @@ export class AlertingController {
     @Body() createSizeAlertDto: CreateSizeAlertDto
   ): Promise<void> {
     await this.alertingService.createSizeAlert(createSizeAlertDto);
+  }
+
+  @Post('creationDate')
+  @ApiOperation({ summary: 'Create a new creation Date alert.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateCreationDateAlertDto })
+  async createCreationDateAlert(
+    @Body() createCreationDateAlertDto: CreateCreationDateAlertDto
+  ): Promise<void> {
+    await this.alertingService.createCreationDateAlert(
+      createCreationDateAlertDto
+    );
+  }
+
+  @Get('type/:typeName/latest')
+  @ApiOperation({
+    summary:
+      'Gets the id of the backup with the latest alert of the given type.',
+  })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  @ApiQuery({
+    name: 'backupType',
+    description: 'Filter by backup type',
+    required: false,
+    enum: BackupType,
+  })
+  async getBackupDateFromLatestAlert(
+    @Param('typeName') typeName: string,
+    @Query('backupType') backupType?: BackupType
+  ): Promise<string | null> {
+    return this.alertingService.getLatestAlertsBackup(typeName, backupType);
   }
 }

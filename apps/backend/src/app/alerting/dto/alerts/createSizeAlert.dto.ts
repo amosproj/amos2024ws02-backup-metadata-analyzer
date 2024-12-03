@@ -11,6 +11,7 @@ export class CreateSizeAlertDto {
     description: 'Size of the Backup, which is the reason for the alert',
   })
   size!: number;
+
   @ApiProperty({
     description:
       'Reference size to the value of the Backup, in which comparison the alert was triggered',

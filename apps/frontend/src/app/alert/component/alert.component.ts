@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
-import { Alert, SizeAlert } from '../../shared/types/alert';
+import { Alert, CreationDateAlert, SizeAlert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../shared/enums/severityType';
@@ -110,6 +110,10 @@ export class AlertComponent implements OnInit {
           reason = `Size of backup increased`;
           break;
         }
+      case 'CREATION_DATE_ALERT':
+        const creationDateAlert = alert as CreationDateAlert;
+        reason = `Backup was started at an unusual time`;
+        break;
     }
     return reason;
   }
@@ -133,6 +137,11 @@ export class AlertComponent implements OnInit {
           description = `Size of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
           break;
         }
+      case 'CREATION_DATE_ALERT':
+        const creationDateAlert = alert as CreationDateAlert;
+
+        description = `Backup was started at ${creationDateAlert.date.toString()}, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
+        break;
     }
     return description;
   }
