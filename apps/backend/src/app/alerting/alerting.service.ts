@@ -222,8 +222,12 @@ export class AlertingService {
     switch (alertType.name) {
       case 'SIZE_ALERT': {
         alert = await this.sizeAlertRepository.findOne(options);
+        break;
       }
-      //TODO: add creationDate Alert as soon as it is implemented
+      case 'CREATION_DATE_ALERT': {
+        alert = await this.creationDateRepository.findOne(options);
+        break;
+      }
     }
 
     if (!alert) {
