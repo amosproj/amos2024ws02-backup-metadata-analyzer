@@ -20,7 +20,7 @@ export class NotificationService {
   updateNotificationSettings(notification: AlertType): Observable<AlertType> {
     return this.http.patch<AlertType>(
       `${this.baseUrl}/alerting/type/${notification.id}/user`,
-      { params: notification.user_active }
+      { status: notification.user_active }
     );
   }
 }
