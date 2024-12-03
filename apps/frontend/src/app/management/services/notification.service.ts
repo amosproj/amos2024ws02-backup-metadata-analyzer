@@ -20,16 +20,9 @@ export class NotificationService {
 
   // Speichere neue Einstellungen
   updateNotificationSettings(notification: AlertType): Observable<AlertType> {
-    if (notification.user_active) {
-      return this.http.patch<AlertType>(
-        `${this.baseUrl}/alerting/type/${notification.id}/activate/user`,
-        { params: notification }
-      );
-    } else {
-      return this.http.patch<AlertType>(
-        `${this.baseUrl}/alerting/type/${notification.id}/deactivate/user`,
-        { params: notification }
-      );
-    }
+    return this.http.patch<AlertType>(
+      `${this.baseUrl}/alerting/type/${notification.id}/user`,
+      { params: notification }
+    );
   }
 }
