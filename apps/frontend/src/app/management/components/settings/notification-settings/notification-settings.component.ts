@@ -94,6 +94,7 @@ export class NotificationSettingsComponent implements OnDestroy {
             this.isLoading = false;
           },
         });
+        window.location.reload();
     }
   }
 
