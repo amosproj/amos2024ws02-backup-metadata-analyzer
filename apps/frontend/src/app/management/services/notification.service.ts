@@ -13,23 +13,14 @@ export class NotificationService {
     private readonly http: HttpClient
   ) {}
 
-  // Lade aktuelle Einstellungen
   getNotificationSettings(): Observable<AlertType[]> {
     return this.http.get<AlertType[]>(`${this.baseUrl}/alerting/type`);
   }
 
-  // Speichere neue Einstellungen
   updateNotificationSettings(notification: AlertType): Observable<AlertType> {
-    if (notification.user_active) {
-      return this.http.patch<AlertType>(
-        `${this.baseUrl}/alerting/type/${notification.id}/activate/user`,
-        { params: notification }
-      );
-    } else {
-      return this.http.patch<AlertType>(
-        `${this.baseUrl}/alerting/type/${notification.id}/deactivate/user`,
-        { params: notification }
-      );
-    }
+    return this.http.patch<AlertType>(
+      `${this.baseUrl}/alerting/type/${notification.id}/user`,
+      { status: notification.user_active }
+    );
   }
 }

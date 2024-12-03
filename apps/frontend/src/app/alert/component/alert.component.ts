@@ -43,19 +43,16 @@ export class AlertComponent implements OnInit {
       .getAllAlerts(this.DAYS)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data: Alert[]) => {
-        const activeAlerts = data.filter(
-          (alert) => alert.alertType.user_active === true
-        );
-        this.criticalAlertsCount = activeAlerts.filter(
+        this.criticalAlertsCount = data.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL
         ).length;
-        this.warningAlertsCount = activeAlerts.filter(
+        this.warningAlertsCount = data.filter(
           (alert) => alert.alertType.severity === SeverityType.WARNING
         ).length;
-        this.infoAlertsCount = activeAlerts.filter(
+        this.infoAlertsCount = data.filter(
           (alert) => alert.alertType.severity === SeverityType.INFO
         ).length;
-        this.alerts = activeAlerts;
+        this.alerts = data;
         this.status = this.getStatus();
       });
   }
