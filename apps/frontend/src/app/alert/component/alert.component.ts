@@ -30,6 +30,12 @@ export class AlertComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAlerts();
+    this.alertService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadAlerts();
+      });
   }
 
   loadAlerts(): void {
@@ -37,19 +43,19 @@ export class AlertComponent implements OnInit {
       .getAllAlerts(this.DAYS)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data: Alert[]) => {
-        const criticalAlerts = data.filter(
+        const activeAlerts = data.filter(
+          (alert) => alert.alertType.user_active === true
+        );
+        this.criticalAlertsCount = activeAlerts.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL
-        );
-        const warningAlerts = data.filter(
+        ).length;
+        this.warningAlertsCount = activeAlerts.filter(
           (alert) => alert.alertType.severity === SeverityType.WARNING
-        );
-        const infoAlerts = data.filter(
+        ).length;
+        this.infoAlertsCount = activeAlerts.filter(
           (alert) => alert.alertType.severity === SeverityType.INFO
-        );
-        this.criticalAlertsCount = criticalAlerts.length;
-        this.warningAlertsCount = warningAlerts.length;
-        this.infoAlertsCount = infoAlerts.length;
-        this.alerts = [...criticalAlerts, ...warningAlerts, ...infoAlerts];
+        ).length;
+        this.alerts = activeAlerts;
         this.status = this.getStatus();
       });
   }
