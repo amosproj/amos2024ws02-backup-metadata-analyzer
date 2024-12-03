@@ -13,12 +13,10 @@ export class NotificationService {
     private readonly http: HttpClient
   ) {}
 
-  // Lade aktuelle Einstellungen
   getNotificationSettings(): Observable<AlertType[]> {
     return this.http.get<AlertType[]>(`${this.baseUrl}/alerting/type`);
   }
 
-  // Speichere neue Einstellungen
   updateNotificationSettings(notification: AlertType): Observable<AlertType> {
     return this.http.patch<AlertType>(
       `${this.baseUrl}/alerting/type/${notification.id}/user`,
