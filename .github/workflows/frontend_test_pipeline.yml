@@ -1,0 +1,37 @@
+name: Frontend Tests
+
+# Trigger on push to dev and on pull request creation, excluding "deliverables" folder
+on:
+  push:
+    branches:
+      - dev
+    paths-ignore:
+      - 'deliverables/**'
+  pull_request:
+    branches:
+      - dev
+    paths-ignore:
+      - 'deliverables/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Run tests
+      - name: Run tests
+        run: npx nx run metadata-analyzer-frontend:test
