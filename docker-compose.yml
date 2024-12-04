@@ -3,7 +3,7 @@ networks:
     driver: bridge
 
 services:
-  # Angular Frontend App
+  # # Angular Frontend App
 
   frontend:
     extends:
@@ -11,8 +11,6 @@ services:
 
       service: nx-app-base
 
-    #command: npm run frontend:dev:docker
-    #command: ['npm', 'run', 'fe-docker']
     command: nx serve metadata-analyzer-frontend --host 0.0.0.0
 
     ports:
@@ -30,8 +28,6 @@ services:
 
       service: nx-app-base
 
-    #command: npm run backend:dev:docker
-    #command: ['npm', 'run', 'be', '--host localhost']
     command: nx serve metadata-analyzer-backend --host 0.0.0.0
     environment:
       - ANALYZER_URL=${ANALYZER_URL}
@@ -61,17 +57,15 @@ services:
 
       # - 4311:4311 # Server Debugging port
 
-    # Python Analyzer Backend App
+  # Python Analyzer Backend App
 
   analyzer:
-    # extends:
-    #   file: docker-compose.base.yml
-
-    #   service: nx-app-base
     build:
       context: ./apps/analyzer
       dockerfile: Dockerfile
-    command: ['/app/.venv/bin/python3', 'main.py', '--host', '0.0.0.0']
+
+    command: ['python3.11', 'main.py', '--host', '0.0.0.0']
+
     environment:
       # Flask
       - FLASK_RUN_HOST=${ANALYZER_FLASK_RUN_HOST}
@@ -107,6 +101,7 @@ services:
       POSTGRES_DB: postgres
     networks:
       - app-network
+
   # Analyzer Database
   analyzerDatabase:
     image: postgres

@@ -160,7 +160,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     const params: BackupFilterParams = { ...INITIAL_FILTER };
 
     if (this.backupDateFilter.isActive()) {
-      //TODO: Adjust timezones
       params.fromDate = this.backupDateFilter.ranges.fromDate;
       params.toDate = this.backupDateFilter.ranges.toDate;
     }
