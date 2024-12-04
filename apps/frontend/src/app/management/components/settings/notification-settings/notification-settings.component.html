@@ -1,0 +1,55 @@
+<clr-modal
+  [(clrModalOpen)]="isOpen"
+  [clrModalClosable]="false"
+  clrModalSize="md"
+>
+  <h3 class="modal-title">Notification Settings</h3>
+  <div class="modal-body">
+    <form clrForm [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+      <clr-spinner *ngIf="isLoading"></clr-spinner>
+
+      <div formArrayName="notifications">
+        <div
+          *ngFor="
+            let notification of notificationControls.controls;
+            let i = index
+          "
+          [formGroupName]="i"
+          class="notification-item"
+        >
+          <clr-control-container>
+            <clr-toggle-wrapper>
+              <input type="checkbox" clrToggle formControlName="user_active" />
+              <label>{{ notification.get('name')?.value }}</label>
+            </clr-toggle-wrapper>
+            <span
+              class="badge"
+              [ngClass]="{
+                'badge-warning':
+                  notification.get('severity')?.value === 'WARNING',
+                'badge-danger': notification.get('severity')?.value === 'ERROR',
+                'badge-info': notification.get('severity')?.value === 'INFO'
+              }"
+            >
+              {{ notification.get('severity')?.value }}
+            </span>
+          </clr-control-container>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="close()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [clrLoading]="isSaving"
+      (click)="saveSettings()"
+      [disabled]="isLoading || !settingsForm.valid"
+    >
+      Save
+    </button>
+  </div>
+</clr-modal>

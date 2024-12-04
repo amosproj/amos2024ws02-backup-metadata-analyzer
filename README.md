@@ -26,25 +26,23 @@ Make sure the following are installed on your machine:
 
 3. **Setup .env files**:
 
-   ```bash
-    cp .env.docker.example .env.docker
-
-   ```
+   In the projects root folder, copy the **.env.docker.example** and rename the copy to **.env.docker**
 
 4. **Copy database dump into project**:
 
-   Copy the database dump .dmp file in the projects root folder and rename it to **db_dump.sql**
+   Copy the database dump .dmp file into the projects root folder and rename it to **db_dump.sql**
 
-5. **Delete Docker node_modules**:
+5. **Build Docker container**:
 
    ```bash
-   docker volume rm amos2024ws02-backup-metadata-analyzer_mono-node-modules
+    docker compose --env-file .env.docker build --no-cache
+
    ```
 
-6. **Build and start Docker container**:
+6. **Start Docker container**:
 
    ```bash
-    docker compose --env-file .env.docker up --build
+    docker compose --env-file .env.docker up
 
    ```
 

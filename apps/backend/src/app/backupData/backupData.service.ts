@@ -15,6 +15,7 @@ import { PaginationService } from '../utils/pagination/paginationService';
 import { BackupDataDto } from './dto/backupData.dto';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
 import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
+import { BackupType } from './dto/backupType';
 
 @Injectable()
 export class BackupDataService extends PaginationService {
@@ -56,10 +57,8 @@ export class BackupDataService extends PaginationService {
   async create(
     createBackupDataDto: CreateBackupDataDto
   ): Promise<BackupDataEntity> {
-    return await this.backupDataRepository.save({
-      ...createBackupDataDto,
-      sizeMB: Math.floor(createBackupDataDto.sizeMB),
-    });
+    const entity = Object.assign(new BackupDataEntity(), createBackupDataDto);
+    return await this.backupDataRepository.save(entity);
   }
 
   /**
@@ -69,12 +68,10 @@ export class BackupDataService extends PaginationService {
   async createBatched(
     createBackupDataDtos: CreateBackupDataDto[]
   ): Promise<void> {
-    await this.backupDataRepository.save(
-      createBackupDataDtos.map((dto) => ({
-        ...dto,
-        sizeMB: Math.floor(dto.sizeMB),
-      }))
+    const entities = createBackupDataDtos.map((dto) =>
+      Object.assign(new BackupDataEntity(), dto)
     );
+    await this.backupDataRepository.save(entities);
   }
 
   /**
@@ -140,6 +137,8 @@ export class BackupDataService extends PaginationService {
     } else if (backupDataFilterDto.toSizeMB) {
       where.sizeMB = LessThanOrEqual(backupDataFilterDto.toSizeMB);
     }
+
+    where.type = BackupType.FULL;
 
     return where;
   }

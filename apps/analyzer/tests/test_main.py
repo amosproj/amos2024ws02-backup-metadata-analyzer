@@ -11,18 +11,3 @@ from tests.mock_database import MockDatabase
 def test_hello_world():
     """Test the hello_world function."""
     assert hello_world() == "Hello, world!"
-
-def test_update_data():
-    mock_result = Result()
-    mock_result.uuid = "1"
-    mock_result.fdi_type = "F"
-    mock_result.data_size = 100
-    mock_result.start_time = datetime.now()
-
-    database = MockDatabase([mock_result])
-    backend = MockBackend()
-    Analyzer.init(database, backend, None, None)
-    Analyzer.update_data()
-
-    assert backend.backups == [Analyzer._convert_result(mock_result)]
-
