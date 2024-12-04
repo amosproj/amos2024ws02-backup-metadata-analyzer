@@ -4,12 +4,18 @@ import { of, throwError } from 'rxjs';
 
 import { NotificationSettingsComponent } from './notification-settings.component';
 import { NotificationService } from '../../../services/notification.service';
+import { mock } from 'node:test';
 
 describe('NotificationSettingsComponent', () => {
   let component: NotificationSettingsComponent;
   let mockNotificationService: {
     getNotificationSettings: ReturnType<typeof vi.fn>;
     updateNotificationSettings: ReturnType<typeof vi.fn>;
+  };
+  let mockAlertService: {
+    getAllAlerts: ReturnType<typeof vi.fn>;
+    refreshAlerts: ReturnType<typeof vi.fn>;
+    getRefreshObservable: ReturnType<typeof vi.fn>;
   };
   let mockFormBuilder: FormBuilder;
 
@@ -28,11 +34,17 @@ describe('NotificationSettingsComponent', () => {
       getNotificationSettings: vi.fn(),
       updateNotificationSettings: vi.fn(),
     };
+    mockAlertService = {
+      getAllAlerts: vi.fn(),
+      refreshAlerts: vi.fn(),
+      getRefreshObservable: vi.fn(),
+    };
 
     mockFormBuilder = new FormBuilder();
 
     component = new NotificationSettingsComponent(
       mockNotificationService as any,
+      mockAlertService as any,
       mockFormBuilder
     );
   });
