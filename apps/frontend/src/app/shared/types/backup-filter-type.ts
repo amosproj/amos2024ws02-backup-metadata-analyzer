@@ -7,4 +7,5 @@ export type BackupFilterParams = {
   toDate?: string | null;
   fromSizeMB?: number | null;
   toSizeMB?: number | null;
+  id?: string | null;
 };
