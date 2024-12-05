@@ -46,5 +46,5 @@ export class BackupDataEntity {
     eager: true,
   })
   @JoinColumn({ name: 'taskId', referencedColumnName: 'id' })
-  task!: TaskEntity;
+  taskId?: TaskEntity;
 }
