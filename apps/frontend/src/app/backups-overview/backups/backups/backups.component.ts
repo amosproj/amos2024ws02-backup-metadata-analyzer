@@ -18,6 +18,7 @@ import { CustomFilter } from './backupfilter';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { APIResponse } from '../../../shared/types/api-response';
+import { BackupTask } from '../../../shared/types/backup.task';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -40,6 +41,30 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     toDate: new Date(),
     range: 'month',
   });
+  private readonly backupTaskSubject$ = new BehaviorSubject<
+    BackupTask | undefined
+  >(undefined);
+  tasksLoading = false;
+  selectedTask: BackupTask | undefined;
+
+  tasks: BackupTask[] = [
+    {
+      id: '1',
+      name: 'Task 1',
+    },
+    {
+      id: '2',
+      name: 'Task 2',
+    },
+    {
+      id: '3',
+      name: 'Task 3',
+    },
+    {
+      id: '4',
+      name: 'Task 4',
+    },
+  ];
 
   timeRanges: ('week' | 'month' | 'year')[] = ['week', 'month', 'year'];
   readonly timeRange$ = this.timeRangeSubject$.pipe(
@@ -73,40 +98,60 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       takeUntil(this.destroy$)
     );
 
-    this.chartBackups$ = this.timeRangeSubject$.pipe(
+    this.chartBackups$ = combineLatest([
+      this.timeRangeSubject$,
+      this.backupTaskSubject$.pipe(startWith(undefined)),
+    ]).pipe(
       distinctUntilChanged(
-        (prev, curr) =>
-          prev.range === curr.range &&
-          prev.fromDate.getTime() === curr.fromDate.getTime() &&
-          prev.toDate.getTime() === curr.toDate.getTime()
+        ([prevTime, prevTask], [currTime, currTask]) =>
+          prevTime.range === currTime.range &&
+          prevTime.fromDate.getTime() === currTime.fromDate.getTime() &&
+          prevTime.toDate.getTime() === currTime.toDate.getTime() &&
+          prevTask?.id === currTask?.id
       ),
-      map(({ fromDate, toDate }) => ({
+      map(([{ fromDate, toDate }, task]) => ({
         fromDate: fromDate.toISOString(),
         toDate: toDate.toISOString(),
+        taskId: task?.id,
       })),
-      switchMap((dateRange) => this.backupService.getAllBackups(dateRange)),
+      tap(() => (this.loading = true)),
+      switchMap((params) => this.backupService.getAllBackups(params)),
       tap((response) => {
         if (response.data && response.data.length > 0) {
-          // Prepare and update column chart
+          // Existing chart update logic remains the same
           const columnData = this.chartService.prepareColumnData(
             response.data,
             this.timeRangeSubject$.getValue().range
           );
           this.chartService.updateChart('backupTimelineChart', columnData);
 
-          // Prepare and update pie chart
           const pieData = this.chartService.preparePieData(response.data);
           this.chartService.updateChart('backupSizeChart', pieData);
         } else {
-          // Handle the case where there's no data
           console.warn('No data received for chart updates.');
         }
+        this.loading = false;
       }),
       takeUntil(this.destroy$)
     );
   }
 
   ngOnInit(): void {
+/*     this.tasksLoading = true;
+    this.backupService
+      .getBackupTasks()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (tasks) => {
+          this.tasks = tasks;
+          this.tasksLoading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching backup tasks:', error);
+          this.tasksLoading = false;
+        },
+      }); */
+
     combineLatest([
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
@@ -201,6 +246,12 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       range,
     });
     this.chartService.updateTimeRange('backupTimelineChart', range);
+  }
+
+  setBackupTask(task: BackupTask | undefined): void {
+    this.selectedTask = task;
+    this.backupTaskSubject$.next(task);
+    console.log(task);
   }
 
   refresh(state: ClrDatagridStateInterface<any>): void {

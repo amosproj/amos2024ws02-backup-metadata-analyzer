@@ -19,6 +19,9 @@ import {
   warningStandardIcon,
   cogIcon,
   bellIcon,
+  angleIcon,
+  tagIcon,
+  dataClusterIcon
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -61,7 +64,10 @@ export class AppModule {
       warningStandardIcon,
       errorStandardIcon,
       cogIcon,
-      bellIcon
+      bellIcon,
+      angleIcon,
+      tagIcon,
+      dataClusterIcon
     );
   }
 }

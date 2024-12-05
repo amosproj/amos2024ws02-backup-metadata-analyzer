@@ -34,34 +34,73 @@
     </div>
   </div>
 </div>
-<div>
-  <h3>Charts:</h3>
-  <div class="btn-group">
-    <button
-      *ngFor="let range of timeRanges"
-      class="btn"
-      [class.btn-primary]="(timeRange$ | async) === range"
-      (click)="setTimeRange(range)"
-    >
-      Last {{ range | titlecase }}
-    </button>
+<h3>Chart Options:</h3>
+<div class="clr-row align-items-center">
+  
+  <div class="clr-col align-items-center">
+    
+    <div class="btn-group">
+      <button
+        *ngFor="let range of timeRanges"
+        class="btn"
+        [class.btn-primary]="(timeRange$ | async) === range"
+        (click)="setTimeRange(range)"
+      >
+        Last {{ range | titlecase }}
+      </button>
+    </div>
   </div>
-  <div class="clr-row">
-    <div class="clr-col-sm-12 clr-col-md-6">
-      <!-- Timeline Chart Section -->
-      <h4>Recent Backup Timeline:</h4>
-      <div
-        id="backupTimelineChart"
-        class="mt-4"
-        style="width: 100%; height: 400px"
-      ></div>
-    </div>
+  <div class="clr-col align-items-center">
+    <clr-combobox-container>
+      <label>Backup Tasks</label>
+      <!-- (clrInputChange)="setBackupTask($event)" -->
+      <clr-combobox
+        name="task"
+        clrMulti="true"
+        [(ngModel)]="selectedTask"
+        [clrLoading]="tasksLoading"
+        (ngModelChange)="setBackupTask($event)"
+      >
+        <ng-container *clrOptionSelected="let task">
+          <cds-icon
+            shape="tag"
+            aria-label="selectedt backup task tag"
+          ></cds-icon>
+          {{ task?.name || 'All Tasks' }}
+        </ng-container>
 
-    <div class="clr-col-sm-12 clr-col-md-6">
-      <!-- Size Distribution Chart Section -->
-      <h4>Recent Backup Size Distribution:</h4>
-      <div id="backupSizeChart" style="width: 100%; height: 400px"></div>
-    </div>
+        <clr-options clrPosition="top-left">
+          <clr-option
+            [clrValue]="undefined"
+            (click)="setBackupTask(undefined)"
+          ></clr-option>
+          <clr-option *ngFor="let task of tasks" [clrValue]="task">
+            <cds-icon shape="data-cluster" aria-label="backup task"></cds-icon>
+            {{ task.name }}
+          </clr-option>
+        </clr-options>
+      </clr-combobox>
+      <clr-control-helper>Helper text</clr-control-helper>
+      <clr-control-error>There was an error</clr-control-error>
+    </clr-combobox-container>
+  </div>
+</div>
+
+<div class="clr-row">
+  <div class="clr-col-sm-12 clr-col-md-6">
+    <!-- Timeline Chart Section -->
+    <h4>Recent Backup Timeline:</h4>
+    <div
+      id="backupTimelineChart"
+      class="mt-4"
+      style="width: 100%; height: 400px"
+    ></div>
+  </div>
+
+  <div class="clr-col-sm-12 clr-col-md-6">
+    <!-- Size Distribution Chart Section -->
+    <h4>Recent Backup Size Distribution:</h4>
+    <div id="backupSizeChart" style="width: 100%; height: 400px"></div>
   </div>
 </div>
 <div class="clr-row">
