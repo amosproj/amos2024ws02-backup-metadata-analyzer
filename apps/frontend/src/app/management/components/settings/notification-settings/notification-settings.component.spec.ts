@@ -1,15 +1,20 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 
 import { NotificationSettingsComponent } from './notification-settings.component';
-import { NotificationService } from '../../../services/notification.service';
 
 describe('NotificationSettingsComponent', () => {
   let component: NotificationSettingsComponent;
   let mockNotificationService: {
     getNotificationSettings: ReturnType<typeof vi.fn>;
     updateNotificationSettings: ReturnType<typeof vi.fn>;
+  };
+  let mockAlertService: {
+    getAllAlerts: ReturnType<typeof vi.fn>;
+    refreshAlerts: ReturnType<typeof vi.fn>;
+    getRefreshObservable: ReturnType<typeof vi.fn>;
+    refresh: ReturnType<typeof vi.fn>;
   };
   let mockFormBuilder: FormBuilder;
 
@@ -28,11 +33,18 @@ describe('NotificationSettingsComponent', () => {
       getNotificationSettings: vi.fn(),
       updateNotificationSettings: vi.fn(),
     };
+    mockAlertService = {
+      getAllAlerts: vi.fn(),
+      refreshAlerts: vi.fn(),
+      getRefreshObservable: vi.fn(),
+      refresh: vi.fn(),
+    };
 
     mockFormBuilder = new FormBuilder();
 
     component = new NotificationSettingsComponent(
       mockNotificationService as any,
+      mockAlertService as any,
       mockFormBuilder
     );
   });

@@ -50,6 +50,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   pageSize = 10;
   backupSizeFilter: CustomFilter;
   backupDateFilter: CustomFilter;
+  backupIdFilter: CustomFilter;
 
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
@@ -65,6 +66,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   ) {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
+    this.backupIdFilter = new CustomFilter('id');
 
     this.backups$ = this.filterOptions$.pipe(
       switchMap((params) => this.backupService.getAllBackups(params)),
@@ -108,6 +110,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     combineLatest([
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
+      this.backupIdFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
         map(() => this.buildFilterParams()),
@@ -167,6 +170,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     if (this.backupSizeFilter.isActive()) {
       params.fromSizeMB = this.backupSizeFilter.ranges.fromSizeMB;
       params.toSizeMB = this.backupSizeFilter.ranges.toSizeMB;
+    }
+
+    if (this.backupIdFilter.isActive()) {
+      params.id = this.backupIdFilter.ranges.id;
     }
 
     return params;

@@ -123,6 +123,7 @@ describe('BackupsComponent', () => {
       dateFilter.ranges = {
         fromDate: new Date('2023-01-01').toISOString(),
         toDate: new Date('2023-12-31').toISOString(),
+        id: null,
         fromSizeMB: null,
         toSizeMB: null,
       };
@@ -143,6 +144,7 @@ describe('BackupsComponent', () => {
         toDate: null,
         fromSizeMB: 100,
         toSizeMB: 500,
+        id: null,
       };
       (sizeFilter.ranges as any)['_isActive'] = true;
 
@@ -152,6 +154,24 @@ describe('BackupsComponent', () => {
 
       expect(params.fromSizeMB).toBe(sizeFilter.ranges.fromSizeMB);
       expect(params.toSizeMB).toBe(sizeFilter.ranges.toSizeMB);
+    });
+
+    it('should build filter params with active id filter', () => {
+      const idFilter = new CustomFilter('id');
+      idFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        fromSizeMB: null,
+        toSizeMB: null,
+        id: '000d88',
+      };
+      (idFilter.ranges as any)['_isActive'] = true;
+
+      component['backupIdFilter'] = idFilter;
+
+      const params = component['buildFilterParams']();
+
+      expect(params.id).toBe(idFilter.ranges.id);
     });
   });
 
