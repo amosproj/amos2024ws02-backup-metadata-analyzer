@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Logger, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -27,7 +35,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Returns the task with the given id.' })
   @ApiOkResponse()
   @ApiNotFoundResponse()
-  async findOne(id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.tasksService.findOne(id);
   }
 

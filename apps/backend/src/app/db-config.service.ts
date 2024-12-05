@@ -18,6 +18,8 @@ import { SizeAlertEntity } from './alerting/entity/alerts/sizeAlert.entity';
 import { NewAlertStructure1732887680122 } from './migrations/1732887680122-NewAlertStructure';
 import { CreationDateAlertEntity } from './alerting/entity/alerts/creationDateAlert.entity';
 import { CreationDateAlert1733070019992 } from './migrations/1733070019992-CreationDateAlert';
+import { TaskEntity } from './tasks/entity/task.entity';
+import { Tasks1733397652480 } from './migrations/1733397652480-Tasks';
 
 /**
  * Used by NestJS to reach database.
@@ -26,7 +28,7 @@ import { CreationDateAlert1733070019992 } from './migrations/1733070019992-Creat
 export class DbConfigService implements TypeOrmOptionsFactory {
   constructor(
     @Inject(ConfigService)
-    private configService: ConfigService
+    private readonly configService: ConfigService
   ) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions & DataSourceOptions {
@@ -43,6 +45,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AlertTypeEntity,
         SizeAlertEntity,
         CreationDateAlertEntity,
+        TaskEntity,
       ],
       migrationsRun: true,
       migrations: [
@@ -57,6 +60,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AlertTypeNameUnique1732874749343,
         NewAlertStructure1732887680122,
         CreationDateAlert1733070019992,
+        Tasks1733397652480,
       ],
       logging: true,
     };
