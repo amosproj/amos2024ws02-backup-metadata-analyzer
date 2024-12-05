@@ -16,3 +16,8 @@ export interface CreationDateAlert extends Alert {
   date: Date;
   referenceDate: Date;
 }
+
+export interface StorageFillAlert extends Alert {
+  storageFill: number;
+  referenceStorageFill: number;
+}

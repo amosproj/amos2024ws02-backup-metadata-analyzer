@@ -1,6 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
-import { Alert, CreationDateAlert, SizeAlert } from '../../shared/types/alert';
+import {
+  Alert,
+  CreationDateAlert,
+  SizeAlert,
+  StorageFillAlert,
+} from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../shared/enums/severityType';
@@ -117,6 +122,10 @@ export class AlertComponent implements OnInit, OnDestroy {
         const creationDateAlert = alert as CreationDateAlert;
         reason = `Backup was started at an unusual time`;
         break;
+      case 'STORAGE_FILL_ALERT':
+        const storageFillAlert = alert as StorageFillAlert;
+        reason = `Storage is filling faster than ususal`; //TODO update reason
+        break;
     }
     return reason;
   }
@@ -144,6 +153,10 @@ export class AlertComponent implements OnInit, OnDestroy {
         const creationDateAlert = alert as CreationDateAlert;
 
         description = `Backup was started at ${creationDateAlert.date.toString()}, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
+        break;
+      case 'STORAGE_FILL_ALERT':
+        const storageFillAlert = alert as StorageFillAlert;
+        description = `Storage is filling faster than ususal`; //TODO update description
         break;
     }
     return description;
