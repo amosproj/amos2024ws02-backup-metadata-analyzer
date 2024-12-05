@@ -6,20 +6,29 @@
       <div class="card-text">
         <p>On this page, you can:</p>
         <ul>
-          <li><strong>See Alerts</strong>: View the current status and details of any alerts that have been triggered.
-            Alerts are categorized by their severity.
+          <li>
+            <strong>See Alerts</strong>: View the current status and details of
+            any alerts that have been triggered. Alerts are categorized by their
+            severity.
           </li>
-          <li><strong>See all backups with basic data</strong>: Browse through a list of all backups, including
-            essential information such as Backup ID, size and creation date.
+          <li>
+            <strong>See all backups with basic data</strong>: Browse through a
+            list of all backups, including essential information such as Backup
+            ID, size and creation date.
           </li>
-          <li><strong>See how the size of the backup evolved over time</strong>: Visualize the changes in backup sizes
-            over time through the <strong>Recent Backup Timeline</strong> chart, helping you understand the growth and
-            trends in your backup data.
+          <li>
+            <strong>See how the size of the backup evolved over time</strong>:
+            Visualize the changes in backup sizes over time through the
+            <strong>Recent Backup Timeline</strong> chart, helping you
+            understand the growth and trends in your backup data.
           </li>
-          <li><strong>See Recent Backup Size Distribution</strong>: Analyze the recent distribution of backup sizes
-            through the
+          <li>
+            <strong>See Recent Backup Size Distribution</strong>: Analyze the
+            recent distribution of backup sizes through the
             <strong>Recent Backup Size Distribution</strong> chart.
+          </li>
         </ul>
+
         <p>More insights will follow.</p>
       </div>
     </div>
@@ -54,8 +63,6 @@
       <div id="backupSizeChart" style="width: 100%; height: 400px"></div>
     </div>
   </div>
-
-
 </div>
 <div class="clr-row">
   <div class="clr-col-lg-12 clr-col-lg-12">
@@ -65,7 +72,21 @@
       (clrDgRefresh)="refresh($event)"
       [clrDgLoading]="loading"
     >
-      <clr-dg-column [clrDgField]="'id'">Backup ID</clr-dg-column>
+      <clr-dg-column [clrDgField]="'id'">
+        <ng-container *clrDgHideableColumn>
+          Backup ID
+          <clr-dg-filter [clrDgFilter]="backupIdFilter">
+            <clr-input-container>
+              <label>ID:</label>
+              <input
+                clrInput
+                type="string"
+                [(ngModel)]="backupIdFilter.ranges.id"
+                (ngModelChange)="backupSizeFilter.updateRanges({ id: $event })"
+              />
+            </clr-input-container>
+          </clr-dg-filter> </ng-container
+      ></clr-dg-column>
       <clr-dg-column [clrDgField]="'sizeMB'">
         <ng-container *clrDgHideableColumn>
           Size (MB)
