@@ -25,4 +25,8 @@ export class TasksService {
   async create(task: TaskEntity): Promise<TaskEntity> {
     return this.taskRepository.save(task);
   }
+
+  async createBatched(tasks: TaskEntity[]): Promise<void> {
+    await this.taskRepository.save(tasks);
+  }
 }
