@@ -3,6 +3,7 @@ import {
   BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
+  filter,
   map,
   Observable,
   of,
@@ -20,6 +21,7 @@ import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
+import e from 'cors';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -37,28 +39,35 @@ interface TimeRangeConfig {
   styleUrl: './backups.component.css',
 })
 export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
+  protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
   private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
     fromDate: new Date(),
     toDate: new Date(),
     range: 'month',
   });
+
   backupTasks$: Observable<BackupTask[]>;
   private readonly backupTaskSubject$ = new BehaviorSubject<
     BackupTask | undefined
   >(undefined);
-  tasksLoading = false;
-  selectedTask: BackupTask | undefined;
 
   timeRanges: ('week' | 'month' | 'year')[] = ['week', 'month', 'year'];
   readonly timeRange$ = this.timeRangeSubject$.pipe(
     map((config) => config.range)
   );
 
+  private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
+    INITIAL_FILTER
+  );
+
+  tasksLoading: boolean = false;
   loading: boolean = false;
   pageSize = 10;
-  backupSizeFilter: CustomFilter;
-  backupDateFilter: CustomFilter;
-  backupIdFilter: CustomFilter;
+  protected backupSizeFilter: CustomFilter;
+  protected backupDateFilter: CustomFilter;
+  protected backupIdFilter: CustomFilter;
+  protected selectedTask: BackupTask | undefined;
+  protected filterPanel: boolean = false;
 
   tasks: BackupTask[] = [
     { id: '1', name: 'Task 1' },
@@ -72,9 +81,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
 
-  private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
-    INITIAL_FILTER
-  );
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -162,22 +168,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    /*     this.tasksLoading = true;
-    this.backupService
-      .getBackupTasks()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (tasks) => {
-          this.tasks = tasks;
-          this.tasksLoading = false;
-        },
-        error: (error) => {
-          console.error('Error fetching backup tasks:', error);
-          this.tasksLoading = false;
-        },
-      }); */
-    //this.backupTasks$ = of(this.tasks);
-
     combineLatest([
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
@@ -307,5 +297,11 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.loading = false;
   }
 
-  protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
+  protected changeFilterPanelState(): void {
+    if (this.filterPanel) {
+      this.filterPanel = false;
+    } else {
+      this.filterPanel = true;
+    }
+  }
 }

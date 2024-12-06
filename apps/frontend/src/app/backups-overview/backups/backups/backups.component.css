@@ -3,9 +3,6 @@
     justify-content: space-around;
 }
 
-.btn-group {
-    padding-top: 10px;
-}
 
 .filter-inline {
     display: inline-flex !important;
@@ -51,4 +48,63 @@
 
 .clr-form-control {
     margin-top: 0;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header-title {
+    margin: 0;
+    font-weight: 500;
+}
+
+.card-header-actions {
+    display: flex;
+    align-items: center;
+}
+
+:host ::ng-deep .card-header {
+    border-bottom: none !important;
+}
+
+
+.btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.btn-group-vertical .btn {
+    border: 1px solid #0072a3;
+    color: #0072a3;
+    background: white;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    width: 100%;
+    border-radius: 0.15rem;
+}
+
+.btn-group-vertical .btn.btn-primary {
+    background: #0072a3;
+    color: white;
+}
+.clr-side-panel {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.15rem;
+    background: white;
+    color: #1b2834;
+    font-size: 0.875rem;
+}
+
+.backupTaskFilter {
+    padding: 1.5rem;
+    background: white;
+    height: 100%;
+    width: 300px;
 }
