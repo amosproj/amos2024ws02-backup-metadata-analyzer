@@ -35,31 +35,34 @@
   </div>
 </div>
 <h3>Chart Options:</h3>
-<div class="clr-row align-items-center">
-  
-  <div class="clr-col align-items-center">
-    
-    <div class="btn-group">
-      <button
-        *ngFor="let range of timeRanges"
-        class="btn"
-        [class.btn-primary]="(timeRange$ | async) === range"
-        (click)="setTimeRange(range)"
-      >
-        Last {{ range | titlecase }}
-      </button>
+<div class="clr-row">
+  <div class="clr-col-12 clr-col-lg-6">
+    <div class="card">
+      <div class="card-block">
+        <div class="btn-group">
+          <button
+            *ngFor="let range of timeRanges"
+            class="btn"
+            [class.btn-primary]="(timeRange$ | async) === range"
+            (click)="setTimeRange(range)"
+          >
+            Last {{ range | titlecase }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="clr-col align-items-center">
-    <clr-combobox-container>
+  <div class="clr-col-12 clr-col-lg-6">
+    <clr-combobox-container *ngIf="backupTasks$ | async as tasks">
       <label>Backup Tasks</label>
       <!-- (clrInputChange)="setBackupTask($event)" -->
       <clr-combobox
         name="task"
-        clrMulti="true"
         [(ngModel)]="selectedTask"
         [clrLoading]="tasksLoading"
         (ngModelChange)="setBackupTask($event)"
+        placeholder="Select backup task"
+        [clrPosition]="'bottom-left'"
       >
         <ng-container *clrOptionSelected="let task">
           <cds-icon
@@ -70,17 +73,14 @@
         </ng-container>
 
         <clr-options clrPosition="top-left">
-          <clr-option
-            [clrValue]="undefined"
-            (click)="setBackupTask(undefined)"
-          ></clr-option>
-          <clr-option *ngFor="let task of tasks" [clrValue]="task">
+          <clr-option [clrValue]="undefined">---</clr-option>
+          <clr-option *clrOptionItems="let task of tasks" [clrValue]="task">
             <cds-icon shape="data-cluster" aria-label="backup task"></cds-icon>
             {{ task.name }}
           </clr-option>
         </clr-options>
       </clr-combobox>
-      <clr-control-helper>Helper text</clr-control-helper>
+      <clr-control-helper>Select backup task</clr-control-helper>
       <clr-control-error>There was an error</clr-control-error>
     </clr-combobox-container>
   </div>

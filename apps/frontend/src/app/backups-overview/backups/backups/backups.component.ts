@@ -5,6 +5,7 @@ import {
   distinctUntilChanged,
   map,
   Observable,
+  of,
   startWith,
   Subject,
   switchMap,
@@ -41,30 +42,12 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     toDate: new Date(),
     range: 'month',
   });
+  backupTasks$: Observable<BackupTask[]>;
   private readonly backupTaskSubject$ = new BehaviorSubject<
     BackupTask | undefined
   >(undefined);
   tasksLoading = false;
   selectedTask: BackupTask | undefined;
-
-  tasks: BackupTask[] = [
-    {
-      id: '1',
-      name: 'Task 1',
-    },
-    {
-      id: '2',
-      name: 'Task 2',
-    },
-    {
-      id: '3',
-      name: 'Task 3',
-    },
-    {
-      id: '4',
-      name: 'Task 4',
-    },
-  ];
 
   timeRanges: ('week' | 'month' | 'year')[] = ['week', 'month', 'year'];
   readonly timeRange$ = this.timeRangeSubject$.pipe(
@@ -76,6 +59,15 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   backupSizeFilter: CustomFilter;
   backupDateFilter: CustomFilter;
   backupIdFilter: CustomFilter;
+
+  tasks: BackupTask[] = [
+    { id: '1', name: 'Task 1' },
+    { id: '2', name: 'Task 2' },
+    { id: '3', name: 'Task 3' },
+    { id: '4', name: 'Task 4' },
+    { id: '5', name: 'Task 5' },
+    { id: '6', name: 'Task 6' },
+  ];
 
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
@@ -98,46 +90,79 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       takeUntil(this.destroy$)
     );
 
+    this.backupTasks$ = this.backupTaskSubject$
+      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        tap(() => (this.tasksLoading = true)),
+        switchMap((task) => of(this.tasks)),
+        tap(() => (this.tasksLoading = false))
+      );
+
     this.chartBackups$ = combineLatest([
-      this.timeRangeSubject$,
-      this.backupTaskSubject$.pipe(startWith(undefined)),
-    ]).pipe(
-      distinctUntilChanged(
-        ([prevTime, prevTask], [currTime, currTask]) =>
-          prevTime.range === currTime.range &&
-          prevTime.fromDate.getTime() === currTime.fromDate.getTime() &&
-          prevTime.toDate.getTime() === currTime.toDate.getTime() &&
-          prevTask?.id === currTask?.id
+      this.timeRangeSubject$.pipe(
+        distinctUntilChanged(
+          (prev, curr) =>
+            prev.range === curr.range &&
+            prev.fromDate.getTime() === curr.fromDate.getTime() &&
+            prev.toDate.getTime() === curr.toDate.getTime()
+        )
       ),
+      this.backupTaskSubject$.pipe(
+        // Add debug logging
+        tap((task) => console.log('Task subject emitted:', task)),
+        distinctUntilChanged((prev, curr) => prev?.id === curr?.id)
+      ),
+    ]).pipe(
+      // Add debug logging for combined emissions
+      tap(([timeRange, task]) => {
+        console.log('Combined emission:', {
+          timeRange: timeRange.range,
+          taskId: task?.id,
+        });
+      }),
       map(([{ fromDate, toDate }, task]) => ({
         fromDate: fromDate.toISOString(),
         toDate: toDate.toISOString(),
         taskId: task?.id,
       })),
-      tap(() => (this.loading = true)),
+      tap((params) => console.log('Calling API with params:', params)),
       switchMap((params) => this.backupService.getAllBackups(params)),
-      tap((response) => {
-        if (response.data && response.data.length > 0) {
-          // Existing chart update logic remains the same
-          const columnData = this.chartService.prepareColumnData(
-            response.data,
-            this.timeRangeSubject$.getValue().range
-          );
-          this.chartService.updateChart('backupTimelineChart', columnData);
+      tap({
+        next: (response) => {
+          if (response.data && response.data.length > 0) {
+            const currentRange = this.timeRangeSubject$.getValue().range;
 
-          const pieData = this.chartService.preparePieData(response.data);
-          this.chartService.updateChart('backupSizeChart', pieData);
-        } else {
-          console.warn('No data received for chart updates.');
-        }
-        this.loading = false;
+            // Update timeline chart
+            const columnData = this.chartService.prepareColumnData(
+              response.data,
+              currentRange
+            );
+            this.chartService.updateChart('backupTimelineChart', columnData);
+
+            // Update size distribution chart
+            const pieData = this.chartService.preparePieData(response.data);
+            this.chartService.updateChart('backupSizeChart', pieData);
+
+            console.log('Charts updated successfully:', {
+              timeRange: currentRange,
+              dataLength: response.data.length,
+            });
+          } else {
+            console.warn('No data received for charts');
+          }
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error updating charts:', error);
+          this.loading = false;
+        },
       }),
       takeUntil(this.destroy$)
     );
   }
 
   ngOnInit(): void {
-/*     this.tasksLoading = true;
+    /*     this.tasksLoading = true;
     this.backupService
       .getBackupTasks()
       .pipe(takeUntil(this.destroy$))
@@ -151,6 +176,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           this.tasksLoading = false;
         },
       }); */
+    //this.backupTasks$ = of(this.tasks);
 
     combineLatest([
       this.backupDateFilter.changes.pipe(startWith(null)),
@@ -250,8 +276,14 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
   setBackupTask(task: BackupTask | undefined): void {
     this.selectedTask = task;
-    this.backupTaskSubject$.next(task);
-    console.log(task);
+    if (task) {
+      this.backupTaskSubject$.next(task);
+    } else {
+      this.backupTaskSubject$.next(undefined);
+    }
+
+    console.log('update subject', task);
+    //his.chartService.updateChart('backupTimelineChart', this.chartBackups$);
   }
 
   refresh(state: ClrDatagridStateInterface<any>): void {
