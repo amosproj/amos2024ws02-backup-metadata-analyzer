@@ -22,16 +22,17 @@ class Analyzer:
     # Convert a result from the database into the format used by the backend
     def _convert_result(result):
         backup_type = {
-                "F": "FULL",
-                "I": "INCREMENTAL",
-                "D": "DIFFERENTIAL",
-                "C": "COPY"
+            "F": "FULL",
+            "I": "INCREMENTAL",
+            "D": "DIFFERENTIAL",
+            "C": "COPY"
         }[result.fdi_type]
         return {
             "id": result.uuid,
             "sizeMB": result.data_size / 1_000_000,
             "creationDate": result.start_time.isoformat(),
-            "type": backup_type
+            "type": backup_type,
+            "taskId": result.task_uuid,
         }
 
     def _get_start_date(data, alert_type, backup_type):
@@ -43,13 +44,13 @@ class Analyzer:
             assert len(latest_alerts) == 1
             return latest_alerts[0]
 
-
     def update_data():
         results = list(Analyzer.database.get_results())
 
         # Batch the api calls to the backend for improved efficiency
         batch = []
         count = 0
+
         for result in results:
             # Only send real backups
             if result.is_backup <= 0:
@@ -78,13 +79,13 @@ class Analyzer:
         start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "FULL")
         result = Analyzer.simple_rule_based_analyzer.analyze(data, alert_limit, start_date)
         return result
-    
+
     def simple_rule_based_analysis_diff(alert_limit):
         data = list(Analyzer.database.get_results())
         start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "DIFFERENTIAL")
         result = Analyzer.simple_rule_based_analyzer.analyze_diff(data, alert_limit, start_date)
         return result
-    
+
     def simple_rule_based_analysis_inc(alert_limit):
         data = list(Analyzer.database.get_results())
         start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "INCREMENTAL")

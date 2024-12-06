@@ -26,6 +26,7 @@ class Result(Base):
     saveset: Mapped[str] = mapped_column(primary_key=True)
     uuid: Mapped[str]
     task: Mapped[str]
+    task_uuid: Mapped[str]
     fdi_type: Mapped[str]
     is_backup: Mapped[int]
     state: Mapped[int]
