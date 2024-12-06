@@ -1,5 +1,6 @@
 import datetime
 
+
 class Analyzer:
     def init(database, backend, simple_analyzer, simple_rule_based_analyzer):
         Analyzer.database = database
@@ -35,6 +36,13 @@ class Analyzer:
             "taskId": result.task_uuid,
         }
 
+    # Convert a task from the database into the format used by the backend
+    def _convert_task(task):
+        return {
+            "id": task.uuid,
+            "displayName": task.task,
+        }
+
     def _get_start_date(data, alert_type, backup_type):
         latest_id = Analyzer.backend.get_latest_alert_id(alert_type, backup_type)
         if latest_id == "":
@@ -44,7 +52,7 @@ class Analyzer:
             assert len(latest_alerts) == 1
             return latest_alerts[0]
 
-    def update_data():
+    def _send_Backups():
         results = list(Analyzer.database.get_results())
 
         # Batch the api calls to the backend for improved efficiency
@@ -73,6 +81,33 @@ class Analyzer:
             Analyzer.backend.send_backup_data_batched(batch)
 
         return {"count": count}
+
+    def _send_Tasks():
+        tasks = list(Analyzer.database.get_tasks())
+
+        # Batch the api calls to the backend for improved efficiency
+        batch = []
+        count = 0
+
+        for task in tasks:
+
+            batch.append(Analyzer._convert_task(task))
+            count += 1
+
+            # Send a full batch
+            if len(batch) == 100:
+                Analyzer.backend.send_task_data_batched(batch)
+                batch = []
+
+        # Send the remaining results
+        if len(batch) > 0:
+            Analyzer.backend.send_task_data_batched(batch)
+
+        return {"count": count}
+
+    def update_data():
+        Analyzer._send_Tasks()
+        Analyzer._send_Backups()
 
     def simple_rule_based_analysis(alert_limit):
         data = list(Analyzer.database.get_results())
