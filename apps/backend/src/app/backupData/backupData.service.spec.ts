@@ -124,6 +124,24 @@ describe('BackupDataService', () => {
         BadRequestException
       );
     });
+
+    it('should create a where clause for taskId search', () => {
+      const filterDto: BackupDataFilterDto = { taskId: 'task-123' };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        taskId: { id: 'task-123' },
+        type: BackupType.FULL,
+      });
+    });
+
+    it('should create a where clause for taskName search', () => {
+      const filterDto: BackupDataFilterDto = { taskName: 'backup-task' };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        taskId: { displayName: ILike('%backup-task%') },
+        type: BackupType.FULL,
+      });
+    });
   });
 
   describe('createOrderClause', () => {
@@ -151,7 +169,8 @@ describe('BackupDataService', () => {
 
   describe('create', () => {
     it('should create a new backup data entity', async () => {
-      let createBackupDataDto: CreateBackupDataDto = new CreateBackupDataDto();
+      const createBackupDataDto: CreateBackupDataDto =
+        new CreateBackupDataDto();
       Object.assign(createBackupDataDto, mockBackupDataEntity);
 
       const result = await service.create(createBackupDataDto);

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
+  FindOptionsWhere,
   ILike,
   LessThanOrEqual,
   MoreThanOrEqual,
@@ -21,7 +22,7 @@ import { BackupType } from './dto/backupType';
 export class BackupDataService extends PaginationService {
   constructor(
     @InjectRepository(BackupDataEntity)
-    private backupDataRepository: Repository<BackupDataEntity>
+    private readonly backupDataRepository: Repository<BackupDataEntity>
   ) {
     super();
   }
@@ -79,7 +80,7 @@ export class BackupDataService extends PaginationService {
    * @param backupDataFilterDto
    */
   createWhereClause(backupDataFilterDto: BackupDataFilterDto) {
-    let where: any = {};
+    const where: FindOptionsWhere<BackupDataEntity> = {};
 
     //ID search
     if (backupDataFilterDto.id) {
@@ -136,6 +137,18 @@ export class BackupDataService extends PaginationService {
       where.sizeMB = MoreThanOrEqual(backupDataFilterDto.fromSizeMB);
     } else if (backupDataFilterDto.toSizeMB) {
       where.sizeMB = LessThanOrEqual(backupDataFilterDto.toSizeMB);
+    }
+
+    //Task id search
+    if (backupDataFilterDto.taskId) {
+      where.taskId = { id: backupDataFilterDto.taskId };
+    }
+
+    //Task name search
+    if (backupDataFilterDto.taskName) {
+      where.taskId = {
+        displayName: ILike(`%${backupDataFilterDto.taskName}%`),
+      };
     }
 
     where.type = BackupType.FULL;

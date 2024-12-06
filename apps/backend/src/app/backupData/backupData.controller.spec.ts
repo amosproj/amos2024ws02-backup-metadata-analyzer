@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataModule } from './backupData.module';
@@ -137,6 +137,30 @@ describe('BackupDataController (e2e)', () => {
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
       where: { creationDate: expect.any(Object), type: BackupType.FULL },
+    });
+  });
+  it('/backupData (GET) with taskId should return backup data entries with the specified taskId', async () => {
+    await request(app.getHttpServer())
+      .get('/backupData?taskId=task-123')
+      .expect(200);
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: { taskId: { id: 'task-123' }, type: BackupType.FULL },
+    });
+  });
+
+  it('/backupData (GET) with taskName should return backup data entries with the specified taskName', async () => {
+    await request(app.getHttpServer())
+      .get('/backupData?taskName=backup-task')
+      .expect(200);
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: {
+        taskId: { displayName: ILike('%backup-task%') },
+        type: BackupType.FULL,
+      },
     });
   });
 });
