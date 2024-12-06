@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BackupType } from '../dto/backupType';
+import { TaskEntity } from '../../tasks/entity/task.entity';
 
 @Entity('BackupData')
 export class BackupDataEntity {
@@ -37,6 +38,13 @@ export class BackupDataEntity {
     nullable: false,
     required: true,
   })
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp' })
   creationDate!: Date;
+
+  @ManyToOne(() => TaskEntity, {
+    nullable: true,
+    eager: true,
+  })
+  @JoinColumn({ name: 'taskId', referencedColumnName: 'id' })
+  taskId?: TaskEntity;
 }

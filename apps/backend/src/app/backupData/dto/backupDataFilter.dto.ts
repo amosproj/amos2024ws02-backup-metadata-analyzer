@@ -1,4 +1,4 @@
-import { IsDate, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class BackupDataFilterDto {
@@ -39,4 +39,18 @@ export class BackupDataFilterDto {
   })
   @IsOptional()
   toSizeMB?: number;
+
+  @ApiProperty({
+    description: 'Task id',
+    required: false,
+  })
+  @IsOptional()
+  taskId?: string;
+
+  @ApiProperty({
+    description: 'Task name',
+    required: false,
+  })
+  @IsOptional()
+  taskName?: string;
 }
