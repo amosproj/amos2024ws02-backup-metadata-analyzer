@@ -28,8 +28,18 @@ export class MailService {
   }
 
   async sendAlertMail(alert: Alert) {
-    const receivers =
-      this.configService.getOrThrow<string>('MAILING_LIST').split(',') || [];
+    const receiverEntities = await this.getAllMailReceiver();
+
+    if (receiverEntities.length === 0) {
+      this.logger.log('No mail receivers found. Skipping sending mail');
+      return;
+    }
+    const receivers = receiverEntities
+      .map((receiver) => receiver.mail)
+      .join(',')
+      .split(',');
+
+    console.log('receivers', receivers);
 
     let reason = '';
     let description = '';
