@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
@@ -126,6 +126,7 @@ describe('BackupsComponent', () => {
         id: null,
         fromSizeMB: null,
         toSizeMB: null,
+        taskName: null,
       };
       (dateFilter.ranges as any)['_isActive'] = true;
 
@@ -145,6 +146,7 @@ describe('BackupsComponent', () => {
         fromSizeMB: 100,
         toSizeMB: 500,
         id: null,
+        taskName: null,
       };
       (sizeFilter.ranges as any)['_isActive'] = true;
 
@@ -164,6 +166,7 @@ describe('BackupsComponent', () => {
         fromSizeMB: null,
         toSizeMB: null,
         id: '000d88',
+        taskName: null,
       };
       (idFilter.ranges as any)['_isActive'] = true;
 
@@ -172,6 +175,25 @@ describe('BackupsComponent', () => {
       const params = component['buildFilterParams']();
 
       expect(params.id).toBe(idFilter.ranges.id);
+    });
+
+    it('should build filter params with active task filter', () => {
+      const taskFilter = new CustomFilter('taskName');
+      taskFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        fromSizeMB: null,
+        toSizeMB: null,
+        id: null,
+        taskName: 'test',
+      };
+      (taskFilter.ranges as any)['_isActive'] = true;
+
+      component['taskFilter'] = taskFilter;
+
+      const params = component['buildFilterParams']();
+
+      expect(params.taskName).toBe(taskFilter.ranges.taskName);
     });
   });
 

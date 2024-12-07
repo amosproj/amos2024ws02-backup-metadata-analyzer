@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
+  FindOptionsOrder,
   FindOptionsWhere,
   ILike,
   LessThanOrEqual,
@@ -13,10 +14,13 @@ import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
 import { PaginationService } from '../utils/pagination/paginationService';
-import { BackupDataDto } from './dto/backupData.dto';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
-import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
+import {
+  BackupDataOrderByOptions,
+  BackupDataOrderOptionsDto,
+} from './dto/backupDataOrderOptions.dto';
 import { BackupType } from './dto/backupType';
+import { SortOrder } from '../utils/pagination/SortOrder';
 
 @Injectable()
 export class BackupDataService extends PaginationService {
@@ -42,7 +46,7 @@ export class BackupDataService extends PaginationService {
     paginationOptionsDto: PaginationOptionsDto,
     backupDataOrderOptionsDto: BackupDataOrderOptionsDto,
     backupDataFilterDto: BackupDataFilterDto
-  ): Promise<PaginationDto<BackupDataDto>> {
+  ): Promise<PaginationDto<BackupDataEntity>> {
     return await this.paginate<BackupDataEntity>(
       this.backupDataRepository,
       this.createOrderClause(backupDataOrderOptionsDto),
@@ -160,10 +164,21 @@ export class BackupDataService extends PaginationService {
    * Create order clause.
    * @param backupDataOrderOptionsDto
    */
-  createOrderClause(backupDataOrderOptionsDto: BackupDataOrderOptionsDto) {
+  createOrderClause(
+    backupDataOrderOptionsDto: BackupDataOrderOptionsDto
+  ): FindOptionsOrder<BackupDataEntity> {
+    if (
+      backupDataOrderOptionsDto.orderBy === BackupDataOrderByOptions.TASK_NAME
+    ) {
+      return {
+        taskId: {
+          displayName: backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
+        },
+      };
+    }
     return {
       [backupDataOrderOptionsDto.orderBy ?? 'creationDate']:
-        backupDataOrderOptionsDto.sortOrder ?? 'DESC',
+        backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
     };
   }
 }
