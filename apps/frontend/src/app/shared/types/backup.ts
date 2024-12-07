@@ -2,7 +2,7 @@ export interface Backup {
   id: string;
   sizeMB: number;
   creationDate: Date;
-  taskId: {
+  taskId?: {
     id: string;
     displayName: string;
   };
