@@ -63,6 +63,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         Tasks1733397652480,
       ],
       logging: true,
+      logger: 'debug'
     };
   }
 }

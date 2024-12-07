@@ -7,6 +7,7 @@ import { BackupDataEntity } from './entity/backupData.entity';
 import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataModule } from './backupData.module';
 import { BackupType } from './dto/backupType';
+import { TaskEntity } from '../tasks/entity/task.entity';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
@@ -40,6 +41,10 @@ describe('BackupDataController (e2e)', () => {
     })
       .overrideProvider(getRepositoryToken(BackupDataEntity))
       .useValue(mockBackupDataRepository)
+      .overrideProvider(getRepositoryToken(TaskEntity))
+      .useValue({
+        findOneBy: jest.fn().mockResolvedValue(new TaskEntity()),
+      })
       .compile();
 
     repository = module.get(getRepositoryToken(BackupDataEntity));
