@@ -68,7 +68,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
     this.backupIdFilter = new CustomFilter('id');
-    this.taskFilter = new CustomFilter('task');
+    this.taskFilter = new CustomFilter('taskName');
 
     this.backups$ = this.filterOptions$.pipe(
       switchMap((params) => this.backupService.getAllBackups(params)),

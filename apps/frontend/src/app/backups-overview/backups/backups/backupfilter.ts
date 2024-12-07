@@ -20,9 +20,9 @@ export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
   };
 
   public changes = new Subject<any>();
-  public filterType: 'date' | 'size' | 'id' | 'task';
+  public filterType: 'date' | 'size' | 'id' | 'taskName';
 
-  constructor(filterType: 'date' | 'size' | 'id' | 'task') {
+  constructor(filterType: 'date' | 'size' | 'id' | 'taskName') {
     this.filterType = filterType;
   }
 
@@ -31,6 +31,8 @@ export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
       return !!(this.ranges.fromDate || this.ranges.toDate);
     } else if (this.filterType === 'size') {
       return !!(this.ranges.fromSizeMB || this.ranges.toSizeMB);
+    } else if (this.filterType === 'taskName') {
+      return !!this.ranges.taskName;
     } else {
       return !!this.ranges.id;
     }
