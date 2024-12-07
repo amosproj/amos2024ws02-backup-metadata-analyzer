@@ -38,9 +38,7 @@ export class MailService {
       .map((receiver) => receiver.mail)
       .join(',')
       .split(',');
-
-    console.log('receivers', receivers);
-
+    
     let reason = '';
     let description = '';
     let valueColumnName = '';
