@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSizeAlertDto {
   @ApiProperty({
-    description: 'Id of the belonging Backup',
+    description: 'Saveset name of the belonging backup',
     required: true,
   })
-  backupId!: string;
+  backupSavesetName!: string;
 
   @ApiProperty({
     description: 'Size of the Backup, which is the reason for the alert',

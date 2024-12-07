@@ -108,7 +108,7 @@ export class AlertingService {
   async createSizeAlert(createSizeAlertDto: CreateSizeAlertDto) {
     // Check if alert already exists
     const existingAlertEntity = await this.sizeAlertRepository.findOneBy({
-      backup: { id: createSizeAlertDto.backupId },
+      backup: { id: createSizeAlertDto.backupSavesetName },
     });
 
     if (existingAlertEntity) {
@@ -121,11 +121,11 @@ export class AlertingService {
     alert.referenceSize = createSizeAlertDto.referenceSize;
 
     const backup = await this.backupDataService.findOneById(
-      createSizeAlertDto.backupId
+      createSizeAlertDto.backupSavesetName
     );
     if (!backup) {
       throw new NotFoundException(
-        `Backup with id ${createSizeAlertDto.backupId} not found`
+        `Backup with id ${createSizeAlertDto.backupSavesetName} not found`
       );
     }
     alert.backup = backup;
@@ -150,7 +150,7 @@ export class AlertingService {
   ) {
     // Check if alert already exists
     const existingAlertEntity = await this.creationDateRepository.findOneBy({
-      backup: { id: createCreationDateAlertDto.backupId },
+      backup: { id: createCreationDateAlertDto.backupSavesetName },
     });
 
     if (existingAlertEntity) {
@@ -163,11 +163,11 @@ export class AlertingService {
     alert.referenceDate = createCreationDateAlertDto.referenceDate;
 
     const backup = await this.backupDataService.findOneById(
-      createCreationDateAlertDto.backupId
+      createCreationDateAlertDto.backupSavesetName
     );
     if (!backup) {
       throw new NotFoundException(
-        `Backup with id ${createCreationDateAlertDto.backupId} not found`
+        `Backup with id ${createCreationDateAlertDto.backupSavesetName} not found`
       );
     }
     alert.backup = backup;
