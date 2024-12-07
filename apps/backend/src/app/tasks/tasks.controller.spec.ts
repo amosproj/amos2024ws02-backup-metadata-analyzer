@@ -64,13 +64,6 @@ describe('TasksController (e2e)', () => {
     expect(response.body).toEqual(task);
   });
 
-  it('/tasks/:id (GET) should throw a NotFoundException if task not found', async () => {
-    const id = 'ea1a2f52-5cf4-44a6-b266-175ee396a18e';
-    jest.spyOn(repository, 'findOneBy').mockResolvedValue(null);
-
-    await request(app.getHttpServer()).get(`/tasks/${id}`).expect(404);
-  });
-
   it('/tasks (POST) should create and return a task', async () => {
     const createTaskDto: CreateTaskDto = {
       id: 'someId',

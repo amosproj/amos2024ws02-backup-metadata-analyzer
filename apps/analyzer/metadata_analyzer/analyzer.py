@@ -91,6 +91,9 @@ class Analyzer:
 
         for task in tasks:
 
+            if task.uuid is None or task.task is None:
+                continue
+
             batch.append(Analyzer._convert_task(task))
             count += 1
 

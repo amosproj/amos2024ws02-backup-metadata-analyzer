@@ -125,7 +125,6 @@ export class BackupDataService extends PaginationService {
       from.setMinutes(0);
       from.setSeconds(0);
       from.setMilliseconds(0);
-      console.log(from);
     }
     if (backupDataFilterDto.toDate) {
       to = new Date(backupDataFilterDto.toDate);
@@ -138,7 +137,6 @@ export class BackupDataService extends PaginationService {
       to.setSeconds(0);
       to.setDate(to.getDate() + 1);
       to.setMilliseconds(-1);
-      console.log(to);
     }
 
     //Creation date search

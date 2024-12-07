@@ -9,6 +9,8 @@ import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataOrderByOptions } from './dto/backupDataOrderOptions.dto';
 import { SortOrder } from '../utils/pagination/SortOrder';
 import { BackupType } from './dto/backupType';
+import { TaskEntity } from '../tasks/entity/task.entity';
+import { TasksService } from '../tasks/tasks.service';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
@@ -31,9 +33,16 @@ describe('BackupDataService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BackupDataService,
+        TasksService,
         {
           provide: getRepositoryToken(BackupDataEntity),
           useValue: mockBackupDataRepository,
+        },
+        {
+          provide: getRepositoryToken(TaskEntity),
+          useValue: {
+            findOneBy: jest.fn().mockResolvedValue(new TaskEntity()),
+          },
         },
       ],
     }).compile();
