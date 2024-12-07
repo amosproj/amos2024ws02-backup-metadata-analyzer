@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
@@ -17,12 +21,14 @@ import { BackupDataDto } from './dto/backupData.dto';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
 import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
 import { BackupType } from './dto/backupType';
+import { TasksService } from '../tasks/tasks.service';
 
 @Injectable()
 export class BackupDataService extends PaginationService {
   constructor(
     @InjectRepository(BackupDataEntity)
-    private readonly backupDataRepository: Repository<BackupDataEntity>
+    private readonly backupDataRepository: Repository<BackupDataEntity>,
+    private readonly tasksService: TasksService
   ) {
     super();
   }
@@ -58,7 +64,14 @@ export class BackupDataService extends PaginationService {
   async create(
     createBackupDataDto: CreateBackupDataDto
   ): Promise<BackupDataEntity> {
+    if (!(await this.tasksService.findOne(createBackupDataDto.taskId ?? ''))) {
+      throw new NotFoundException(
+        `Task with id ${createBackupDataDto.taskId} not found`
+      );
+    }
+
     const entity = Object.assign(new BackupDataEntity(), createBackupDataDto);
+
     return await this.backupDataRepository.save(entity);
   }
 
@@ -69,6 +82,16 @@ export class BackupDataService extends PaginationService {
   async createBatched(
     createBackupDataDtos: CreateBackupDataDto[]
   ): Promise<void> {
+    //ignore unknown taskIds
+    for (const dto of createBackupDataDtos) {
+      if (dto.taskId && !(await this.tasksService.findOne(dto.taskId))) {
+        console.warn(
+          `Task with id ${dto.taskId} not found - still creating the backup, but without task`
+        );
+        dto.taskId = undefined;
+      }
+    }
+
     const entities = createBackupDataDtos.map((dto) =>
       Object.assign(new BackupDataEntity(), dto)
     );
