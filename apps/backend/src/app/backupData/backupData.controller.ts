@@ -15,12 +15,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { BackupDataService } from './backupData.service';
-import { BackupDataDto } from './dto/backupData.dto';
 import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
 import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
 import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
+import { BackupDataEntity } from './entity/backupData.entity';
 
 @ApiTags('Backup Data')
 @Controller('backupData')
@@ -31,8 +31,8 @@ export class BackupDataController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Returns the backupData Object with the given id.' })
-  @ApiOkResponse({ type: BackupDataDto })
-  async getById(@Param('id') id: string): Promise<BackupDataDto> {
+  @ApiOkResponse({ type: BackupDataEntity })
+  async getById(@Param('id') id: string): Promise<BackupDataEntity> {
     const entity = await this.backupDataService.findOneById(id);
     if (!entity) {
       throw new NotFoundException();
@@ -48,7 +48,7 @@ export class BackupDataController {
     @Query() paginationOptionsDto: PaginationOptionsDto,
     @Query() backupDataFilterDto: BackupDataFilterDto,
     @Query() backupDataOrderOptionsDto: BackupDataOrderOptionsDto
-  ): Promise<PaginationDto<BackupDataDto>> {
+  ): Promise<PaginationDto<BackupDataEntity>> {
     return this.backupDataService.findAll(
       paginationOptionsDto,
       backupDataOrderOptionsDto,
@@ -59,12 +59,12 @@ export class BackupDataController {
   @Post()
   @ApiOperation({ summary: 'Creates a new backupData Object.' })
   @ApiCreatedResponse({
-    type: BackupDataDto,
+    type: BackupDataEntity,
     description: 'The created Backup Data Object.',
   })
   async create(
     @Body() createBackupDataDto: CreateBackupDataDto
-  ): Promise<BackupDataDto> {
+  ): Promise<BackupDataEntity> {
     return this.backupDataService.create(createBackupDataDto);
   }
 
