@@ -138,5 +138,7 @@ class Analyzer:
 
     def simple_rule_based_analysis_storage_capacity(alert_limit):
         data = list(Analyzer.database.get_data_stores())
-        result = Analyzer.simple_rule_based_analyzer.analyze_storage_capacity(data, alert_limit)
+        result = Analyzer.simple_rule_based_analyzer.analyze_storage_capacity(
+            data, alert_limit
+        )
         return result

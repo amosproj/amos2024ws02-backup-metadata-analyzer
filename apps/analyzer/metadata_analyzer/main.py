@@ -317,6 +317,7 @@ def simple_rule_based_analysis_creation_dates():
     except ValueError:
         return "Invalid value for alert limit", 400
 
+
 @app.route("/simpleRuleBasedAnalysisStorageCapacity", methods=["POST"])
 def simple_rule_based_analysis_storage_capacity():
     """Runs a simple rule based analysis on data stores searching for ones with
@@ -338,9 +339,12 @@ def simple_rule_based_analysis_storage_capacity():
 
     try:
         int(alert_limit)
-        return jsonify(Analyzer.simple_rule_based_analysis_storage_capacity(int(alert_limit)))
+        return jsonify(
+            Analyzer.simple_rule_based_analysis_storage_capacity(int(alert_limit))
+        )
     except ValueError:
         return "Invalid value for alert limit", 400
+
 
 def main():
     database = Database()

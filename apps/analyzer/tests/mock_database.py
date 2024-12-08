@@ -1,5 +1,5 @@
 class MockDatabase:
-    def __init__(self, results, tasks = [], data_stores = []):
+    def __init__(self, results, tasks=[], data_stores=[]):
         self.results = results
         self.tasks = tasks
         self.data_stores = data_stores

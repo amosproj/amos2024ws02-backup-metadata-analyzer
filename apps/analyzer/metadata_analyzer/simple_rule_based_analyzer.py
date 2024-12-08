@@ -292,7 +292,11 @@ class SimpleRuleBasedAnalyzer:
         alerts = []
         for data_store in data:
             # Skip data stores with missing data
-            if (data_store.capacity is None or data_store.filled is None or data_store.high_water_mark is None):
+            if (
+                data_store.capacity is None
+                or data_store.filled is None
+                or data_store.high_water_mark is None
+            ):
                 continue
             if data_store.filled > data_store.high_water_mark:
                 alerts.append(StorageFillAlert(data_store))
