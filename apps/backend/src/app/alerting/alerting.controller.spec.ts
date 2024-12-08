@@ -108,6 +108,7 @@ describe('AlertingController (e2e)', () => {
       .overrideProvider(getRepositoryToken(AlertTypeEntity))
       .useValue(mockAlertTypeRepository)
       .overrideProvider(getRepositoryToken(TaskEntity))
+      .useValue({})
       .overrideProvider(getRepositoryToken(MailReceiverEntity))
       .useValue({})
       .compile();
