@@ -17,10 +17,16 @@ import { AlertTypeEntity } from './entity/alertType.entity';
 import { Alert } from './entity/alerts/alert';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
+import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
+import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 import { BackupType } from '../backupData/dto/backupType';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
-import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
+import {
+  CREATION_DATE_ALERT,
+  SIZE_ALERT,
+  STORAGE_FILL_ALERT,
+} from '../utils/constants';
 
 @Injectable()
 export class AlertingService {
@@ -34,12 +40,15 @@ export class AlertingService {
     private sizeAlertRepository: Repository<SizeAlertEntity>,
     @InjectRepository(CreationDateAlertEntity)
     private creationDateRepository: Repository<CreationDateAlertEntity>,
+    @InjectRepository(CreationDateAlertEntity)
+    private storageFillRepository: Repository<StorageFillAlertEntity>,
     //Services
     private mailService: MailService,
     private backupDataService: BackupDataService
   ) {
     this.alertRepositories.push(this.sizeAlertRepository);
     this.alertRepositories.push(this.creationDateRepository);
+    this.alertRepositories.push(this.storageFillRepository);
   }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
@@ -183,6 +192,48 @@ export class AlertingService {
     alert.alertType = alertType;
 
     await this.creationDateRepository.save(alert);
+
+    if (alert.alertType.user_active && alert.alertType.master_active) {
+      await this.triggerAlertMail(alert);
+    }
+  }
+
+  async createStorageFillAlert(
+    createStorageFillAlertDto: CreateStorageFillAlertDto
+  ) {
+    // Check if alert already exists
+    const existingAlertEntity = await this.storageFillRepository.findOneBy({
+      backup: { id: createStorageFillAlertDto.backupId },
+    });
+
+    if (existingAlertEntity) {
+      console.log('Alert already exists -> ignoring it');
+      return;
+    }
+
+    const alert = new StorageFillAlertEntity();
+    alert.storageFill = createStorageFillAlertDto.storageFill;
+    alert.referenceStorageFill = createStorageFillAlertDto.referenceStorageFill;
+
+    const backup = await this.backupDataService.findOneById(
+      createStorageFillAlertDto.backupId
+    );
+    if (!backup) {
+      throw new NotFoundException(
+        `Backup with id ${createStorageFillAlertDto.backupId} not found`
+      );
+    }
+    alert.backup = backup;
+
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: STORAGE_FILL_ALERT,
+    });
+    if (!alertType) {
+      throw new NotFoundException(`Alert type ${STORAGE_FILL_ALERT} not found`);
+    }
+    alert.alertType = alertType;
+
+    await this.storageFillRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
       await this.triggerAlertMail(alert);
