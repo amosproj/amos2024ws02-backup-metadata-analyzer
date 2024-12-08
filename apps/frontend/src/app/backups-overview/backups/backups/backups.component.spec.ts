@@ -9,6 +9,8 @@ import { CustomFilter } from './backupfilter';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { APIResponse } from '../../../shared/types/api-response';
 import { Backup } from '../../../shared/types/backup';
+import { BackupTask } from '../../../shared/types/backup.task';
+import { get } from 'http';
 
 describe('BackupsComponent', () => {
   let component: BackupsComponent;
@@ -35,6 +37,7 @@ describe('BackupsComponent', () => {
   beforeEach(() => {
     mockBackupService = {
       getAllBackups: vi.fn().mockReturnValue(of(mockBackups)),
+      getAllBackupTasks: vi.fn().mockReturnValue(of([])),
     };
 
     mockChartService = {
@@ -233,6 +236,103 @@ describe('BackupsComponent', () => {
         'backupTimelineChart',
         'week'
       );
+    });
+  });
+
+  describe('Search and Task Selection', () => {
+    it('should handle task search input', () => {
+      const searchTerm = 'backup-task';
+      const searchSpy = vi.spyOn(component['backupTaskSearchTerm$'], 'next');
+
+      component.onSearchInput(searchTerm);
+
+      expect(searchSpy).toHaveBeenCalledWith(searchTerm);
+    });
+
+    it('should update selected backup tasks', () => {
+      const mockTasks = [
+        { id: '1', displayName: 'Task 1' },
+        { id: '2', displayName: 'Task 2' },
+      ] as BackupTask[];
+      const taskSubjectSpy = vi.spyOn(component['backupTaskSubject$'], 'next');
+
+      component.setBackupTask(mockTasks);
+
+      expect(component['selectedTask']).toEqual(mockTasks);
+      expect(taskSubjectSpy).toHaveBeenCalledWith(mockTasks);
+    });
+  });
+
+  describe('Filter Panel', () => {
+    it('should toggle filter panel state', () => {
+      expect(component['filterPanel']).toBe(false);
+
+      component['changeFilterPanelState']();
+      expect(component['filterPanel']).toBe(true);
+
+      component['changeFilterPanelState']();
+      expect(component['filterPanel']).toBe(false);
+    });
+  });
+
+  describe('Chart Data Updates', () => {
+    it('should update charts when new data is received', (done) => {
+      const mockResponse = {
+        data: [
+          { id: '1', sizeMB: 100, creationDate: new Date() },
+          { id: '2', sizeMB: 200, creationDate: new Date() },
+        ],
+        paginationData: { total: 2 },
+      };
+
+      mockBackupService.getAllBackups.mockReturnValue(of(mockResponse));
+
+      component.chartBackups$.subscribe(() => {
+        expect(mockChartService.prepareColumnData).toHaveBeenCalled();
+        expect(mockChartService.preparePieData).toHaveBeenCalled();
+        expect(mockChartService.updateChart).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
+
+  describe('Task Filtering', () => {
+    it('should filter tasks based on search term', (done) => {
+      const mockTasks = [
+        { id: '1', displayName: 'Daily Backup' },
+        { id: '2', displayName: 'Weekly Backup' },
+      ] as BackupTask[];
+
+      mockBackupService.getAllBackupTasks.mockReturnValue(of(mockTasks));
+
+      component['selectedbackupTasks$'].subscribe((filteredTasks) => {
+        expect(filteredTasks).toEqual([]);
+      });
+    });
+    it('should handle empty search term', (done) => {
+      const mockTasks = [
+        { id: '1', displayName: 'Daily Backup' },
+      ] as BackupTask[];
+
+      mockBackupService.getAllBackupTasks.mockReturnValue(of(mockTasks));
+      component.onSearchInput('');
+
+      (component as any).selectedbackupTasks$.subscribe(
+        (filteredTasks: BackupTask[]) => {
+          expect(filteredTasks).toEqual([]);
+        }
+      );
+    });
+  });
+
+  describe('Loading States', () => {
+    it('should manage loading state during refresh', () => {
+      const mockState: ClrDatagridStateInterface<any> = {
+        page: { size: 10, current: 1 },
+      };
+
+      component.refresh(mockState);
+
+      expect(component.loading).toBe(false);
     });
   });
 });
