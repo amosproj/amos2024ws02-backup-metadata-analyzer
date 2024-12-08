@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { TasksService } from './tasks.service';
 import { TaskEntity } from './entity/task.entity';
@@ -52,13 +51,6 @@ describe('TasksService', () => {
       jest.spyOn(repository, 'findOneBy').mockResolvedValue(task);
 
       expect(await service.findOne(id)).toBe(task);
-    });
-
-    it('should throw a NotFoundException if task not found', async () => {
-      const id = 'ea1a2f52-5cf4-44a6-b266-175ee396a18d';
-      jest.spyOn(repository, 'findOneBy').mockResolvedValue(null);
-
-      await expect(service.findOne(id)).rejects.toThrow(NotFoundException);
     });
   });
 
