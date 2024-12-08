@@ -22,7 +22,7 @@ import {
   angleIcon,
   tagIcon,
   dataClusterIcon,
-  filterIcon
+  filterIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';

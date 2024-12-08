@@ -2,11 +2,11 @@ import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest,
+  debounceTime,
   distinctUntilChanged,
-  filter,
   map,
   Observable,
-  of,
+  shareReplay,
   startWith,
   Subject,
   switchMap,
@@ -21,7 +21,6 @@ import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
-import e from 'cors';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -40,49 +39,44 @@ interface TimeRangeConfig {
 })
 export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
-  private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
-    fromDate: new Date(),
-    toDate: new Date(),
-    range: 'month',
-  });
 
-  backupTasks$: Observable<BackupTask[]>;
-  private readonly backupTaskSubject$ = new BehaviorSubject<
-    BackupTask | undefined
-  >(undefined);
-
-  timeRanges: ('week' | 'month' | 'year')[] = ['week', 'month', 'year'];
-  readonly timeRange$ = this.timeRangeSubject$.pipe(
-    map((config) => config.range)
-  );
-
-  private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
-    INITIAL_FILTER
-  );
-
+  protected timeRanges: ('week' | 'month' | 'year')[] = [
+    'week',
+    'month',
+    'year',
+  ];
   tasksLoading: boolean = false;
   loading: boolean = false;
   pageSize = 10;
   protected backupSizeFilter: CustomFilter;
   protected backupDateFilter: CustomFilter;
   protected backupIdFilter: CustomFilter;
-  protected selectedTask: BackupTask | undefined;
+  protected selectedTask: BackupTask[] = [];
   protected filterPanel: boolean = false;
   taskFilter: CustomFilter;
 
-  tasks: BackupTask[] = [
-    { id: '1', name: 'Task 1' },
-    { id: '2', name: 'Task 2' },
-    { id: '3', name: 'Task 3' },
-    { id: '4', name: 'Task 4' },
-    { id: '5', name: 'Task 5' },
-    { id: '6', name: 'Task 6' },
-  ];
+  //Subjects
+  private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
+    fromDate: new Date(),
+    toDate: new Date(),
+    range: 'month',
+  });
+  readonly timeRange$ = this.timeRangeSubject$.pipe(
+    map((config) => config.range)
+  );
+  protected backupTaskSearchTerm$: Subject<string> = new Subject<string>();
 
+  private readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
+  private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
+    INITIAL_FILTER
+  );
+  private readonly destroy$ = new Subject<void>();
+
+  //Observables
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
-
-  private readonly destroy$ = new Subject<void>();
+  protected allBackupTasks$: Observable<BackupTask[]>;
+  protected selectedbackupTasks$: Observable<BackupTask[]>;
 
   constructor(
     private readonly backupService: BackupService,
@@ -93,18 +87,40 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupIdFilter = new CustomFilter('id');
     this.taskFilter = new CustomFilter('taskName');
 
+    /**
+     * Load all backups and filter them based on the filter options for table
+     */
     this.backups$ = this.filterOptions$.pipe(
       switchMap((params) => this.backupService.getAllBackups(params)),
       takeUntil(this.destroy$)
     );
 
-    this.backupTasks$ = this.backupTaskSubject$
-      .pipe(takeUntil(this.destroy$))
-      .pipe(
-        tap(() => (this.tasksLoading = true)),
-        switchMap((task) => of(this.tasks)),
-        tap(() => (this.tasksLoading = false))
-      );
+    /**
+     * Load all backups and filter them based on the filter options for charts
+     */
+    this.allBackupTasks$ = this.backupService
+      .getAllBackupTasks()
+      .pipe(takeUntil(this.destroy$), shareReplay(1));
+
+    this.selectedbackupTasks$ = combineLatest([
+      this.allBackupTasks$,
+      this.backupTaskSearchTerm$.pipe(
+        startWith(''),
+        debounceTime(300),
+        distinctUntilChanged()
+      ),
+    ]).pipe(
+      map(([tasks, searchTerm]) => {
+        if (!searchTerm) {
+          return [];
+        }
+
+        const term = searchTerm.toLowerCase();
+        return tasks.filter((task) =>
+          task.displayName.toLowerCase().includes(term)
+        );
+      })
+    );
 
     this.chartBackups$ = combineLatest([
       this.timeRangeSubject$.pipe(
@@ -116,45 +132,42 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
         )
       ),
       this.backupTaskSubject$.pipe(
-        // Add debug logging
-        tap((task) => console.log('Task subject emitted:', task)),
-        distinctUntilChanged((prev, curr) => prev?.id === curr?.id)
+        distinctUntilChanged((prev, curr) => {
+          if (!prev && !curr) return true;
+          if (!prev || !curr) return false;
+          if (prev.length !== curr.length) {
+            return false;
+          }
+          const prevIds = prev.map((p) => p.id).sort();
+          const currIds = curr.map((c) => c.id).sort();
+
+          return prevIds === currIds;
+        })
       ),
     ]).pipe(
-      // Add debug logging for combined emissions
-      tap(([timeRange, task]) => {
-        console.log('Combined emission:', {
-          timeRange: timeRange.range,
-          taskId: task?.id,
-        });
-      }),
-      map(([{ fromDate, toDate }, task]) => ({
-        fromDate: fromDate.toISOString(),
-        toDate: toDate.toISOString(),
-        taskId: task?.id,
+      map(([timeRange, tasks]) => ({
+        params: {
+          fromDate: timeRange.fromDate.toISOString(),
+          toDate: timeRange.toDate.toISOString(),
+        },
+        selectedTasks: tasks ? tasks.map((task) => task.id) : [],
       })),
-      tap((params) => console.log('Calling API with params:', params)),
-      switchMap((params) => this.backupService.getAllBackups(params)),
+      switchMap(({ params, selectedTasks }) =>
+        this.backupService.getAllBackups(params, selectedTasks)
+      ),
       tap({
         next: (response) => {
           if (response.data && response.data.length > 0) {
             const currentRange = this.timeRangeSubject$.getValue().range;
-
             // Update timeline chart
             const columnData = this.chartService.prepareColumnData(
               response.data,
               currentRange
             );
             this.chartService.updateChart('backupTimelineChart', columnData);
-
             // Update size distribution chart
             const pieData = this.chartService.preparePieData(response.data);
             this.chartService.updateChart('backupSizeChart', pieData);
-
-            console.log('Charts updated successfully:', {
-              timeRange: currentRange,
-              dataLength: response.data.length,
-            });
           } else {
             console.warn('No data received for charts');
           }
@@ -185,6 +198,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.setTimeRange('month');
   }
 
+  /**
+   * Initialize the charts
+   */
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.chartService.createChart(
@@ -223,6 +239,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.chartService.dispose();
   }
 
+  /**
+   * Set filter options for the backup datagrid
+   * @returns Filter options
+   */
   private buildFilterParams(): BackupFilterParams {
     const params: BackupFilterParams = { ...INITIAL_FILTER };
 
@@ -247,6 +267,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     return params;
   }
 
+  /**
+   * Set time range for the charts
+   * @param range time range for the charts
+   */
   setTimeRange(range: 'week' | 'month' | 'year'): void {
     const toDate = new Date();
     const fromDate = new Date();
@@ -270,19 +294,25 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     });
     this.chartService.updateTimeRange('backupTimelineChart', range);
   }
-
-  setBackupTask(task: BackupTask | undefined): void {
-    this.selectedTask = task;
-    if (task) {
-      this.backupTaskSubject$.next(task);
-    } else {
-      this.backupTaskSubject$.next(undefined);
-    }
-
-    console.log('update subject', task);
-    //his.chartService.updateChart('backupTimelineChart', this.chartBackups$);
+  /**
+   * Set selected Backup task to filter the charts
+   * @param tasks selected Backup task
+   */
+  setBackupTask(tasks: BackupTask[]): void {
+    this.selectedTask = tasks;
+    this.backupTaskSubject$.next(tasks);
   }
-
+  /**
+   * Add search Term to backupTaskSearchTerm$ subject for the Backup task search
+   * @param term Search term for the Backup task
+   */
+  onSearchInput(term: string): void {
+    this.backupTaskSearchTerm$.next(term);
+  }
+  /**
+   * Check the filter states and add new filter values to the filterOptions$ subject
+   * @param state filter values 
+   */
   refresh(state: ClrDatagridStateInterface<any>): void {
     this.loading = true;
 
@@ -303,7 +333,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.filterOptions$.next(params);
     this.loading = false;
   }
-
+  /**
+   * Change the state of the filter panel to open or close it
+   */
   protected changeFilterPanelState(): void {
     if (this.filterPanel) {
       this.filterPanel = false;

@@ -100,8 +100,7 @@
               />
             </clr-input-container>
           </clr-dg-filter>
-        </ng-container
-        >
+        </ng-container>
       </clr-dg-column>
       <clr-dg-column [clrDgField]="'sizeMB'">
         <ng-container *clrDgHideableColumn>
@@ -147,8 +146,7 @@
               />
             </clr-input-container>
           </clr-dg-filter>
-        </ng-container
-        >
+        </ng-container>
       </clr-dg-column>
 
       <clr-dg-column
@@ -244,39 +242,42 @@
       </div>
     </div>
 
-    <div class="backupTaskFilter">
+    <div>
       <h4>Backup Task:</h4>
-      <clr-combobox-container
-        *ngIf="backupTasks$ | async as tasks"
-        class="backupTaskFilter"
-      >
+      <clr-combobox-container *ngIf="allBackupTasks$" class="backupTaskFilter">
         <clr-combobox
           name="task"
           [(ngModel)]="selectedTask"
           [clrLoading]="tasksLoading"
+          clrMulti="true"
           (ngModelChange)="setBackupTask($event)"
+          (clrInputChange)="onSearchInput($event)"
           placeholder="Select backup task"
           [clrPosition]="'bottom-left'"
         >
           <ng-container *clrOptionSelected="let task">
-            <cds-icon
-              shape="tag"
-              aria-label="selected backup task tag"
-            ></cds-icon>
-            {{ task ? task.name : 'All Tasks' }}
+            <span class="selected-item">
+              <cds-icon
+                shape="tag"
+                aria-label="selected backup task tag"
+              ></cds-icon>
+              {{ task ? task.displayName : 'All Tasks' }}
+            </span>
           </ng-container>
 
           <clr-options>
-            <clr-option
-              *clrOptionItems="let task of tasks; field: 'name'"
-              [clrValue]="task"
-            >
-              <cds-icon
-                shape="data-cluster"
-                aria-label="backup task"
-              ></cds-icon>
-              {{ task.name }}
-            </clr-option>
+            <ng-container *ngIf="selectedbackupTasks$ | async as tasks">
+              <clr-option
+                *clrOptionItems="let task of tasks; field: 'displayName'"
+                [clrValue]="task"
+              >
+                <cds-icon
+                  shape="data-cluster"
+                  aria-label="backup task"
+                ></cds-icon>
+                {{ task.displayName }}
+              </clr-option>
+            </ng-container>
           </clr-options>
         </clr-combobox>
         <clr-control-error>There was an error</clr-control-error>
