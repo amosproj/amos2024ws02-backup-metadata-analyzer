@@ -21,6 +21,8 @@ import {
 } from './dto/backupDataOrderOptions.dto';
 import { BackupType } from './dto/backupType';
 import { SortOrder } from '../utils/pagination/SortOrder';
+import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
+import { TaskEntity } from '../tasks/entity/task.entity';
 
 @Injectable()
 export class BackupDataService extends PaginationService {
@@ -47,10 +49,13 @@ export class BackupDataService extends PaginationService {
     backupDataOrderOptionsDto: BackupDataOrderOptionsDto,
     backupDataFilterDto: BackupDataFilterDto
   ): Promise<PaginationDto<BackupDataEntity>> {
+    backupDataFilterDto: BackupDataFilterDto,
+    backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
+  ): Promise<PaginationDto<BackupDataDto>> {
     return await this.paginate<BackupDataEntity>(
       this.backupDataRepository,
       this.createOrderClause(backupDataOrderOptionsDto),
-      this.createWhereClause(backupDataFilterDto),
+      this.createWhereClause(backupDataFilterDto, backupDataFilterByTaskIdsDto),
       paginationOptionsDto
     );
   }
@@ -83,7 +88,10 @@ export class BackupDataService extends PaginationService {
    * Create where clause.
    * @param backupDataFilterDto
    */
-  createWhereClause(backupDataFilterDto: BackupDataFilterDto) {
+  createWhereClause(
+    backupDataFilterDto: BackupDataFilterDto,
+    backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
+  ) {
     const where: FindOptionsWhere<BackupDataEntity> = {};
 
     //ID search
@@ -146,6 +154,16 @@ export class BackupDataService extends PaginationService {
     //Task id search
     if (backupDataFilterDto.taskId) {
       where.taskId = { id: backupDataFilterDto.taskId };
+    }
+
+    //Multiple Task ids from body search
+    if (backupDataFilterByTaskIdsDto?.taskIds) {
+      const taskIdFilter: FindOptionsWhere<TaskEntity>[] = [];
+      const taskIds = backupDataFilterByTaskIdsDto.taskIds;
+      for (const taskId of taskIds) {
+        taskIdFilter.push({ id: taskId });
+      }
+      where.taskId = taskIdFilter;
     }
 
     //Task name search

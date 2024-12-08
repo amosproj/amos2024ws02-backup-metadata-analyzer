@@ -142,6 +142,16 @@ describe('BackupDataService', () => {
         type: BackupType.FULL,
       });
     });
+
+    it('should create a where clause for multiple taskIds', () => {
+      const filterDto: BackupDataFilterDto = {};
+      const filterByTaskIdsDto = { taskIds: ['task-1', 'task-2'] };
+      const where = service.createWhereClause(filterDto, filterByTaskIdsDto);
+      expect(where).toEqual({
+        taskId: [{ id: 'task-1' }, { id: 'task-2' }],
+        type: BackupType.FULL,
+      });
+    });
   });
 
   describe('createOrderClause', () => {

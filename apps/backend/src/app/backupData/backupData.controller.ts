@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import {
+  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -21,6 +22,7 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
 import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
 import { BackupDataEntity } from './entity/backupData.entity';
+import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
 
 @ApiTags('Backup Data')
 @Controller('backupData')
@@ -41,18 +43,26 @@ export class BackupDataController {
     return entity;
   }
 
-  @Get()
+  @Post('filter')
   @ApiOperation({ summary: 'Returns all backupData Objects.' })
   @ApiOkResponse()
+  @ApiBody({
+    type: BackupDataFilterByTaskIdsDto,
+    required: false,
+  })
   async findAll(
     @Query() paginationOptionsDto: PaginationOptionsDto,
     @Query() backupDataFilterDto: BackupDataFilterDto,
     @Query() backupDataOrderOptionsDto: BackupDataOrderOptionsDto
   ): Promise<PaginationDto<BackupDataEntity>> {
+    @Query() backupDataOrderOptionsDto: BackupDataOrderOptionsDto,
+    @Body() backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
+  ): Promise<PaginationDto<BackupDataDto>> {
     return this.backupDataService.findAll(
       paginationOptionsDto,
       backupDataOrderOptionsDto,
-      backupDataFilterDto
+      backupDataFilterDto,
+      backupDataFilterByTaskIdsDto
     );
   }
 
