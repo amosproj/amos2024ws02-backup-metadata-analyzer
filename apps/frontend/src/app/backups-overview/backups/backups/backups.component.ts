@@ -75,7 +75,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   //Observables
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
-  protected allBackupTasks$: Observable<BackupTask[]>;
+  allBackupTasks$: Observable<BackupTask[]>;
   protected selectedbackupTasks$: Observable<BackupTask[]>;
 
   constructor(
