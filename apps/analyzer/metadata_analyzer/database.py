@@ -1,7 +1,7 @@
 import pg8000.dbapi
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from metadata_analyzer.models import BackupData, Result
+from metadata_analyzer.models import BackupData, Result, Tasks
 import os
 
 
@@ -37,6 +37,13 @@ class Database:
     def get_results(self):
         session = Session(self.engine)
         stmt = select(Result)
+
+        result = session.scalars(stmt)
+        return result
+
+    def get_tasks(self):
+        session = Session(self.engine)
+        stmt = select(Tasks)
 
         result = session.scalars(stmt)
         return result

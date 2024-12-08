@@ -15,7 +15,9 @@ import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
+import { TaskEntity } from '../tasks/entity/task.entity';
 import { MailReceiverEntity } from '../utils/mail/entity/MailReceiver.entity';
+
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -105,6 +107,8 @@ describe('AlertingController (e2e)', () => {
       .useValue(mockCreationDateAlertRepository)
       .overrideProvider(getRepositoryToken(AlertTypeEntity))
       .useValue(mockAlertTypeRepository)
+      .overrideProvider(getRepositoryToken(TaskEntity))
+      .useValue({})
       .overrideProvider(getRepositoryToken(MailReceiverEntity))
       .useValue({})
       .compile();

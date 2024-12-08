@@ -67,6 +67,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         MailReceiver1733580333590,
       ],
       logging: true,
+      logger: 'debug'
     };
   }
 }

@@ -45,4 +45,11 @@ export class TasksController {
   async create(@Body() createTaskDto: CreateTaskDto) {
     return this.tasksService.create(createTaskDto);
   }
+
+  @Post('batched')
+  @ApiOperation({ summary: 'Creates multiple tasks batched.' })
+  @ApiCreatedResponse()
+  async createBatched(@Body() createTaskDtos: CreateTaskDto[]) {
+    return this.tasksService.createBatched(createTaskDtos);
+  }
 }
