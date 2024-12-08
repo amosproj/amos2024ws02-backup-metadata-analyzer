@@ -1,110 +1,160 @@
 .header {
-    background-color: white;
-    justify-content: space-around;
+  background-color: white;
+  justify-content: space-around;
 }
 
-
 .filter-inline {
-    display: inline-flex !important;
-    align-items: center;
+  display: inline-flex !important;
+  align-items: center;
 }
 
 .alert-info-section {
-    display: flex;
-    gap: 40px;
-    margin: 20px 0;
-    align-items: center;
+  display: flex;
+  gap: 40px;
+  margin: 20px 0;
+  align-items: center;
 }
 
-.alert-panel, .info {
-    flex: 1;
+.alert-panel,
+.info {
+  flex: 1;
 }
 
 .card.info {
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e0e0e0;
-    padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  padding: 20px;
 }
 
 .card-block {
-    padding: 20px;
+  padding: 20px;
 }
 
 .card-text ul {
-    list-style-type: disc;
-    padding-left: 20px;
+  list-style-type: disc;
+  padding-left: 20px;
 }
 
 .card-text ul li {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .card-text p {
-    margin-top: 20px;
-    font-style: italic;
+  margin-top: 20px;
+  font-style: italic;
 }
 
 .clr-form-control {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .card-header-title {
-    margin: 0;
-    font-weight: 500;
+  margin: 0;
+  font-weight: 500;
 }
 
 .card-header-actions {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 :host ::ng-deep .card-header {
-    border-bottom: none !important;
+  border-bottom: none !important;
 }
 
-
 .btn-group-vertical {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .btn-group-vertical .btn {
-    border: 1px solid #0072a3;
-    color: #0072a3;
-    background: white;
-    text-align: center;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
-    width: 100%;
-    border-radius: 0.15rem;
+  border: 1px solid #0072a3;
+  color: #0072a3;
+  background: white;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  width: 100%;
+  border-radius: 0.15rem;
 }
 
 .btn-group-vertical .btn.btn-primary {
-    background: #0072a3;
-    color: white;
+  background: #0072a3;
+  color: white;
 }
 .clr-side-panel {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 0.15rem;
-    background: white;
-    color: #1b2834;
-    font-size: 0.875rem;
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.15rem;
+  background: white;
+  color: #1b2834;
+  font-size: 0.875rem;
+}
+
+.clr-side-panel , .modal {
+    z-index: 100000;
 }
 
 .backupTaskFilter {
-    padding: 1.5rem;
-    background: white;
-    height: 100%;
-    width: 300px;
+  margin-top: 0.8rem;
+  width: 100%;
+}
+
+.backupTaskFilter ::ng-deep .clr-combobox-wrapper {
+  width: 100%;
+  border: 1px solid #0072a3;
+  border-radius: 0.15rem;
+  background: white;
+  padding: 10px 15px;
+}
+
+.backupTaskFilter ::ng-deep .clr-combobox-input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  color: #0072a3;
+  font-weight: 500;
+  border: none;
+  background: white;
+}
+
+.backupTaskFilter ::ng-deep .clr-combobox-trigger {
+  color: #0072a3;
+  border: none;
+  background: none;
+  padding-right: 0.5rem;
+}
+
+.backupTaskFilter ::ng-deep .clr-combobox-options {
+  border: 1px solid #0072a3;
+  border-radius: 0.15rem;
+  margin-top: 0.25rem;
+}
+
+.backupTaskFilter ::ng-deep .clr-combobox-options .clr-combobox-option {
+  padding: 0.5rem 1rem;
+  color: #0072a3;
+  font-weight: 500;
+}
+
+.backupTaskFilter ::ng-deep .clr-combobox-options .clr-combobox-option:hover {
+  background: #0072a3;
+  color: white;
+}
+
+.backupTaskFilter
+  ::ng-deep
+  .clr-combobox-options
+  .clr-combobox-option[aria-selected='true'] {
+  background: #0072a3;
+  color: white;
 }

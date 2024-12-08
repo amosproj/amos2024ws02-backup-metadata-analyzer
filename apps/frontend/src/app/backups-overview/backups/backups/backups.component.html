@@ -96,7 +96,7 @@
                 clrInput
                 type="string"
                 [(ngModel)]="backupIdFilter.ranges.id"
-                (ngModelChange)="backupSizeFilter.updateRanges({ id: $event })"
+                (ngModelChange)="backupIdFilter.updateRanges({ id: $event })"
               />
             </clr-input-container>
           </clr-dg-filter> </ng-container
@@ -225,7 +225,10 @@
 
     <div class="backupTaskFilter">
       <h4>Backup Task:</h4>
-      <clr-combobox-container *ngIf="backupTasks$ | async as tasks">
+      <clr-combobox-container
+        *ngIf="backupTasks$ | async as tasks"
+        class="backupTaskFilter"
+      >
         <clr-combobox
           name="task"
           [(ngModel)]="selectedTask"
@@ -237,14 +240,16 @@
           <ng-container *clrOptionSelected="let task">
             <cds-icon
               shape="tag"
-              aria-label="selectedt backup task tag"
+              aria-label="selected backup task tag"
             ></cds-icon>
-            {{ task?.name || 'All Tasks' }}
+            {{ task ? task.name : 'All Tasks' }}
           </ng-container>
 
-          <clr-options clrPosition="top-left">
-            <clr-option [clrValue]="undefined">---</clr-option>
-            <clr-option *clrOptionItems="let task of tasks" [clrValue]="task">
+          <clr-options>
+            <clr-option
+              *clrOptionItems="let task of tasks; field: 'name'"
+              [clrValue]="task"
+            >
               <cds-icon
                 shape="data-cluster"
                 aria-label="backup task"
