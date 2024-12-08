@@ -9,4 +9,5 @@ export type BackupFilterParams = {
   toSizeMB?: number | null;
   id?: string | null;
   taskId?: string | null;
+  taskName?: string | null;
 };

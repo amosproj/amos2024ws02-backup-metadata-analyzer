@@ -99,8 +99,10 @@
                 (ngModelChange)="backupIdFilter.updateRanges({ id: $event })"
               />
             </clr-input-container>
-          </clr-dg-filter> </ng-container
-      ></clr-dg-column>
+          </clr-dg-filter>
+        </ng-container
+        >
+      </clr-dg-column>
       <clr-dg-column [clrDgField]="'sizeMB'">
         <ng-container *clrDgHideableColumn>
           Size (MB)
@@ -129,6 +131,24 @@
             </clr-input-container>
           </clr-dg-filter>
         </ng-container>
+      </clr-dg-column>
+
+      <clr-dg-column [clrDgField]="'taskName'">
+        <ng-container *clrDgHideableColumn>
+          Task
+          <clr-dg-filter [clrDgFilter]="taskFilter">
+            <clr-input-container>
+              <label>Task:</label>
+              <input
+                clrInput
+                type="string"
+                [(ngModel)]="taskFilter.ranges.taskName"
+                (ngModelChange)="taskFilter.updateRanges({ taskName: $event })"
+              />
+            </clr-input-container>
+          </clr-dg-filter>
+        </ng-container
+        >
       </clr-dg-column>
 
       <clr-dg-column
@@ -168,6 +188,7 @@
       <clr-dg-row *ngFor="let backup of backups.data" [clrDgItem]="backup">
         <clr-dg-cell>{{ backup.id }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
+        <clr-dg-cell>{{ backup.taskId?.displayName ?? '' }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.creationDate | date }}</clr-dg-cell>
         <clr-dg-action-overflow>
           <button class="action-item">More Details</button>
