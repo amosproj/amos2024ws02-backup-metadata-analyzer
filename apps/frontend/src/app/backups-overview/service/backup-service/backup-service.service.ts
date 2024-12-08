@@ -17,7 +17,8 @@ export class BackupService {
   ) {}
 
   getAllBackups(
-    filterParams: BackupFilterParams
+    filterParams: BackupFilterParams & { taskIds?: string[] },
+    selectedTasks?: string[]
   ): Observable<APIResponse<Backup>> {
     const cleanParams = Object.fromEntries(
       Object.entries(filterParams).filter(
@@ -32,9 +33,12 @@ export class BackupService {
     };
 
     const params = new HttpParams({ fromObject: cleanParams });
+    const body = {
+      taskIds: selectedTasks,
+    };
 
     return this.http
-      .post<APIResponse<Backup>>(`${this.baseUrl}/backupData/filter`, null, {
+      .post<APIResponse<Backup>>(`${this.baseUrl}/backupData/filter`, body, {
         params: params,
       })
       .pipe(shareReplay(1));
