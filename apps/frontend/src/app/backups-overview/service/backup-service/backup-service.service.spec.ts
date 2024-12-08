@@ -11,13 +11,13 @@ import { fail } from 'assert';
 describe('BackupService', () => {
   let service: BackupService;
   let httpClientMock: {
-    get: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
   };
   const baseUrl = 'http://test-url';
 
   beforeEach(() => {
     httpClientMock = {
-      get: vi.fn(),
+      post: vi.fn(),
     };
 
     service = new BackupService(
@@ -46,16 +46,17 @@ describe('BackupService', () => {
         },
       };
 
-      httpClientMock.get.mockReturnValue(of(mockResponse));
+      httpClientMock.post.mockReturnValue(of(mockResponse));
 
       service.getAllBackups(mockFilterParams).subscribe((response) => {
-        expect(httpClientMock.get).toHaveBeenCalledWith(
-          `${baseUrl}/backupData`,
+        expect(httpClientMock.post).toHaveBeenCalledWith(
+          `${baseUrl}/backupData/filter`,
+          null,
           {
             params: expect.any(HttpParams),
           }
         );
-        const passedParams = httpClientMock.get.mock.calls[0][1].params;
+        const passedParams = httpClientMock.post.mock.calls[0][2].params;
         expect(passedParams.keys()).toEqual(['offset', 'limit']);
       });
     });
@@ -79,17 +80,18 @@ describe('BackupService', () => {
         },
       };
 
-      httpClientMock.get.mockReturnValue(of(mockResponse));
+      httpClientMock.post.mockReturnValue(of(mockResponse));
 
       service.getAllBackups(mockFilterParams).subscribe((response) => {
-        expect(httpClientMock.get).toHaveBeenCalledWith(
-          `${baseUrl}/backupData`,
+        expect(httpClientMock.post).toHaveBeenCalledWith(
+          `${baseUrl}/backupData/filter`,
+          null,
           {
             params: expect.any(HttpParams),
           }
         );
 
-        const passedParams = httpClientMock.get.mock.calls[0][1].params;
+        const passedParams = httpClientMock.post.mock.calls[0][2].params;
         expect(passedParams.get('limit')).toBe('10');
         expect(passedParams.get('offset')).toBe('0');
         expect(passedParams.get('orderBy')).toBe('createdAt');
@@ -114,14 +116,14 @@ describe('BackupService', () => {
         },
       };
 
-      httpClientMock.get.mockReturnValue(of(mockResponse));
+      httpClientMock.post.mockReturnValue(of(mockResponse));
 
       const observable = service.getAllBackups(mockFilterParams);
 
       observable.subscribe();
       observable.subscribe();
 
-      expect(httpClientMock.get).toHaveBeenCalledTimes(1);
+      expect(httpClientMock.post).toHaveBeenCalledTimes(1);
     });
 
     it('should handle empty filter params', () => {
@@ -134,17 +136,18 @@ describe('BackupService', () => {
         },
       };
 
-      httpClientMock.get.mockReturnValue(of(mockResponse));
+      httpClientMock.post.mockReturnValue(of(mockResponse));
 
       service.getAllBackups(mockFilterParams).subscribe((response) => {
-        expect(httpClientMock.get).toHaveBeenCalledWith(
-          `${baseUrl}/backupData`,
+        expect(httpClientMock.post).toHaveBeenCalledWith(
+          `${baseUrl}/backupData/filter`,
+          null,
           {
             params: expect.any(HttpParams),
           }
         );
 
-        const passedParams = httpClientMock.get.mock.calls[0][1].params;
+        const passedParams = httpClientMock.post.mock.calls[0][2].params;
         expect(passedParams.keys().length).toBe(0);
       });
     });
@@ -157,7 +160,7 @@ describe('BackupService', () => {
 
       const mockError = new Error('Network error');
 
-      httpClientMock.get.mockReturnValue(throwError(() => mockError));
+      httpClientMock.post.mockReturnValue(throwError(() => mockError));
       service.getAllBackups(mockFilterParams).subscribe({
         next: () => fail('expected an error, not backups'),
         error: (error) => expect(error).toBe(mockError),

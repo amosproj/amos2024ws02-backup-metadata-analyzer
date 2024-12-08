@@ -95,10 +95,10 @@ describe('BackupDataController (e2e)', () => {
     });
   });
 
-  it('/backupData (GET) with pagination should return paginated backup data entries', async () => {
+  it('/backupData/filter (POST) with pagination should return paginated backup data entries', async () => {
     const response = await request(app.getHttpServer())
-      .get('/backupData?offset=0&limit=1')
-      .expect(200);
+      .post('/backupData/filter?offset=0&limit=1')
+      .expect(201);
 
     expect(response.body).toEqual({
       data: [
@@ -122,10 +122,10 @@ describe('BackupDataController (e2e)', () => {
     });
   });
 
-  it('/backupData (GET) with date range should return backup data entries within date range', async () => {
+  it('/backupData/filter (POST) with date range should return backup data entries within date range', async () => {
     const response = await request(app.getHttpServer())
-      .get('/backupData?fromDate=2023-12-01&toDate=2023-12-31')
-      .expect(200);
+      .post('/backupData/filter?fromDate=2023-12-01&toDate=2023-12-31')
+      .expect(201);
 
     expect(response.body).toEqual({
       data: [
@@ -144,10 +144,10 @@ describe('BackupDataController (e2e)', () => {
       where: { creationDate: expect.any(Object), type: BackupType.FULL },
     });
   });
-  it('/backupData (GET) with taskId should return backup data entries with the specified taskId', async () => {
+  it('/backupData/filter (POST) with taskId should return backup data entries with the specified taskId', async () => {
     await request(app.getHttpServer())
-      .get('/backupData?taskId=task-123')
-      .expect(200);
+      .post('/backupData/filter?taskId=task-123')
+      .expect(201);
 
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
@@ -155,15 +155,42 @@ describe('BackupDataController (e2e)', () => {
     });
   });
 
-  it('/backupData (GET) with taskName should return backup data entries with the specified taskName', async () => {
+  it('/backupData/filter (POST) with taskName should return backup data entries with the specified taskName', async () => {
     await request(app.getHttpServer())
-      .get('/backupData?taskName=backup-task')
-      .expect(200);
+      .post('/backupData/filter?taskName=backup-task')
+      .expect(201);
 
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
       where: {
         taskId: { displayName: ILike('%backup-task%') },
+        type: BackupType.FULL,
+      },
+    });
+  });
+
+  it('/backupData/filter (POST) with multiple taskIds should return backup data entries with the specified taskIds', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/backupData/filter')
+      .send({ taskIds: ['task-1', 'task-2'] })
+      .expect(201);
+
+    expect(response.body).toEqual({
+      data: [
+        {
+          ...mockBackupDataEntity,
+          creationDate: mockBackupDataEntity.creationDate.toISOString(),
+        },
+      ],
+      paginationData: {
+        total: 1,
+      },
+    });
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: {
+        taskId: [{ id: 'task-1' }, { id: 'task-2' }],
         type: BackupType.FULL,
       },
     });
