@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
+  FindOptionsOrder,
   FindOptionsWhere,
   ILike,
   LessThanOrEqual,
@@ -17,10 +18,13 @@ import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
 import { PaginationService } from '../utils/pagination/paginationService';
-import { BackupDataDto } from './dto/backupData.dto';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
-import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
+import {
+  BackupDataOrderByOptions,
+  BackupDataOrderOptionsDto,
+} from './dto/backupDataOrderOptions.dto';
 import { BackupType } from './dto/backupType';
+import { SortOrder } from '../utils/pagination/SortOrder';
 import { TasksService } from '../tasks/tasks.service';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
 import { TaskEntity } from '../tasks/entity/task.entity';
@@ -51,7 +55,7 @@ export class BackupDataService extends PaginationService {
     backupDataOrderOptionsDto: BackupDataOrderOptionsDto,
     backupDataFilterDto: BackupDataFilterDto,
     backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
-  ): Promise<PaginationDto<BackupDataDto>> {
+  ): Promise<PaginationDto<BackupDataEntity>> {
     return await this.paginate<BackupDataEntity>(
       this.backupDataRepository,
       this.createOrderClause(backupDataOrderOptionsDto),
@@ -59,7 +63,6 @@ export class BackupDataService extends PaginationService {
       paginationOptionsDto
     );
   }
-
   /**
    * Create a new backup data entity.
    * @param createBackupDataDto
@@ -197,10 +200,21 @@ export class BackupDataService extends PaginationService {
    * Create order clause.
    * @param backupDataOrderOptionsDto
    */
-  createOrderClause(backupDataOrderOptionsDto: BackupDataOrderOptionsDto) {
+  createOrderClause(
+    backupDataOrderOptionsDto: BackupDataOrderOptionsDto
+  ): FindOptionsOrder<BackupDataEntity> {
+    if (
+      backupDataOrderOptionsDto.orderBy === BackupDataOrderByOptions.TASK_NAME
+    ) {
+      return {
+        taskId: {
+          displayName: backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
+        },
+      };
+    }
     return {
       [backupDataOrderOptionsDto.orderBy ?? 'creationDate']:
-        backupDataOrderOptionsDto.sortOrder ?? 'DESC',
+        backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
     };
   }
 }
