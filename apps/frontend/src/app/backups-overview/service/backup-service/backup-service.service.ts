@@ -33,7 +33,7 @@ export class BackupService {
     const params = new HttpParams({ fromObject: cleanParams });
 
     return this.http
-      .get<APIResponse<Backup>>(`${this.baseUrl}/backupData`, {
+      .post<APIResponse<Backup>>(`${this.baseUrl}/backupData/filter`, null, {
         params: params,
       })
       .pipe(shareReplay(1));
