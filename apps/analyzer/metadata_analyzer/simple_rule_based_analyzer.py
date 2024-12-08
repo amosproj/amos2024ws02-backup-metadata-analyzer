@@ -285,3 +285,9 @@ class SimpleRuleBasedAnalyzer:
             times.append(result.start_time)
 
         return alerts
+
+    # Search for data stores that are almost full
+    def analyze_storage_capacity(self, data, alert_limit):
+        print(data)
+
+

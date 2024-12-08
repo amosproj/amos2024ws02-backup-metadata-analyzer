@@ -59,3 +59,16 @@ class Tasks(Base):
 
     def __str__(self):
         return repr(self)
+
+
+class DataStore(Base):
+    __tablename__ = "data_stores"
+
+    # For now I only added the most relevant columns
+    name: Mapped[str] = mapped_column(primary_key=True)
+
+    def __repr__(self):
+        return f"""DataStore(name={self.name})"""
+
+    def __str__(self):
+        return repr(self)
