@@ -47,11 +47,9 @@ export class BackupDataService extends PaginationService {
   async findAll(
     paginationOptionsDto: PaginationOptionsDto,
     backupDataOrderOptionsDto: BackupDataOrderOptionsDto,
-    backupDataFilterDto: BackupDataFilterDto
-  ): Promise<PaginationDto<BackupDataEntity>> {
     backupDataFilterDto: BackupDataFilterDto,
     backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
-  ): Promise<PaginationDto<BackupDataDto>> {
+  ): Promise<PaginationDto<BackupDataEntity>> {
     return await this.paginate<BackupDataEntity>(
       this.backupDataRepository,
       this.createOrderClause(backupDataOrderOptionsDto),
@@ -59,7 +57,6 @@ export class BackupDataService extends PaginationService {
       paginationOptionsDto
     );
   }
-
   /**
    * Create a new backup data entity.
    * @param createBackupDataDto

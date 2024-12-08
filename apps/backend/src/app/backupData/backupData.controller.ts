@@ -53,11 +53,9 @@ export class BackupDataController {
   async findAll(
     @Query() paginationOptionsDto: PaginationOptionsDto,
     @Query() backupDataFilterDto: BackupDataFilterDto,
-    @Query() backupDataOrderOptionsDto: BackupDataOrderOptionsDto
-  ): Promise<PaginationDto<BackupDataEntity>> {
     @Query() backupDataOrderOptionsDto: BackupDataOrderOptionsDto,
     @Body() backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
-  ): Promise<PaginationDto<BackupDataDto>> {
+  ): Promise<PaginationDto<BackupDataEntity>> {
     return this.backupDataService.findAll(
       paginationOptionsDto,
       backupDataOrderOptionsDto,
