@@ -1,16 +1,16 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { BehaviorSubject, forkJoin, Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../../../services/notification.service';
-import { AlertType } from 'apps/frontend/src/app/shared/types/alertType';
-import { AlertServiceService } from 'apps/frontend/src/app/alert/service/alert-service.service';
+import { AlertType } from '../../../../shared/types/alertType';
+import { AlertServiceService } from '../../../../alert/service/alert-service.service';
 
 @Component({
   selector: 'app-notification-settings',
   templateUrl: './notification-settings.component.html',
   styleUrl: './notification-settings.component.css',
 })
-export class NotificationSettingsComponent implements OnDestroy {
+export class NotificationSettingsComponent implements OnDestroy, OnInit {
   isLoading = false;
   isSaving = false;
   isOpen = false;
