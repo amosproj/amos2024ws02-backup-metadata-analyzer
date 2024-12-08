@@ -4,6 +4,7 @@ import metadata_analyzer.backend
 from datetime import datetime, timedelta
 from metadata_analyzer.size_alert import SizeAlert
 from metadata_analyzer.creation_date_alert import CreationDateAlert
+from metadata_analyzer.storage_fill_alert import StorageFillAlert
 
 
 class SimpleRuleBasedAnalyzer:
@@ -288,6 +289,21 @@ class SimpleRuleBasedAnalyzer:
 
     # Search for data stores that are almost full
     def analyze_storage_capacity(self, data, alert_limit):
-        print(data)
+        alerts = []
+        for data_store in data:
+            # Skip data stores with missing data
+            if (data_store.capacity is None or data_store.filled is None or data_store.high_water_mark is None):
+                continue
+            if data_store.filled > data_store.high_water_mark:
+                alerts.append(StorageFillAlert(data_store))
 
+        if alert_limit is None:
+            alert_limit = 10
 
+        # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
+        count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+        # Send the alerts to the backend
+        for alert in alerts[:count]:
+            self.backend.create_storage_fill_alert(alert.as_json())
+
+        return {"count": count}

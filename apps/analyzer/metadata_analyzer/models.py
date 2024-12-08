@@ -66,6 +66,10 @@ class DataStore(Base):
 
     # For now I only added the most relevant columns
     name: Mapped[str] = mapped_column(primary_key=True)
+    capacity: Mapped[float]
+    high_water_mark: Mapped[float]
+    filled: Mapped[float]
+    stored: Mapped[float]
 
     def __repr__(self):
         return f"""DataStore(name={self.name})"""
