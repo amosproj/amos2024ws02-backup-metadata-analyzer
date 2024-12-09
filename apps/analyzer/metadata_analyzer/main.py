@@ -14,6 +14,7 @@ app = Flask(__name__)
 swagger = Swagger(app)
 load_dotenv(dotenv_path=".env")
 
+
 @app.route("/")
 def hello_world():
     """Most basic example endpoint that returns a hello world message.
@@ -111,6 +112,7 @@ def analyze():
     """
     return jsonify(Analyzer.analyze())
 
+
 @app.route("/updateBasicBackupData", methods=["POST"])
 def update_data():
     """Updates the backend database with values taken from the analyzer database.
@@ -144,11 +146,13 @@ def update_data():
     """
     return jsonify(Analyzer.update_data())
 
+
 @app.route("/simpleRuleBasedAnalysis", methods=["POST"])
 def simple_rule_based_analysis():
     json = request.get_json()
     alert_limit = json["alertLimit"]
     return jsonify(Analyzer.simple_rule_based_analysis(alert_limit))
+
 
 @app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
 def simple_rule_based_analysis_diff():
@@ -156,21 +160,69 @@ def simple_rule_based_analysis_diff():
     alert_limit = json["alertLimit"]
     return jsonify(Analyzer.simple_rule_based_analysis_diff(alert_limit))
 
+
 @app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
 def simple_rule_based_analysis_inc():
     json = request.get_json()
     alert_limit = json["alertLimit"]
     return jsonify(Analyzer.simple_rule_based_analysis_inc(alert_limit))
 
-@app.route("/timeSeriesTests", methods=["GET"])
+
+# TODO yaml for swagger
+@app.route("/kMeansAnomalies", methods=["POST"])
 def runTimeSeriesTests():
-        result = Time_series_analyzer.analyze_basic()
-        return 'Time series analysis not yet supported', 501
+    json = request.get_json()
+    field = "None"
+    try:
+        field = "variable"
+        variable = json["variable"]
+        field = "task_id"
+        task_id = json["task_id"]
+        field = "frequency"
+        frequency = json["frequency"]
+        field = "backup_type"
+        backup_type = json["backup_type"]
+        field = "window_size"
+        window_size = json["window_size"]
+    except KeyError:
+        return "Missing field of type " + field
+
+    try:
+        result = Time_series_analyzer.k_means_analyze(
+            variable, task_id, frequency, backup_type, window_size
+        )
+        return jsonify(result)
+    except Exception as ex:
+        return "Misc error occurred!", 500
+
+
+@app.route("/getTaskIds", methods=["GET"])
+def return_task_ids():
+    return jsonify(Time_series_analyzer.get_task_ids())
+
+
+@app.route("/getFrequenciesForTask", methods=["POST"])
+def return_frequencies():
+    json = request.get_json()
+    field = "None"
+    try:
+        field = "task_id"
+        task_id = json["task_id"]
+        field = "backup_type"
+        backup_type = json["backup_type"]
+        field = "variable"
+        variable = json["variable"]
+    except KeyError:
+        return "Missing field of type " + field
+
+    return jsonify(Time_series_analyzer.get_frequencies(task_id, backup_type, variable))
+
 
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
+    time_series_analyzer = Time_series_analyzer()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, simple_analyzer, simple_rule_based_analyzer)
 
