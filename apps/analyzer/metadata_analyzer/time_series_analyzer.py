@@ -35,23 +35,27 @@ class Time_series_analyzer:
         df = df.sort_values("sbc_start")
 
     def k_means_analyze(variable, task_id, frequency, backup_type, window_size):
-        global df
+        working_df = Time_series_analyzer.task_preprocessing(
+            backup_type, task_id, variable
+        )
 
-        Time_series_analyzer.task_preprocessing(backup_type, task_id, variable)
-
-        df.index = df["sbc_start"]  # sets index to datetime in sbc_start column
-        df = df.drop(
+        working_df.index = working_df[
+            "sbc_start"
+        ]  # sets index to datetime in sbc_start column
+        working_df = working_df.drop(
             "sbc_start", axis=1
         )  # removes column because values are now in index
 
         # interpolates series to emulate backups at regular intervals, different methods possible
         frequency = frequency + "s"  # adds unit
-        df = df.asfreq(frequency, method="ffill")
+        working_df = working_df.asfreq(frequency, method="ffill")
         # determines number of clusters for the k means scorer,
         # TODO use clusters for more useful k value
         clusters = len(df[variable].unique())
         # initializes time series
-        series = TimeSeries.from_series(df, fill_missing_dates=False, freq=frequency)
+        series = TimeSeries.from_series(
+            working_df, fill_missing_dates=False, freq=frequency
+        )
 
         # TODO interim definition of training data, change to something more useful
         series_train = series[: round(len(series) / 4)]
@@ -78,6 +82,7 @@ class Time_series_analyzer:
 
     def task_preprocessing(backup_type, task_id, variable):
         global df
+
         # --------------- Task Specific Preprocessing ---------------#
         # TODO remove when other types are implemented
         if backup_type != "F":
@@ -85,12 +90,15 @@ class Time_series_analyzer:
                 "k means analysis for this backup type is not yet implemented"
             )
 
+        working_df = df
         # removes backups of types that are not specified
-        df = df[df.fdi_type == backup_type]
+        working_df = working_df[working_df.fdi_type == backup_type]
         # removes backups that do not have chosen task id
-        df = df[df.task_uuid == task_id]
+        working_df = working_df[working_df.task_uuid == task_id]
         # removes columns that are not relevant (only univariate analysis supported)
-        df = df[["sbc_start", variable]]
+        working_df = working_df[["sbc_start", variable]]
+
+        return working_df
 
     def get_task_ids():
         global df
@@ -99,10 +107,10 @@ class Time_series_analyzer:
         return dict(enumerate(task_ids.flatten(), 1))
 
     def get_frequencies(task_id, backup_type, variable):
-        global df
-
-        Time_series_analyzer.task_preprocessing(backup_type, task_id, variable)
-        freqs = df[["sbc_start"]]
+        working_df = Time_series_analyzer.task_preprocessing(
+            backup_type, task_id, variable
+        )
+        freqs = working_df[["sbc_start"]]
 
         # gets backup frequencies present in dataset
         freqs = freqs.diff()["sbc_start"]

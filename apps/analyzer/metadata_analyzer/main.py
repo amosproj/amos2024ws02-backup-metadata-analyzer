@@ -192,8 +192,8 @@ def runTimeSeriesTests():
             variable, task_id, frequency, backup_type, window_size
         )
         return jsonify(result)
-    except Exception as ex:
-        return "Misc error occurred!", 500
+    except ValueError as val:
+        return "Value error occured: " + val.message, 401
 
 
 @app.route("/getTaskIds", methods=["GET"])
