@@ -127,6 +127,7 @@ describe('BackupsComponent', () => {
         toDate: new Date('2023-12-31').toISOString(),
         id: null,
         fromSizeMB: null,
+        saveset: null,
         toSizeMB: null,
         taskName: null,
       };
@@ -145,6 +146,7 @@ describe('BackupsComponent', () => {
       sizeFilter.ranges = {
         fromDate: null,
         toDate: null,
+        saveset: null,
         fromSizeMB: 100,
         toSizeMB: 500,
         id: null,
@@ -166,6 +168,7 @@ describe('BackupsComponent', () => {
         fromDate: null,
         toDate: null,
         fromSizeMB: null,
+        saveset: null,
         toSizeMB: null,
         id: '000d88',
         taskName: null,
@@ -184,6 +187,7 @@ describe('BackupsComponent', () => {
       taskFilter.ranges = {
         fromDate: null,
         toDate: null,
+        saveset: null, 
         fromSizeMB: null,
         toSizeMB: null,
         id: null,
