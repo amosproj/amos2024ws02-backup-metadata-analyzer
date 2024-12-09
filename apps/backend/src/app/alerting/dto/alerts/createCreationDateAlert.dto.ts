@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCreationDateAlertDto {
+
+  @ApiProperty({
+    description: 'Uuid of the Backup',
+    required: true,
+  })
+  backupUuid!: string;
+
   @ApiProperty({
     description: 'SAveset name of the belonging backup',
     required: true,

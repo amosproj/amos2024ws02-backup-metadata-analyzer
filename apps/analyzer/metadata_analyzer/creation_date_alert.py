@@ -1,5 +1,6 @@
 class CreationDateAlert:
     def __init__(self, result, reference_date):
+        self.uuid = result.uuid
         self.backup_saveset = result.saveset
         self.date = result.start_time
         self.reference_date = reference_date
