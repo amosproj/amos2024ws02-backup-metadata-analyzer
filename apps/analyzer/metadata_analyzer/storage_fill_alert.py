@@ -7,7 +7,7 @@ class StorageFillAlert:
 
     def as_json(self):
         return {
-            "name": self.name,
+            "dataStoreName": self.name,
             "capacity": self.capacity,
             "filled": self.filled,
             "highWaterMark": self.high_water_mark,
