@@ -106,7 +106,7 @@ describe('MailService', () => {
         valueColumnName: 'Size of backup',
         referenceValueColumnName: 'Size of previous backup',
         backupId: 'backup-id',
-        creationDate: alert.backup.creationDate.toLocaleString(),
+        creationDate: alert.backup?.creationDate?.toLocaleString() ?? '',
       },
       attachments: [
         {
