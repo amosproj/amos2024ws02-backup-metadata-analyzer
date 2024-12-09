@@ -30,8 +30,8 @@
             <span>{{ getAlertReason(alert) }}</span>
           </div>
           <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
-            <b>Backup ID:</b>
-            {{ alert.backup.id }}
+            <b>Backup Saveset:</b>
+            {{ alert.backup.saveset }}
             <br />
             <b>Creation Date:</b>
             {{ formatDate(alert.backup.creationDate) }}
