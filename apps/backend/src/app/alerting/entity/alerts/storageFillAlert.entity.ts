@@ -2,7 +2,7 @@ import { Column, Entity } from 'typeorm';
 import { Alert } from './alert';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Entity('StoragFillAlert')
+@Entity('StorageFillAlert')
 export class StorageFillAlertEntity extends Alert {
   @ApiProperty({
     description: 'Available storage, the system actual has after backup',

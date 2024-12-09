@@ -40,7 +40,7 @@ export class AlertingService {
     private sizeAlertRepository: Repository<SizeAlertEntity>,
     @InjectRepository(CreationDateAlertEntity)
     private creationDateRepository: Repository<CreationDateAlertEntity>,
-    @InjectRepository(CreationDateAlertEntity)
+    @InjectRepository(StorageFillAlertEntity)
     private storageFillRepository: Repository<StorageFillAlertEntity>,
     //Services
     private mailService: MailService,
@@ -277,6 +277,10 @@ export class AlertingService {
       }
       case 'CREATION_DATE_ALERT': {
         alert = await this.creationDateRepository.findOne(options);
+        break;
+      }
+      case 'STORAGE_FILL_ALERT': {
+        alert = await this.storageFillRepository.findOne(options);
         break;
       }
     }
