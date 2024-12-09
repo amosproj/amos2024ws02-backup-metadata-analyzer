@@ -640,16 +640,19 @@ def test_storage_fill_alert_enough_capacity_left():
             "name": mock_data_store1.name,
             "capacity": mock_data_store1.capacity,
             "filled": mock_data_store1.filled,
+            "highWaterMark": mock_data_store1.high_water_mark,
         },
         {
             "name": mock_data_store2.name,
             "capacity": mock_data_store2.capacity,
             "filled": mock_data_store2.filled,
+            "highWaterMark": mock_data_store2.high_water_mark,
         },
         {
             "name": mock_data_store3.name,
             "capacity": mock_data_store3.capacity,
             "filled": mock_data_store3.filled,
+            "highWaterMark": mock_data_store3.high_water_mark,
         },
     ]
 
