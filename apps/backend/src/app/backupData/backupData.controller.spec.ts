@@ -12,6 +12,7 @@ import { TaskEntity } from '../tasks/entity/task.entity';
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
   sizeMB: 100,
+  saveset: 'backup-123',
   type: BackupType.FULL,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
@@ -60,6 +61,7 @@ describe('BackupDataController (e2e)', () => {
   it('/backupData (POST) should create new backup data entry', async () => {
     const createBackupDataDto: CreateBackupDataDto = {
       id: '1',
+      saveset: 'backup-1',
       sizeMB: 100,
       creationDate: new Date(),
     };
