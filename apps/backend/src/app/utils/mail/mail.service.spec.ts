@@ -6,15 +6,39 @@ import { BackupType } from '../../backupData/dto/backupType';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
 import { SeverityType } from '../../alerting/dto/severityType';
 import { SIZE_ALERT } from '../constants';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { MailReceiverEntity } from './entity/MailReceiver.entity';
+import { NotFoundException } from '@nestjs/common';
 
 jest.mock('path', () => ({
   resolve: jest.fn().mockReturnValue('mocked/path/to/logo.png'),
+  dirname: jest.fn(),
 }));
+
+const mockMailReceiverRepository = {
+  find: jest.fn().mockResolvedValue([
+    {
+      id: '1',
+      mail: 'test@example.com',
+    },
+  ]),
+  save: jest.fn().mockImplementation((receiver) => Promise.resolve(receiver)),
+  findOneBy: jest.fn().mockImplementation(({ id }) => {
+    if (id === '1') {
+      return Promise.resolve({
+        id: '1',
+        mail: 'test@example.com',
+      });
+    } else {
+      return Promise.resolve(null);
+    }
+  }),
+  delete: jest.fn().mockResolvedValue({}),
+};
 
 describe('MailService', () => {
   let service: MailService;
   let mailerService: MailerService;
-  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,16 +53,18 @@ describe('MailService', () => {
         {
           provide: ConfigService,
           useValue: {
-            getOrThrow: jest.fn().mockReturnValue('test@example.com'),
             get: jest.fn().mockReturnValue('true'),
           },
+        },
+        {
+          provide: getRepositoryToken(MailReceiverEntity),
+          useValue: mockMailReceiverRepository,
         },
       ],
     }).compile();
 
     service = module.get(MailService);
     mailerService = module.get(MailerService);
-    configService = module.get(ConfigService);
   });
 
   it('should be defined', () => {
@@ -111,5 +137,42 @@ describe('MailService', () => {
       context,
       attachments,
     });
+  });
+
+  it('should get all mail receivers', async () => {
+    const receivers = [{ id: '1', mail: 'test@example.com' }];
+
+    expect(await service.getAllMailReceiver()).toStrictEqual(receivers);
+  });
+
+  it('should add a mail receiver', async () => {
+    const createMailReceiverDto = { mail: 'new@example.com' };
+    const savedReceiver = { mail: 'new@example.com' };
+
+    await service.addMailReceiver(createMailReceiverDto);
+
+    expect(mockMailReceiverRepository.save).toBeCalledWith({
+      mail: createMailReceiverDto.mail,
+    });
+
+    expect(await service.addMailReceiver(createMailReceiverDto)).toStrictEqual(
+      savedReceiver
+    );
+  });
+
+  it('should remove a mail receiver', async () => {
+    const id = '1';
+    await service.removeMailReceiver(id);
+
+    expect(mockMailReceiverRepository.findOneBy).toHaveBeenCalledWith({ id });
+    expect(mockMailReceiverRepository.delete).toHaveBeenCalledWith({ id });
+  });
+
+  it('should throw NotFoundException if mail receiver not found', async () => {
+    const id = 'non-existent-id';
+
+    await expect(service.removeMailReceiver(id)).rejects.toThrow(
+      NotFoundException
+    );
   });
 });

@@ -9,6 +9,11 @@ class Backend:
         r = requests.post(url, json=batch)
         r.raise_for_status()
 
+    def send_task_data_batched(self, batch):
+        url = self.backend_url + "tasks/batched"
+        r = requests.post(url, json=batch)
+        r.raise_for_status()
+
     def create_size_alert(self, alert):
         url = self.backend_url + "alerting/size"
         r = requests.post(url, json=alert)

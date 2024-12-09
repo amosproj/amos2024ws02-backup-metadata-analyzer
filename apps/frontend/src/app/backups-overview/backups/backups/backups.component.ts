@@ -46,11 +46,12 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     map((config) => config.range)
   );
 
-  loading: boolean = false;
+  loading = false;
   pageSize = 10;
   backupSizeFilter: CustomFilter;
   backupDateFilter: CustomFilter;
   backupIdFilter: CustomFilter;
+  taskFilter: CustomFilter;
 
   readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
@@ -67,6 +68,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
     this.backupIdFilter = new CustomFilter('id');
+    this.taskFilter = new CustomFilter('taskName');
 
     this.backups$ = this.filterOptions$.pipe(
       switchMap((params) => this.backupService.getAllBackups(params)),
@@ -111,6 +113,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
       this.backupIdFilter.changes.pipe(startWith(null)),
+      this.taskFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
         map(() => this.buildFilterParams()),
@@ -174,6 +177,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
     if (this.backupIdFilter.isActive()) {
       params.id = this.backupIdFilter.ranges.id;
+    }
+
+    if (this.taskFilter.isActive()) {
+      params.taskName = this.taskFilter.ranges.taskName;
     }
 
     return params;
