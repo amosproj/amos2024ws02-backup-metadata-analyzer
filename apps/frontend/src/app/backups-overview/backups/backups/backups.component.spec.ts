@@ -20,11 +20,13 @@ describe('BackupsComponent', () => {
         id: '1',
         sizeMB: 500,
         creationDate: new Date(),
+        savesetName: ''
       },
       {
         id: '2',
         sizeMB: 750,
         creationDate: new Date(),
+        savesetName: ''
       },
     ],
     paginationData: {

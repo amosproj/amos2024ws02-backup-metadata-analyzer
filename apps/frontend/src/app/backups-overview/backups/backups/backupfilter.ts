@@ -6,6 +6,7 @@ export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
   public ranges: {
     fromDate: string | null;
     toDate: string | null;
+    saveset: string | null;
     fromSizeMB: number | null;
     toSizeMB: number | null;
     id: string | null;
@@ -17,12 +18,13 @@ export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
     toSizeMB: null,
     id: null,
     taskName: null,
+    saveset: null
   };
 
   public changes = new Subject<any>();
-  public filterType: 'date' | 'size' | 'id' | 'taskName';
+  public filterType: 'date' | 'size' | 'id' | 'taskName' | 'saveset';
 
-  constructor(filterType: 'date' | 'size' | 'id' | 'taskName') {
+  constructor(filterType: 'date' | 'size' | 'id' | 'taskName' | 'saveset') {
     this.filterType = filterType;
   }
 
@@ -33,6 +35,8 @@ export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
       return !!(this.ranges.fromSizeMB || this.ranges.toSizeMB);
     } else if (this.filterType === 'taskName') {
       return !!this.ranges.taskName;
+    } else if (this.filterType === 'saveset') {
+      return !!this.ranges.saveset;
     } else {
       return !!this.ranges.id;
     }

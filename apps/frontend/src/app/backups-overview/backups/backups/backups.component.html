@@ -119,6 +119,36 @@
         </ng-container>
       </clr-dg-column>
 
+      <clr-dg-column [clrDgField]="'sizeMB'">
+        <ng-container *clrDgHideableColumn>
+          Size (MB)
+          <clr-dg-filter [clrDgFilter]="backupSavesetFilter">
+            <clr-input-container>
+              <label>From:</label>
+              <input
+                clrInput
+                type="number"
+                [(ngModel)]="backupSizeFilter.ranges.saveset"
+                (ngModelChange)="
+                  backupSizeFilter.updateRanges({ saveset: $event })
+                "
+              />
+            </clr-input-container>
+            <clr-input-container>
+              <label>To:</label>
+              <input
+                clrInput
+                type="number"
+                [(ngModel)]="backupSizeFilter.ranges.toSizeMB"
+                (ngModelChange)="
+                  backupSizeFilter.updateRanges({ toSizeMB: $event })
+                "
+              />
+            </clr-input-container>
+          </clr-dg-filter>
+        </ng-container>
+      </clr-dg-column>
+
       <clr-dg-column [clrDgField]="'taskName'">
         <ng-container *clrDgHideableColumn>
           Task

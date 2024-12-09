@@ -21,6 +21,7 @@ class Analyzer:
 
     # Convert a result from the database into the format used by the backend
     def _convert_result(result):
+        print(result.saveset)
         backup_type = {
             "F": "FULL",
             "I": "INCREMENTAL",

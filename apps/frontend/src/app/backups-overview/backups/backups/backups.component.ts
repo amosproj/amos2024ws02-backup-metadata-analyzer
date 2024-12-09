@@ -51,6 +51,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   backupSizeFilter: CustomFilter;
   backupDateFilter: CustomFilter;
   backupIdFilter: CustomFilter;
+  backupSavesetFilter: CustomFilter;
   taskFilter: CustomFilter;
 
   readonly backups$: Observable<APIResponse<Backup>>;
@@ -67,6 +68,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   ) {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
+    this.backupSavesetFilter = new CustomFilter('saveset');
     this.backupIdFilter = new CustomFilter('id');
     this.taskFilter = new CustomFilter('taskName');
 
