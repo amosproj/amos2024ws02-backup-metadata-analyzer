@@ -17,7 +17,7 @@ export class BackupDataEntity {
     required: true,
   })
   @Column()
-  savesetName!: string;
+  saveset!: string;
 
   @ApiProperty({
     description: 'Size of Backup in MB',

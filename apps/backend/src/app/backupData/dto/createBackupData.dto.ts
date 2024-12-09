@@ -20,7 +20,7 @@ export class CreateBackupDataDto {
     description: 'saveset name of the backup',
     required: true,
   })
-  savesetName!: string;
+  saveset!: string;
 
   @ApiProperty({
     description: 'Size of Backup in MB',

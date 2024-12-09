@@ -12,7 +12,7 @@ export class CreateCreationDateAlertDto {
     description: 'Saveset name of the belonging backup',
     required: true,
   })
-  backupSavesetName!: string;
+  backupSaveset!: string;
 
   @ApiProperty({
     description: 'Date, the backup started',

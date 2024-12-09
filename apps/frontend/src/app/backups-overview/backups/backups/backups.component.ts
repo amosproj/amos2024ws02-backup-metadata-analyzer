@@ -114,6 +114,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     combineLatest([
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
+      this.backupSavesetFilter.changes.pipe(startWith(null)),
       this.backupIdFilter.changes.pipe(startWith(null)),
       this.taskFilter.changes.pipe(startWith(null)),
     ])

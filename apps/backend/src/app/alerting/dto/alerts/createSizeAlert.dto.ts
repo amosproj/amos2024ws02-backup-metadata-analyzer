@@ -12,7 +12,7 @@ export class CreateSizeAlertDto {
     description: 'Saveset name of the belonging backup',
     required: true,
   })
-  backupSavesetName!: string;
+  backupSaveset!: string;
 
   @ApiProperty({
     description: 'Size of the Backup, which is the reason for the alert',

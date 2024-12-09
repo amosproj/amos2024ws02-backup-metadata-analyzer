@@ -30,7 +30,7 @@ class Analyzer:
         }[result.fdi_type]
         return {
             "id": result.uuid,
-            "savesetName": result.saveset,
+            "saveset": result.saveset,
             "sizeMB": result.data_size / 1_000_000,
             "creationDate": result.start_time.isoformat(),
             "type": backup_type,

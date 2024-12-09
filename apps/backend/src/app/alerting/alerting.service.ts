@@ -125,7 +125,7 @@ export class AlertingService {
     );
     if (!backup) {
       throw new NotFoundException(
-        `Backup with id ${createSizeAlertDto.backupSavesetName} not found`
+        `Backup with id ${createSizeAlertDto.backupSaveset} not found`
       );
     }
     alert.backup = backup;

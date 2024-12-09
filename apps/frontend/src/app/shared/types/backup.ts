@@ -1,6 +1,6 @@
 export interface Backup {
   id: string;
-  savesetName: string;
+  saveset: string;
   sizeMB: number;
   creationDate: Date;
   taskId?: {
