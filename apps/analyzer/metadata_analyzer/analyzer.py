@@ -1,18 +1,7 @@
 import datetime
-from metadata_analyzer.database import Database
-from metadata_analyzer.backend import Backend
-from metadata_analyzer.simple_analyzer import SimpleAnalyzer
-from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
-
-
 class Analyzer:
-    database: Database
-    backend: Backend
-    simple_analyzer: SimpleAnalyzer
-    simple_rule_based_analyzer: SimpleRuleBasedAnalyzer
 
-    @staticmethod
-    def initialize(database: Database, backend: Backend, simple_analyzer: SimpleAnalyzer, simple_rule_based_analyzer: SimpleRuleBasedAnalyzer) -> None:
+    def init(database, backend, simple_analyzer, simple_rule_based_analyzer):
         Analyzer.database = database
         Analyzer.backend = backend
         Analyzer.simple_analyzer = simple_analyzer
@@ -119,7 +108,7 @@ class Analyzer:
 
         return {"count": count}
 
-    def update_data(self):
+    def update_data():
         Analyzer._send_Tasks()
         Analyzer._send_Backups()
 

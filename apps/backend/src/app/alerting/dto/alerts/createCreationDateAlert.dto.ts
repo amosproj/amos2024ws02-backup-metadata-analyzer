@@ -9,7 +9,7 @@ export class CreateCreationDateAlertDto {
   backupUuid!: string;
 
   @ApiProperty({
-    description: 'SAveset name of the belonging backup',
+    description: 'Saveset name of the belonging backup',
     required: true,
   })
   backupSavesetName!: string;

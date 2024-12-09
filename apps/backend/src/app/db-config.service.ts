@@ -22,6 +22,7 @@ import { TaskEntity } from './tasks/entity/task.entity';
 import { Tasks1733397652480 } from './migrations/1733397652480-Tasks';
 import { MailReceiverEntity } from './utils/mail/entity/MailReceiver.entity';
 import { MailReceiver1733580333590 } from './migrations/1733580333590-MailReceiver';
+import { AddSavesetName1733754552133 } from './migrations/1733754552133-AddSavesetName';
 
 /**
  * Used by NestJS to reach database.
@@ -65,6 +66,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         CreationDateAlert1733070019992,
         Tasks1733397652480,
         MailReceiver1733580333590,
+        AddSavesetName1733754552133,
       ],
       logging: true,
       logger: 'debug'
