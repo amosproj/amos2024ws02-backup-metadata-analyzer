@@ -182,6 +182,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       params.id = this.backupIdFilter.ranges.id;
     }
 
+    if(this.backupSavesetFilter.isActive()) {
+      params.saveset = this.backupSavesetFilter.ranges.saveset;
+    }
+
     if (this.taskFilter.isActive()) {
       params.taskName = this.taskFilter.ranges.taskName;
     }

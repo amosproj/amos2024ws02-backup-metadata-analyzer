@@ -191,6 +191,11 @@ export class BackupDataService extends PaginationService {
       };
     }
 
+    //Saveset search
+    if (backupDataFilterDto.saveset) {
+      where.saveset = ILike(`%${backupDataFilterDto.saveset}%`);
+    }
+
     where.type = BackupType.FULL;
 
     return where;
@@ -210,6 +215,11 @@ export class BackupDataService extends PaginationService {
         taskId: {
           displayName: backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
         },
+      };
+    }
+    if( backupDataOrderOptionsDto.orderBy === BackupDataOrderByOptions.SAVESET) {
+      return {
+        saveset: backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
       };
     }
     return {

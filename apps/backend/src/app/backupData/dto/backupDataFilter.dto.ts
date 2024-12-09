@@ -53,4 +53,11 @@ export class BackupDataFilterDto {
   })
   @IsOptional()
   taskName?: string;
+
+  @ApiProperty({
+    description: 'saveset',
+    required: false,
+  })
+  @IsOptional()
+  saveset?: string;
 }
