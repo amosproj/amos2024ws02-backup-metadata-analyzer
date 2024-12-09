@@ -86,9 +86,26 @@
               />
             </clr-input-container>
           </clr-dg-filter>
-        </ng-container
-        >
+        </ng-container>
       </clr-dg-column>
+
+      <clr-dg-column [clrDgField]="'savesetName'">
+        <ng-container *clrDgHideableColumn>
+          Saveset
+          <clr-dg-filter [clrDgFilter]="backupSavesetFilter">
+            <clr-input-container>
+              <label>Saveset:</label>
+              <input
+                clrInput
+                type="string"
+                [(ngModel)]="backupSavesetFilter.ranges.saveset"
+                (ngModelChange)="backupSavesetFilter.updateRanges({ saveset: $event })"
+              />
+            </clr-input-container>
+          </clr-dg-filter>
+        </ng-container>
+      </clr-dg-column>
+
       <clr-dg-column [clrDgField]="'sizeMB'">
         <ng-container *clrDgHideableColumn>
           Size (MB)
@@ -99,9 +116,7 @@
                 clrInput
                 type="number"
                 [(ngModel)]="backupSizeFilter.ranges.fromSizeMB"
-                (ngModelChange)="
-                  backupSizeFilter.updateRanges({ fromSizeMB: $event })
-                "
+                (ngModelChange)="backupSizeFilter.updateRanges({ fromSizeMB: $event })"
               />
             </clr-input-container>
             <clr-input-container>
@@ -110,39 +125,7 @@
                 clrInput
                 type="number"
                 [(ngModel)]="backupSizeFilter.ranges.toSizeMB"
-                (ngModelChange)="
-                  backupSizeFilter.updateRanges({ toSizeMB: $event })
-                "
-              />
-            </clr-input-container>
-          </clr-dg-filter>
-        </ng-container>
-      </clr-dg-column>
-
-      <clr-dg-column [clrDgField]="'sizeMB'">
-        <ng-container *clrDgHideableColumn>
-          Size (MB)
-          <clr-dg-filter [clrDgFilter]="backupSavesetFilter">
-            <clr-input-container>
-              <label>From:</label>
-              <input
-                clrInput
-                type="number"
-                [(ngModel)]="backupSizeFilter.ranges.saveset"
-                (ngModelChange)="
-                  backupSizeFilter.updateRanges({ saveset: $event })
-                "
-              />
-            </clr-input-container>
-            <clr-input-container>
-              <label>To:</label>
-              <input
-                clrInput
-                type="number"
-                [(ngModel)]="backupSizeFilter.ranges.toSizeMB"
-                (ngModelChange)="
-                  backupSizeFilter.updateRanges({ toSizeMB: $event })
-                "
+                (ngModelChange)="backupSizeFilter.updateRanges({ toSizeMB: $event })"
               />
             </clr-input-container>
           </clr-dg-filter>
@@ -163,8 +146,7 @@
               />
             </clr-input-container>
           </clr-dg-filter>
-        </ng-container
-        >
+        </ng-container>
       </clr-dg-column>
 
       <clr-dg-column
@@ -180,9 +162,7 @@
                 clrInput
                 type="date"
                 [(ngModel)]="backupDateFilter.ranges.fromDate"
-                (ngModelChange)="
-                  backupDateFilter.updateRanges({ fromDate: $event })
-                "
+                (ngModelChange)="backupDateFilter.updateRanges({ fromDate: $event })"
               />
             </clr-input-container>
             <clr-input-container>
@@ -191,9 +171,7 @@
                 clrInput
                 type="date"
                 [(ngModel)]="backupDateFilter.ranges.toDate"
-                (ngModelChange)="
-                  backupDateFilter.updateRanges({ toDate: $event })
-                "
+                (ngModelChange)="backupDateFilter.updateRanges({ toDate: $event })"
               />
             </clr-input-container>
           </clr-dg-filter>
@@ -203,6 +181,7 @@
       <clr-dg-placeholder>We couldn't find any backups!</clr-dg-placeholder>
       <clr-dg-row *ngFor="let backup of backups.data" [clrDgItem]="backup">
         <clr-dg-cell>{{ backup.id }}</clr-dg-cell>
+        <clr-dg-cell>{{ backup.savesetName }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.taskId?.displayName ?? '' }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.creationDate | date }}</clr-dg-cell>
