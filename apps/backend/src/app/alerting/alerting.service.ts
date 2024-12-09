@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -109,7 +110,14 @@ export class AlertingService {
     //Iterate over all alert repositories and get all alerts
     const alerts: Alert[] = [];
     for (const alertRepository of this.alertRepositories) {
-      alerts.push(...(await alertRepository.find({ where })));
+      // if(alertRepository.target.name===STORAGE_FILL_ALERT){
+
+      // }
+      if (alertRepository === this.storageFillRepository) {
+        alerts.push(...(await alertRepository.find()));
+      } else {
+        alerts.push(...(await alertRepository.find({ where })));
+      }
     }
     return alerts;
   }
@@ -203,7 +211,8 @@ export class AlertingService {
   ) {
     // Check if alert already exists
     const existingAlertEntity = await this.storageFillRepository.findOneBy({
-      backup: { id: createStorageFillAlertDto.backupId },
+      filled: createStorageFillAlertDto.filled,
+      dataStoreName: createStorageFillAlertDto.dataStoreName,
     });
 
     if (existingAlertEntity) {
@@ -212,18 +221,10 @@ export class AlertingService {
     }
 
     const alert = new StorageFillAlertEntity();
-    alert.storageFill = createStorageFillAlertDto.storageFill;
-    alert.referenceStorageFill = createStorageFillAlertDto.referenceStorageFill;
-
-    const backup = await this.backupDataService.findOneById(
-      createStorageFillAlertDto.backupId
-    );
-    if (!backup) {
-      throw new NotFoundException(
-        `Backup with id ${createStorageFillAlertDto.backupId} not found`
-      );
-    }
-    alert.backup = backup;
+    alert.filled = createStorageFillAlertDto.filled;
+    alert.highWaterMark = createStorageFillAlertDto.highWaterMark;
+    alert.dataStoreName = createStorageFillAlertDto.dataStoreName;
+    alert.capacity = createStorageFillAlertDto.capacity;
 
     const alertType = await this.alertTypeRepository.findOneBy({
       name: STORAGE_FILL_ALERT,
@@ -280,13 +281,17 @@ export class AlertingService {
         break;
       }
       case 'STORAGE_FILL_ALERT': {
-        alert = await this.storageFillRepository.findOne(options);
-        break;
+        throw new BadRequestException(
+          'Method not supported for alert type STORAGE_FILL_ALERT'
+        );
       }
     }
 
     if (!alert) {
       return null;
+    }
+    if (!alert.backup) {
+      throw new BadRequestException();
     }
 
     return alert.backup.id;

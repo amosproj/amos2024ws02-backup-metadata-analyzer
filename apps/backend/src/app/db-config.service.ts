@@ -24,6 +24,8 @@ import { Tasks1733397652480 } from './migrations/1733397652480-Tasks';
 import { MailReceiverEntity } from './utils/mail/entity/MailReceiver.entity';
 import { MailReceiver1733580333590 } from './migrations/1733580333590-MailReceiver';
 import { StorageFillAlert1733739256545 } from './migrations/1733739256545-StorageFillAlert';
+import { StorageFillAlertChangedColumns1733765217660 } from './migrations/1733765217660-StorageFillAlertChangedColumns';
+import { StorageFillAlertChangedColumnsDecimal1733768959317 } from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
 
 /**
  * Used by NestJS to reach database.
@@ -69,6 +71,8 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         Tasks1733397652480,
         MailReceiver1733580333590,
         StorageFillAlert1733739256545,
+        StorageFillAlertChangedColumns1733765217660,
+        StorageFillAlertChangedColumnsDecimal1733768959317,
       ],
       logging: true,
       logger: 'debug',

@@ -4,7 +4,7 @@ import { AlertType } from './alertType';
 export interface Alert {
   id: string;
   alertType: AlertType;
-  backup: Backup;
+  backup?: Backup;
 }
 
 export interface SizeAlert extends Alert {

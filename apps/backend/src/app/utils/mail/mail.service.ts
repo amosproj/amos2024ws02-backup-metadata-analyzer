@@ -95,9 +95,9 @@ export class MailService {
         valueColumnName = 'Storage Fill Value';
         referenceValueColumnName = 'Available storage the system should have';
         reason = `Less available storage space than expected`;
-        description = `The current storage fill is ${storageFillAlert.storageFill.toString()}, which is less than the expected minimum of ${storageFillAlert.referenceStorageFill.toString()}. This indicates insufficient available storage space.`;
-        value = storageFillAlert.storageFill.toString();
-        referenceValue = storageFillAlert.referenceStorageFill.toString();
+        description = `The current storage fill is ${storageFillAlert.filled.toString()}, which is above the threshold of ${storageFillAlert.highWaterMark.toString()}. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()}`;
+        value = storageFillAlert.filled.toString();
+        referenceValue = storageFillAlert.highWaterMark.toString();
         break;
     }
 
@@ -108,8 +108,8 @@ export class MailService {
       referenceValue,
       valueColumnName,
       referenceValueColumnName,
-      backupId: alert.backup.id,
-      creationDate: alert.backup.creationDate.toLocaleString(),
+      backupId: alert.backup?.id ?? '-',
+      creationDate: alert.backup?.creationDate.toLocaleString() ?? '-',
     };
 
     const logoPath = path.resolve('apps/backend/src/assets/team_logo.png');

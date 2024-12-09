@@ -5,14 +5,26 @@ import { ApiProperty } from '@nestjs/swagger';
 @Entity('StorageFillAlert')
 export class StorageFillAlertEntity extends Alert {
   @ApiProperty({
-    description: 'Available storage, the system actual has after backup',
+    description: 'Name of the data_store',
   })
   @Column()
-  storageFill!: number;
+  dataStoreName!: string;
 
   @ApiProperty({
-    description: 'Available storage, the system should have',
+    description: 'Used storage',
   })
-  @Column()
-  referenceStorageFill!: number;
+  @Column({ type: 'decimal', precision: 20, scale: 6 })
+  filled!: number;
+
+  @ApiProperty({
+    description: 'Alert threshold',
+  })
+  @Column({ type: 'decimal', precision: 20, scale: 6 })
+  highWaterMark!: number;
+
+  @ApiProperty({
+    description: 'Capacity of the data store',
+  })
+  @Column({ type: 'decimal', precision: 20, scale: 6 })
+  capacity!: number;
 }

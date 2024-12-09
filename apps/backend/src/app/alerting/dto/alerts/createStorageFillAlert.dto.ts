@@ -2,20 +2,26 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateStorageFillAlertDto {
   @ApiProperty({
-    description: 'Id of the belonging Backup',
+    description: 'Name of the data_store',
     required: true,
   })
-  backupId!: string;
+  dataStoreName!: string;
 
   @ApiProperty({
-    description:
-      'Storage fill mark of the Backup, which is the reason for the alert',
+    description: 'Used storage',
+    required: true,
   })
-  storageFill!: number;
+  filled!: number;
 
   @ApiProperty({
-    description:
-      'Reference Storage fill to the value of the Backup, in which comparison the alert was triggered',
+    description: 'Alert threshold',
+    required: true,
   })
-  referenceStorageFill!: number;
+  highWaterMark!: number;
+
+  @ApiProperty({
+    description: 'Capacity of the data store',
+    required: true,
+  })
+  capacity!: number;
 }
