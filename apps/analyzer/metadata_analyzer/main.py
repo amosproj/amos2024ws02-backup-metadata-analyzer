@@ -193,7 +193,7 @@ def runTimeSeriesTests():
         )
         return jsonify(result)
     except ValueError as val:
-        return "Value error occured: " + val.message, 401
+        return "Value error occured: " + str(val), 401
 
 
 @app.route("/getTaskIds", methods=["GET"])

@@ -57,6 +57,9 @@ class Time_series_analyzer:
             working_df, fill_missing_dates=False, freq=frequency
         )
 
+        if len(series) == 0:
+            raise ValueError("Series had length 0 after applying specified parameters!")
+
         # TODO interim definition of training data, change to something more useful
         series_train = series[: round(len(series) / 4)]
 
