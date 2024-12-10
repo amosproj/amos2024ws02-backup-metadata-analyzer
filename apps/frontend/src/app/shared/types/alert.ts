@@ -18,6 +18,8 @@ export interface CreationDateAlert extends Alert {
 }
 
 export interface StorageFillAlert extends Alert {
-  storageFill: number;
-  referenceStorageFill: number;
+  dataStoreName: string;
+  filled: number;
+  highWaterMark: number;
+  capacity: number;
 }

@@ -124,7 +124,7 @@ export class AlertComponent implements OnInit, OnDestroy {
         break;
       case 'STORAGE_FILL_ALERT':
         const storageFillAlert = alert as StorageFillAlert;
-        reason = `Storage is filling faster than ususal`; //TODO update reason
+        reason = `Less available storage space than expected`;
         break;
     }
     return reason;
@@ -156,7 +156,7 @@ export class AlertComponent implements OnInit, OnDestroy {
         break;
       case 'STORAGE_FILL_ALERT':
         const storageFillAlert = alert as StorageFillAlert;
-        description = `Storage is filling faster than ususal`; //TODO update description
+        description = `The current storage fill is ${storageFillAlert.filled.toString()} GiB, which is above the threshold of ${storageFillAlert.highWaterMark.toString()} GiB. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()} GiB`;
         break;
     }
     return description;
