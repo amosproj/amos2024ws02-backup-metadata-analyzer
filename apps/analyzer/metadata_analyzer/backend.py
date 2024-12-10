@@ -24,6 +24,11 @@ class Backend:
         r = requests.post(url, json=alert)
         r.raise_for_status()
 
+    def create_storage_fill_alert(self, alert):
+        url = self.backend_url + "alerting/storageFill"
+        r = requests.post(url, json=alert)
+        r.raise_for_status()
+
     def get_latest_alert_id(self, alert_type, backup_type=None):
         url = self.backend_url + f"alerting/type/{alert_type}/latest"
         if backup_type != None:
