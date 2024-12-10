@@ -1,6 +1,7 @@
 .header {
   background-color: white;
   justify-content: space-around;
+  position: relative;
 }
 
 .filter-inline {
@@ -13,6 +14,7 @@
   gap: 40px;
   margin: 20px 0;
   align-items: center;
+  position: relative;
 }
 
 .alert-panel,
@@ -26,6 +28,11 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #e0e0e0;
   padding: 20px;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
 }
 
 .card-block {
@@ -73,6 +80,7 @@
 .btn-group-vertical {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 100%;
 }
 
@@ -92,18 +100,32 @@
   color: white;
 }
 .clr-side-panel {
-  width: 100%;
+  width: 80% !important;
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 0.15rem;
   background: white;
   color: #1b2834;
   font-size: 0.875rem;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 1000000;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+}
+.modal {
+  z-index: 1000000;
 }
 
-.clr-side-panel,
-.modal {
-  z-index: 100000;
+
+.side-panel-footer {
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
 }
 
 .backupTaskFilter {
