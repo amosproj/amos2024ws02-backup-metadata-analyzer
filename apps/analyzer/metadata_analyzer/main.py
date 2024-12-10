@@ -425,7 +425,7 @@ def runTimeSeriesTests():
         field = "window_size"
         window_size = json["window_size"]
     except KeyError:
-        return "Missing field of type " + field
+        return "Missing field of type " + field, 400
 
     try:
         result = Analyzer.simple_time_series_analysis(
