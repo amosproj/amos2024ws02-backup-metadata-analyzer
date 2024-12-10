@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -17,10 +18,16 @@ import { AlertTypeEntity } from './entity/alertType.entity';
 import { Alert } from './entity/alerts/alert';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
+import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
+import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 import { BackupType } from '../backupData/dto/backupType';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
-import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
+import {
+  CREATION_DATE_ALERT,
+  SIZE_ALERT,
+  STORAGE_FILL_ALERT,
+} from '../utils/constants';
 
 @Injectable()
 export class AlertingService {
@@ -34,12 +41,15 @@ export class AlertingService {
     private sizeAlertRepository: Repository<SizeAlertEntity>,
     @InjectRepository(CreationDateAlertEntity)
     private creationDateRepository: Repository<CreationDateAlertEntity>,
+    @InjectRepository(StorageFillAlertEntity)
+    private storageFillRepository: Repository<StorageFillAlertEntity>,
     //Services
     private mailService: MailService,
     private backupDataService: BackupDataService
   ) {
     this.alertRepositories.push(this.sizeAlertRepository);
     this.alertRepositories.push(this.creationDateRepository);
+    this.alertRepositories.push(this.storageFillRepository);
   }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
@@ -100,7 +110,14 @@ export class AlertingService {
     //Iterate over all alert repositories and get all alerts
     const alerts: Alert[] = [];
     for (const alertRepository of this.alertRepositories) {
-      alerts.push(...(await alertRepository.find({ where })));
+      // if(alertRepository.target.name===STORAGE_FILL_ALERT){
+
+      // }
+      if (alertRepository === this.storageFillRepository) {
+        alerts.push(...(await alertRepository.find()));
+      } else {
+        alerts.push(...(await alertRepository.find({ where })));
+      }
     }
     return alerts;
   }
@@ -189,6 +206,41 @@ export class AlertingService {
     }
   }
 
+  async createStorageFillAlert(
+    createStorageFillAlertDto: CreateStorageFillAlertDto
+  ) {
+    // Check if alert already exists
+    const existingAlertEntity = await this.storageFillRepository.findOneBy({
+      filled: createStorageFillAlertDto.filled,
+      dataStoreName: createStorageFillAlertDto.dataStoreName,
+    });
+
+    if (existingAlertEntity) {
+      console.log('Alert already exists -> ignoring it');
+      return;
+    }
+
+    const alert = new StorageFillAlertEntity();
+    alert.filled = createStorageFillAlertDto.filled;
+    alert.highWaterMark = createStorageFillAlertDto.highWaterMark;
+    alert.dataStoreName = createStorageFillAlertDto.dataStoreName;
+    alert.capacity = createStorageFillAlertDto.capacity;
+
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: STORAGE_FILL_ALERT,
+    });
+    if (!alertType) {
+      throw new NotFoundException(`Alert type ${STORAGE_FILL_ALERT} not found`);
+    }
+    alert.alertType = alertType;
+
+    await this.storageFillRepository.save(alert);
+
+    if (alert.alertType.user_active && alert.alertType.master_active) {
+      await this.triggerAlertMail(alert);
+    }
+  }
+
   private async findAlertTypeByIdOrThrow(id: string): Promise<AlertTypeEntity> {
     const entity = await this.alertTypeRepository.findOneBy({ id });
     if (!entity) {
@@ -228,10 +280,18 @@ export class AlertingService {
         alert = await this.creationDateRepository.findOne(options);
         break;
       }
+      case 'STORAGE_FILL_ALERT': {
+        throw new BadRequestException(
+          'Method not supported for alert type STORAGE_FILL_ALERT'
+        );
+      }
     }
 
     if (!alert) {
       return null;
+    }
+    if (!alert.backup) {
+      throw new BadRequestException();
     }
 
     return alert.backup.id;
