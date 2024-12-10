@@ -53,6 +53,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected backupIdFilter: CustomFilter;
   protected selectedTask: BackupTask[] = [];
   protected filterPanel: boolean = false;
+  protected backupSavesetFilter: CustomFilter;
   taskFilter: CustomFilter;
 
   //Subjects
@@ -64,17 +65,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   readonly timeRange$ = this.timeRangeSubject$.pipe(
     map((config) => config.range)
   );
-
-  loading = false;
-  pageSize = 10;
-  backupSizeFilter: CustomFilter;
-  backupDateFilter: CustomFilter;
-  backupIdFilter: CustomFilter;
-  backupSavesetFilter: CustomFilter;
-  taskFilter: CustomFilter;
-
-  readonly backups$: Observable<APIResponse<Backup>>;
-  readonly chartBackups$: Observable<APIResponse<Backup>>;
 
   protected backupTaskSearchTerm$: Subject<string> = new Subject<string>();
 
