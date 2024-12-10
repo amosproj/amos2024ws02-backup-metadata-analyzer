@@ -39,7 +39,7 @@ def test_update_data_all_types():
 
 	database = MockDatabase(mock_results, mock_tasks)
 	backend = MockBackend()
-	Analyzer.init(database, backend, None, None)
+	Analyzer.init(database, backend, None, None, None)
 	Analyzer.update_data()
 
 	assert backend.backups == [{
@@ -89,7 +89,7 @@ def test_update_data_not_a_backup():
 
 	database = MockDatabase([mock_result1], [])
 	backend = MockBackend()
-	Analyzer.init(database, backend, None, None)
+	Analyzer.init(database, backend, None, None, None)
 	Analyzer.update_data()
 
 	assert backend.backups == []
