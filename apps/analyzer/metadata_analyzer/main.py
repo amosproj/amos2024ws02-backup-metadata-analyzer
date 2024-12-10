@@ -171,6 +171,65 @@ def simple_rule_based_analysis_inc():
 # TODO yaml for swagger
 @app.route("/kMeansAnomalies", methods=["POST"])
 def runTimeSeriesTests():
+    """Runs k-means anomaly detection on the specified dataset.
+    ---
+    parameters:
+      - name: input
+        in: body
+        type: object
+        required: true
+        properties:
+            properties:
+                variable:
+                type: string
+                example: 'data_size'
+            task_id:
+                type: string
+                example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+            backup_type:
+                type: string
+                example: 'F'
+            frequency:
+                type: int
+                example: 86401
+            windows_size:
+                type: int
+                example: 2
+    definitions:
+        MeansBody:
+            type: object
+            properties:
+                variable:
+                    type: string
+                    example: 'data_size'
+                task_id:
+                    type: string
+                    example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+                backup_type:
+                    type: string
+                    example: 'F'
+                frequency:
+                    type: int
+                    example: 86401
+                windows_size:
+                    type: int
+                    example: 2
+        Timestamps:
+            type: array
+            items:
+                type: string
+            example:
+                - 'Tue, 10 Sep 2024 21:01:22 GMT'
+                - 'Sat, 21 Sep 2024 21:01:33 GMT'
+                - 'Sun, 22 Sep 2024 21:01:34 GMT'
+                - 'Tue, 08 Oct 2024 21:01:50 GMT'
+                - 'Wed, 09 Oct 2024 21:01:51 GMT'
+    responses:
+      200:
+        description: The timestamps of the anomalies
+        schema:
+          $ref: '#/definitions/Timestamps'
+    """
     json = request.get_json()
     field = "None"
     try:
