@@ -179,8 +179,7 @@ def runTimeSeriesTests():
         type: object
         required: true
         properties:
-            properties:
-                variable:
+            variable:
                 type: string
                 example: 'data_size'
             task_id:
@@ -192,7 +191,7 @@ def runTimeSeriesTests():
             frequency:
                 type: int
                 example: 86401
-            windows_size:
+            window_size:
                 type: int
                 example: 2
     definitions:
@@ -257,11 +256,83 @@ def runTimeSeriesTests():
 
 @app.route("/getTaskIds", methods=["GET"])
 def return_task_ids():
+    """Gets task ids of current dataset, necessary for time series analysis.
+    ---
+    definitions:
+        task_ids:
+            type: object
+            properties:
+                1:
+                    type: string
+                    example: 'd6f0d862-ef51-4f01-8d34-5503a58c6421'
+                2:
+                    type: string
+                    example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+                3:
+                    type: string
+                    example: '8cc9efbc-d392-430d-8844-af04da35e7d6'
+    responses:
+      200:
+        description: All possible task ids
+        schema:
+          $ref: '#/definitions/task_ids'
+    """
     return jsonify(Time_series_analyzer.get_task_ids())
 
 
 @app.route("/getFrequenciesForTask", methods=["POST"])
 def return_frequencies():
+    """Gets frequencies for a specific task, variable and backup type.
+    ---
+    parameters:
+      - name: input
+        in: body
+        type: object
+        required: true
+        properties:
+            variable:
+                type: string
+                example: 'data_size'
+            task_id:
+                type: string
+                example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+            backup_type:
+                type: string
+                example: 'F'
+    definitions:
+        Frequencies:
+            type: object
+            properties:
+                count:
+                    type: object
+                    properties:
+                        0:
+                            type: int
+                            example: 20
+                        1:
+                            type: int
+                            example: 17
+                        2:
+                            type: int
+                            example: 5
+                sbc_start:
+                    type: object
+                    properties:
+                        0:
+                            type: int
+                            example: 86400
+                        1:
+                            type: int
+                            example: 86401
+                        2:
+                            type: int
+                            example: 86399
+    responses:
+      200:
+        description: All backup frequencies found that meet the conditions, ranked by times appeared
+        schema:
+          $ref: '#/definitions/Frequencies'
+    """
     json = request.get_json()
     field = "None"
     try:

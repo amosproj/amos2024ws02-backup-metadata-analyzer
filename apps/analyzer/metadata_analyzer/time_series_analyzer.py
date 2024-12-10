@@ -47,7 +47,7 @@ class Time_series_analyzer:
         )  # removes column because values are now in index
 
         # interpolates series to emulate backups at regular intervals, different methods possible
-        frequency = frequency + "s"  # adds unit
+        frequency = str(frequency) + "s"  # adds unit
         working_df = working_df.asfreq(frequency, method="ffill")
         # determines number of clusters for the k means scorer,
         # TODO use clusters for more useful k value
