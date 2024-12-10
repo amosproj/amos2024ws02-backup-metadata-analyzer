@@ -30,6 +30,7 @@ readme = 'README.md'
   flasgger = "^0.9.7.1"
   darts = "^0.31.0"
   pandas = "^2.2.3"
+  mypy = "^1.13.0"
 
   [tool.poetry.group.dev.dependencies]
   autopep8 = "2.0.2"
