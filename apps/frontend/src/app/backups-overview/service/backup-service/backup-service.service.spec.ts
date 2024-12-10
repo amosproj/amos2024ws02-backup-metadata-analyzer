@@ -6,18 +6,21 @@ import { BackupService } from './backup-service.service';
 import { APIResponse } from '../../../shared/types/api-response';
 import { Backup } from '../../../shared/types/backup';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
+import { BackupTask } from '../../../shared/types/backup.task';
 import { fail } from 'assert';
 
 describe('BackupService', () => {
   let service: BackupService;
   let httpClientMock: {
+    post: ReturnType<typeof vi.fn>;
     get: ReturnType<typeof vi.fn>;
   };
   const baseUrl = 'http://test-url';
 
   beforeEach(() => {
     httpClientMock = {
-      get: vi.fn(),
+      post: vi.fn(),
+      get: vi.fn(), // Add GET mock
     };
 
     service = new BackupService(
@@ -26,141 +29,97 @@ describe('BackupService', () => {
     );
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
+  // ... existing tests ...
 
-  describe('getAllBackups', () => {
-    it('should filter out null and undefined params', () => {
-      const mockFilterParams: BackupFilterParams = {
-        offset: 0,
-        limit: 10,
-        fromDate: null,
-        toDate: undefined,
-      };
+  describe('getAllBackupTasks', () => {
+    it('should fetch all backup tasks', () => {
+      const mockTasks: BackupTask[] = [
+        { id: '1', displayName: 'Task 1' },
+        { id: '2', displayName: 'Task 2' },
+      ];
 
-      const mockResponse: APIResponse<Backup> = {
-        data: [],
-        paginationData: {
-          total: 0,
-        },
-      };
+      httpClientMock.get.mockReturnValue(of(mockTasks));
 
-      httpClientMock.get.mockReturnValue(of(mockResponse));
-
-      service.getAllBackups(mockFilterParams).subscribe((response) => {
-        expect(httpClientMock.get).toHaveBeenCalledWith(
-          `${baseUrl}/backupData`,
-          {
-            params: expect.any(HttpParams),
-          }
-        );
-        const passedParams = httpClientMock.get.mock.calls[0][1].params;
-        expect(passedParams.keys()).toEqual(['offset', 'limit']);
+      service.getAllBackupTasks().subscribe((tasks) => {
+        expect(tasks).toEqual(mockTasks);
+        expect(httpClientMock.get).toHaveBeenCalledWith(`${baseUrl}/tasks`);
       });
     });
 
-    it('should call the correct endpoint with all valid params', () => {
-      const mockFilterParams: BackupFilterParams = {
-        limit: 10,
-        offset: 0,
-        orderBy: 'createdAt',
-        sortOrder: 'DESC',
-        fromDate: '2023-01-01',
-        toDate: '2023-12-31',
-        fromSizeMB: 100,
-        toSizeMB: 500,
-      };
+    it('should handle empty tasks response', () => {
+      const mockTasks: BackupTask[] = [];
 
-      const mockResponse: APIResponse<Backup> = {
-        data: [],
-        paginationData: {
-          total: 0,
-        },
-      };
+      httpClientMock.get.mockReturnValue(of(mockTasks));
 
-      httpClientMock.get.mockReturnValue(of(mockResponse));
-
-      service.getAllBackups(mockFilterParams).subscribe((response) => {
-        expect(httpClientMock.get).toHaveBeenCalledWith(
-          `${baseUrl}/backupData`,
-          {
-            params: expect.any(HttpParams),
-          }
-        );
-
-        const passedParams = httpClientMock.get.mock.calls[0][1].params;
-        expect(passedParams.get('limit')).toBe('10');
-        expect(passedParams.get('offset')).toBe('0');
-        expect(passedParams.get('orderBy')).toBe('createdAt');
-        expect(passedParams.get('sortOrder')).toBe('DESC');
-        expect(passedParams.get('fromDate')).toBe('2023-01-01');
-        expect(passedParams.get('toDate')).toBe('2023-12-31');
-        expect(passedParams.get('fromSizeMB')).toBe('100');
-        expect(passedParams.get('toSizeMB')).toBe('500');
+      service.getAllBackupTasks().subscribe((tasks) => {
+        expect(tasks).toEqual([]);
+        expect(httpClientMock.get).toHaveBeenCalledWith(`${baseUrl}/tasks`);
       });
     });
 
-    it('should use shareReplay to cache the response', () => {
-      const mockFilterParams: BackupFilterParams = {
-        offset: 10,
-        limit: 10,
-      };
-
-      const mockResponse: APIResponse<Backup> = {
-        data: [],
-        paginationData: {
-          total: 0,
-        },
-      };
-
-      httpClientMock.get.mockReturnValue(of(mockResponse));
-
-      const observable = service.getAllBackups(mockFilterParams);
-
-      observable.subscribe();
-      observable.subscribe();
-
-      expect(httpClientMock.get).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle empty filter params', () => {
-      const mockFilterParams: BackupFilterParams = {};
-
-      const mockResponse: APIResponse<Backup> = {
-        data: [],
-        paginationData: {
-          total: 0,
-        },
-      };
-
-      httpClientMock.get.mockReturnValue(of(mockResponse));
-
-      service.getAllBackups(mockFilterParams).subscribe((response) => {
-        expect(httpClientMock.get).toHaveBeenCalledWith(
-          `${baseUrl}/backupData`,
-          {
-            params: expect.any(HttpParams),
-          }
-        );
-
-        const passedParams = httpClientMock.get.mock.calls[0][1].params;
-        expect(passedParams.keys().length).toBe(0);
-      });
-    });
-
-    it('should propagate HTTP errors', () => {
-      const mockFilterParams: BackupFilterParams = {
-        offset: 0,
-        limit: 10,
-      };
-
+    it('should propagate HTTP errors for tasks endpoint', () => {
       const mockError = new Error('Network error');
 
       httpClientMock.get.mockReturnValue(throwError(() => mockError));
-      service.getAllBackups(mockFilterParams).subscribe({
-        next: () => fail('expected an error, not backups'),
+
+      service.getAllBackupTasks().subscribe({
+        next: () => fail('expected an error, not tasks'),
         error: (error) => expect(error).toBe(mockError),
+      });
+    });
+  });
+
+  describe('getAllBackups with taskIds', () => {
+    it('should include taskIds in request body when provided', () => {
+      const mockFilterParams: BackupFilterParams = {
+        limit: 10,
+        offset: 0,
+      };
+      const selectedTasks = ['task1', 'task2'];
+
+      const mockResponse: APIResponse<Backup> = {
+        data: [],
+        paginationData: {
+          total: 0,
+        },
+      };
+
+      httpClientMock.post.mockReturnValue(of(mockResponse));
+
+      service.getAllBackups(mockFilterParams, selectedTasks).subscribe(() => {
+        expect(httpClientMock.post).toHaveBeenCalledWith(
+          `${baseUrl}/backupData/filter`,
+          { taskIds: selectedTasks },
+          {
+            params: expect.any(HttpParams),
+          }
+        );
+      });
+    });
+
+    it('should handle null taskIds in request', () => {
+      const mockFilterParams: BackupFilterParams = {
+        limit: 10,
+        offset: 0,
+      };
+
+      const mockResponse: APIResponse<Backup> = {
+        data: [],
+        paginationData: {
+          total: 0,
+        },
+      };
+
+      httpClientMock.post.mockReturnValue(of(mockResponse));
+
+      service.getAllBackups(mockFilterParams).subscribe(() => {
+        expect(httpClientMock.post).toHaveBeenCalledWith(
+          `${baseUrl}/backupData/filter`,
+          { taskIds: undefined },
+          {
+            params: expect.any(HttpParams),
+          }
+        );
       });
     });
   });

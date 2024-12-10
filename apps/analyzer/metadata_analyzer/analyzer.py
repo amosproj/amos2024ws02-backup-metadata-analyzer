@@ -1,5 +1,6 @@
 import datetime
 
+
 class Analyzer:
     def init(database, backend, simple_analyzer, simple_rule_based_analyzer):
         Analyzer.database = database
@@ -22,16 +23,24 @@ class Analyzer:
     # Convert a result from the database into the format used by the backend
     def _convert_result(result):
         backup_type = {
-                "F": "FULL",
-                "I": "INCREMENTAL",
-                "D": "DIFFERENTIAL",
-                "C": "COPY"
+            "F": "FULL",
+            "I": "INCREMENTAL",
+            "D": "DIFFERENTIAL",
+            "C": "COPY"
         }[result.fdi_type]
         return {
             "id": result.uuid,
             "sizeMB": result.data_size / 1_000_000,
             "creationDate": result.start_time.isoformat(),
-            "type": backup_type
+            "type": backup_type,
+            "taskId": result.task_uuid,
+        }
+
+    # Convert a task from the database into the format used by the backend
+    def _convert_task(task):
+        return {
+            "id": task.uuid,
+            "displayName": task.task,
         }
 
     def _get_start_date(data, alert_type, backup_type):
@@ -43,13 +52,13 @@ class Analyzer:
             assert len(latest_alerts) == 1
             return latest_alerts[0]
 
-
-    def update_data():
+    def _send_Backups():
         results = list(Analyzer.database.get_results())
 
         # Batch the api calls to the backend for improved efficiency
         batch = []
         count = 0
+
         for result in results:
             # Only send real backups
             if result.is_backup <= 0:
@@ -73,18 +82,48 @@ class Analyzer:
 
         return {"count": count}
 
+    def _send_Tasks():
+        tasks = list(Analyzer.database.get_tasks())
+
+        # Batch the api calls to the backend for improved efficiency
+        batch = []
+        count = 0
+
+        for task in tasks:
+
+            if task.uuid is None or task.task is None:
+                continue
+
+            batch.append(Analyzer._convert_task(task))
+            count += 1
+
+            # Send a full batch
+            if len(batch) == 100:
+                Analyzer.backend.send_task_data_batched(batch)
+                batch = []
+
+        # Send the remaining results
+        if len(batch) > 0:
+            Analyzer.backend.send_task_data_batched(batch)
+
+        return {"count": count}
+
+    def update_data():
+        Analyzer._send_Tasks()
+        Analyzer._send_Backups()
+
     def simple_rule_based_analysis(alert_limit):
         data = list(Analyzer.database.get_results())
         start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "FULL")
         result = Analyzer.simple_rule_based_analyzer.analyze(data, alert_limit, start_date)
         return result
-    
+
     def simple_rule_based_analysis_diff(alert_limit):
         data = list(Analyzer.database.get_results())
         start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "DIFFERENTIAL")
         result = Analyzer.simple_rule_based_analyzer.analyze_diff(data, alert_limit, start_date)
         return result
-    
+
     def simple_rule_based_analysis_inc(alert_limit):
         data = list(Analyzer.database.get_results())
         start_date = Analyzer._get_start_date(data, "SIZE_ALERT", "INCREMENTAL")
@@ -95,4 +134,11 @@ class Analyzer:
         data = list(Analyzer.database.get_results())
         start_date = Analyzer._get_start_date(data, "CREATION_DATE_ALERT", None)
         result = Analyzer.simple_rule_based_analyzer.analyze_creation_dates(data, alert_limit, start_date)
+        return result
+
+    def simple_rule_based_analysis_storage_capacity(alert_limit):
+        data = list(Analyzer.database.get_data_stores())
+        result = Analyzer.simple_rule_based_analyzer.analyze_storage_capacity(
+            data, alert_limit
+        )
         return result

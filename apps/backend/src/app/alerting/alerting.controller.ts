@@ -13,7 +13,8 @@ import {
   ApiConflictResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiQuery, ApiTags
+  ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
@@ -23,6 +24,7 @@ import { Alert } from './entity/alerts/alert';
 import { BackupType } from '../backupData/dto/backupType';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { AlertStatusDto } from './dto/alertStatus.dto';
+import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -127,6 +129,18 @@ export class AlertingController {
   ): Promise<void> {
     await this.alertingService.createCreationDateAlert(
       createCreationDateAlertDto
+    );
+  }
+
+  @Post('storageFill')
+  @ApiOperation({ summary: 'Create a new storage fill alert.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateStorageFillAlertDto })
+  async storageFillAlert(
+    @Body() createStorageFillAlertDto: CreateStorageFillAlertDto
+  ): Promise<void> {
+    await this.alertingService.createStorageFillAlert(
+      createStorageFillAlertDto
     );
   }
 

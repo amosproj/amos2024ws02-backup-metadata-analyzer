@@ -1,11 +1,20 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { Alert } from '../../alerting/entity/alerts/alert';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
-import { CREATION_DATE_ALERT, SIZE_ALERT } from '../constants';
+import { StorageFillAlertEntity } from '../../alerting/entity/alerts/storageFillAlert.entity';
+import {
+  CREATION_DATE_ALERT,
+  SIZE_ALERT,
+  STORAGE_FILL_ALERT,
+} from '../constants';
 import { CreationDateAlertEntity } from '../../alerting/entity/alerts/creationDateAlert.entity';
+import { CreateMailReceiverDto } from './dto/createMailReceiver.dto';
+import { MailReceiverEntity } from './entity/MailReceiver.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class MailService {
@@ -13,8 +22,10 @@ export class MailService {
   MAILING_ACTIVE = true;
 
   constructor(
-    private mailerService: MailerService,
-    private configService: ConfigService
+    @InjectRepository(MailReceiverEntity)
+    private readonly mailReceiverEntityRepository: Repository<MailReceiverEntity>,
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService
   ) {
     if (this.configService.get('MAILING_ACTIVE') === 'false') {
       this.MAILING_ACTIVE = false;
@@ -22,16 +33,24 @@ export class MailService {
   }
 
   async sendAlertMail(alert: Alert) {
-    const receivers =
-      this.configService.getOrThrow<string>('MAILING_LIST').split(',') || [];
+    const receiverEntities = await this.getAllMailReceiver();
+
+    if (receiverEntities.length === 0) {
+      this.logger.log('No mail receivers found. Skipping sending mail');
+      return;
+    }
+    const receivers = receiverEntities
+      .map((receiver) => receiver.mail)
+      .join(',')
+      .split(',');
 
     let reason = '';
     let description = '';
     let valueColumnName = '';
     let referenceValueColumnName = '';
-    let percentage: string = 'Infinity';
-    let value: string = '-';
-    let referenceValue: string = '-';
+    let percentage = 'Infinity';
+    let value = '-';
+    let referenceValue = '-';
     switch (alert.alertType.name) {
       case SIZE_ALERT:
         const sizeAlert = alert as SizeAlertEntity;
@@ -71,6 +90,15 @@ export class MailService {
         value = creationDateAlert.date.toString();
         referenceValue = creationDateAlert.referenceDate.toString();
         break;
+      case STORAGE_FILL_ALERT:
+        const storageFillAlert = alert as StorageFillAlertEntity;
+        valueColumnName = 'Storage Fill Value';
+        referenceValueColumnName = 'Available storage the system should have';
+        reason = `Less available storage space than expected`;
+        description = `The current storage fill is ${storageFillAlert.filled.toString()}, which is above the threshold of ${storageFillAlert.highWaterMark.toString()}. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()}`;
+        value = storageFillAlert.filled.toString();
+        referenceValue = storageFillAlert.highWaterMark.toString();
+        break;
     }
 
     const context = {
@@ -80,8 +108,8 @@ export class MailService {
       referenceValue,
       valueColumnName,
       referenceValueColumnName,
-      backupId: alert.backup.id,
-      creationDate: alert.backup.creationDate.toLocaleString(),
+      backupId: alert.backup?.id ?? '-',
+      creationDate: alert.backup?.creationDate.toLocaleString() ?? '-',
     };
 
     const logoPath = path.resolve('apps/backend/src/assets/team_logo.png');
@@ -128,5 +156,22 @@ export class MailService {
       context,
       attachments: attachments ?? [],
     });
+  }
+
+  async getAllMailReceiver(): Promise<MailReceiverEntity[]> {
+    return this.mailReceiverEntityRepository.find();
+  }
+
+  async addMailReceiver(
+    createMailReceiverDto: CreateMailReceiverDto
+  ): Promise<MailReceiverEntity> {
+    return await this.mailReceiverEntityRepository.save(createMailReceiverDto);
+  }
+
+  async removeMailReceiver(id: string) {
+    if (!(await this.mailReceiverEntityRepository.findOneBy({ id }))) {
+      throw new NotFoundException('Mail ');
+    }
+    await this.mailReceiverEntityRepository.delete({ id });
   }
 }

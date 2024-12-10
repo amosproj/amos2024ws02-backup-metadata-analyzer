@@ -34,33 +34,47 @@
     </div>
   </div>
 </div>
-<div>
-  <h3>Charts:</h3>
-  <div class="btn-group">
-    <button
-      *ngFor="let range of timeRanges"
-      class="btn"
-      [class.btn-primary]="(timeRange$ | async) === range"
-      (click)="setTimeRange(range)"
-    >
-      Last {{ range | titlecase }}
-    </button>
-  </div>
-  <div class="clr-row">
-    <div class="clr-col-sm-12 clr-col-md-6">
-      <!-- Timeline Chart Section -->
-      <h4>Recent Backup Timeline:</h4>
-      <div
-        id="backupTimelineChart"
-        class="mt-4"
-        style="width: 100%; height: 400px"
-      ></div>
-    </div>
 
-    <div class="clr-col-sm-12 clr-col-md-6">
-      <!-- Size Distribution Chart Section -->
-      <h4>Recent Backup Size Distribution:</h4>
-      <div id="backupSizeChart" style="width: 100%; height: 400px"></div>
+<div class="clr-row">
+  <div class="clr-col-12 clr-col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-title">Recent Backup Timeline:</div>
+        <div class="card-header-actions">
+          <button
+            class="btn btn-sm btn-link"
+            (click)="changeFilterPanelState()"
+          >
+            <cds-icon shape="filter"></cds-icon>
+          </button>
+        </div>
+      </div>
+      <div class="card-block">
+        <div
+          id="backupTimelineChart"
+          class="mt-4"
+          style="width: 100%; height: 400px"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="clr-col-12 clr-col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-title">Recent Backup Size Distribution:</div>
+        <div class="card-header-actions">
+          <button
+            class="btn btn-sm btn-link"
+            (click)="changeFilterPanelState()"
+          >
+            <cds-icon shape="filter"></cds-icon>
+          </button>
+        </div>
+      </div>
+      <div class="card-block">
+        <div id="backupSizeChart" style="width: 100%; height: 400px"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -82,11 +96,12 @@
                 clrInput
                 type="string"
                 [(ngModel)]="backupIdFilter.ranges.id"
-                (ngModelChange)="backupSizeFilter.updateRanges({ id: $event })"
+                (ngModelChange)="backupIdFilter.updateRanges({ id: $event })"
               />
             </clr-input-container>
-          </clr-dg-filter> </ng-container
-      ></clr-dg-column>
+          </clr-dg-filter>
+        </ng-container>
+      </clr-dg-column>
       <clr-dg-column [clrDgField]="'sizeMB'">
         <ng-container *clrDgHideableColumn>
           Size (MB)
@@ -111,6 +126,23 @@
                 (ngModelChange)="
                   backupSizeFilter.updateRanges({ toSizeMB: $event })
                 "
+              />
+            </clr-input-container>
+          </clr-dg-filter>
+        </ng-container>
+      </clr-dg-column>
+
+      <clr-dg-column [clrDgField]="'taskName'">
+        <ng-container *clrDgHideableColumn>
+          Task
+          <clr-dg-filter [clrDgFilter]="taskFilter">
+            <clr-input-container>
+              <label>Task:</label>
+              <input
+                clrInput
+                type="string"
+                [(ngModel)]="taskFilter.ranges.taskName"
+                (ngModelChange)="taskFilter.updateRanges({ taskName: $event })"
               />
             </clr-input-container>
           </clr-dg-filter>
@@ -154,6 +186,7 @@
       <clr-dg-row *ngFor="let backup of backups.data" [clrDgItem]="backup">
         <clr-dg-cell>{{ backup.id }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
+        <clr-dg-cell>{{ backup.taskId?.displayName ?? '' }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.creationDate | date }}</clr-dg-cell>
         <clr-dg-action-overflow>
           <button class="action-item">More Details</button>
@@ -187,3 +220,73 @@
     </clr-datagrid>
   </div>
 </div>
+
+<clr-side-panel
+  [(clrSidePanelOpen)]="filterPanel"
+  position="right"
+  [clrSidePanelSize]="'md'"
+>
+  <div class="side-panel-title">Chart Filter Options</div>
+  <div class="side-panel-body">
+    <div>
+      <h4>Time Range:</h4>
+      <div class="btn-group-vertical">
+        <button
+          *ngFor="let range of timeRanges"
+          class="btn"
+          [class.btn-primary]="(timeRange$ | async) === range"
+          (click)="setTimeRange(range)"
+        >
+          Last {{ range | titlecase }}
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <h4>Backup Task:</h4>
+      <clr-combobox-container *ngIf="allBackupTasks$" class="backupTaskFilter">
+        <clr-combobox
+          name="task"
+          [(ngModel)]="selectedTask"
+          [clrLoading]="tasksLoading"
+          clrMulti="true"
+          (ngModelChange)="setBackupTask($event)"
+          (clrInputChange)="onSearchInput($event)"
+          placeholder="Select backup task"
+          [clrPosition]="'bottom-left'"
+        >
+          <ng-container *clrOptionSelected="let task">
+            <span class="selected-item">
+              <cds-icon
+                shape="tag"
+                aria-label="selected backup task tag"
+              ></cds-icon>
+              {{ task ? task.displayName : 'All Tasks' }}
+            </span>
+          </ng-container>
+
+          <clr-options>
+            <ng-container *ngIf="selectedbackupTasks$ | async as tasks">
+              <clr-option
+                *clrOptionItems="let task of tasks; field: 'displayName'"
+                [clrValue]="task"
+              >
+                <cds-icon
+                  shape="data-cluster"
+                  aria-label="backup task"
+                ></cds-icon>
+                {{ task.displayName }}
+              </clr-option>
+            </ng-container>
+          </clr-options>
+        </clr-combobox>
+        <clr-control-error>There was an error</clr-control-error>
+      </clr-combobox-container>
+    </div>
+  </div>
+  <div class="side-panel-footer">
+    <button class="btn btn-outline" (click)="changeFilterPanelState()">
+      Close
+    </button>
+  </div>
+</clr-side-panel>

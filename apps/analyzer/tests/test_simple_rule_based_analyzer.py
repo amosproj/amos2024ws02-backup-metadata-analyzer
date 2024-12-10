@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from metadata_analyzer.analyzer import Analyzer
-from metadata_analyzer.models import Result
+from metadata_analyzer.models import Result, DataStore
 from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
 from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
@@ -15,6 +15,14 @@ def _create_mock_result(task, uuid, fdi_type, data_size, start_time):
     mock_result.data_size = data_size
     mock_result.start_time = start_time
     return mock_result
+
+def _create_mock_data_store(name, capacity, high_water_mark, filled):
+    mock_data_store = DataStore()
+    mock_data_store.name = name
+    mock_data_store.capacity = capacity
+    mock_data_store.high_water_mark = high_water_mark
+    mock_data_store.filled = filled
+    return mock_data_store
 
 
 def test_alert():
@@ -579,3 +587,88 @@ def test_alert_latest_creation_date():
         "referenceDate": "2000-01-04T16:00:00",
         "backupId": mock_result4.uuid
     }]
+
+# Tests for the storage fill alerts
+
+
+# Empty data store should not generate an alert
+def test_storage_fill_alert_empty():
+    mock_data_store1 = _create_mock_data_store("foo", 100, 80, 0)
+
+    database = MockDatabase([], [], [mock_data_store1])
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.simple_rule_based_analysis_storage_capacity(-1)
+
+    assert backend.storage_fill_alerts == []
+
+
+# Data stores with enough capacity left should not generate an alert
+def test_storage_fill_alert_enough_capacity_left():
+    mock_data_store1 = _create_mock_data_store("foo", 100, 80, 20)
+    mock_data_store2 = _create_mock_data_store("bar", 120, 90, 80)
+    mock_data_store3 = _create_mock_data_store("baz", 150, 50, 50)
+
+    database = MockDatabase(
+        [], [], [mock_data_store1, mock_data_store2, mock_data_store3]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.simple_rule_based_analysis_storage_capacity(-1)
+
+    assert backend.storage_fill_alerts == []
+
+
+# Data stores with less than enough capacity left should generate an alert
+def test_storage_fill_alert_enough_capacity_left():
+    mock_data_store1 = _create_mock_data_store("foo", 100, 80, 81)
+    mock_data_store2 = _create_mock_data_store("bar", 120, 90, 100)
+    mock_data_store3 = _create_mock_data_store("baz", 150, 50, 150)
+
+    database = MockDatabase(
+        [], [], [mock_data_store1, mock_data_store2, mock_data_store3]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.simple_rule_based_analysis_storage_capacity(-1)
+
+    assert backend.storage_fill_alerts == [
+        {
+            "dataStoreName": mock_data_store1.name,
+            "capacity": mock_data_store1.capacity,
+            "filled": mock_data_store1.filled,
+            "highWaterMark": mock_data_store1.high_water_mark,
+        },
+        {
+            "dataStoreName": mock_data_store2.name,
+            "capacity": mock_data_store2.capacity,
+            "filled": mock_data_store2.filled,
+            "highWaterMark": mock_data_store2.high_water_mark,
+        },
+        {
+            "dataStoreName": mock_data_store3.name,
+            "capacity": mock_data_store3.capacity,
+            "filled": mock_data_store3.filled,
+            "highWaterMark": mock_data_store3.high_water_mark,
+        },
+    ]
+
+
+# Data stores with missing data should not generate an alert
+def test_storage_fill_alert_missing_data():
+    mock_data_store1 = _create_mock_data_store("foo", None, 80, 100)
+    mock_data_store2 = _create_mock_data_store("bar", 120, None, 120)
+    mock_data_store3 = _create_mock_data_store("baz", 150, 50, None)
+
+    database = MockDatabase(
+        [], [], [mock_data_store1, mock_data_store2, mock_data_store3]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.simple_rule_based_analysis_storage_capacity(-1)
+
+    assert backend.storage_fill_alerts == []
