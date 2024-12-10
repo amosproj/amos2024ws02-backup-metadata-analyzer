@@ -181,7 +181,7 @@ def test_alert_full_start_date():
     backend = MockBackend()
     backend.set_latest_alert_id("SIZE_ALERT", "FULL", "2")
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis(-1)
 
     assert backend.size_alerts == [{
@@ -222,7 +222,7 @@ def test_alert_diff_start_date():
     backend = MockBackend()
     backend.set_latest_alert_id("SIZE_ALERT", "DIFFERENTIAL", "2")
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_diff(-1)
 
     assert backend.size_alerts == [{
@@ -452,7 +452,7 @@ def test_alert_diff_start_date():
     backend = MockBackend()
     backend.set_latest_alert_id("SIZE_ALERT", "INCREMENTAL", "2")
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_inc(-1)
 
     assert backend.size_alerts == [{
@@ -530,7 +530,7 @@ def test_alert_exact_time():
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == []
@@ -546,7 +546,7 @@ def test_alert_small_time_deviation():
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4, mock_result5])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == []
@@ -559,7 +559,7 @@ def test_alert_time_on_the_limit():
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == []
@@ -575,7 +575,7 @@ def test_alert_moving_schedule():
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4, mock_result5])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == []
@@ -591,7 +591,7 @@ def test_alert_time_midnight_no_alert():
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4, mock_result5])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == []
@@ -606,7 +606,7 @@ def test_alert_unusual_time():
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == [{
@@ -625,7 +625,7 @@ def test_alert_two_different_schedules_same_task():
     database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == [{
@@ -643,7 +643,7 @@ def test_alert_time_midnight_alerts():
     database = MockDatabase([mock_result1, mock_result2, mock_result3])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == [{
@@ -666,7 +666,7 @@ def test_alert_creation_date_unordered():
     database = MockDatabase([mock_result4, mock_result2, mock_result3, mock_result1])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == [{
@@ -689,7 +689,7 @@ def test_alert_creation_date_different_tasks():
     database = MockDatabase([mock_result4, mock_result2, mock_result3, mock_result1])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == [{
@@ -709,7 +709,7 @@ def test_alert_latest_creation_date():
     backend = MockBackend()
     backend.set_latest_alert_id("CREATION_DATE_ALERT", None, "3")
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
     assert backend.creation_date_alerts == [{
@@ -728,7 +728,7 @@ def test_storage_fill_alert_empty():
     database = MockDatabase([], [], [mock_data_store1])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_storage_capacity(-1)
 
     assert backend.storage_fill_alerts == []
@@ -745,7 +745,7 @@ def test_storage_fill_alert_enough_capacity_left():
     )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_storage_capacity(-1)
 
     assert backend.storage_fill_alerts == []
@@ -762,7 +762,7 @@ def test_storage_fill_alert_enough_capacity_left():
     )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_storage_capacity(-1)
 
     assert backend.storage_fill_alerts == [
@@ -798,7 +798,7 @@ def test_storage_fill_alert_missing_data():
     )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_storage_capacity(-1)
 
     assert backend.storage_fill_alerts == []

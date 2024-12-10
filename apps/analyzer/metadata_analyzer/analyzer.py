@@ -68,7 +68,7 @@ class Analyzer:
 
         for result in results:
             # Only send real backups
-            if result.is_backup <= 0:
+            if (result.is_backup is not None) and (result.is_backup <= 0):
                 continue
 
             # Only send backups where the relevant data is not null
@@ -141,7 +141,7 @@ class Analyzer:
         variable, task_id, frequency, backup_type, window_size
     ):
         result = Analyzer.time_series_analyzer.k_means_analyze(
-            variable, task_id, frequency, backup_type, window_size
+            variable, task_id, frequency, backup_type, window_size)
 
     def simple_rule_based_analysis_creation_dates(alert_limit):
         data = list(Analyzer.database.get_results())
