@@ -107,17 +107,17 @@ export class AlertingService {
       where.backup = { creationDate: MoreThanOrEqual(date) };
     }
 
-    //Iterate over all alert repositories and get all alerts
     const alerts: Alert[] = [];
     for (const alertRepository of this.alertRepositories) {
-      // if(alertRepository.target.name===STORAGE_FILL_ALERT){
-
-      // }
-      if (alertRepository === this.storageFillRepository) {
-        alerts.push(...(await alertRepository.find()));
-      } else {
-        alerts.push(...(await alertRepository.find({ where })));
-      }
+      const repositoryAlerts = await alertRepository.find({
+        where: {
+          alertType: {
+            user_active: true,
+            master_active: true,
+          },
+        },
+      });
+      alerts.push(...repositoryAlerts);
     }
     return alerts;
   }

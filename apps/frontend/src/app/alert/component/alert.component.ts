@@ -7,7 +7,7 @@ import {
   StorageFillAlert,
 } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, tap } from 'rxjs';
 import { SeverityType } from '../../shared/enums/severityType';
 
 @Component({
@@ -17,6 +17,7 @@ import { SeverityType } from '../../shared/enums/severityType';
   providers: [DatePipe],
 })
 export class AlertComponent implements OnInit, OnDestroy {
+  protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
 
   alerts: Alert[] = [];
@@ -47,6 +48,7 @@ export class AlertComponent implements OnInit, OnDestroy {
     this.alertService
       .getAllAlerts(this.DAYS)
       .pipe(takeUntil(this.destroy$))
+      .pipe(tap((data) => console.log(data)))
       .subscribe((data: Alert[]) => {
         this.criticalAlertsCount = data.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL
@@ -156,7 +158,8 @@ export class AlertComponent implements OnInit, OnDestroy {
         break;
       case 'STORAGE_FILL_ALERT':
         const storageFillAlert = alert as StorageFillAlert;
-        description = `The current storage fill is ${storageFillAlert.filled.toString()} GiB, which is above the threshold of ${storageFillAlert.highWaterMark.toString()} GiB. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()} GiB`;
+        description = `The current storage fill is ${storageFillAlert.filled.toString()} GiB, which is above the threshold of ${storageFillAlert.highWaterMark.toString()}
+         GiB. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()} GiB`;
         break;
     }
     return description;
@@ -166,7 +169,7 @@ export class AlertComponent implements OnInit, OnDestroy {
     return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
   }
 
-  protected readonly SeverityType = SeverityType;
+  
 
   ngOnDestroy(): void {
     this.destroy$.next();
