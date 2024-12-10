@@ -4,7 +4,12 @@ import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { Alert } from '../../alerting/entity/alerts/alert';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
-import { CREATION_DATE_ALERT, SIZE_ALERT } from '../constants';
+import { StorageFillAlertEntity } from '../../alerting/entity/alerts/storageFillAlert.entity';
+import {
+  CREATION_DATE_ALERT,
+  SIZE_ALERT,
+  STORAGE_FILL_ALERT,
+} from '../constants';
 import { CreationDateAlertEntity } from '../../alerting/entity/alerts/creationDateAlert.entity';
 import { CreateMailReceiverDto } from './dto/createMailReceiver.dto';
 import { MailReceiverEntity } from './entity/MailReceiver.entity';
@@ -38,7 +43,7 @@ export class MailService {
       .map((receiver) => receiver.mail)
       .join(',')
       .split(',');
-    
+
     let reason = '';
     let description = '';
     let valueColumnName = '';
@@ -85,6 +90,15 @@ export class MailService {
         value = creationDateAlert.date.toString();
         referenceValue = creationDateAlert.referenceDate.toString();
         break;
+      case STORAGE_FILL_ALERT:
+        const storageFillAlert = alert as StorageFillAlertEntity;
+        valueColumnName = 'Storage Fill Value';
+        referenceValueColumnName = 'Available storage the system should have';
+        reason = `Less available storage space than expected`;
+        description = `The current storage fill is ${storageFillAlert.filled.toString()}, which is above the threshold of ${storageFillAlert.highWaterMark.toString()}. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()}`;
+        value = storageFillAlert.filled.toString();
+        referenceValue = storageFillAlert.highWaterMark.toString();
+        break;
     }
 
     const context = {
@@ -94,8 +108,8 @@ export class MailService {
       referenceValue,
       valueColumnName,
       referenceValueColumnName,
-      backupId: alert.backup.id,
-      creationDate: alert.backup.creationDate.toLocaleString(),
+      backupId: alert.backup?.id ?? '-',
+      creationDate: alert.backup?.creationDate.toLocaleString() ?? '-',
     };
 
     const logoPath = path.resolve('apps/backend/src/assets/team_logo.png');
