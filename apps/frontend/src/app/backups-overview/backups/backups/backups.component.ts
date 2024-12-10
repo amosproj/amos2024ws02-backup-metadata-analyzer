@@ -50,7 +50,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   pageSize = 10;
   protected backupSizeFilter: CustomFilter;
   protected backupDateFilter: CustomFilter;
-  protected backupIdFilter: CustomFilter;
   protected selectedTask: BackupTask[] = [];
   protected filterPanel: boolean = false;
   protected backupSavesetFilter: CustomFilter;
@@ -87,7 +86,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
     this.backupSavesetFilter = new CustomFilter('saveset');
-    this.backupIdFilter = new CustomFilter('id');
     this.taskFilter = new CustomFilter('taskName');
 
     /**
@@ -190,7 +188,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
       this.backupSavesetFilter.changes.pipe(startWith(null)),
-      this.backupIdFilter.changes.pipe(startWith(null)),
       this.taskFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
@@ -258,10 +255,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     if (this.backupSizeFilter.isActive()) {
       params.fromSizeMB = this.backupSizeFilter.ranges.fromSizeMB;
       params.toSizeMB = this.backupSizeFilter.ranges.toSizeMB;
-    }
-
-    if (this.backupIdFilter.isActive()) {
-      params.id = this.backupIdFilter.ranges.id;
     }
 
     if(this.backupSavesetFilter.isActive()) {

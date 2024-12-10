@@ -166,23 +166,23 @@ describe('BackupsComponent', () => {
     });
 
     it('should build filter params with active id filter', () => {
-      const idFilter = new CustomFilter('id');
-      idFilter.ranges = {
+      const savesetFilter = new CustomFilter('saveset');
+      savesetFilter.ranges = {
         fromDate: null,
         toDate: null,
         fromSizeMB: null,
-        saveset: null,
+        saveset: "saveset",
         toSizeMB: null,
         id: '000d88',
         taskName: null,
       };
-      (idFilter.ranges as any)['_isActive'] = true;
+      (savesetFilter.ranges as any)['_isActive'] = true;
 
-      component['backupIdFilter'] = idFilter;
+      component['backupSavesetFilter'] = savesetFilter;
 
       const params = component['buildFilterParams']();
 
-      expect(params.id).toBe(idFilter.ranges.id);
+      expect(params.saveset).toBe(savesetFilter.ranges.saveset);
     });
 
     it('should build filter params with active task filter', () => {

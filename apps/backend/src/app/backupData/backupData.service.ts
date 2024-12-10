@@ -217,11 +217,6 @@ export class BackupDataService extends PaginationService {
         },
       };
     }
-    if( backupDataOrderOptionsDto.orderBy === BackupDataOrderByOptions.SAVESET) {
-      return {
-        saveset: backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
-      };
-    }
     return {
       [backupDataOrderOptionsDto.orderBy ?? 'creationDate']:
         backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
