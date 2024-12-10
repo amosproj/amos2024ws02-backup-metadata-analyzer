@@ -246,7 +246,7 @@ def runTimeSeriesTests():
         return "Missing field of type " + field
 
     try:
-        result = Time_series_analyzer.k_means_analyze(
+        result = Analyzer.simple_time_series_analysis(
             variable, task_id, frequency, backup_type, window_size
         )
         return jsonify(result)
@@ -352,9 +352,15 @@ def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
-    time_series_analyzer = Time_series_analyzer()
+    time_series_analyzer = Time_series_analyzer(database)
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, simple_analyzer, simple_rule_based_analyzer)
+    Analyzer.init(
+        database,
+        backend,
+        simple_analyzer,
+        simple_rule_based_analyzer,
+        time_series_analyzer,
+    )
 
     print(f"FLASK_RUN_HOST: {os.getenv('FLASK_RUN_HOST')}")
     print(f"FLASK_RUN_PORT: {os.getenv('FLASK_RUN_PORT')}")

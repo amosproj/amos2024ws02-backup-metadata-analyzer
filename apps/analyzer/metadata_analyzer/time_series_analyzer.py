@@ -11,10 +11,10 @@ from darts.ad.detectors import QuantileDetector
 class Time_series_analyzer:
     df = ""
 
-    def __init__(self):
+    def __init__(self, database):
         global df
         # Create an engine using shared init
-        database = Database()
+        database = database
         # read table into a dataframe
         with database.engine.connect() as conn, conn.begin():
             df = pd.read_sql_table("results", conn)
@@ -34,7 +34,7 @@ class Time_series_analyzer:
         # sorts dataframe by sbc_start
         df = df.sort_values("sbc_start")
 
-    def k_means_analyze(variable, task_id, frequency, backup_type, window_size):
+    def k_means_analyze(self, variable, task_id, frequency, backup_type, window_size):
         working_df = Time_series_analyzer.task_preprocessing(
             backup_type, task_id, variable
         )

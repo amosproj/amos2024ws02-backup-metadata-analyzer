@@ -1,9 +1,16 @@
 class Analyzer:
-    def init(database, backend, simple_analyzer, simple_rule_based_analyzer):
+    def init(
+        database,
+        backend,
+        simple_analyzer,
+        simple_rule_based_analyzer,
+        time_series_analyzer,
+    ):
         Analyzer.database = database
         Analyzer.backend = backend
         Analyzer.simple_analyzer = simple_analyzer
         Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
+        Analyzer.time_series_analyzer = time_series_analyzer
 
     def analyze():
         data = list(Analyzer.database.get_results())
@@ -58,13 +65,21 @@ class Analyzer:
         data = list(Analyzer.database.get_results())
         result = Analyzer.simple_rule_based_analyzer.analyze(data, alert_limit)
         return result
-    
+
     def simple_rule_based_analysis_diff(alert_limit):
         data = list(Analyzer.database.get_results())
-        result = Analyzer.simple_rule_based_analyzer.analyze_diff(data,alert_limit)
+        result = Analyzer.simple_rule_based_analyzer.analyze_diff(data, alert_limit)
         return result
-    
+
     def simple_rule_based_analysis_inc(alert_limit):
         data = list(Analyzer.database.get_results())
-        result = Analyzer.simple_rule_based_analyzer.analyze_inc(data,alert_limit)
+        result = Analyzer.simple_rule_based_analyzer.analyze_inc(data, alert_limit)
+        return result
+
+    def simple_time_series_analysis(
+        variable, task_id, frequency, backup_type, window_size
+    ):
+        result = Analyzer.time_series_analyzer.k_means_analyze(
+            variable, task_id, frequency, backup_type, window_size
+        )
         return result
