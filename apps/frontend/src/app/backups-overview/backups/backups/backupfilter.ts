@@ -8,25 +8,33 @@ export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
     toDate: string | null;
     fromSizeMB: number | null;
     toSizeMB: number | null;
+    id: string | null;
+    taskName: string | null;
   } = {
     fromDate: null,
     toDate: null,
     fromSizeMB: null,
     toSizeMB: null,
+    id: null,
+    taskName: null,
   };
 
   public changes = new Subject<any>();
-  public filterType: 'date' | 'size';
+  public filterType: 'date' | 'size' | 'id' | 'taskName';
 
-  constructor(filterType: 'date' | 'size') {
+  constructor(filterType: 'date' | 'size' | 'id' | 'taskName') {
     this.filterType = filterType;
   }
 
   isActive(): boolean {
     if (this.filterType === 'date') {
       return !!(this.ranges.fromDate || this.ranges.toDate);
-    } else {
+    } else if (this.filterType === 'size') {
       return !!(this.ranges.fromSizeMB || this.ranges.toSizeMB);
+    } else if (this.filterType === 'taskName') {
+      return !!this.ranges.taskName;
+    } else {
+      return !!this.ranges.id;
     }
   }
 

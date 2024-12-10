@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 import { BackupType } from './backupType';
 
 export class CreateBackupDataDto {
@@ -23,7 +29,7 @@ export class CreateBackupDataDto {
     nullable: false,
     required: true,
     enum: BackupType,
-    default: BackupType.FULL
+    default: BackupType.FULL,
   })
   @IsOptional()
   @IsEnum(BackupType)
@@ -34,6 +40,13 @@ export class CreateBackupDataDto {
     nullable: false,
     required: true,
   })
-  @IsString()
+  @IsDateString({ strict: true })
   creationDate!: Date;
+
+  @ApiProperty({
+    description: 'Task Id',
+    nullable: true,
+    required: false,
+  })
+  taskId?: string;
 }

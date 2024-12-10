@@ -2,11 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataModule } from './backupData.module';
 import { BackupType } from './dto/backupType';
+import { TaskEntity } from '../tasks/entity/task.entity';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
@@ -40,6 +41,10 @@ describe('BackupDataController (e2e)', () => {
     })
       .overrideProvider(getRepositoryToken(BackupDataEntity))
       .useValue(mockBackupDataRepository)
+      .overrideProvider(getRepositoryToken(TaskEntity))
+      .useValue({
+        findOneBy: jest.fn().mockResolvedValue(new TaskEntity()),
+      })
       .compile();
 
     repository = module.get(getRepositoryToken(BackupDataEntity));
@@ -90,10 +95,10 @@ describe('BackupDataController (e2e)', () => {
     });
   });
 
-  it('/backupData (GET) with pagination should return paginated backup data entries', async () => {
+  it('/backupData/filter (POST) with pagination should return paginated backup data entries', async () => {
     const response = await request(app.getHttpServer())
-      .get('/backupData?offset=0&limit=1')
-      .expect(200);
+      .post('/backupData/filter?offset=0&limit=1')
+      .expect(201);
 
     expect(response.body).toEqual({
       data: [
@@ -117,10 +122,10 @@ describe('BackupDataController (e2e)', () => {
     });
   });
 
-  it('/backupData (GET) with date range should return backup data entries within date range', async () => {
+  it('/backupData/filter (POST) with date range should return backup data entries within date range', async () => {
     const response = await request(app.getHttpServer())
-      .get('/backupData?fromDate=2023-12-01&toDate=2023-12-31')
-      .expect(200);
+      .post('/backupData/filter?fromDate=2023-12-01&toDate=2023-12-31')
+      .expect(201);
 
     expect(response.body).toEqual({
       data: [
@@ -137,6 +142,57 @@ describe('BackupDataController (e2e)', () => {
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
       where: { creationDate: expect.any(Object), type: BackupType.FULL },
+    });
+  });
+  it('/backupData/filter (POST) with taskId should return backup data entries with the specified taskId', async () => {
+    await request(app.getHttpServer())
+      .post('/backupData/filter?taskId=task-123')
+      .expect(201);
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: { taskId: { id: 'task-123' }, type: BackupType.FULL },
+    });
+  });
+
+  it('/backupData/filter (POST) with taskName should return backup data entries with the specified taskName', async () => {
+    await request(app.getHttpServer())
+      .post('/backupData/filter?taskName=backup-task')
+      .expect(201);
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: {
+        taskId: { displayName: ILike('%backup-task%') },
+        type: BackupType.FULL,
+      },
+    });
+  });
+
+  it('/backupData/filter (POST) with multiple taskIds should return backup data entries with the specified taskIds', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/backupData/filter')
+      .send({ taskIds: ['task-1', 'task-2'] })
+      .expect(201);
+
+    expect(response.body).toEqual({
+      data: [
+        {
+          ...mockBackupDataEntity,
+          creationDate: mockBackupDataEntity.creationDate.toISOString(),
+        },
+      ],
+      paginationData: {
+        total: 1,
+      },
+    });
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: {
+        taskId: [{ id: 'task-1' }, { id: 'task-2' }],
+        type: BackupType.FULL,
+      },
     });
   });
 });

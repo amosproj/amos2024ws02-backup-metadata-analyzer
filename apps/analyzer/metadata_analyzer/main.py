@@ -149,23 +149,205 @@ def update_data():
 
 @app.route("/simpleRuleBasedAnalysis", methods=["POST"])
 def simple_rule_based_analysis():
-    json = request.get_json()
-    alert_limit = json["alertLimit"]
-    return jsonify(Analyzer.simple_rule_based_analysis(alert_limit))
+    """Fulfills a simple rule based analysis on full backups.
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    definitions:
+        Alerts:
+            type: object
+            properties:
+                type:
+                    type: int
+                    example: 1
+                value:
+                    type: int
+                    example: 12345
+                referenceValue:
+                    type: int
+                    example: 12300
+                backupId:
+                    type: string
+        AlertLimit:
+            type: object
+            properties:
+                alertLimit:
+                    type: int
+                    example: 1
+    responses:
+        200:
+            description: Alerts for the analyzed data
+            schema:
+                $ref: '#/definitions/Alerts'
+        400:
+            description: The value set for the alert limit was not valid
+    """
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(Analyzer.simple_rule_based_analysis(int(alert_limit)))
+    except ValueError:
+        print("Alert limit is not a number")
+        return "Invalid value for alert limit", 400
+
 
 
 @app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
 def simple_rule_based_analysis_diff():
-    json = request.get_json()
-    alert_limit = json["alertLimit"]
-    return jsonify(Analyzer.simple_rule_based_analysis_diff(alert_limit))
+    """Fulfills a simple rule based analysis on diff backups.
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    definitions:
+        Alerts:
+            type: object
+            properties:
+                type:
+                    type: int
+                    example: 1
+                value:
+                    type: int
+                    example: 12345
+                referenceValue:
+                    type: int
+                    example: 12300
+                backupId:
+                    type: string
+        AlertLimit:
+            type: object
+            properties:
+                alertLimit:
+                    type: int
+                    example: 1
+    responses:
+        200:
+            description: Alerts for the analyzed data
+            schema:
+                $ref: '#/definitions/Alerts'
+        400:
+            description: The value set for the alert limit was not valid
+    """
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(Analyzer.simple_rule_based_analysis_diff(int(alert_limit)))
+    except ValueError:
+        print("Alert limit is not a number")
+        return "Invalid value for alert limit", 400
+
 
 
 @app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
 def simple_rule_based_analysis_inc():
-    json = request.get_json()
-    alert_limit = json["alertLimit"]
-    return jsonify(Analyzer.simple_rule_based_analysis_inc(alert_limit))
+    """Fulfills a simple rule based analysis on inc backups.
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    definitions:
+        Alerts:
+            type: object
+            properties:
+                type:
+                    type: int
+                    example: 1
+                value:
+                    type: int
+                    example: 12345
+                referenceValue:
+                    type: int
+                    example: 12300
+                backupId:
+                    type: string
+        AlertLimit:
+            type: object
+            properties:
+                alertLimit:
+                    type: int
+                    example: 1
+    responses:
+        200:
+            description: Alerts for the analyzed data
+            schema:
+                $ref: '#/definitions/Alerts'
+        400:
+            description: The value set for the alert limit was not valid
+    """
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(Analyzer.simple_rule_based_analysis_inc(int(alert_limit)))
+    except ValueError:
+        print("Alert limit is not a number")
+        return "Invalid value for alert limit", 400
+
+
+@app.route("/simpleRuleBasedAnalysisCreationDates", methods=["POST"])
+def simple_rule_based_analysis_creation_dates():
+    """Runs a simple rule based analysis on full backups searching for unusual creation times
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    responses:
+        200:
+            description: Number of created alerts
+        400:
+            description: The value set for the alert limit was not valid
+    """
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(Analyzer.simple_rule_based_analysis_creation_dates(int(alert_limit)))
+    except ValueError:
+        return "Invalid value for alert limit", 400
+
+
+@app.route("/simpleRuleBasedAnalysisStorageCapacity", methods=["POST"])
+def simple_rule_based_analysis_storage_capacity():
+    """Runs a simple rule based analysis on data stores searching for ones with
+    almost full
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    responses:
+        200:
+            description: Number of created alerts
+        400:
+            description: The value set for the alert limit was not valid
+    """
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(
+            Analyzer.simple_rule_based_analysis_storage_capacity(int(alert_limit))
+        )
+    except ValueError:
+        return "Invalid value for alert limit", 400
+
 
 
 # TODO yaml for swagger

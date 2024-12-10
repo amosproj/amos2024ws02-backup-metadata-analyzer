@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BASE_URL } from '../../../shared/types/configuration';
 import { FindTestDataComponent } from './find-test-data.component';
 import { TestUploadServiceService } from '../../service/test-upload-service.service';
-import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ClarityModule } from '@clr/angular';
 

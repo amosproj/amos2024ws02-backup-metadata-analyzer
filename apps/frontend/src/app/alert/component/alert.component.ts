@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
 import { Alert, CreationDateAlert, SizeAlert } from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
@@ -11,7 +11,7 @@ import { SeverityType } from '../../shared/enums/severityType';
   styleUrl: './alert.component.css',
   providers: [DatePipe],
 })
-export class AlertComponent implements OnInit {
+export class AlertComponent implements OnInit, OnDestroy {
   readonly DAYS = 7;
 
   alerts: Alert[] = [];
@@ -30,6 +30,12 @@ export class AlertComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAlerts();
+    this.alertService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadAlerts();
+      });
   }
 
   loadAlerts(): void {
@@ -37,19 +43,16 @@ export class AlertComponent implements OnInit {
       .getAllAlerts(this.DAYS)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data: Alert[]) => {
-        const criticalAlerts = data.filter(
+        this.criticalAlertsCount = data.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL
-        );
-        const warningAlerts = data.filter(
+        ).length;
+        this.warningAlertsCount = data.filter(
           (alert) => alert.alertType.severity === SeverityType.WARNING
-        );
-        const infoAlerts = data.filter(
+        ).length;
+        this.infoAlertsCount = data.filter(
           (alert) => alert.alertType.severity === SeverityType.INFO
-        );
-        this.criticalAlertsCount = criticalAlerts.length;
-        this.warningAlertsCount = warningAlerts.length;
-        this.infoAlertsCount = infoAlerts.length;
-        this.alerts = [...criticalAlerts, ...warningAlerts, ...infoAlerts];
+        ).length;
+        this.alerts = data;
         this.status = this.getStatus();
       });
   }
@@ -151,4 +154,9 @@ export class AlertComponent implements OnInit {
   }
 
   protected readonly SeverityType = SeverityType;
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

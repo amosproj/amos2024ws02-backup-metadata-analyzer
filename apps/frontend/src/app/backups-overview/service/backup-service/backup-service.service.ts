@@ -5,6 +5,7 @@ import { BASE_URL } from '../../../shared/types/configuration';
 import { Backup } from '../../../shared/types/backup';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
+import { BackupTask } from '../../../shared/types/backup.task';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,8 @@ export class BackupService {
   ) {}
 
   getAllBackups(
-    filterParams: BackupFilterParams
+    filterParams: BackupFilterParams & { taskIds?: string[] },
+    selectedTasks?: string[]
   ): Observable<APIResponse<Backup>> {
     const cleanParams = Object.fromEntries(
       Object.entries(filterParams).filter(
@@ -31,11 +33,18 @@ export class BackupService {
     };
 
     const params = new HttpParams({ fromObject: cleanParams });
+    const body = {
+      taskIds: selectedTasks,
+    };
 
     return this.http
-      .get<APIResponse<Backup>>(`${this.baseUrl}/backupData`, {
+      .post<APIResponse<Backup>>(`${this.baseUrl}/backupData/filter`, body, {
         params: params,
       })
       .pipe(shareReplay(1));
+  }
+
+  getAllBackupTasks(): Observable<BackupTask[]> {
+    return this.http.get<BackupTask[]>(`${this.baseUrl}/tasks`);
   }
 }

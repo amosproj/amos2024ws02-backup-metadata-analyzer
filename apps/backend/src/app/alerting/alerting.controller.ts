@@ -14,15 +14,19 @@ import {
   ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { Alert } from './entity/alerts/alert';
+import { BackupType } from '../backupData/dto/backupType';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { AlertStatusDto } from './dto/alertStatus.dto';
+import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 
+@ApiTags('Alerting')
 @Controller('alerting')
 export class AlertingController {
   readonly logger = new Logger(AlertingController.name);
@@ -126,5 +130,36 @@ export class AlertingController {
     await this.alertingService.createCreationDateAlert(
       createCreationDateAlertDto
     );
+  }
+
+  @Post('storageFill')
+  @ApiOperation({ summary: 'Create a new storage fill alert.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateStorageFillAlertDto })
+  async storageFillAlert(
+    @Body() createStorageFillAlertDto: CreateStorageFillAlertDto
+  ): Promise<void> {
+    await this.alertingService.createStorageFillAlert(
+      createStorageFillAlertDto
+    );
+  }
+
+  @Get('type/:typeName/latest')
+  @ApiOperation({
+    summary:
+      'Gets the id of the backup with the latest alert of the given type.',
+  })
+  @ApiNotFoundResponse({ description: 'Alert type not found' })
+  @ApiQuery({
+    name: 'backupType',
+    description: 'Filter by backup type',
+    required: false,
+    enum: BackupType,
+  })
+  async getBackupDateFromLatestAlert(
+    @Param('typeName') typeName: string,
+    @Query('backupType') backupType?: BackupType
+  ): Promise<string | null> {
+    return this.alertingService.getLatestAlertsBackup(typeName, backupType);
   }
 }

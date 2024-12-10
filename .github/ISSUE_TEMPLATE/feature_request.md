@@ -18,9 +18,11 @@ assignees: ''
 * ...
 
 ## Definition of done (DoD)
-* Added only after week 5
-* The same for all features
-* Here goes the project specific part
+* Github actions pipline: success / All test: success
+* All acceptance criteria are met
+* Code review done and approved
+* Is merged to Dev branch
+* Tests for new feature are implemented
 
 ## DoD general criteria
 * Feature has been fully implemented

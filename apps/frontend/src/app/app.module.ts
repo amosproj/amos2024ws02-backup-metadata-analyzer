@@ -10,12 +10,19 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
 import {
-  ClarityIcons, errorStandardIcon,
+  ClarityIcons,
+  errorStandardIcon,
   homeIcon,
   searchIcon,
   tableIcon,
   uploadCloudIcon,
-  warningStandardIcon
+  warningStandardIcon,
+  cogIcon,
+  bellIcon,
+  angleIcon,
+  tagIcon,
+  dataClusterIcon,
+  filterIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -23,6 +30,7 @@ import { FindTestDataComponent } from './test-upload/component/find-test-data/fi
 import { BackupsComponent } from './backups-overview/backups/backups/backups.component';
 import { BASE_URL } from './shared/types/configuration';
 import { AlertComponent } from './alert/component/alert.component';
+import { NotificationSettingsComponent } from './management/components/settings/notification-settings/notification-settings.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +39,7 @@ import { AlertComponent } from './alert/component/alert.component';
     FindTestDataComponent,
     BackupsComponent,
     AlertComponent,
+    NotificationSettingsComponent,
   ],
   imports: [
     BrowserModule,
@@ -55,7 +64,12 @@ export class AppModule {
       tableIcon,
       warningStandardIcon,
       errorStandardIcon,
-
+      cogIcon,
+      bellIcon,
+      angleIcon,
+      tagIcon,
+      dataClusterIcon,
+      filterIcon
     );
   }
 }

@@ -13,7 +13,6 @@ def test_hello_world():
     """Test the hello_world function."""
     assert hello_world() == "Hello, world!"
 
-
 def test_update_data():
     mock_result = Result()
     mock_result.uuid = "1"
@@ -27,3 +26,4 @@ def test_update_data():
     Analyzer.update_data()
 
     assert backend.backups == [Analyzer._convert_result(mock_result)]
+
