@@ -72,22 +72,6 @@
       (clrDgRefresh)="refresh($event)"
       [clrDgLoading]="loading"
     >
-      <clr-dg-column [clrDgField]="'id'">
-        <ng-container *clrDgHideableColumn>
-          Backup ID
-          <clr-dg-filter [clrDgFilter]="backupIdFilter">
-            <clr-input-container>
-              <label>ID:</label>
-              <input
-                clrInput
-                type="string"
-                [(ngModel)]="backupIdFilter.ranges.id"
-                (ngModelChange)="backupIdFilter.updateRanges({ id: $event })"
-              />
-            </clr-input-container>
-          </clr-dg-filter>
-        </ng-container>
-      </clr-dg-column>
 
       <clr-dg-column [clrDgField]="'saveset'">
         <ng-container *clrDgHideableColumn>
@@ -180,7 +164,6 @@
 
       <clr-dg-placeholder>We couldn't find any backups!</clr-dg-placeholder>
       <clr-dg-row *ngFor="let backup of backups.data" [clrDgItem]="backup">
-        <clr-dg-cell>{{ backup.id }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.saveset }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.taskId?.displayName ?? '' }}</clr-dg-cell>
