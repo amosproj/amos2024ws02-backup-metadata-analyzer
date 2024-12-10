@@ -6,13 +6,7 @@ export class CreateSizeAlertDto {
     description: 'Uuid of the Backup',
     required: true,
   })
-  backupUuid!: string;
-
-  @ApiProperty({
-    description: 'Saveset name of the belonging backup',
-    required: true,
-  })
-  backupSaveset!: string;
+  backupId!: string;
 
   @ApiProperty({
     description: 'Size of the Backup, which is the reason for the alert',

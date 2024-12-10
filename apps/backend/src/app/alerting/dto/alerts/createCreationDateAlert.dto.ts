@@ -6,13 +6,7 @@ export class CreateCreationDateAlertDto {
     description: 'Uuid of the Backup',
     required: true,
   })
-  backupUuid!: string;
-
-  @ApiProperty({
-    description: 'Saveset name of the belonging backup',
-    required: true,
-  })
-  backupSaveset!: string;
+  backupId!: string;
 
   @ApiProperty({
     description: 'Date, the backup started',
