@@ -22,11 +22,13 @@ describe('BackupsComponent', () => {
         id: '1',
         sizeMB: 500,
         creationDate: new Date(),
+        saveset: ''
       },
       {
         id: '2',
         sizeMB: 750,
         creationDate: new Date(),
+        saveset: ''
       },
     ],
     paginationData: {
@@ -128,6 +130,7 @@ describe('BackupsComponent', () => {
         toDate: new Date('2023-12-31').toISOString(),
         id: null,
         fromSizeMB: null,
+        saveset: null,
         toSizeMB: null,
         taskName: null,
       };
@@ -146,6 +149,7 @@ describe('BackupsComponent', () => {
       sizeFilter.ranges = {
         fromDate: null,
         toDate: null,
+        saveset: null,
         fromSizeMB: 100,
         toSizeMB: 500,
         id: null,
@@ -162,22 +166,23 @@ describe('BackupsComponent', () => {
     });
 
     it('should build filter params with active id filter', () => {
-      const idFilter = new CustomFilter('id');
-      idFilter.ranges = {
+      const savesetFilter = new CustomFilter('saveset');
+      savesetFilter.ranges = {
         fromDate: null,
         toDate: null,
         fromSizeMB: null,
+        saveset: "saveset",
         toSizeMB: null,
         id: '000d88',
         taskName: null,
       };
-      (idFilter.ranges as any)['_isActive'] = true;
+      (savesetFilter.ranges as any)['_isActive'] = true;
 
-      component['backupIdFilter'] = idFilter;
+      component['backupSavesetFilter'] = savesetFilter;
 
       const params = component['buildFilterParams']();
 
-      expect(params.id).toBe(idFilter.ranges.id);
+      expect(params.saveset).toBe(savesetFilter.ranges.saveset);
     });
 
     it('should build filter params with active task filter', () => {
@@ -185,6 +190,7 @@ describe('BackupsComponent', () => {
       taskFilter.ranges = {
         fromDate: null,
         toDate: null,
+        saveset: null, 
         fromSizeMB: null,
         toSizeMB: null,
         id: null,

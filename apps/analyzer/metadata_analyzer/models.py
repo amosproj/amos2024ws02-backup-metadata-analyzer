@@ -9,6 +9,7 @@ class BackupData(Base):
     __tablename__ = "BackupData"
 
     id: Mapped[str] = mapped_column(primary_key=True)
+    saveset: Mapped[str]
     sizeMB: Mapped[int]
     creationDate: Mapped[datetime]
     bio: Mapped[str]

@@ -6,9 +6,10 @@ from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
 
 
-def _create_mock_result(task, uuid, fdi_type, data_size, start_time, task_uuid=None, is_backup=1):
+def _create_mock_result(task, uuid, saveset, fdi_type, data_size, start_time, task_uuid=None, is_backup=1):
 	mock_result = Result()
 	mock_result.task = task
+	mock_result.saveset = saveset
 	mock_result.uuid = uuid
 	mock_result.fdi_type = fdi_type
 	mock_result.data_size = data_size
@@ -26,10 +27,10 @@ def _create_mock_task(uuid, task):
 
 
 def test_update_data_all_types():
-	mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"))
-	mock_result2 = _create_mock_result("foo", "2", "D", 150_000_000, datetime.fromisoformat("2000-01-02"))
-	mock_result3 = _create_mock_result("foo", "3", "I", 200_000_000, datetime.fromisoformat("2000-01-03"))
-	mock_result4 = _create_mock_result("foo", "4", "C", 250_000_000, datetime.fromisoformat("2000-01-04"), '123')
+	mock_result1 = _create_mock_result("foo", "1", "saveset1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"))
+	mock_result2 = _create_mock_result("foo", "2", "saveset2", "D", 150_000_000, datetime.fromisoformat("2000-01-02"))
+	mock_result3 = _create_mock_result("foo", "3", "saveset3", "I", 200_000_000, datetime.fromisoformat("2000-01-03"))
+	mock_result4 = _create_mock_result("foo", "4", "saveset4", "C", 250_000_000, datetime.fromisoformat("2000-01-04"), '123')
 	mock_results = [mock_result1, mock_result2, mock_result3, mock_result4]
 
 	mock_task1 = _create_mock_task("1", "task1")
@@ -46,25 +47,29 @@ def test_update_data_all_types():
 		"sizeMB": mock_result1.data_size / 1_000_000,
 		"creationDate": mock_result1.start_time.isoformat(),
 		"type": "FULL",
-		"taskId": None
+		"taskId": None,
+		"saveset": mock_result1.saveset
 	}, {
 		"id": mock_result2.uuid,
 		"sizeMB": mock_result2.data_size / 1_000_000,
 		"creationDate": mock_result2.start_time.isoformat(),
 		"type": "DIFFERENTIAL",
-		"taskId": None
+		"taskId": None,
+		"saveset": mock_result2.saveset
 	}, {
 		"id": mock_result3.uuid,
 		"sizeMB": mock_result3.data_size / 1_000_000,
 		"creationDate": mock_result3.start_time.isoformat(),
 		"type": "INCREMENTAL",
-		"taskId": None
+		"taskId": None,
+		"saveset": mock_result3.saveset
 	}, {
 		"id": mock_result4.uuid,
 		"sizeMB": mock_result4.data_size / 1_000_000,
 		"creationDate": mock_result4.start_time.isoformat(),
 		"type": "COPY",
-		"taskId": '123'
+		"taskId": '123',
+		"saveset": mock_result4.saveset
 	}]
 
 	assert backend.tasks == [

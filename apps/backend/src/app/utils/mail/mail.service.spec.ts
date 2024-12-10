@@ -88,6 +88,7 @@ describe('MailService', () => {
         sizeMB: 100,
         type: BackupType.FULL,
         creationDate: new Date(),
+        saveset: 'saveset1',
       },
     };
 

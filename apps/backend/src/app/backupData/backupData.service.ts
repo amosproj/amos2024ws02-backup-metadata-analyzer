@@ -191,6 +191,11 @@ export class BackupDataService extends PaginationService {
       };
     }
 
+    //Saveset search
+    if (backupDataFilterDto.saveset) {
+      where.saveset = ILike(`%${backupDataFilterDto.saveset}%`);
+    }
+
     where.type = BackupType.FULL;
 
     return where;

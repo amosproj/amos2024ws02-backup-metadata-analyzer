@@ -1,6 +1,4 @@
 import datetime
-
-
 class Analyzer:
     def init(
         database,
@@ -37,6 +35,7 @@ class Analyzer:
         }[result.fdi_type]
         return {
             "id": result.uuid,
+            "saveset": result.saveset,
             "sizeMB": result.data_size / 1_000_000,
             "creationDate": result.start_time.isoformat(),
             "type": backup_type,

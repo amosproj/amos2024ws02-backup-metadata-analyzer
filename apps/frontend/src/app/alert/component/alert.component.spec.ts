@@ -44,7 +44,10 @@ describe('AlertComponent', () => {
             user_active: false,
             master_active: false
           },
-          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+          backup: {
+            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
+            saveset: 'saveset'
+          },
         },
         {
           id: randomUUID().toString(),
@@ -54,7 +57,10 @@ describe('AlertComponent', () => {
             user_active: false,
             master_active: false
           },
-          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+          backup: {
+            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
+            saveset: 'saveset'
+          },
         },
         {
           id: randomUUID().toString(),
@@ -64,7 +70,10 @@ describe('AlertComponent', () => {
             user_active: false,
             master_active: false
           },
-          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+          backup: {
+            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
+            saveset: 'saveset'
+          },
         },
       ];
 
@@ -104,7 +113,10 @@ describe('AlertComponent', () => {
             user_active: false,
             master_active: false
           },
-          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+          backup: {
+            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
+            saveset: 'saveset'
+          },
         },
       ];
       expect(component.getStatus()).toBe('Critical');
@@ -120,7 +132,10 @@ describe('AlertComponent', () => {
             user_active: false,
             master_active: false
           },
-          backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+          backup: {
+            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
+            saveset: 'saveset'
+          },
         },
       ];
       expect(component.getStatus()).toBe('Warning');
@@ -151,7 +166,10 @@ describe('AlertComponent', () => {
           user_active: false,
           master_active: false
         },
-        backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+        backup: {
+          id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
+          saveset: 'saveset'
+        },
       };
 
       const nonCriticalAlert: Alert =         {
@@ -162,7 +180,10 @@ describe('AlertComponent', () => {
           user_active: false,
           master_active: false
         },
-        backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+        backup: {
+          id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
+          saveset: 'saveset'
+        },
       };
 
       expect(component.getAlertClass(criticalAlert)).toBe('alert-red');
@@ -180,7 +201,10 @@ describe('AlertComponent', () => {
           user_active: false,
           master_active: false
         },
-        backup: { id: randomUUID().toString(), sizeMB: 20, creationDate: new Date() },
+        backup: {
+          id: randomUUID().toString(), sizeMB: 20, creationDate: new Date(),
+          saveset: 'saveset'
+        },
         size: 20,
         referenceSize: 100
       };
@@ -197,7 +221,10 @@ describe('AlertComponent', () => {
           user_active: false,
           master_active: false
         },
-        backup: { id: randomUUID().toString(), sizeMB: 100, creationDate: new Date() },
+        backup: {
+          id: randomUUID().toString(), sizeMB: 100, creationDate: new Date(),
+          saveset: 'saveset'
+        },
         size: 100,
         referenceSize: 20
       };
