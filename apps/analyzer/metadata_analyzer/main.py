@@ -433,7 +433,7 @@ def runTimeSeriesTests():
         )
         return jsonify(result)
     except ValueError as val:
-        return "Value error occured: " + str(val), 401
+        return "Value error occured: " + str(val), 400
 
 
 @app.route("/getTaskIds", methods=["GET"])
@@ -525,7 +525,7 @@ def return_frequencies():
         field = "variable"
         variable = json["variable"]
     except KeyError:
-        return "Missing field of type " + field
+        return "Missing field of type " + field, 400
 
     return jsonify(Time_series_analyzer.get_frequencies(task_id, backup_type, variable))
 
