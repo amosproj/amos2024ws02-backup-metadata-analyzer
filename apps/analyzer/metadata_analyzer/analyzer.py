@@ -135,3 +135,10 @@ class Analyzer:
         start_date = Analyzer._get_start_date(data, "CREATION_DATE_ALERT", None)
         result = Analyzer.simple_rule_based_analyzer.analyze_creation_dates(data, alert_limit, start_date)
         return result
+
+    def simple_rule_based_analysis_storage_capacity(alert_limit):
+        data = list(Analyzer.database.get_data_stores())
+        result = Analyzer.simple_rule_based_analyzer.analyze_storage_capacity(
+            data, alert_limit
+        )
+        return result
