@@ -6,7 +6,8 @@ export enum BackupDataOrderByOptions {
   ID = 'id',
   SIZE = 'sizeMB',
   BACKUP_DATE = 'creationDate',
-  TASK_NAME = 'taskName'
+  TASK_NAME = 'taskName',
+  SAVESET = 'saveset',
 }
 
 export class BackupDataOrderOptionsDto {

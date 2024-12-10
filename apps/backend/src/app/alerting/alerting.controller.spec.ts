@@ -29,6 +29,7 @@ const mockedBackupDataEntity: BackupDataEntity = {
   sizeMB: 100,
   type: BackupType.FULL,
   creationDate: new Date(),
+  saveset: 'saveset1',
 };
 
 const mockedSizeAlertTypeEntity: AlertTypeEntity = {

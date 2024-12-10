@@ -15,6 +15,7 @@ import { TasksService } from '../tasks/tasks.service';
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
   sizeMB: 100,
+  saveset: 'backup',
   type: BackupType.FULL,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
@@ -201,8 +202,8 @@ describe('BackupDataService', () => {
   describe('createBatched', () => {
     it('should create new backup data entities batched', async () => {
       const createBackupDataDtos: CreateBackupDataDto[] = [
-        { id: '1', sizeMB: 100, creationDate: new Date() },
-        { id: '2', sizeMB: 200, creationDate: new Date() },
+        { id: '1', sizeMB: 100, creationDate: new Date(), saveset: 'backup' },
+        { id: '2', sizeMB: 200, creationDate: new Date(), saveset: 'backup' },
       ];
 
       await service.createBatched(createBackupDataDtos);
@@ -224,8 +225,8 @@ describe('BackupDataService', () => {
   describe('createBatched', () => {
     it('should create new backup data entities batched', async () => {
       const createBackupDataDtos: CreateBackupDataDto[] = [
-        { id: '1', sizeMB: 100, creationDate: new Date() },
-        { id: '2', sizeMB: 200, creationDate: new Date() },
+        { id: '1', sizeMB: 100, creationDate: new Date(), saveset: 'backup' },
+        { id: '2', sizeMB: 200, creationDate: new Date(), saveset: 'backup' },
       ];
 
       await service.createBatched(createBackupDataDtos);
