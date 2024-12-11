@@ -1,27 +1,29 @@
-<!-- email-alerts.component.html -->
-
 <h3>Email Alert Recipients</h3>
-
-<div class="btn-group">
-  <button class="btn btn-primary" (click)="showEmailModal = true">
-    <cds-icon shape="plus"></cds-icon>
-    Add Email
-  </button>
-  <button class="btn btn-success" (click)="saveChanges()">
-    <cds-icon shape="lock"></cds-icon>
-    Save Changes
-  </button>
-</div>
-
 <div class="clr-row">
   <div class="clr-col-lg-12 clr-col-lg-12">
-    <h3>All Backups:</h3>
     <clr-datagrid
       *ngIf="emailsSubject$ | async as emails"
       [clrDgLoading]="isLoading"
+      [(clrDgSelected)]="selectedEmails"
     >
+      <clr-dg-action-bar>
+        <div class="btn-group">
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary"
+            (click)="showEmailModal = true"
+          >
+            <cds-icon shape="plus"></cds-icon>
+            New
+          </button>
+          <button type="button" class="btn btn-sm btn-danger" (click)="removeEmail(selectedEmails)" [disabled]="selectedEmails.length === 0">
+            <cds-icon shape="lock"></cds-icon>
+            Delete
+          </button>
+        </div>
+      </clr-dg-action-bar>
 
-      <clr-dg-column [clrDgField]="'email'">
+      <clr-dg-column [clrDgField]="'mail'">
         <ng-container *clrDgHideableColumn>
           Email
           <clr-dg-filter [clrDgFilter]="emailFilter">
@@ -46,7 +48,7 @@
               <label>ID:</label>
               <input
                 clrInput
-                type="number"
+                type="string"
                 [(ngModel)]="emailIdFilter.ranges.id"
                 (ngModelChange)="emailIdFilter.updateRanges({ id: $event })"
               />
@@ -55,25 +57,20 @@
         </ng-container>
       </clr-dg-column>
 
-      <clr-dg-placeholder>We couldn't find any backups!</clr-dg-placeholder>
-      <clr-dg-row *ngFor="let email of emailsSubject$.getValue()" [clrDgItem]="email">
+      <clr-dg-placeholder>We couldn't find any emails!</clr-dg-placeholder>
+      <clr-dg-row
+        *ngFor="let email of emailsSubject$.getValue()"
+        [clrDgItem]="email"
+      >
         <clr-dg-cell>{{ email.mail }}</clr-dg-cell>
         <clr-dg-cell>{{ email.id }}</clr-dg-cell>
-
       </clr-dg-row>
 
-      <clr-dg-footer>
-
-      </clr-dg-footer>
+      <clr-dg-footer> </clr-dg-footer>
     </clr-datagrid>
   </div>
+</div>
 
-
-
-
-
-
-<!-- Add Email Modal -->
 <clr-modal [(clrModalOpen)]="showEmailModal">
   <h3 class="modal-title">Add Email Recipient</h3>
   <div class="modal-body">
