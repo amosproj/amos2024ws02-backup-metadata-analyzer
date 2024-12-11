@@ -1,0 +1,108 @@
+<!-- email-alerts.component.html -->
+
+<h3>Email Alert Recipients</h3>
+
+<div class="btn-group">
+  <button class="btn btn-primary" (click)="showEmailModal = true">
+    <cds-icon shape="plus"></cds-icon>
+    Add Email
+  </button>
+  <button class="btn btn-success" (click)="saveChanges()">
+    <cds-icon shape="lock"></cds-icon>
+    Save Changes
+  </button>
+</div>
+
+<div class="clr-row">
+  <div class="clr-col-lg-12 clr-col-lg-12">
+    <h3>All Backups:</h3>
+    <clr-datagrid
+      *ngIf="emailsSubject$ | async as emails"
+      [clrDgLoading]="isLoading"
+    >
+
+      <clr-dg-column [clrDgField]="'email'">
+        <ng-container *clrDgHideableColumn>
+          Email
+          <clr-dg-filter [clrDgFilter]="emailFilter">
+            <clr-input-container>
+              <label>Email:</label>
+              <input
+                clrInput
+                type="string"
+                [(ngModel)]="emailFilter.ranges.mail"
+                (ngModelChange)="emailFilter.updateRanges({ mail: $event })"
+              />
+            </clr-input-container>
+          </clr-dg-filter>
+        </ng-container>
+      </clr-dg-column>
+
+      <clr-dg-column [clrDgField]="'id'">
+        <ng-container *clrDgHideableColumn>
+          ID
+          <clr-dg-filter [clrDgFilter]="emailIdFilter">
+            <clr-input-container>
+              <label>ID:</label>
+              <input
+                clrInput
+                type="number"
+                [(ngModel)]="emailIdFilter.ranges.id"
+                (ngModelChange)="emailIdFilter.updateRanges({ id: $event })"
+              />
+            </clr-input-container>
+          </clr-dg-filter>
+        </ng-container>
+      </clr-dg-column>
+
+      <clr-dg-placeholder>We couldn't find any backups!</clr-dg-placeholder>
+      <clr-dg-row *ngFor="let email of emailsSubject$.getValue()" [clrDgItem]="email">
+        <clr-dg-cell>{{ email.mail }}</clr-dg-cell>
+        <clr-dg-cell>{{ email.id }}</clr-dg-cell>
+
+      </clr-dg-row>
+
+      <clr-dg-footer>
+
+      </clr-dg-footer>
+    </clr-datagrid>
+  </div>
+
+
+
+
+
+
+<!-- Add Email Modal -->
+<clr-modal [(clrModalOpen)]="showEmailModal">
+  <h3 class="modal-title">Add Email Recipient</h3>
+  <div class="modal-body">
+    <form clrForm [formGroup]="emailForm" (ngSubmit)="saveChanges()">
+      <clr-spinner *ngIf="isLoading"></clr-spinner>
+      <clr-input-container>
+        <label>Email Address</label>
+        <input clrInput type="email" formControlName="email" />
+        <clr-control-error
+          >Please enter a valid email address</clr-control-error
+        >
+      </clr-input-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-outline"
+      (click)="showEmailModal = false"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="saveChanges()"
+      [disabled]="!emailForm.valid"
+    >
+      Add
+    </button>
+  </div>
+</clr-modal>
