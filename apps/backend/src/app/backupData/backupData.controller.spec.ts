@@ -121,7 +121,7 @@ describe('BackupDataController (e2e)', () => {
       skip: '0',
       take: '1',
       order: { creationDate: 'DESC' },
-      where: { type: BackupType.FULL },
+      where: {},
     });
   });
 
@@ -144,7 +144,7 @@ describe('BackupDataController (e2e)', () => {
 
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
-      where: { creationDate: expect.any(Object), type: BackupType.FULL },
+      where: { creationDate: expect.any(Object) },
     });
   });
   it('/backupData/filter (POST) with taskId should return backup data entries with the specified taskId', async () => {
@@ -154,7 +154,7 @@ describe('BackupDataController (e2e)', () => {
 
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
-      where: { taskId: { id: 'task-123' }, type: BackupType.FULL },
+      where: { taskId: { id: 'task-123' } },
     });
   });
 
@@ -167,7 +167,19 @@ describe('BackupDataController (e2e)', () => {
       order: { creationDate: 'DESC' },
       where: {
         taskId: { displayName: ILike('%backup-task%') },
-        type: BackupType.FULL,
+      },
+    });
+  });
+
+  it('/backupData/filter (POST) with type should return backup data entries with the specified type', async () => {
+    await request(app.getHttpServer())
+      .post('/backupData/filter?type=INCREMENTAL')
+      .expect(201);
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: {
+        type: BackupType.INCREMENTAL,
       },
     });
   });
@@ -194,7 +206,6 @@ describe('BackupDataController (e2e)', () => {
       order: { creationDate: 'DESC' },
       where: {
         taskId: [{ id: 'task-1' }, { id: 'task-2' }],
-        type: BackupType.FULL,
       },
     });
   });
