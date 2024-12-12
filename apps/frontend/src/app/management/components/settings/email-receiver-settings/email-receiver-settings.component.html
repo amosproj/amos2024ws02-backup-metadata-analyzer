@@ -16,7 +16,12 @@
             <cds-icon shape="plus"></cds-icon>
             New
           </button>
-          <button type="button" class="btn btn-sm btn-danger" (click)="removeEmail(selectedEmails)" [disabled]="selectedEmails.length === 0">
+          <button
+            type="button"
+            class="btn btn-sm btn-danger"
+            (click)="removeEmail(selectedEmails)"
+            [disabled]="selectedEmails.length === 0"
+          >
             <cds-icon shape="lock"></cds-icon>
             Delete
           </button>
@@ -39,7 +44,7 @@
           </clr-dg-filter>
         </ng-container>
       </clr-dg-column>
-
+<!-- 
       <clr-dg-column [clrDgField]="'id'">
         <ng-container *clrDgHideableColumn>
           ID
@@ -56,14 +61,14 @@
           </clr-dg-filter>
         </ng-container>
       </clr-dg-column>
-
+ -->
       <clr-dg-placeholder>We couldn't find any emails!</clr-dg-placeholder>
       <clr-dg-row
         *ngFor="let email of emailsSubject$.getValue()"
         [clrDgItem]="email"
       >
-        <clr-dg-cell>{{ email.mail }}</clr-dg-cell>
-        <clr-dg-cell>{{ email.id }}</clr-dg-cell>
+        <clr-dg-cell class="clr-dg-cell">{{ email.mail }}</clr-dg-cell>
+        <!-- <clr-dg-cell>{{ email.id }}</clr-dg-cell> -->
       </clr-dg-row>
 
       <clr-dg-footer> </clr-dg-footer>
@@ -83,6 +88,9 @@
           >Please enter a valid email address</clr-control-error
         >
       </clr-input-container>
+      <div class="error" *ngIf="modalError">
+        {{ modalError }}
+      </div>
     </form>
   </div>
   <div class="modal-footer">
