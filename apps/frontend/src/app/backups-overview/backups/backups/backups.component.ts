@@ -45,15 +45,16 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     'month',
     'year',
   ];
-  tasksLoading: boolean = false;
-  loading: boolean = false;
+  tasksLoading = false;
+  loading = false;
   pageSize = 10;
   protected backupSizeFilter: CustomFilter;
   protected backupDateFilter: CustomFilter;
-  protected selectedTask: BackupTask[] = [];
-  protected filterPanel: boolean = false;
+  protected taskFilter: CustomFilter;
   protected backupSavesetFilter: CustomFilter;
-  taskFilter: CustomFilter;
+  protected typeFilter: CustomFilter;
+  protected selectedTask: BackupTask[] = [];
+  protected filterPanel = false;
 
   //Subjects
   private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
@@ -87,6 +88,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupDateFilter = new CustomFilter('date');
     this.backupSavesetFilter = new CustomFilter('saveset');
     this.taskFilter = new CustomFilter('taskName');
+    this.typeFilter = new CustomFilter('type');
 
     /**
      * Load all backups and filter them based on the filter options for table
@@ -189,6 +191,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       this.backupSizeFilter.changes.pipe(startWith(null)),
       this.backupSavesetFilter.changes.pipe(startWith(null)),
       this.taskFilter.changes.pipe(startWith(null)),
+      this.typeFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
         map(() => this.buildFilterParams()),
@@ -257,12 +260,17 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       params.toSizeMB = this.backupSizeFilter.ranges.toSizeMB;
     }
 
-    if(this.backupSavesetFilter.isActive()) {
+    if (this.backupSavesetFilter.isActive()) {
       params.saveset = this.backupSavesetFilter.ranges.saveset;
     }
 
     if (this.taskFilter.isActive()) {
       params.taskName = this.taskFilter.ranges.taskName;
+    }
+
+    if (this.typeFilter.isActive()) {
+      console.log('ACTIVE');
+      params.type = this.typeFilter.ranges.type;
     }
 
     return params;
@@ -295,6 +303,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     });
     this.chartService.updateTimeRange('backupTimelineChart', range);
   }
+
   /**
    * Set selected Backup task to filter the charts
    * @param tasks selected Backup task
@@ -303,6 +312,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.selectedTask = tasks;
     this.backupTaskSubject$.next(tasks);
   }
+
   /**
    * Add search Term to backupTaskSearchTerm$ subject for the Backup task search
    * @param term Search term for the Backup task
@@ -310,9 +320,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   onSearchInput(term: string): void {
     this.backupTaskSearchTerm$.next(term);
   }
+
   /**
    * Check the filter states and add new filter values to the filterOptions$ subject
-   * @param state filter values 
+   * @param state filter values
    */
   refresh(state: ClrDatagridStateInterface<any>): void {
     this.loading = true;
@@ -334,6 +345,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.filterOptions$.next(params);
     this.loading = false;
   }
+
   /**
    * Change the state of the filter panel to open or close it
    */
