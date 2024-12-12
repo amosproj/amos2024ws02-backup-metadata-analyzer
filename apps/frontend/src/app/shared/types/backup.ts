@@ -1,4 +1,5 @@
 import { BackupTask } from './backup.task';
+import { BackupType } from './backupType';
 
 export interface Backup {
   id: string;
@@ -6,4 +7,5 @@ export interface Backup {
   sizeMB: number;
   creationDate: Date;
   taskId?: BackupTask;
+  type: BackupType;
 }
