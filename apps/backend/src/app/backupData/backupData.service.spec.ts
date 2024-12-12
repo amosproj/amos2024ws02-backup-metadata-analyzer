@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Between, ILike, Repository } from 'typeorm';
+import { Between, ILike, In, Repository } from 'typeorm';
 import { BackupDataService } from './backupData.service';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
@@ -69,9 +69,7 @@ describe('BackupDataService', () => {
       expect(repository.findAndCount).toHaveBeenCalledWith({
         take: 5,
         order: { creationDate: 'DESC' },
-        where: {
-          type: BackupType.FULL,
-        },
+        where: {},
       });
     });
   });
@@ -80,7 +78,7 @@ describe('BackupDataService', () => {
     it('should create a where clause for ID search', () => {
       const filterDto: BackupDataFilterDto = { id: '123' };
       const where = service.createWhereClause(filterDto);
-      expect(where).toEqual({ id: ILike('%123%'), type: BackupType.FULL });
+      expect(where).toEqual({ id: ILike('%123%') });
     });
 
     it('should create a where clause for date range search', () => {
@@ -91,7 +89,6 @@ describe('BackupDataService', () => {
       const where = service.createWhereClause(filterDto);
       expect(where).toEqual({
         creationDate: Between(expect.any(Date), expect.any(Date)),
-        type: BackupType.FULL,
       });
     });
 
@@ -100,7 +97,6 @@ describe('BackupDataService', () => {
       const where = service.createWhereClause(filterDto);
       expect(where).toEqual({
         sizeMB: Between(10, 100),
-        type: BackupType.FULL,
       });
     });
 
@@ -117,7 +113,6 @@ describe('BackupDataService', () => {
         id: ILike('%123%'),
         creationDate: Between(expect.any(Date), expect.any(Date)),
         sizeMB: Between(10, 100),
-        type: BackupType.FULL,
       });
     });
 
@@ -140,7 +135,6 @@ describe('BackupDataService', () => {
       const where = service.createWhereClause(filterDto);
       expect(where).toEqual({
         taskId: { id: 'task-123' },
-        type: BackupType.FULL,
       });
     });
 
@@ -149,7 +143,24 @@ describe('BackupDataService', () => {
       const where = service.createWhereClause(filterDto);
       expect(where).toEqual({
         taskId: { displayName: ILike('%backup-task%') },
-        type: BackupType.FULL,
+      });
+    });
+
+    it('should create a where clause for type search with a single type', () => {
+      const filterDto: BackupDataFilterDto = { types: [BackupType.FULL] };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        type: In([BackupType.FULL]),
+      });
+    });
+
+    it('should create a where clause for type search with multiple types', () => {
+      const filterDto: BackupDataFilterDto = {
+        types: [BackupType.FULL, BackupType.INCREMENTAL],
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        type: In([BackupType.FULL, BackupType.INCREMENTAL]),
       });
     });
 
@@ -159,7 +170,6 @@ describe('BackupDataService', () => {
       const where = service.createWhereClause(filterDto, filterByTaskIdsDto);
       expect(where).toEqual({
         taskId: [{ id: 'task-1' }, { id: 'task-2' }],
-        type: BackupType.FULL,
       });
     });
   });
