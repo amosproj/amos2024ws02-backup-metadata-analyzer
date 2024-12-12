@@ -63,11 +63,12 @@ export class BackupDataFilterDto {
   saveset?: string;
 
   @ApiProperty({
-    description: 'Backup type',
-    required: false,
+    description: 'Array of backup types',
     enum: BackupType,
+    isArray: true,
+    required: false,
   })
   @IsOptional()
-  @IsEnum(BackupType)
-  type?: BackupType;
+  @IsEnum(BackupType, { each: true })
+  types?: BackupType[];
 }

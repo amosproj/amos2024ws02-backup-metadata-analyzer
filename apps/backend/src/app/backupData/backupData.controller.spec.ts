@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataModule } from './backupData.module';
@@ -173,13 +173,13 @@ describe('BackupDataController (e2e)', () => {
 
   it('/backupData/filter (POST) with type should return backup data entries with the specified type', async () => {
     await request(app.getHttpServer())
-      .post('/backupData/filter?type=INCREMENTAL')
+      .post('/backupData/filter?types=INCREMENTAL')
       .expect(201);
 
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
       where: {
-        type: BackupType.INCREMENTAL,
+        type: In([BackupType.INCREMENTAL]),
       },
     });
   });
@@ -206,6 +206,19 @@ describe('BackupDataController (e2e)', () => {
       order: { creationDate: 'DESC' },
       where: {
         taskId: [{ id: 'task-1' }, { id: 'task-2' }],
+      },
+    });
+  });
+
+  it('/backupData/filter (POST) with multiple types should return backup data entries with the specified types', async () => {
+    await request(app.getHttpServer())
+      .post('/backupData/filter?types=FULL&types=INCREMENTAL')
+      .expect(201);
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: {
+        type: In([BackupType.FULL, BackupType.INCREMENTAL]),
       },
     });
   });
