@@ -87,7 +87,7 @@ export class EmailReceiverSettingsComponent {
           this.isLoading = false;
         },
         complete: () => {
-          this.selectedEmails.length = 0; // Clear selection
+          this.selectedEmails.length = 0;
         },
       });
   }
