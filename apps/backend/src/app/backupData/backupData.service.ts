@@ -9,6 +9,7 @@ import {
   FindOptionsOrder,
   FindOptionsWhere,
   ILike,
+  In,
   LessThanOrEqual,
   MoreThanOrEqual,
   Repository,
@@ -198,8 +199,11 @@ export class BackupDataService extends PaginationService {
     }
 
     //Backup type search
-    if (backupDataFilterDto.type) {
-      where.type = backupDataFilterDto.type;
+    if (backupDataFilterDto.types) {
+      const typesArray = Array.isArray(backupDataFilterDto.types)
+        ? backupDataFilterDto.types
+        : [backupDataFilterDto.types];
+      where.type = In(typesArray);
     }
 
     return where;

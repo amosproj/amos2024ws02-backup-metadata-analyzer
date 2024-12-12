@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Between, ILike, Repository } from 'typeorm';
+import { Between, ILike, In, Repository } from 'typeorm';
 import { BackupDataService } from './backupData.service';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
@@ -146,11 +146,21 @@ describe('BackupDataService', () => {
       });
     });
 
-    it('should create a where clause for type search', () => {
-      const filterDto: BackupDataFilterDto = { type: BackupType.FULL };
+    it('should create a where clause for type search with a single type', () => {
+      const filterDto: BackupDataFilterDto = { types: [BackupType.FULL] };
       const where = service.createWhereClause(filterDto);
       expect(where).toEqual({
-        type: BackupType.FULL,
+        type: In([BackupType.FULL]),
+      });
+    });
+
+    it('should create a where clause for type search with multiple types', () => {
+      const filterDto: BackupDataFilterDto = {
+        types: [BackupType.FULL, BackupType.INCREMENTAL],
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        type: In([BackupType.FULL, BackupType.INCREMENTAL]),
       });
     });
 
