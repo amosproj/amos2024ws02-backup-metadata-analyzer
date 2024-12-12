@@ -1,7 +1,14 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { EmailType } from 'apps/frontend/src/app/shared/types/email';
-import { BehaviorSubject, Observable, Subject, takeUntil } from 'rxjs';
+import {
+  BehaviorSubject,
+  from,
+  mergeMap,
+  Observable,
+  Subject,
+  takeUntil,
+} from 'rxjs';
 import { EmailReceiverService } from '../../../services/email-receiver/email-receiver.service';
 import { CustomEmailFilter } from './emailfilter';
 
@@ -14,6 +21,7 @@ export class EmailReceiverSettingsComponent {
   isLoading = false;
   emailForm: FormGroup;
   showEmailModal = false;
+  modalError = '';
   protected readonly selectedEmails: EmailType[] = [];
 
   protected emailsSubject$ = new BehaviorSubject<EmailType[]>([]);
@@ -53,26 +61,68 @@ export class EmailReceiverSettingsComponent {
       });
   }
 
-  addEmail() {
+  removeEmail(emailsToRemove: EmailType[]) {
+    if (!emailsToRemove.length) return;
+
+    this.isLoading = true;
+
+    // Using forkJoin to handle multiple delete requests
+    from(emailsToRemove)
+      .pipe(
+        mergeMap((email) => this.emailService.deleteEmail(email.id)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: () => {
+          const currentEmails = this.emailsSubject$.getValue();
+          const updatedEmails = currentEmails.filter(
+            (email) =>
+              !emailsToRemove.some((toRemove) => toRemove.id === email.id)
+          );
+          this.emailsSubject$.next(updatedEmails);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Failed to delete emails:', error);
+          this.isLoading = false;
+        },
+        complete: () => {
+          this.selectedEmails.length = 0; // Clear selection
+        },
+      });
+  }
+
+  saveChanges() {
     if (this.emailForm.valid) {
       this.isLoading = true;
-      const newEmail = {
-        email: this.emailForm.get('email')?.value,
+      this.modalError = '';
+
+      const newEmail: Partial<EmailType> = {
+        mail: this.emailForm.get('email')?.value,
       };
 
-      const currentEmails = this.emailsSubject$.getValue();
-
-      this.emailForm.reset();
-      this.showEmailModal = false;
+      this.emailService
+        .updateEmailReceiver(newEmail)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (createdEmail) => {
+            const currentEmails = this.emailsSubject$.getValue();
+            this.emailsSubject$.next([...currentEmails, createdEmail]);
+            this.emailForm.reset();
+            this.showEmailModal = false;
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Failed to create email:', error);
+            this.modalError =
+              error.status === 409
+                ? 'This email already exists'
+                : 'Failed to create email. Please try again.';
+            this.isLoading = false;
+          },
+        });
     }
   }
-
-  removeEmail(emailToRemove: EmailType[]) {
-    // implement forkjion ... 
-    //this.emailService.deleteEmail(emailToRemove);
-  }
-
-  saveChanges() {}
 
   ngOnDestroy() {
     this.destroy$.next();
