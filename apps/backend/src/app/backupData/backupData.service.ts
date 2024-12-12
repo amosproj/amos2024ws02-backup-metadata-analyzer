@@ -23,7 +23,6 @@ import {
   BackupDataOrderByOptions,
   BackupDataOrderOptionsDto,
 } from './dto/backupDataOrderOptions.dto';
-import { BackupType } from './dto/backupType';
 import { SortOrder } from '../utils/pagination/SortOrder';
 import { TasksService } from '../tasks/tasks.service';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
@@ -63,6 +62,7 @@ export class BackupDataService extends PaginationService {
       paginationOptionsDto
     );
   }
+
   /**
    * Create a new backup data entity.
    * @param createBackupDataDto
@@ -107,6 +107,7 @@ export class BackupDataService extends PaginationService {
   /**
    * Create where clause.
    * @param backupDataFilterDto
+   * @param backupDataFilterByTaskIdsDto
    */
   createWhereClause(
     backupDataFilterDto: BackupDataFilterDto,
@@ -196,7 +197,10 @@ export class BackupDataService extends PaginationService {
       where.saveset = ILike(`%${backupDataFilterDto.saveset}%`);
     }
 
-    where.type = BackupType.FULL;
+    //Backup type search
+    if (backupDataFilterDto.type) {
+      where.type = backupDataFilterDto.type;
+    }
 
     return where;
   }

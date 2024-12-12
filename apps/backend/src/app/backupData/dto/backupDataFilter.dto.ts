@@ -1,5 +1,6 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { BackupType } from './backupType';
 
 export class BackupDataFilterDto {
   @ApiProperty({
@@ -60,4 +61,13 @@ export class BackupDataFilterDto {
   })
   @IsOptional()
   saveset?: string;
+
+  @ApiProperty({
+    description: 'Backup type',
+    required: false,
+    enum: BackupType,
+  })
+  @IsOptional()
+  @IsEnum(BackupType)
+  type?: BackupType;
 }
