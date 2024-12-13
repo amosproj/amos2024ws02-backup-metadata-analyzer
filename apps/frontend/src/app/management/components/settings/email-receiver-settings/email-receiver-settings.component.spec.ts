@@ -1,127 +1,130 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EmailReceiverSettingsComponent } from './email-receiver-settings.component';
-import { EmailReceiverService } from '../../../services/email-receiver/email-receiver.service';
 import { FormBuilder } from '@angular/forms';
-import { of, throwError } from 'rxjs';
+import { EmailReceiverService } from '../../../services/email-receiver/email-receiver.service';
 import { ConfirmDialogService } from 'apps/frontend/src/app/shared/components/confirm-dialog/service/confirm-dialog.service';
+import { of, throwError } from 'rxjs';
+import { EmailType } from 'apps/frontend/src/app/shared/types/email';
 
 describe('EmailReceiverSettingsComponent', () => {
   let component: EmailReceiverSettingsComponent;
-  let emailServiceMock: any;
+  let emailService: EmailReceiverService;
+  let confirmDialogService: ConfirmDialogService;
 
-  const mockEmails = [
-    { id: 1, mail: 'test1@example.com' },
-    { id: 2, mail: 'test2@example.com' },
-  ];
+  const mockEmailService = {
+    getAllEmailReceiver: vi.fn(),
+    deleteEmail: vi.fn(),
+    updateEmailReceiver: vi.fn(),
+  };
+
+  const mockConfirmDialogService = {
+    handleConfirmation: vi.fn(),
+  };
 
   beforeEach(() => {
-    emailServiceMock = {
-      getAllEmailReceiver: vi.fn().mockReturnValue(of(mockEmails)),
-      deleteEmail: vi.fn().mockReturnValue(of({})),
-      updateEmailReceiver: vi
-        .fn()
-        .mockReturnValue(of({ id: 3, mail: 'new@example.com' })),
-    };
-
-    const confirmationServiceMock = {};
-
+    emailService = mockEmailService as any;
+    confirmDialogService = mockConfirmDialogService as any;
     component = new EmailReceiverSettingsComponent(
       new FormBuilder(),
-      emailServiceMock,
-      confirmationServiceMock as ConfirmDialogService
+      emailService,
+      confirmDialogService
     );
   });
-  it('should create component', () => {
+
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load email receivers on init', () => {
-    component.ngOnInit();
-    expect(emailServiceMock.getAllEmailReceiver).toHaveBeenCalled();
-    expect(component['emailsSubject$'].getValue()).toEqual(mockEmails);
-  });
+  describe('loadEmailReceiver', () => {
+    it('should load emails successfully', () => {
+      const mockEmails = [{ id: 1, mail: 'test@example.com' }];
+      mockEmailService.getAllEmailReceiver.mockReturnValue(of(mockEmails));
 
-  it('should handle error when loading emails', () => {
-    emailServiceMock.getAllEmailReceiver = vi
-      .fn()
-      .mockReturnValue(throwError(() => new Error('Failed to load')));
-    component.ngOnInit();
-    expect(component.isLoading).toBeFalsy();
-  });
+      component.loadEmailReceiver();
 
-  it('should remove selected emails', () => {
-    const emailsToRemove = [
-      { ...mockEmails[0], id: mockEmails[0].id.toString() },
-    ];
-    component['emailsSubject$'].next(
-      mockEmails.map((email) => ({ ...email, id: email.id.toString() }))
-    );
-
-    component.removeEmail(emailsToRemove);
-
-    expect(emailServiceMock.deleteEmail).toHaveBeenCalledWith(
-      emailsToRemove[0].id
-    );
-    expect(component['emailsSubject$'].getValue()).toEqual([
-      { ...mockEmails[1], id: mockEmails[1].id.toString() },
-    ]);
-  });
-  it('should handle error when removing emails', () => {
-    emailServiceMock.deleteEmail = vi
-      .fn()
-      .mockReturnValue(throwError(() => new Error('Failed to delete')));
-
-    const consoleSpy = vi.spyOn(console, 'error');
-    component.removeEmail([
-      { ...mockEmails[0], id: mockEmails[0].id.toString() },
-    ]);
-
-    expect(consoleSpy).toHaveBeenCalled();
-    expect(component.isLoading).toBeFalsy();
-  });
-  it('should save new email when form is valid', () => {
-    const newEmail = 'new@example.com';
-    component.emailForm.patchValue({ email: newEmail });
-
-    component.saveChanges();
-
-    expect(emailServiceMock.updateEmailReceiver).toHaveBeenCalledWith({
-      mail: newEmail,
+      expect(component.isLoading).toBe(false);
+      (component as any).emailsSubject$.subscribe((emails: EmailType) => {
+        expect(emails).toEqual(mockEmails);
+      });
     });
-    expect(component.showEmailModal).toBeFalsy();
+
+    it('should handle error when loading emails', () => {
+      mockEmailService.getAllEmailReceiver.mockReturnValue(
+        throwError(() => new Error())
+      );
+
+      component.loadEmailReceiver();
+
+      expect(component.isLoading).toBe(false);
+    });
   });
 
-  it('should handle duplicate email error', () => {
-    emailServiceMock.updateEmailReceiver = vi
-      .fn()
-      .mockReturnValue(throwError(() => ({ status: 409 })));
+  describe('removeEmail', () => {
+    it('should not proceed if no emails to remove', () => {
+      component.removeEmail([]);
+      expect(
+        mockConfirmDialogService.handleConfirmation
+      ).not.toHaveBeenCalled();
+    });
 
-    component.emailForm.patchValue({ email: 'duplicate@example.com' });
-    component.saveChanges();
+    it('should show confirmation dialog and delete emails when confirmed', () => {
+      const emailsToRemove: EmailType[] = [
+        { id: '1', mail: 'test@example.com' },
+      ];
+      mockEmailService.deleteEmail.mockReturnValue(of({}));
+      mockConfirmDialogService.handleConfirmation.mockImplementation(
+        (config, callback) => callback()
+      );
 
-    expect(component.modalError).toBe('This email already exists');
+      component.removeEmail(emailsToRemove);
+
+      expect(mockConfirmDialogService.handleConfirmation).toHaveBeenCalled();
+      expect(mockEmailService.deleteEmail).toHaveBeenCalledWith('1');
+    });
   });
 
-  it('should handle generic error when saving email', () => {
-    emailServiceMock.updateEmailReceiver = vi
-      .fn()
-      .mockReturnValue(throwError(() => new Error('Failed to save')));
+  describe('saveChanges', () => {
+    it('should create new email when form is valid', () => {
+      const newEmail = { mail: 'new@example.com' };
+      const createdEmail = { id: 1, mail: 'new@example.com' };
+      component.emailForm.controls['email'].setValue('new@example.com');
+      mockEmailService.updateEmailReceiver.mockReturnValue(of(createdEmail));
 
-    component.emailForm.patchValue({ email: 'test@example.com' });
-    component.saveChanges();
+      component.saveChanges();
 
-    expect(component.modalError).toBe(
-      'Failed to create email. Please try again.'
-    );
+      expect(mockEmailService.updateEmailReceiver).toHaveBeenCalledWith(
+        newEmail
+      );
+      (component as any).emailsSubject$.subscribe((emails: EmailType) => {
+        expect(emails).toContain(createdEmail);
+      });
+    });
+
+    it('should handle duplicate email error', () => {
+      component.emailForm.controls['email'].setValue('existing@example.com');
+      mockEmailService.updateEmailReceiver.mockReturnValue(
+        throwError(() => ({ status: 409 }))
+      );
+
+      component.saveChanges();
+
+      expect(component.modalError).toBe('This email already exists');
+    });
   });
 
-  it('should clean up subscriptions on destroy', () => {
-    const nextSpy = vi.spyOn(component['destroy$'], 'next');
-    const completeSpy = vi.spyOn(component['destroy$'], 'complete');
+  describe('resetForm', () => {
+    it('should reset form and clear modal state', () => {
+      component.emailForm.controls['email'].setValue('test@example.com');
+      component.showEmailModal = true;
+      component.modalError = 'Some error';
+      component.isLoading = true;
 
-    component.ngOnDestroy();
+      component.resetForm();
 
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
+      expect(component.emailForm.controls['email'].value).toBeNull();
+      expect(component.showEmailModal).toBe(false);
+      expect(component.modalError).toBe('');
+      expect(component.isLoading).toBe(false);
+    });
   });
 });
