@@ -8,56 +8,143 @@ describe('ConfirmDialogComponent', () => {
     component = new ConfirmDialogComponent();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  describe('initialization', () => {
+    it('should create', () => {
+      expect(component).toBeTruthy();
+    });
+
+    it('should initialize with default values', () => {
+      expect(component.isOpen).toBe(false);
+      expect(component.title).toBe('Confirm Action');
+      expect(component.message).toBe('Are you sure you want to proceed?');
+      expect(component.confirmText).toBe('Confirm');
+      expect(component.cancelText).toBe('Cancel');
+      expect(component.confirmButtonClass).toBe('btn btn-primary');
+      expect(component.onConfirm).toBeDefined();
+      expect(component.onCancel).toBeDefined();
+    });
+
+    it('should have default no-op functions for onConfirm and onCancel', () => {
+      expect(() => component.onConfirm()).not.toThrow();
+      expect(() => component.onCancel()).not.toThrow();
+    });
   });
 
-  it('should initialize with default values', () => {
-    expect(component.isOpen).toBe(false);
-    expect(component.title).toBe('Confirm Action');
-    expect(component.message).toBe('Are you sure you want to proceed?');
-    expect(component.confirmText).toBe('Confirm');
-    expect(component.cancelText).toBe('Cancel');
-    expect(component.confirmButtonClass).toBe('btn btn-primary');
+  describe('confirm action', () => {
+    it('should call onConfirm and close dialog when confirm is called', () => {
+      const mockOnConfirm = vi.fn();
+      component.isOpen = true;
+      component.onConfirm = mockOnConfirm;
+
+      component.confirm();
+
+      expect(mockOnConfirm).toHaveBeenCalledTimes(1);
+      expect(component.isOpen).toBe(false);
+    });
+
+    it('should handle undefined onConfirm without error', () => {
+      component.isOpen = true;
+      component.onConfirm = undefined as any;
+
+      expect(() => component.confirm()).not.toThrow();
+      expect(component.isOpen).toBe(false);
+    });
   });
 
-  it('should call onConfirm and close dialog when confirm is called', () => {
-    const mockOnConfirm = vi.fn();
-    component.isOpen = true;
-    component.onConfirm = mockOnConfirm;
+  describe('cancel action', () => {
+    it('should call onCancel and close dialog when cancel is called', () => {
+      const mockOnCancel = vi.fn();
+      component.isOpen = true;
+      component.onCancel = mockOnCancel;
 
-    component.confirm();
+      component.cancel();
 
-    expect(mockOnConfirm).toHaveBeenCalled();
-    expect(component.isOpen).toBe(false);
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+      expect(component.isOpen).toBe(false);
+    });
+
+    it('should handle undefined onCancel without error', () => {
+      component.isOpen = true;
+      component.onCancel = undefined as any;
+
+      expect(() => component.cancel()).not.toThrow();
+      expect(component.isOpen).toBe(false);
+    });
   });
 
-  it('should call onCancel and close dialog when cancel is called', () => {
-    const mockOnCancel = vi.fn();
-    component.isOpen = true;
-    component.onCancel = mockOnCancel;
+  describe('input properties', () => {
+    it('should accept custom button class', () => {
+      const customClass = 'btn btn-danger';
+      component.confirmButtonClass = customClass;
+      expect(component.confirmButtonClass).toBe(customClass);
+    });
 
-    component.cancel();
+    it('should accept custom title and message', () => {
+      const customTitle = 'Delete Item';
+      const customMessage = 'Do you want to delete this item?';
 
-    expect(mockOnCancel).toHaveBeenCalled();
-    expect(component.isOpen).toBe(false);
+      component.title = customTitle;
+      component.message = customMessage;
+
+      expect(component.title).toBe(customTitle);
+      expect(component.message).toBe(customMessage);
+    });
+
+    it('should accept custom button text', () => {
+      const customConfirmText = 'Delete';
+      const customCancelText = 'Keep';
+
+      component.confirmText = customConfirmText;
+      component.cancelText = customCancelText;
+
+      expect(component.confirmText).toBe(customConfirmText);
+      expect(component.cancelText).toBe(customCancelText);
+    });
+
+    it('should handle empty string inputs', () => {
+      component.title = '';
+      component.message = '';
+      component.confirmText = '';
+      component.cancelText = '';
+      component.confirmButtonClass = '';
+
+      expect(component.title).toBe('');
+      expect(component.message).toBe('');
+      expect(component.confirmText).toBe('');
+      expect(component.cancelText).toBe('');
+      expect(component.confirmButtonClass).toBe('');
+    });
   });
 
-  it('should accept custom button class', () => {
-    const customClass = 'btn btn-danger';
-    component.confirmButtonClass = customClass;
+  describe('dialog state', () => {
+    it('should toggle isOpen state', () => {
+      expect(component.isOpen).toBe(false);
 
-    expect(component.confirmButtonClass).toBe(customClass);
-  });
+      component.isOpen = true;
+      expect(component.isOpen).toBe(true);
 
-  it('should accept custom title and message', () => {
-    const customTitle = 'Delete Item';
-    const customMessage = 'Do you want to delete this item?';
+      component.isOpen = false;
+      expect(component.isOpen).toBe(false);
+    });
 
-    component.title = customTitle;
-    component.message = customMessage;
+    it('should close dialog after confirm regardless of callback execution', () => {
+      component.isOpen = true;
+      component.onConfirm = () => {
+        throw new Error('Test error');
+      };
 
-    expect(component.title).toBe(customTitle);
-    expect(component.message).toBe(customMessage);
+      expect(() => component.confirm()).toThrow();
+      expect(component.isOpen).toBe(false);
+    });
+
+    it('should close dialog after cancel regardless of callback execution', () => {
+      component.isOpen = true;
+      component.onCancel = () => {
+        throw new Error('Test error');
+      };
+
+      expect(() => component.cancel()).toThrow();
+      expect(component.isOpen).toBe(false);
+    });
   });
 });
