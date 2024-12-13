@@ -67,7 +67,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
   protected backupTaskSearchTerm$: Subject<string> = new Subject<string>();
 
-  private readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
+  readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
   private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
   );
@@ -257,7 +257,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       params.toSizeMB = this.backupSizeFilter.ranges.toSizeMB;
     }
 
-    if(this.backupSavesetFilter.isActive()) {
+    if (this.backupSavesetFilter.isActive()) {
       params.saveset = this.backupSavesetFilter.ranges.saveset;
     }
 
@@ -312,7 +312,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
   /**
    * Check the filter states and add new filter values to the filterOptions$ subject
-   * @param state filter values 
+   * @param state filter values
    */
   refresh(state: ClrDatagridStateInterface<any>): void {
     this.loading = true;
