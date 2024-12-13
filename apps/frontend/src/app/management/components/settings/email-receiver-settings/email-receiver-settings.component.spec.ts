@@ -3,6 +3,7 @@ import { EmailReceiverSettingsComponent } from './email-receiver-settings.compon
 import { EmailReceiverService } from '../../../services/email-receiver/email-receiver.service';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
+import { ConfirmDialogService } from 'apps/frontend/src/app/shared/components/confirm-dialog/service/confirm-dialog.service';
 
 describe('EmailReceiverSettingsComponent', () => {
   let component: EmailReceiverSettingsComponent;
@@ -22,12 +23,14 @@ describe('EmailReceiverSettingsComponent', () => {
         .mockReturnValue(of({ id: 3, mail: 'new@example.com' })),
     };
 
+    const confirmationServiceMock = {};
+
     component = new EmailReceiverSettingsComponent(
       new FormBuilder(),
-      emailServiceMock
+      emailServiceMock,
+      confirmationServiceMock as ConfirmDialogService
     );
   });
-
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
