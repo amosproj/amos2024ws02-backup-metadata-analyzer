@@ -36,6 +36,7 @@ import { BASE_URL } from './shared/types/configuration';
 import { AlertComponent } from './alert/component/alert.component';
 import { NotificationSettingsComponent } from './management/components/settings/notification-settings/notification-settings.component';
 import { EmailReceiverSettingsComponent } from './management/components/settings/email-receiver-settings/email-receiver-settings.component';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/component/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { EmailReceiverSettingsComponent } from './management/components/settings
     AlertComponent,
     NotificationSettingsComponent,
     EmailReceiverSettingsComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
