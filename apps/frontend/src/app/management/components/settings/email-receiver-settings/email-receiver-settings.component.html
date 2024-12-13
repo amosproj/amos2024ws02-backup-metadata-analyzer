@@ -44,31 +44,12 @@
           </clr-dg-filter>
         </ng-container>
       </clr-dg-column>
-<!-- 
-      <clr-dg-column [clrDgField]="'id'">
-        <ng-container *clrDgHideableColumn>
-          ID
-          <clr-dg-filter [clrDgFilter]="emailIdFilter">
-            <clr-input-container>
-              <label>ID:</label>
-              <input
-                clrInput
-                type="string"
-                [(ngModel)]="emailIdFilter.ranges.id"
-                (ngModelChange)="emailIdFilter.updateRanges({ id: $event })"
-              />
-            </clr-input-container>
-          </clr-dg-filter>
-        </ng-container>
-      </clr-dg-column>
- -->
       <clr-dg-placeholder>We couldn't find any emails!</clr-dg-placeholder>
       <clr-dg-row
         *ngFor="let email of emailsSubject$.getValue()"
         [clrDgItem]="email"
       >
         <clr-dg-cell class="clr-dg-cell">{{ email.mail }}</clr-dg-cell>
-        <!-- <clr-dg-cell>{{ email.id }}</clr-dg-cell> -->
       </clr-dg-row>
 
       <clr-dg-footer> </clr-dg-footer>
@@ -85,6 +66,9 @@
         <label>Email Address</label>
         <input clrInput type="email" formControlName="email" />
         <clr-control-error
+          *ngIf="
+            emailForm.get('email')?.touched && emailForm.get('email')?.invalid
+          "
           >Please enter a valid email address</clr-control-error
         >
       </clr-input-container>
@@ -94,11 +78,7 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button
-      type="button"
-      class="btn btn-outline"
-      (click)="showEmailModal = false"
-    >
+    <button type="button" class="btn btn-outline" (click)="resetForm()">
       Cancel
     </button>
     <button
