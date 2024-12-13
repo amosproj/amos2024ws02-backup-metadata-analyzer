@@ -141,6 +141,7 @@ class Analyzer:
     ):
         result = Analyzer.time_series_analyzer.k_means_analyze(
             variable, task_id, frequency, backup_type, window_size)
+        return result
 
     def simple_rule_based_analysis_creation_dates(alert_limit):
         data = list(Analyzer.database.get_results())
