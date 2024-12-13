@@ -239,7 +239,7 @@
   <div class="side-panel-title">Chart Filter Options</div>
   <div class="side-panel-body">
     <div>
-      <h4>Time Range:</h4>
+      <h5>Time Range</h5>
       <div class="btn-group-vertical">
         <button
           *ngFor="let range of timeRanges"
@@ -253,7 +253,7 @@
     </div>
 
     <div>
-      <h4>Backup Task:</h4>
+      <h5>Tasks</h5>
       <clr-combobox-container *ngIf="allBackupTasks$" class="backupTaskFilter">
         <clr-combobox
           name="task"
@@ -291,6 +291,25 @@
           </clr-options>
         </clr-combobox>
         <clr-control-error>There was an error</clr-control-error>
+      </clr-combobox-container>
+    </div>
+    <div>
+      <h5>Types</h5>
+      <clr-combobox-container class="backupTaskFilter">
+        <clr-combobox
+          [(ngModel)]="selectedtBackupTypes"
+          [clrMulti]="true"
+          (ngModelChange)="setBackupTypes($event)"
+          placeholder="Select backup types">
+          <ng-container *clrOptionSelected="let value">
+            {{value}}
+          </ng-container>
+          <clr-options>
+            <clr-option *ngFor="let option of backupEnumTypes" [clrValue]="option">
+              {{option}}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
       </clr-combobox-container>
     </div>
   </div>

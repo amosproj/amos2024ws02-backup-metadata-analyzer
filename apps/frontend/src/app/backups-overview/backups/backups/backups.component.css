@@ -191,3 +191,10 @@
   height: auto;
   line-height: 1;
 }
+
+
+.backupTaskFilter ::ng-deep .clr-combobox-options {
+  width: 100% !important;
+  min-width: 100%;
+  max-width: 100%;
+}

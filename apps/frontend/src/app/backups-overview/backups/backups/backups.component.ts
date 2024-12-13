@@ -21,6 +21,7 @@ import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
+import { BackupType } from '../../../shared/enums/backup.types';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -53,7 +54,11 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected selectedTask: BackupTask[] = [];
   protected filterPanel: boolean = false;
   protected backupSavesetFilter: CustomFilter;
-  taskFilter: CustomFilter;
+  protected taskFilter: CustomFilter;
+  backupEnumTypes = Object.keys(BackupType).filter((item) => {
+    return isNaN(Number(item));
+  });
+  selectedtBackupTypes: string[] = [];
 
   //Subjects
   private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
@@ -68,6 +73,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected backupTaskSearchTerm$: Subject<string> = new Subject<string>();
 
   readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
+  readonly backupTypesSubject$ = new BehaviorSubject<BackupType[]>([]);
   private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
   );
@@ -303,6 +309,13 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.selectedTask = tasks;
     this.backupTaskSubject$.next(tasks);
   }
+
+  setBackupTypes(types: BackupType[]): void {
+    this.selectedtBackupTypes = types;
+    this.backupTypesSubject$.next(types);
+  }
+
+
   /**
    * Add search Term to backupTaskSearchTerm$ subject for the Backup task search
    * @param term Search term for the Backup task
