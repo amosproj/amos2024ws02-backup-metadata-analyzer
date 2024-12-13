@@ -151,16 +151,31 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           return prevIds === currIds;
         })
       ),
+      this.backupTypesSubject$.pipe(
+        distinctUntilChanged((prev, curr) => {
+          if (!prev && !curr) return true;
+          if (!prev || !curr) return false;
+          if (prev.length !== curr.length) {
+            return false;
+          }
+          const prevIds = prev.map((p) => p).sort();
+          const currIds = curr.map((c) => c).sort();
+          return prevIds === currIds;
+        })
+      ),
     ]).pipe(
-      map(([timeRange, tasks]) => ({
+      map(([timeRange, tasks, backupTypes]) => ({
         params: {
           fromDate: timeRange.fromDate.toISOString(),
           toDate: timeRange.toDate.toISOString(),
+          types: backupTypes,
         },
         selectedTasks: tasks ? tasks.map((task) => task.id) : [],
+        selectedTypes: backupTypes || [],
       })),
-      switchMap(({ params, selectedTasks }) =>
-        this.backupService.getAllBackups(params, selectedTasks)
+      switchMap(
+        ({ params, selectedTasks, selectedTypes }) =>
+          this.backupService.getAllBackups(params, selectedTasks)
       ),
       tap({
         next: (response) => {
@@ -314,7 +329,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.selectedtBackupTypes = types;
     this.backupTypesSubject$.next(types);
   }
-
 
   /**
    * Add search Term to backupTaskSearchTerm$ subject for the Backup task search

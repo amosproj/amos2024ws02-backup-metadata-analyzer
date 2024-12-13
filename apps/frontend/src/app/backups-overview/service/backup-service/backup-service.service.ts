@@ -1,11 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, shareReplay, tap } from 'rxjs';
 import { BASE_URL } from '../../../shared/types/configuration';
 import { Backup } from '../../../shared/types/backup';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { BackupTask } from '../../../shared/types/backup.task';
+import { BackupType } from '../../../shared/enums/backup.types';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +19,7 @@ export class BackupService {
 
   getAllBackups(
     filterParams: BackupFilterParams & { taskIds?: string[] },
-    selectedTasks?: string[]
+    selectedTasks?: string[], selectedTypes?: BackupType[]
   ): Observable<APIResponse<Backup>> {
     const cleanParams = Object.fromEntries(
       Object.entries(filterParams).filter(
@@ -32,6 +33,10 @@ export class BackupService {
         | readonly (string | number | boolean)[];
     };
 
+    if (selectedTypes && selectedTypes.length > 0) {
+      cleanParams['types'] = selectedTypes;
+    }
+
     const params = new HttpParams({ fromObject: cleanParams });
     const body = {
       taskIds: selectedTasks,
@@ -41,7 +46,7 @@ export class BackupService {
       .post<APIResponse<Backup>>(`${this.baseUrl}/backupData/filter`, body, {
         params: params,
       })
-      .pipe(shareReplay(1));
+      .pipe(shareReplay(1), tap((elem) => console.log(elem)));
   }
 
   getAllBackupTasks(): Observable<BackupTask[]> {

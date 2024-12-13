@@ -13,5 +13,5 @@ export type BackupFilterParams = {
   taskId?: string[] | null;
   taskName?: string | null;
   saveset?: string | null;
-  types?: BackupType | null;
+  types?: BackupType[] | null;
 };
