@@ -171,11 +171,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           types: backupTypes,
         },
         selectedTasks: tasks ? tasks.map((task) => task.id) : [],
-        selectedTypes: backupTypes || [],
       })),
-      switchMap(
-        ({ params, selectedTasks, selectedTypes }) =>
-          this.backupService.getAllBackups(params, selectedTasks)
+      switchMap(({ params, selectedTasks }) =>
+        this.backupService.getAllBackups(params, selectedTasks)
       ),
       tap({
         next: (response) => {
