@@ -14,6 +14,7 @@ def _create_mock_result(task, uuid, fdi_type, data_size, start_time):
     mock_result.fdi_type = fdi_type
     mock_result.data_size = data_size
     mock_result.start_time = start_time
+    mock_result.subtask_flag = 0
     return mock_result
 
 def _create_mock_data_store(name, capacity, high_water_mark, filled):
@@ -671,7 +672,7 @@ def test_alert_creation_date_no_subtasks():
     mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T18:00:00"))
     mock_result2.subtask_flag = 1
 
-    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
+    database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
