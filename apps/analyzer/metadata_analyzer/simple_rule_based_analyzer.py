@@ -67,6 +67,7 @@ class SimpleRuleBasedAnalyzer:
                 or result.fdi_type != "F"
                 or result.data_size is None
                 or result.start_time is None
+                or result.subtask_flag != 0
             ):
                 continue
             groups[result.task].append(result)
@@ -110,6 +111,7 @@ class SimpleRuleBasedAnalyzer:
                 or (result.fdi_type != "F" and result.fdi_type != "D")
                 or result.data_size is None
                 or result.start_time is None
+                or result.subtask_flag != 0
             ):
                 continue
             if result.fdi_type == "F":
@@ -153,6 +155,7 @@ class SimpleRuleBasedAnalyzer:
                 or result.fdi_type != "I"
                 or result.data_size is None
                 or result.start_time is None
+                or result.subtask_flag != 0
             ):
                 continue
             groups[result.task].append(result)
@@ -221,7 +224,9 @@ class SimpleRuleBasedAnalyzer:
             if (result.task == ""
                 or result.fdi_type != 'F'
                 or result.data_size is None
-                or result.start_time is None):
+                or result.start_time is None
+                or result.subtask_flag != 0
+            ):
                 continue
             groups[result.task].append(result)
 
