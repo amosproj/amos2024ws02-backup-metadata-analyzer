@@ -71,7 +71,7 @@ class Analyzer:
                 continue
 
             # Don't send subtasks
-            if result.subtask_flag != 0:
+            if result.subtask_flag != "0":
                 continue
 
             # Only send backups where the relevant data is not null

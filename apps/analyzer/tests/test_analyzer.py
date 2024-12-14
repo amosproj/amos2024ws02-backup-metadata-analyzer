@@ -6,7 +6,7 @@ from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
 
 
-def _create_mock_result(task, uuid, saveset, fdi_type, data_size, start_time, task_uuid=None, is_backup=1, subtask_flag=0):
+def _create_mock_result(task, uuid, saveset, fdi_type, data_size, start_time, task_uuid=None, is_backup=1, subtask_flag="0"):
 	mock_result = Result()
 	mock_result.task = task
 	mock_result.saveset = saveset

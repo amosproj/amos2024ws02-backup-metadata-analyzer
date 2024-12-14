@@ -32,7 +32,7 @@ class Result(Base):
     fdi_type: Mapped[str]
     is_backup: Mapped[int]
     state: Mapped[int]
-    subtask_flag: Mapped[int]
+    subtask_flag: Mapped[str]
 
     start_time: Mapped[datetime]
     stop_time: Mapped[datetime]

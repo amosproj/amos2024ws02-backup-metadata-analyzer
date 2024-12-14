@@ -14,7 +14,7 @@ def _create_mock_result(task, uuid, fdi_type, data_size, start_time):
     mock_result.fdi_type = fdi_type
     mock_result.data_size = data_size
     mock_result.start_time = start_time
-    mock_result.subtask_flag = 0
+    mock_result.subtask_flag = "0"
     return mock_result
 
 def _create_mock_data_store(name, capacity, high_water_mark, filled):
@@ -54,7 +54,7 @@ def test_no_size_alert_sub_tasks():
     mock_result2 = _create_mock_result(
         "foo", "2", "F", 121_000_000, datetime.fromisoformat("2000-01-02")
     )
-    mock_result2.subtask_flag = 1
+    mock_result2.subtask_flag = "1"
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
@@ -300,7 +300,7 @@ def test_alert_backup_size_no_subtasks_diff():
     mock_result2 = _create_mock_result(
         "foo", "2", "D", 1_000_000, datetime.fromisoformat("2000-01-03")
     )
-    mock_result2.subtask_flag = 1
+    mock_result2.subtask_flag = "1"
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
@@ -484,7 +484,7 @@ def test_alert_backup_size_no_subtasks_inc():
     mock_result2 = _create_mock_result(
         "foo", "2", "I", 0, datetime.fromisoformat("2000-01-02")
     )
-    mock_result2.subtask_flag = 1
+    mock_result2.subtask_flag = "1"
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
@@ -670,7 +670,7 @@ def test_alert_unusual_time():
 def test_alert_creation_date_no_subtasks():
     mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
     mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T18:00:00"))
-    mock_result2.subtask_flag = 1
+    mock_result2.subtask_flag = "1"
 
     database = MockDatabase([mock_result1, mock_result2])
     backend = MockBackend()
