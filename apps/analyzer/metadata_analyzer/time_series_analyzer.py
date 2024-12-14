@@ -11,13 +11,10 @@ from darts.ad.detectors import QuantileDetector
 class Time_series_analyzer:
     df = ""
 
-    def __init__(self, database):
+    def preload_data(self, data):
         global df
-        # Create an engine using shared init
-        database = database
-        # read table into a dataframe
-        with database.engine.connect() as conn, conn.begin():
-            df = pd.read_sql_table("results", conn)
+         # read table into a dataframe
+        df = pd.DataFrame([res.as_dict() for res in data])
 
         # --------------- General Preprocessing ---------------
         # removes null values in sbc_start, task_uuid and is_backup
@@ -103,13 +100,13 @@ class Time_series_analyzer:
 
         return working_df
 
-    def get_task_ids():
+    def get_task_ids(self):
         global df
         # gets all possible values for task_uuid
         task_ids = df["task_uuid"].unique()
         return dict(enumerate(task_ids.flatten(), 1))
 
-    def get_frequencies(task_id, backup_type, variable):
+    def get_frequencies(self,task_id, backup_type, variable):
         working_df = Time_series_analyzer.task_preprocessing(
             backup_type, task_id, variable
         )

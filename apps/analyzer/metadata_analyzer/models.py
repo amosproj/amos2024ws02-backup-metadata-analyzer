@@ -47,6 +47,23 @@ class Result(Base):
     def __str__(self):
         return repr(self)
 
+    def as_dict(self):
+        return {
+            "saveset": self.saveset,
+            "uuid": self.uuid,
+            "task": self.task,
+            "task_uuid": self.task_uuid,
+            "fdi_type": self.fdi_type,
+            "is_backup": self.is_backup,
+            "state": self.state,
+            "start_time": self.start_time,
+            "stop_time": self.stop_time,
+            "sbc_start": self.sbc_start,
+            "data_size": self.data_size,
+            "throughput": self.throughput,
+            "duration": self.duration,
+        }
+
 
 class Tasks(Base):
     __tablename__ = "tasks"

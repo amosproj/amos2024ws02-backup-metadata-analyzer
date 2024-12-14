@@ -12,6 +12,7 @@ class Analyzer:
         Analyzer.simple_analyzer = simple_analyzer
         Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
         Analyzer.time_series_analyzer = time_series_analyzer
+        Analyzer.series_loaded = False
 
     def analyze():
         data = list(Analyzer.database.get_results())
@@ -139,9 +140,26 @@ class Analyzer:
     def simple_time_series_analysis(
         variable, task_id, frequency, backup_type, window_size
     ):
-        result = Analyzer.time_series_analyzer.k_means_analyze(
+        if not Analyzer.series_loaded:
+            Analyzer.load_time_series_data()
+
+        return Analyzer.time_series_analyzer.k_means_analyze(
             variable, task_id, frequency, backup_type, window_size)
-        return result
+    
+    def time_series_get_frequencies(task_id, backup_type, variable):
+        if not Analyzer.series_loaded:
+            Analyzer.load_time_series_data()
+        return Analyzer.time_series_analyzer.get_frequencies(task_id, backup_type, variable)
+
+    def time_series_get_task_ids():
+        if not Analyzer.series_loaded:
+            Analyzer.load_time_series_data()
+        return Analyzer.time_series_analyzer.get_task_ids()
+
+    def load_time_series_data():
+        data = list(Analyzer.database.get_results())
+        Analyzer.time_series_analyzer.preload_data(data)
+        Analyzer.series_loaded = True
 
     def simple_rule_based_analysis_creation_dates(alert_limit):
         data = list(Analyzer.database.get_results())

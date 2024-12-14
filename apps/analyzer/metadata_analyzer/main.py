@@ -192,7 +192,6 @@ def simple_rule_based_analysis():
         int(alert_limit)
         return jsonify(Analyzer.simple_rule_based_analysis(int(alert_limit)))
     except ValueError:
-        print("Alert limit is not a number")
         return "Invalid value for alert limit", 400
 
 
@@ -242,7 +241,6 @@ def simple_rule_based_analysis_diff():
         int(alert_limit)
         return jsonify(Analyzer.simple_rule_based_analysis_diff(int(alert_limit)))
     except ValueError:
-        print("Alert limit is not a number")
         return "Invalid value for alert limit", 400
 
 
@@ -292,7 +290,6 @@ def simple_rule_based_analysis_inc():
         int(alert_limit)
         return jsonify(Analyzer.simple_rule_based_analysis_inc(int(alert_limit)))
     except ValueError:
-        print("Alert limit is not a number")
         return "Invalid value for alert limit", 400
 
 
@@ -410,6 +407,10 @@ def runTimeSeriesTests():
         description: The timestamps of the anomalies
         schema:
           $ref: '#/definitions/Timestamps'
+      400:
+        description: Input either asked for non-implemented features or led to an emtpy cleaned dataset.
+      500:
+        description: Data was not loaded correctly in previous steps so a time series analysis is not possible.
     """
     json = request.get_json()
     field = "None"
@@ -434,6 +435,8 @@ def runTimeSeriesTests():
         return jsonify(result)
     except ValueError as val:
         return "Value error occured: " + str(val), 400
+    except AttributeError as att:
+        return "No time series analysis possible because of failed data loading: " + str(att), 500
 
 
 @app.route("/getTaskIds", methods=["GET"])
@@ -458,8 +461,14 @@ def return_task_ids():
         description: All possible task ids
         schema:
           $ref: '#/definitions/task_ids'
+      500:
+        description: Data was not loaded correctly in previous steps so a time series analysis is not possible.
     """
-    return jsonify(Time_series_analyzer.get_task_ids())
+    try:
+        
+        return jsonify(Analyzer.time_series_get_task_ids())
+    except AttributeError as att:
+        return "No time series analysis possible because of failed data loading: " + str(att), 500
 
 
 @app.route("/getFrequenciesForTask", methods=["POST"])
@@ -514,6 +523,8 @@ def return_frequencies():
         description: All backup frequencies found that meet the conditions, ranked by times appeared
         schema:
           $ref: '#/definitions/Frequencies'
+      500:
+        description: Data was not loaded correctly in previous steps so a time series analysis is not possible.
     """
     json = request.get_json()
     field = "None"
@@ -524,17 +535,17 @@ def return_frequencies():
         backup_type = json["backup_type"]
         field = "variable"
         variable = json["variable"]
+        return jsonify(Analyzer.time_series_get_frequencies(task_id, backup_type, variable))
     except KeyError:
         return "Missing field of type " + field, 400
-
-    return jsonify(Time_series_analyzer.get_frequencies(task_id, backup_type, variable))
-
+    except AttributeError as att:
+        return "No time series analysis possible because of failed data loading: " + str(att), 500
 
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
-    time_series_analyzer = Time_series_analyzer(database)
+    time_series_analyzer = Time_series_analyzer()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(
         database,
