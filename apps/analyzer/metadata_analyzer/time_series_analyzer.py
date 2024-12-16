@@ -48,9 +48,6 @@ class Time_series_analyzer:
         if working_df.empty:
             raise ValueError("Series had length 0 after applying specified parameters!")
         working_df = working_df.asfreq(frequency, method="ffill")
-        # determines number of clusters for the k means scorer,
-        # TODO use clusters for more useful k value
-        clusters = len(df[variable].unique())
         # initializes time series
         series = TimeSeries.from_series(
             working_df, fill_missing_dates=False, freq=frequency
@@ -62,8 +59,24 @@ class Time_series_analyzer:
         # TODO interim definition of training data, change to something more useful
         series_train = series[: round(len(series) / 4)]
 
+        # determines number of clusters for the k means scorer,
+        # use clusters for more useful k value
+        maxClusters = len(series_train)
+        # TODO read in env for clusters here
+        clusters = 5
+
+        if clusters > maxClusters:
+            raise ValueError(
+                "Series had "
+                + str(maxClusters)
+                + " different samples, less than the number of clusters "
+                + str(clusters)
+            )
+
         # using basic k-means scorer (moving window comparison)
-        Kmeans_scorer = KMeansScorer(k=5, window=int(window_size), component_wise=False)
+        Kmeans_scorer = KMeansScorer(
+            k=clusters, window=int(window_size), component_wise=False
+        )
         Kmeans_scorer.fit(series_train)
         anomaly_score = Kmeans_scorer.score(series)
 
