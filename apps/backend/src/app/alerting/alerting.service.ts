@@ -109,15 +109,23 @@ export class AlertingService {
 
     const alerts: Alert[] = [];
     for (const alertRepository of this.alertRepositories) {
-      const repositoryAlerts = await alertRepository.find({
-        where: {
-          alertType: {
-            user_active: true,
-            master_active: true,
-          },
-        },
-      });
-      alerts.push(...repositoryAlerts);
+      // if(alertRepository.target.name===STORAGE_FILL_ALERT){
+
+      // }
+      if (alertRepository === this.storageFillRepository) {
+        alerts.push(
+          ...(await alertRepository.find({
+            where: {
+              alertType: {
+                user_active: true,
+                master_active: true,
+              },
+            },
+          }))
+        );
+      } else {
+        alerts.push(...(await alertRepository.find({ where })));
+      }
     }
     return alerts;
   }
