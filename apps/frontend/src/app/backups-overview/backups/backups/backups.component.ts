@@ -53,11 +53,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected backupDateFilter: CustomFilter;
   protected taskFilter: CustomFilter;
   protected backupSavesetFilter: CustomFilter;
-  protected taskFilter: CustomFilter;
   backupEnumTypes = Object.keys(BackupType).filter((item) => {
     return isNaN(Number(item));
   });
-  selectedtBackupTypes: string[] = [];
+  selectedBackupTypes: string[] = [];
   protected typeFilter: CustomFilter;
   protected selectedTask: BackupTask[] = [];
   protected filterPanel = false;
@@ -290,7 +289,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
     if (this.typeFilter.isActive()) {
       console.log('ACTIVE');
-      params.type = this.typeFilter.ranges.type;
+      //params.types = this.typeFilter.ranges.type;
     }
 
     return params;
@@ -334,7 +333,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   setBackupTypes(types: BackupType[]): void {
-    this.selectedtBackupTypes = types;
+    this.selectedBackupTypes = types;
     this.backupTypesSubject$.next(types);
   }
 
