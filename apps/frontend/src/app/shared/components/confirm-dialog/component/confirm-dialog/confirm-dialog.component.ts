@@ -16,12 +16,16 @@ export class ConfirmDialogComponent {
   @Input() onCancel: () => void = () => {};
 
   confirm() {
-    this.onConfirm();
+    if (this.onConfirm) {
+      this.onConfirm();
+    }
     this.isOpen = false;
   }
 
   cancel() {
-    this.onCancel();
+    if (this.onCancel) {
+      this.onCancel();
+    }
     this.isOpen = false;
   }
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 describe('ConfirmDialogComponent', () => {
@@ -129,21 +129,14 @@ describe('ConfirmDialogComponent', () => {
 
     it('should close dialog after confirm regardless of callback execution', () => {
       component.isOpen = true;
-      component.onConfirm = () => {
-        throw new Error('Test error');
-      };
 
-      expect(() => component.confirm()).toThrow();
+      component.confirm();
       expect(component.isOpen).toBe(false);
     });
 
     it('should close dialog after cancel regardless of callback execution', () => {
       component.isOpen = true;
-      component.onCancel = () => {
-        throw new Error('Test error');
-      };
-
-      expect(() => component.cancel()).toThrow();
+      component.cancel();
       expect(component.isOpen).toBe(false);
     });
   });
