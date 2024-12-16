@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { FormBuilder } from '@angular/forms';
-import { ConfirmDialogService } from 'apps/frontend/src/app/shared/components/confirm-dialog/service/confirm-dialog.service';
 import { of, throwError } from 'rxjs';
-import { EmailType } from 'apps/frontend/src/app/shared/types/email';
 import { EmailReceiverService } from './email-receiver.service';
 import { EmailReceiverSettingsComponent } from '../../components/settings/email-receiver-settings/email-receiver-settings.component';
+import { ConfirmDialogService } from '../../../shared/components/confirm-dialog/service/confirm-dialog.service';
+import { EmailType } from '../../../shared/types/email';
 
 describe('EmailReceiverSettingsComponent', () => {
   let component: EmailReceiverSettingsComponent;
