@@ -31,6 +31,7 @@ readme = 'README.md'
   darts = "^0.31.0"
   pandas = "^2.2.3"
   mypy = "^1.13.0"
+  torch = "^2.1.0"
 
   [tool.poetry.group.dev.dependencies]
   autopep8 = "2.0.2"
@@ -39,6 +40,11 @@ readme = 'README.md'
   pytest-sugar = "0.9.7"
   pytest-cov = "4.1.0"
   pytest-html = "3.2.0"
+
+[[tool.poetry.source]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
 
 [build-system]
 requires = ["poetry-core"]
