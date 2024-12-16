@@ -195,7 +195,6 @@ def simple_rule_based_analysis():
         return "Invalid value for alert limit", 400
 
 
-
 @app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
 def simple_rule_based_analysis_diff():
     """Fulfills a simple rule based analysis on diff backups.
@@ -242,7 +241,6 @@ def simple_rule_based_analysis_diff():
         return jsonify(Analyzer.simple_rule_based_analysis_diff(int(alert_limit)))
     except ValueError:
         return "Invalid value for alert limit", 400
-
 
 
 @app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
@@ -313,7 +311,9 @@ def simple_rule_based_analysis_creation_dates():
 
     try:
         int(alert_limit)
-        return jsonify(Analyzer.simple_rule_based_analysis_creation_dates(int(alert_limit)))
+        return jsonify(
+            Analyzer.simple_rule_based_analysis_creation_dates(int(alert_limit))
+        )
     except ValueError:
         return "Invalid value for alert limit", 400
 
@@ -344,7 +344,6 @@ def simple_rule_based_analysis_storage_capacity():
         )
     except ValueError:
         return "Invalid value for alert limit", 400
-
 
 
 # TODO yaml for swagger
@@ -436,7 +435,11 @@ def runTimeSeriesTests():
     except ValueError as val:
         return "Value error occured: " + str(val), 400
     except AttributeError as att:
-        return "No time series analysis possible because of failed data loading: " + str(att), 500
+        return (
+            "No time series analysis possible because of failed data loading: "
+            + str(att),
+            500,
+        )
 
 
 @app.route("/getTaskIds", methods=["GET"])
@@ -465,10 +468,14 @@ def return_task_ids():
         description: Data was not loaded correctly in previous steps so a time series analysis is not possible.
     """
     try:
-        
+
         return jsonify(Analyzer.time_series_get_task_ids())
     except AttributeError as att:
-        return "No time series analysis possible because of failed data loading: " + str(att), 500
+        return (
+            "No time series analysis possible because of failed data loading: "
+            + str(att),
+            500,
+        )
 
 
 @app.route("/getFrequenciesForTask", methods=["POST"])
@@ -535,17 +542,27 @@ def return_frequencies():
         backup_type = json["backup_type"]
         field = "variable"
         variable = json["variable"]
-        return jsonify(Analyzer.time_series_get_frequencies(task_id, backup_type, variable))
+        return jsonify(
+            Analyzer.time_series_get_frequencies(task_id, backup_type, variable)
+        )
     except KeyError:
         return "Missing field of type " + field, 400
     except AttributeError as att:
-        return "No time series analysis possible because of failed data loading: " + str(att), 500
+        return (
+            "No time series analysis possible because of failed data loading: "
+            + str(att),
+            500,
+        )
+
 
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
-    time_series_analyzer = Time_series_analyzer()
+    parameters = []
+    parameters.append(os.getenv("ANOMALY_THRESHOLD"))
+    parameters.append(os.getenv("CLUSTER_NUMBER"))
+    time_series_analyzer = Time_series_analyzer(parameters)
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(
         database,

@@ -48,7 +48,7 @@ class Test_time_series_analyzer:
         database = MockDatabase(
             [mock_result1, mock_result2, mock_result3, mock_result4]
         )
-        time_series_analyzer = Time_series_analyzer()
+        time_series_analyzer = Time_series_analyzer([0.95, 5])
         Analyzer.init(database, backend, None, None, time_series_analyzer)
         Analyzer.load_time_series_data()
 
@@ -154,7 +154,7 @@ class Test_time_series_analyzer:
                 mock_result21,
             ]
         )
-        time_series_analyzer = Time_series_analyzer()
+        time_series_analyzer = Time_series_analyzer([0.95, 5])
         Analyzer.init(database, backend, None, None, time_series_analyzer)
         Analyzer.load_time_series_data()
 
@@ -261,7 +261,7 @@ class Test_time_series_analyzer:
                 mock_result21,
             ]
         )
-        time_series_analyzer = Time_series_analyzer()
+        time_series_analyzer = Time_series_analyzer([0.95, 5])
         Analyzer.init(database, backend, None, None, time_series_analyzer)
         Analyzer.load_time_series_data()
 

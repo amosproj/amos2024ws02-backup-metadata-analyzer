@@ -6,10 +6,25 @@ from flask import jsonify
 import numpy as np
 from darts.ad import KMeansScorer
 from darts.ad.detectors import QuantileDetector
+import os
 
 
 class Time_series_analyzer:
     df = ""
+    threshold = ""
+    training_series_start = 0
+    training_series_end = 0
+    clusters = 0
+
+    def __init__(self, parameters):
+        global threshold
+        global training_series_start
+        global training_series_end
+        global clusters
+        threshold = float(parameters[0])
+        training_series_start = 0
+        training_series_end = -1
+        clusters = int(parameters[1])
 
     def preload_data(self, data):
         global df
@@ -32,6 +47,11 @@ class Time_series_analyzer:
         df = df.sort_values("sbc_start")
 
     def k_means_analyze(self, variable, task_id, frequency, backup_type, window_size):
+        global threshold
+        global training_series_start
+        global training_series_end
+        global clusters
+
         working_df = Time_series_analyzer.task_preprocessing(
             backup_type, task_id, variable
         )
@@ -56,14 +76,15 @@ class Time_series_analyzer:
         if len(series) == 0:
             raise ValueError("Series had length 0 after applying specified parameters!")
 
-        # TODO interim definition of training data, change to something more useful
-        series_train = series[: round(len(series) / 4)]
+        # sets end of training series to arbitrary value of none is set manually
+        if training_series_end == -1:
+            training_series_end = round(len(series) / 4)
+
+        series_train = series[training_series_start:training_series_end]
 
         # determines number of clusters for the k means scorer,
         # use clusters for more useful k value
         maxClusters = len(series_train)
-        # TODO read in env for clusters here
-        clusters = 5
 
         if clusters > maxClusters:
             raise ValueError(
@@ -81,7 +102,6 @@ class Time_series_analyzer:
         anomaly_score = Kmeans_scorer.score(series)
 
         # detects where anomalies lie, then return binary prediction
-        threshold = 0.95
         detector = QuantileDetector(high_quantile=threshold)
         anomaly_pred = detector.fit_detect(series=anomaly_score)
 
