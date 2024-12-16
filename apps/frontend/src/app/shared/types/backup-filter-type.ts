@@ -1,3 +1,5 @@
+import { BackupType } from "../enums/backup.types";
+
 export type BackupFilterParams = {
   limit?: number;
   offset?: number;
@@ -11,5 +13,5 @@ export type BackupFilterParams = {
   taskId?: string[] | null;
   taskName?: string | null;
   saveset?: string | null;
-  type?: string | null;
+  types?: BackupType[] | null;
 };

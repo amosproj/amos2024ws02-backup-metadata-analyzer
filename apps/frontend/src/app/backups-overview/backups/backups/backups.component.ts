@@ -21,6 +21,7 @@ import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
+import { BackupType } from '../../../shared/enums/backup.types';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -52,6 +53,11 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected backupDateFilter: CustomFilter;
   protected taskFilter: CustomFilter;
   protected backupSavesetFilter: CustomFilter;
+  protected taskFilter: CustomFilter;
+  backupEnumTypes = Object.keys(BackupType).filter((item) => {
+    return isNaN(Number(item));
+  });
+  selectedtBackupTypes: string[] = [];
   protected typeFilter: CustomFilter;
   protected selectedTask: BackupTask[] = [];
   protected filterPanel = false;
@@ -68,7 +74,8 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
   protected backupTaskSearchTerm$: Subject<string> = new Subject<string>();
 
-  private readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
+  readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
+  readonly backupTypesSubject$ = new BehaviorSubject<BackupType[]>([]);
   private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
   );
@@ -147,11 +154,24 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           return prevIds === currIds;
         })
       ),
+      this.backupTypesSubject$.pipe(
+        distinctUntilChanged((prev, curr) => {
+          if (!prev && !curr) return true;
+          if (!prev || !curr) return false;
+          if (prev.length !== curr.length) {
+            return false;
+          }
+          const prevIds = prev.map((p) => p).sort();
+          const currIds = curr.map((c) => c).sort();
+          return prevIds === currIds;
+        })
+      ),
     ]).pipe(
-      map(([timeRange, tasks]) => ({
+      map(([timeRange, tasks, backupTypes]) => ({
         params: {
           fromDate: timeRange.fromDate.toISOString(),
           toDate: timeRange.toDate.toISOString(),
+          types: backupTypes,
         },
         selectedTasks: tasks ? tasks.map((task) => task.id) : [],
       })),
@@ -311,6 +331,11 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   setBackupTask(tasks: BackupTask[]): void {
     this.selectedTask = tasks;
     this.backupTaskSubject$.next(tasks);
+  }
+
+  setBackupTypes(types: BackupType[]): void {
+    this.selectedtBackupTypes = types;
+    this.backupTypesSubject$.next(types);
   }
 
   /**
