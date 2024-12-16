@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { EmailType } from 'apps/frontend/src/app/shared/types/email';
 import {
   BehaviorSubject,
   from,
@@ -10,14 +9,15 @@ import {
 } from 'rxjs';
 import { EmailReceiverService } from '../../../services/email-receiver/email-receiver.service';
 import { CustomEmailFilter } from './emailfilter';
-import { ConfirmDialogService } from 'apps/frontend/src/app/shared/components/confirm-dialog/service/confirm-dialog.service';
+import { EmailType } from '../../../../shared/types/email';
+import { ConfirmDialogService } from '../../../../shared/components/confirm-dialog/service/confirm-dialog.service';
 
 @Component({
   selector: 'app-email-receiver-settings',
   templateUrl: './email-receiver-settings.component.html',
   styleUrl: './email-receiver-settings.component.css',
 })
-export class EmailReceiverSettingsComponent {
+export class EmailReceiverSettingsComponent implements OnInit, OnDestroy {
   isLoading = false;
   emailForm: FormGroup;
   showEmailModal = false;

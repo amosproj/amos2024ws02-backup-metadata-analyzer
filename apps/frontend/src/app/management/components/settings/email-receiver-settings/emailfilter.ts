@@ -1,6 +1,6 @@
 import { ClrDatagridFilterInterface } from '@clr/angular';
-import { EmailType } from 'apps/frontend/src/app/shared/types/email';
 import { Subject } from 'rxjs';
+import { EmailType } from '../../../../shared/types/email';
 
 export class CustomEmailFilter implements ClrDatagridFilterInterface<EmailType> {
   public ranges: {
