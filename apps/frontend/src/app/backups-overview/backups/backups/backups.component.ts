@@ -21,6 +21,7 @@ import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
+import { BackupType } from '../../../shared/enums/backup.types';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -50,10 +51,14 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   pageSize = 10;
   protected backupSizeFilter: CustomFilter;
   protected backupDateFilter: CustomFilter;
-  protected backupIdFilter: CustomFilter;
   protected selectedTask: BackupTask[] = [];
   protected filterPanel: boolean = false;
-  taskFilter: CustomFilter;
+  protected backupSavesetFilter: CustomFilter;
+  protected taskFilter: CustomFilter;
+  backupEnumTypes = Object.keys(BackupType).filter((item) => {
+    return isNaN(Number(item));
+  });
+  selectedtBackupTypes: string[] = [];
 
   //Subjects
   private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
@@ -64,9 +69,11 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   readonly timeRange$ = this.timeRangeSubject$.pipe(
     map((config) => config.range)
   );
+
   protected backupTaskSearchTerm$: Subject<string> = new Subject<string>();
 
-  private readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
+  readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
+  readonly backupTypesSubject$ = new BehaviorSubject<BackupType[]>([]);
   private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
   );
@@ -84,7 +91,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   ) {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
-    this.backupIdFilter = new CustomFilter('id');
+    this.backupSavesetFilter = new CustomFilter('saveset');
     this.taskFilter = new CustomFilter('taskName');
 
     /**
@@ -144,11 +151,24 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           return prevIds === currIds;
         })
       ),
+      this.backupTypesSubject$.pipe(
+        distinctUntilChanged((prev, curr) => {
+          if (!prev && !curr) return true;
+          if (!prev || !curr) return false;
+          if (prev.length !== curr.length) {
+            return false;
+          }
+          const prevIds = prev.map((p) => p).sort();
+          const currIds = curr.map((c) => c).sort();
+          return prevIds === currIds;
+        })
+      ),
     ]).pipe(
-      map(([timeRange, tasks]) => ({
+      map(([timeRange, tasks, backupTypes]) => ({
         params: {
           fromDate: timeRange.fromDate.toISOString(),
           toDate: timeRange.toDate.toISOString(),
+          types: backupTypes,
         },
         selectedTasks: tasks ? tasks.map((task) => task.id) : [],
       })),
@@ -186,7 +206,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     combineLatest([
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
-      this.backupIdFilter.changes.pipe(startWith(null)),
+      this.backupSavesetFilter.changes.pipe(startWith(null)),
       this.taskFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
@@ -256,8 +276,8 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       params.toSizeMB = this.backupSizeFilter.ranges.toSizeMB;
     }
 
-    if (this.backupIdFilter.isActive()) {
-      params.id = this.backupIdFilter.ranges.id;
+    if (this.backupSavesetFilter.isActive()) {
+      params.saveset = this.backupSavesetFilter.ranges.saveset;
     }
 
     if (this.taskFilter.isActive()) {
@@ -302,6 +322,12 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.selectedTask = tasks;
     this.backupTaskSubject$.next(tasks);
   }
+
+  setBackupTypes(types: BackupType[]): void {
+    this.selectedtBackupTypes = types;
+    this.backupTypesSubject$.next(types);
+  }
+
   /**
    * Add search Term to backupTaskSearchTerm$ subject for the Backup task search
    * @param term Search term for the Backup task
@@ -311,7 +337,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
   /**
    * Check the filter states and add new filter values to the filterOptions$ subject
-   * @param state filter values 
+   * @param state filter values
    */
   refresh(state: ClrDatagridStateInterface<any>): void {
     this.loading = true;

@@ -1,12 +1,17 @@
 import datetime
-
-
 class Analyzer:
-    def init(database, backend, simple_analyzer, simple_rule_based_analyzer):
+    def init(
+        database,
+        backend,
+        simple_analyzer,
+        simple_rule_based_analyzer,
+        time_series_analyzer,
+    ):
         Analyzer.database = database
         Analyzer.backend = backend
         Analyzer.simple_analyzer = simple_analyzer
         Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
+        Analyzer.time_series_analyzer = time_series_analyzer
 
     def analyze():
         data = list(Analyzer.database.get_results())
@@ -30,6 +35,7 @@ class Analyzer:
         }[result.fdi_type]
         return {
             "id": result.uuid,
+            "saveset": result.saveset,
             "sizeMB": result.data_size / 1_000_000,
             "creationDate": result.start_time.isoformat(),
             "type": backup_type,
@@ -61,7 +67,7 @@ class Analyzer:
 
         for result in results:
             # Only send real backups
-            if result.is_backup <= 0:
+            if (result.is_backup is not None) and (result.is_backup <= 0):
                 continue
 
             # Only send backups where the relevant data is not null
@@ -130,6 +136,12 @@ class Analyzer:
         result = Analyzer.simple_rule_based_analyzer.analyze_inc(data, alert_limit, start_date)
         return result
 
+    def simple_time_series_analysis(
+        variable, task_id, frequency, backup_type, window_size
+    ):
+        result = Analyzer.time_series_analyzer.k_means_analyze(
+            variable, task_id, frequency, backup_type, window_size)
+
     def simple_rule_based_analysis_creation_dates(alert_limit):
         data = list(Analyzer.database.get_results())
         start_date = Analyzer._get_start_date(data, "CREATION_DATE_ALERT", None)
@@ -139,6 +151,5 @@ class Analyzer:
     def simple_rule_based_analysis_storage_capacity(alert_limit):
         data = list(Analyzer.database.get_data_stores())
         result = Analyzer.simple_rule_based_analyzer.analyze_storage_capacity(
-            data, alert_limit
-        )
+            data, alert_limit)
         return result

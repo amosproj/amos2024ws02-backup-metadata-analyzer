@@ -117,7 +117,6 @@
   z-index: 1000000;
 }
 
-
 .side-panel-footer {
   padding: 1rem;
   border-top: 1px solid #eee;
@@ -191,4 +190,11 @@
   white-space: nowrap;
   height: auto;
   line-height: 1;
+}
+
+
+.backupTaskFilter ::ng-deep .clr-combobox-options {
+  width: 100% !important;
+  min-width: 100%;
+  max-width: 100%;
 }

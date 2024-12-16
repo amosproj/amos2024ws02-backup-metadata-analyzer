@@ -13,6 +13,13 @@ export class BackupDataEntity {
   id!: string;
 
   @ApiProperty({
+    description: 'saveset name of the backup',
+    required: true,
+  })
+  @Column()
+  saveset!: string;
+
+  @ApiProperty({
     description: 'Size of Backup in MB',
     nullable: false,
     required: true,

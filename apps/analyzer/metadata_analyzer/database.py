@@ -1,4 +1,3 @@
-import pg8000.dbapi
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from metadata_analyzer.models import BackupData, Result, Tasks, DataStore

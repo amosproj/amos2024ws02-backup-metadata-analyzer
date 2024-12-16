@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataModule } from './backupData.module';
@@ -12,6 +12,7 @@ import { TaskEntity } from '../tasks/entity/task.entity';
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
   sizeMB: 100,
+  saveset: 'backup-123',
   type: BackupType.FULL,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
@@ -60,6 +61,7 @@ describe('BackupDataController (e2e)', () => {
   it('/backupData (POST) should create new backup data entry', async () => {
     const createBackupDataDto: CreateBackupDataDto = {
       id: '1',
+      saveset: 'backup-1',
       sizeMB: 100,
       creationDate: new Date(),
     };
@@ -71,6 +73,7 @@ describe('BackupDataController (e2e)', () => {
 
     expect(response.body).toEqual({
       id: createBackupDataDto.id,
+      saveset: createBackupDataDto.saveset,
       sizeMB: createBackupDataDto.sizeMB,
       creationDate: createBackupDataDto.creationDate.toISOString(),
     });
@@ -118,7 +121,7 @@ describe('BackupDataController (e2e)', () => {
       skip: '0',
       take: '1',
       order: { creationDate: 'DESC' },
-      where: { type: BackupType.FULL },
+      where: {},
     });
   });
 
@@ -141,7 +144,7 @@ describe('BackupDataController (e2e)', () => {
 
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
-      where: { creationDate: expect.any(Object), type: BackupType.FULL },
+      where: { creationDate: expect.any(Object) },
     });
   });
   it('/backupData/filter (POST) with taskId should return backup data entries with the specified taskId', async () => {
@@ -151,7 +154,7 @@ describe('BackupDataController (e2e)', () => {
 
     expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
       order: { creationDate: 'DESC' },
-      where: { taskId: { id: 'task-123' }, type: BackupType.FULL },
+      where: { taskId: { id: 'task-123' } },
     });
   });
 
@@ -164,7 +167,19 @@ describe('BackupDataController (e2e)', () => {
       order: { creationDate: 'DESC' },
       where: {
         taskId: { displayName: ILike('%backup-task%') },
-        type: BackupType.FULL,
+      },
+    });
+  });
+
+  it('/backupData/filter (POST) with type should return backup data entries with the specified type', async () => {
+    await request(app.getHttpServer())
+      .post('/backupData/filter?types=INCREMENTAL')
+      .expect(201);
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: {
+        type: In([BackupType.INCREMENTAL]),
       },
     });
   });
@@ -191,7 +206,19 @@ describe('BackupDataController (e2e)', () => {
       order: { creationDate: 'DESC' },
       where: {
         taskId: [{ id: 'task-1' }, { id: 'task-2' }],
-        type: BackupType.FULL,
+      },
+    });
+  });
+
+  it('/backupData/filter (POST) with multiple types should return backup data entries with the specified types', async () => {
+    await request(app.getHttpServer())
+      .post('/backupData/filter?types=FULL&types=INCREMENTAL')
+      .expect(201);
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: {
+        type: In([BackupType.FULL, BackupType.INCREMENTAL]),
       },
     });
   });

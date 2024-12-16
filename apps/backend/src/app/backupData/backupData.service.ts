@@ -9,6 +9,7 @@ import {
   FindOptionsOrder,
   FindOptionsWhere,
   ILike,
+  In,
   LessThanOrEqual,
   MoreThanOrEqual,
   Repository,
@@ -23,7 +24,6 @@ import {
   BackupDataOrderByOptions,
   BackupDataOrderOptionsDto,
 } from './dto/backupDataOrderOptions.dto';
-import { BackupType } from './dto/backupType';
 import { SortOrder } from '../utils/pagination/SortOrder';
 import { TasksService } from '../tasks/tasks.service';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
@@ -63,6 +63,7 @@ export class BackupDataService extends PaginationService {
       paginationOptionsDto
     );
   }
+
   /**
    * Create a new backup data entity.
    * @param createBackupDataDto
@@ -107,6 +108,7 @@ export class BackupDataService extends PaginationService {
   /**
    * Create where clause.
    * @param backupDataFilterDto
+   * @param backupDataFilterByTaskIdsDto
    */
   createWhereClause(
     backupDataFilterDto: BackupDataFilterDto,
@@ -191,7 +193,18 @@ export class BackupDataService extends PaginationService {
       };
     }
 
-    where.type = BackupType.FULL;
+    //Saveset search
+    if (backupDataFilterDto.saveset) {
+      where.saveset = ILike(`%${backupDataFilterDto.saveset}%`);
+    }
+
+    //Backup type search
+    if (backupDataFilterDto.types) {
+      const typesArray = Array.isArray(backupDataFilterDto.types)
+        ? backupDataFilterDto.types
+        : [backupDataFilterDto.types];
+      where.type = In(typesArray);
+    }
 
     return where;
   }
