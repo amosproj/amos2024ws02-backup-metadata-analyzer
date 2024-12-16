@@ -48,7 +48,6 @@ export class AlertComponent implements OnInit, OnDestroy {
     this.alertService
       .getAllAlerts(this.DAYS)
       .pipe(takeUntil(this.destroy$))
-      .pipe(tap((data) => console.log(data)))
       .subscribe((data: Alert[]) => {
         this.criticalAlertsCount = data.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL
@@ -168,8 +167,6 @@ export class AlertComponent implements OnInit, OnDestroy {
   formatDate(date: Date): string {
     return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
   }
-
-  
 
   ngOnDestroy(): void {
     this.destroy$.next();

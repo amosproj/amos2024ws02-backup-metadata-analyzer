@@ -49,8 +49,7 @@ export class BackupService {
         params: params,
       })
       .pipe(
-        shareReplay(1),
-        tap((elem) => console.log(elem))
+        shareReplay(1)
       );
   }
 
