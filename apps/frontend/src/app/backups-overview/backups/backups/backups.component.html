@@ -163,15 +163,22 @@
         <ng-container *clrDgHideableColumn>
           Type
           <clr-dg-filter [clrDgFilter]="typeFilter">
-            <clr-input-container>
-              <label>Type:</label>
-              <input
-                clrInput
-                type="string"
-                [(ngModel)]="typeFilter.ranges.type"
-                (ngModelChange)="typeFilter.updateRanges({ type: $event })"
-              />
-            </clr-input-container>
+            <clr-combobox-container class="backupTaskFilter">
+              <clr-combobox
+                [(ngModel)]="selectedBackupTypesForTable"
+                [clrMulti]="true"
+                (ngModelChange)="setBackupTypesForTable($event)"
+                placeholder="Select backup types">
+                <ng-container *clrOptionSelected="let value">
+                  {{ value }}
+                </ng-container>
+                <clr-options>
+                  <clr-option *ngFor="let option of backupEnumTypes" [clrValue]="option">
+                    {{ option }}
+                  </clr-option>
+                </clr-options>
+              </clr-combobox>
+            </clr-combobox-container>
           </clr-dg-filter>
         </ng-container>
       </clr-dg-column>
@@ -214,7 +221,7 @@
         <clr-dg-cell>{{ backup.saveset }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.taskId?.displayName ?? '' }}</clr-dg-cell>
-        <clr-dg-cell>{{ backup.type ?? '' }}</clr-dg-cell>
+        <clr-dg-cell>{{ backup.type ?? '-' }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.creationDate | date }}</clr-dg-cell>
         <clr-dg-action-overflow>
           <button class="action-item">More Details</button>
@@ -315,16 +322,16 @@
       <h5>Types</h5>
       <clr-combobox-container class="backupTaskFilter">
         <clr-combobox
-          [(ngModel)]="selectedBackupTypes"
+          [(ngModel)]="selectedBackupTypesForCharts"
           [clrMulti]="true"
-          (ngModelChange)="setBackupTypes($event)"
+          (ngModelChange)="setBackupTypesForCharts($event)"
           placeholder="Select backup types">
           <ng-container *clrOptionSelected="let value">
-            {{value}}
+            {{ value }}
           </ng-container>
           <clr-options>
             <clr-option *ngFor="let option of backupEnumTypes" [clrValue]="option">
-              {{option}}
+              {{ option }}
             </clr-option>
           </clr-options>
         </clr-combobox>

@@ -1,5 +1,5 @@
 import { BackupTask } from './backup.task';
-import { BackupType } from './backupType';
+import { BackupType } from '../enums/backup.types';
 
 export interface Backup {
   id: string;

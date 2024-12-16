@@ -1,6 +1,7 @@
 import { ClrDatagridFilterInterface } from '@clr/angular';
 import { Backup } from '../../../shared/types/backup';
 import { Subject } from 'rxjs';
+import { BackupType } from '../../../shared/enums/backup.types';
 
 export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
   public ranges: {
@@ -11,7 +12,7 @@ export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
     toSizeMB: number | null;
     id: string | null;
     taskName: string | null;
-    type: string | null;
+    type: BackupType[] | null;
   } = {
     fromDate: null,
     toDate: null,

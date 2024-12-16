@@ -49,15 +49,21 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   tasksLoading = false;
   loading = false;
   pageSize = 10;
+
+  backupEnumTypes = Object.keys(BackupType).filter((item) => {
+    return isNaN(Number(item));
+  });
+
+  //Filters for Table
   protected backupSizeFilter: CustomFilter;
   protected backupDateFilter: CustomFilter;
   protected taskFilter: CustomFilter;
   protected backupSavesetFilter: CustomFilter;
-  backupEnumTypes = Object.keys(BackupType).filter((item) => {
-    return isNaN(Number(item));
-  });
-  selectedBackupTypes: string[] = [];
+  selectedBackupTypesForTable: string[] = [];
   protected typeFilter: CustomFilter;
+
+  //Filters for Charts
+  selectedBackupTypesForCharts: string[] = [];
   protected selectedTask: BackupTask[] = [];
   protected filterPanel = false;
 
@@ -74,7 +80,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected backupTaskSearchTerm$: Subject<string> = new Subject<string>();
 
   readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
-  readonly backupTypesSubject$ = new BehaviorSubject<BackupType[]>([]);
+  readonly backupTypesForChartsSubject$ = new BehaviorSubject<BackupType[]>([]);
   private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
   );
@@ -153,7 +159,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           return prevIds === currIds;
         })
       ),
-      this.backupTypesSubject$.pipe(
+      this.backupTypesForChartsSubject$.pipe(
         distinctUntilChanged((prev, curr) => {
           if (!prev && !curr) return true;
           if (!prev || !curr) return false;
@@ -288,8 +294,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     if (this.typeFilter.isActive()) {
-      console.log('ACTIVE');
-      //params.types = this.typeFilter.ranges.type;
+      params.types = this.typeFilter.ranges.type;
     }
 
     return params;
@@ -332,9 +337,14 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupTaskSubject$.next(tasks);
   }
 
-  setBackupTypes(types: BackupType[]): void {
-    this.selectedBackupTypes = types;
-    this.backupTypesSubject$.next(types);
+  setBackupTypesForCharts(types: BackupType[]): void {
+    this.selectedBackupTypesForCharts = types;
+    this.backupTypesForChartsSubject$.next(types);
+  }
+
+  setBackupTypesForTable(types: BackupType[]): void {
+    this.selectedBackupTypesForTable = types;
+    this.typeFilter.updateRanges({ type: types });
   }
 
   /**

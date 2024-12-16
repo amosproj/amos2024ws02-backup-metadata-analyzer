@@ -1,12 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { filter, Observable, shareReplay, tap } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { BASE_URL } from '../../../shared/types/configuration';
 import { Backup } from '../../../shared/types/backup';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { BackupTask } from '../../../shared/types/backup.task';
-import { BackupType } from '../../../shared/enums/backup.types';
 
 @Injectable({
   providedIn: 'root',
@@ -48,10 +47,7 @@ export class BackupService {
       .post<APIResponse<Backup>>(`${this.baseUrl}/backupData/filter`, body, {
         params: params,
       })
-      .pipe(
-        shareReplay(1),
-        tap((elem) => console.log(elem))
-      );
+      .pipe(shareReplay(1));
   }
 
   getAllBackupTasks(): Observable<BackupTask[]> {
