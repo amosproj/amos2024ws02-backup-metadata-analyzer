@@ -13,7 +13,7 @@ class Time_series_analyzer:
 
     def preload_data(self, data):
         global df
-         # read table into a dataframe
+        # read table into a dataframe
         df = pd.DataFrame([res.as_dict() for res in data])
 
         # --------------- General Preprocessing ---------------
@@ -45,6 +45,8 @@ class Time_series_analyzer:
 
         # interpolates series to emulate backups at regular intervals, different methods possible
         frequency = str(frequency) + "s"  # adds unit
+        if working_df.empty:
+            raise ValueError("Series had length 0 after applying specified parameters!")
         working_df = working_df.asfreq(frequency, method="ffill")
         # determines number of clusters for the k means scorer,
         # TODO use clusters for more useful k value
@@ -106,7 +108,7 @@ class Time_series_analyzer:
         task_ids = df["task_uuid"].unique()
         return dict(enumerate(task_ids.flatten(), 1))
 
-    def get_frequencies(self,task_id, backup_type, variable):
+    def get_frequencies(self, task_id, backup_type, variable):
         working_df = Time_series_analyzer.task_preprocessing(
             backup_type, task_id, variable
         )
