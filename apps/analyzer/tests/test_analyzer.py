@@ -6,7 +6,7 @@ from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
 
 
-def _create_mock_result(task, uuid, saveset, fdi_type, data_size, start_time, task_uuid=None, is_backup=1):
+def _create_mock_result(task, uuid, saveset, fdi_type, data_size, start_time, task_uuid=None, is_backup=1, subtask_flag="0"):
 	mock_result = Result()
 	mock_result.task = task
 	mock_result.saveset = saveset
@@ -16,6 +16,7 @@ def _create_mock_result(task, uuid, saveset, fdi_type, data_size, start_time, ta
 	mock_result.start_time = start_time
 	mock_result.is_backup = is_backup
 	mock_result.task_uuid = task_uuid
+	mock_result.subtask_flag = subtask_flag
 	return mock_result
 
 
@@ -85,7 +86,17 @@ def test_update_data_all_types():
 
 
 def test_update_data_not_a_backup():
-	mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"), None, 0)
+	mock_result1 = _create_mock_result("foo", "1", "saveset1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"), None, 0)
+
+	database = MockDatabase([mock_result1], [])
+	backend = MockBackend()
+	Analyzer.init(database, backend, None, None, None)
+	Analyzer.update_data()
+
+	assert backend.backups == []
+
+def test_update_data_no_subtasks():
+	mock_result1 = _create_mock_result("foo", "1", "saveset1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"), None, 1, 1)
 
 	database = MockDatabase([mock_result1], [])
 	backend = MockBackend()
