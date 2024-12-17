@@ -75,6 +75,10 @@ class Analyzer:
             if (result.is_backup is not None) and (result.is_backup <= 0):
                 continue
 
+            # Don't send subtasks
+            if result.subtask_flag != "0":
+                continue
+
             # Only send backups where the relevant data is not null
             if result.data_size is None or result.start_time is None:
                 continue

@@ -14,6 +14,7 @@ def _create_mock_result(task, uuid, fdi_type, data_size, start_time):
     mock_result.fdi_type = fdi_type
     mock_result.data_size = data_size
     mock_result.start_time = start_time
+    mock_result.subtask_flag = "0"
     return mock_result
 
 
@@ -47,6 +48,23 @@ def test_alert():
             "backupId": mock_result2.uuid,
         }
     ]
+
+def test_no_size_alert_sub_tasks():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01")
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 121_000_000, datetime.fromisoformat("2000-01-02")
+    )
+    mock_result2.subtask_flag = "1"
+
+    database = MockDatabase([mock_result1, mock_result2])
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis(-1)
+    
+    assert backend.size_alerts == []
 
 
 def test_alerts_different_tasks():
@@ -301,6 +319,23 @@ def test_alert_backup_size_decrease_nok_diff():
         }
     ]
 
+def test_alert_backup_size_no_subtasks_diff():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "D", 100_000_000, datetime.fromisoformat("2000-01-01")
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "D", 1_000_000, datetime.fromisoformat("2000-01-03")
+    )
+    mock_result2.subtask_flag = "1"
+
+    database = MockDatabase([mock_result1, mock_result2])
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_diff(1)
+
+    assert backend.size_alerts == []
+
 
 # two decreasing diff backups (not in the accepted range) with same full backup as base
 def test_alert_backup_size_decrease_large_nok_diff():
@@ -474,6 +509,23 @@ def test_alert_backup_size_zero_inc():
         }
     ]
 
+
+def test_alert_backup_size_no_subtasks_inc():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "I", 100_000_000, datetime.fromisoformat("2000-01-01")
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "I", 0, datetime.fromisoformat("2000-01-02")
+    )
+    mock_result2.subtask_flag = "1"
+
+    database = MockDatabase([mock_result1, mock_result2])
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_inc(1)
+
+    assert backend.size_alerts == []
 
 # Tests if the inc analysis skips alerts already created
 def test_alert_diff_start_date():
@@ -720,6 +772,19 @@ def test_alert_unusual_time():
         }
     ]
 
+
+def test_alert_creation_date_no_subtasks():
+    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
+    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T18:00:00"))
+    mock_result2.subtask_flag = "1"
+
+    database = MockDatabase([mock_result1, mock_result2])
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == []
 
 # Two different schedules should trigger one alert for the first backup of the second schedule
 def test_alert_two_different_schedules_same_task():
