@@ -9,6 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import {
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -44,6 +45,7 @@ export class MailController {
   @Post()
   @ApiOperation({ summary: 'Adds a new Mail Receiver.' })
   @ApiCreatedResponse()
+  @ApiConflictResponse({ description: 'Mail Receiver already exists.' })
   async create(
     @Body() createMailReceiverDto: CreateMailReceiverDto
   ): Promise<MailReceiverEntity> {

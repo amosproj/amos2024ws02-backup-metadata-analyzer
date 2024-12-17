@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { BehaviorSubject, forkJoin, Subject, takeUntil } from 'rxjs';
-import { NotificationService } from '../../../services/notification.service';
+import { NotificationService } from '../../../services/alert-notification/notification.service';
 import { AlertType } from '../../../../shared/types/alertType';
 import { AlertServiceService } from '../../../../alert/service/alert-service.service';
 
