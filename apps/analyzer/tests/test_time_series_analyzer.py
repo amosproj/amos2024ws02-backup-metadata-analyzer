@@ -262,6 +262,8 @@ class Test_time_series_analyzer:
             ]
         )
         time_series_analyzer = Time_series_analyzer([0.95, 5])
+        Analyzer.time_series_analyzer.set_training_start(0)
+        Analyzer.time_series_analyzer.set_training_end(5)
         Analyzer.init(database, backend, None, None, time_series_analyzer)
         Analyzer.load_time_series_data()
 

@@ -555,6 +555,136 @@ def return_frequencies():
         )
 
 
+@app.route("/setTimeSeriesThreshold", methods=["POST"])
+def set_time_series_threshold():
+    """Sets a new threshold value for the time series analysis, should be between 1 and 0
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: threshold
+        schema:
+            type: string
+    responses:
+        200:
+            description: Threshold set
+        400:
+            description: The value set for the threshold was not valid
+    """
+    try:
+        threshold = float(request.args.get("threshold"))
+    except:
+        return (
+            "Threshold value could not be converted to float, was " + str(threshold),
+            400,
+        )
+    if threshold > 1 or threshold < 0:
+        return "Threshold value not between 1 and 0, was " + str(threshold), 400
+    Analyzer.time_series_analyzer.set_threshold(threshold), 200
+    return "Setting threshold was succesful", 200
+
+
+@app.route("/setTimeSeriesClusters", methods=["POST"])
+def set_time_series_clusters():
+    """Sets a new cluster value for the time series analysis
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: clusters
+        schema:
+            type: integer
+    responses:
+        200:
+            description: Clusters number set
+        400:
+            description: The value set for the clusters was not valid
+    """
+    try:
+        clusters = int(request.args.get("clusters"))
+    except:
+        return "Clusters value not an integer, was " + str(clusters), 400
+    Analyzer.time_series_analyzer.set_clusters(clusters)
+    return "Setting clusters was succesful", 200
+
+
+@app.route("/setTrainingDataLimits", methods=["POST"])
+def set_training_limits():
+    """Sets start and end index of the values to be used as a training set.
+    ---
+    parameters:
+      - name: Input
+        in: body
+        type: object
+        required: true
+        properties:
+            body:
+                type: object
+                items: '#/definitions/LimitBody'
+                properties:
+                    training_series_start:
+                        type: int
+                        example: 4
+                    training_series_end:
+                        type: int
+                        example: 329
+    definitions:
+        LimitBody:
+            type: object
+            properties:
+                training_series_start:
+                        type: int
+                        example: 4
+                training_series_end:
+                        type: int
+                        example: 329
+    responses:
+        200:
+            description: Values set succesfully
+    """
+    if request.method == "POST":
+        data = request.get_json()
+        obj = data["body"]
+        try:
+            start = int(obj["training_series_start"])
+            end = int(obj["training_series_end"])
+        except:
+            return "Indices were not valid integers", 400
+
+        if start >= end:
+            return "Start index was not smaller than end index", 400
+
+        Analyzer.time_series_analyzer.set_training_start(start)
+        Analyzer.time_series_analyzer.set_training_end(end)
+        return "Indices set succesfully", 200
+
+
+@app.route("/calcTrainingDataLimits", methods=["GET"])
+def calculate_training_indices():
+    """Triggers automatic calculation of the indices for training data in basic time series analysis. Only possible when at least one analysis already done.
+    ---
+    responses:
+      200:
+        description: Calculation was succesful
+      500:
+        description: Calculation could not be completed
+    """
+    try:
+        Analyzer.time_series_analyzer.calc_training_indices()
+    except NameError as name:
+        return (
+            "Run time series analysis first, calculates initial training series bounds. "
+            + str(name),
+            500,
+        )
+    except Exception as ex:
+        return (
+            "Calculation of training series indices encountered an exception: "
+            + str(ex),
+            500,
+        )
+
+
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))

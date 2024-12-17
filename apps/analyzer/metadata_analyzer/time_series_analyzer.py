@@ -15,6 +15,7 @@ class Time_series_analyzer:
     training_series_start = 0
     training_series_end = 0
     clusters = 0
+    temp_df = []
 
     def __init__(self, parameters):
         global threshold
@@ -46,6 +47,26 @@ class Time_series_analyzer:
         # sorts dataframe by sbc_start
         df = df.sort_values("sbc_start")
 
+    def set_threshold(self, new_threshold):
+        global threshold
+        threshold = new_threshold
+        return True
+
+    def set_clusters(self, new_clusters):
+        global clusters
+        clusters = new_clusters
+        return True
+
+    def set_training_start(self, start):
+        global training_series_start
+        training_series_start = start
+        return True
+
+    def set_training_end(self, end):
+        global training_series_end
+        training_series_end = end
+        return True
+
     def k_means_analyze(self, variable, task_id, frequency, backup_type, window_size):
         global threshold
         global training_series_start
@@ -76,10 +97,14 @@ class Time_series_analyzer:
         if len(series) == 0:
             raise ValueError("Series had length 0 after applying specified parameters!")
 
-        # sets end of training series to arbitrary value of none is set manually
-        if training_series_end == -1:
-            training_series_end = round(len(series) / 4)
+        global temp_df
+        temp_df = working_df
 
+        # if no indices were manually set to override, some are generated that could be useful
+        if training_series_end == -1:
+            self.calc_training_indices()
+
+        # trains series
         series_train = series[training_series_start:training_series_end]
 
         # determines number of clusters for the k means scorer,
@@ -114,6 +139,44 @@ class Time_series_analyzer:
                 anomaly_timestamps.append(series.get_timestamp_at_point(i))
 
         return anomaly_timestamps
+
+    def calc_training_indices(self):
+        global training_series_start
+        global training_series_end
+        global temp_df
+
+        training_df = temp_df
+        print("head before reindexing")
+        print(training_df.head())
+        training_df.insert(0, "index", range(0, len(training_df)))
+        print("head after reindexing")
+        print(training_df)
+
+        # rough outlier removal
+        training_df = training_df[
+            training_df.iloc[:, 1].between(
+                training_df.iloc[:, 1].quantile(0.1),
+                training_df.iloc[:, 1].quantile(0.9),
+            )
+        ]
+
+        # groups dataframe into groups with consecutive indices without gaps
+        grouped = training_df.groupby(
+            training_df["index"] == (training_df["index"].shift() - 1)
+        )
+        print("hopefully grouped training df")
+        print(grouped)
+        print("individual groups")
+        for group in grouped:
+            print("Group Here")
+            print(group)
+
+        # gets the longest group, i.e. the longest range of consecutive values without outliers
+        grp = max(grouped, key=lambda x: x[1].shape)
+        grp = grp[1] # gets series out of tuple
+
+        training_series_start = int(grp.iloc[0]['index'])
+        training_series_end = int(grp.iloc[len(grp) - 1]['index'])
 
     def task_preprocessing(backup_type, task_id, variable):
         global df

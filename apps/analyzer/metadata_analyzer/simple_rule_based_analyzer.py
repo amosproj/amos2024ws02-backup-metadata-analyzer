@@ -218,10 +218,12 @@ class SimpleRuleBasedAnalyzer:
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
-            if (result.task == ""
-                or result.fdi_type != 'F'
+            if (
+                result.task == ""
+                or result.fdi_type != "F"
                 or result.data_size is None
-                or result.start_time is None):
+                or result.start_time is None
+            ):
                 continue
             groups[result.task].append(result)
 
