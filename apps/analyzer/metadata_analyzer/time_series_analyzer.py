@@ -146,11 +146,7 @@ class Time_series_analyzer:
         global temp_df
 
         training_df = temp_df
-        print("head before reindexing")
-        print(training_df.head())
         training_df.insert(0, "index", range(0, len(training_df)))
-        print("head after reindexing")
-        print(training_df)
 
         # rough outlier removal
         training_df = training_df[
@@ -161,15 +157,9 @@ class Time_series_analyzer:
         ]
 
         # groups dataframe into groups with consecutive indices without gaps
-        grouped = training_df.groupby(
-            training_df["index"] == (training_df["index"].shift() - 1)
-        )
-        print("hopefully grouped training df")
-        print(grouped)
-        print("individual groups")
-        for group in grouped:
-            print("Group Here")
-            print(group)
+        mask = training_df['index'].diff().gt(1)
+
+        grouped = training_df.groupby(mask.cumsum())
 
         # gets the longest group, i.e. the longest range of consecutive values without outliers
         grp = max(grouped, key=lambda x: x[1].shape)
