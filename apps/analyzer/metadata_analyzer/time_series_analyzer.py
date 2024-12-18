@@ -146,6 +146,8 @@ class Time_series_analyzer:
         global temp_df
 
         training_df = temp_df
+        if 'index' in training_df.columns:
+            training_df = training_df.drop('index', axis=1)
         training_df.insert(0, "index", range(0, len(training_df)))
 
         # rough outlier removal

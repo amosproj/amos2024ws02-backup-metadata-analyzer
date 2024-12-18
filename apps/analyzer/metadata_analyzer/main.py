@@ -683,6 +683,7 @@ def calculate_training_indices():
             + str(ex),
             500,
         )
+    return "Calculation of training series was succesful", 200
 
 
 def main():
