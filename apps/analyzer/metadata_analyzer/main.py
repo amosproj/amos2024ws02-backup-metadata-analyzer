@@ -192,9 +192,7 @@ def simple_rule_based_analysis():
         int(alert_limit)
         return jsonify(Analyzer.simple_rule_based_analysis(int(alert_limit)))
     except ValueError:
-        print("Alert limit is not a number")
         return "Invalid value for alert limit", 400
-
 
 
 @app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
@@ -242,9 +240,7 @@ def simple_rule_based_analysis_diff():
         int(alert_limit)
         return jsonify(Analyzer.simple_rule_based_analysis_diff(int(alert_limit)))
     except ValueError:
-        print("Alert limit is not a number")
         return "Invalid value for alert limit", 400
-
 
 
 @app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
@@ -292,7 +288,6 @@ def simple_rule_based_analysis_inc():
         int(alert_limit)
         return jsonify(Analyzer.simple_rule_based_analysis_inc(int(alert_limit)))
     except ValueError:
-        print("Alert limit is not a number")
         return "Invalid value for alert limit", 400
 
 
@@ -316,7 +311,9 @@ def simple_rule_based_analysis_creation_dates():
 
     try:
         int(alert_limit)
-        return jsonify(Analyzer.simple_rule_based_analysis_creation_dates(int(alert_limit)))
+        return jsonify(
+            Analyzer.simple_rule_based_analysis_creation_dates(int(alert_limit))
+        )
     except ValueError:
         return "Invalid value for alert limit", 400
 
@@ -347,7 +344,6 @@ def simple_rule_based_analysis_storage_capacity():
         )
     except ValueError:
         return "Invalid value for alert limit", 400
-
 
 
 # TODO yaml for swagger
@@ -410,6 +406,10 @@ def runTimeSeriesTests():
         description: The timestamps of the anomalies
         schema:
           $ref: '#/definitions/Timestamps'
+      400:
+        description: Input either asked for non-implemented features or led to an emtpy cleaned dataset.
+      500:
+        description: Data was not loaded correctly in previous steps so a time series analysis is not possible.
     """
     json = request.get_json()
     field = "None"
@@ -434,6 +434,12 @@ def runTimeSeriesTests():
         return jsonify(result)
     except ValueError as val:
         return "Value error occured: " + str(val), 400
+    except AttributeError as att:
+        return (
+            "No time series analysis possible because of failed data loading: "
+            + str(att),
+            500,
+        )
 
 
 @app.route("/getTaskIds", methods=["GET"])
@@ -458,8 +464,18 @@ def return_task_ids():
         description: All possible task ids
         schema:
           $ref: '#/definitions/task_ids'
+      500:
+        description: Data was not loaded correctly in previous steps so a time series analysis is not possible.
     """
-    return jsonify(Time_series_analyzer.get_task_ids())
+    try:
+
+        return jsonify(Analyzer.time_series_get_task_ids())
+    except AttributeError as att:
+        return (
+            "No time series analysis possible because of failed data loading: "
+            + str(att),
+            500,
+        )
 
 
 @app.route("/getFrequenciesForTask", methods=["POST"])
@@ -514,6 +530,8 @@ def return_frequencies():
         description: All backup frequencies found that meet the conditions, ranked by times appeared
         schema:
           $ref: '#/definitions/Frequencies'
+      500:
+        description: Data was not loaded correctly in previous steps so a time series analysis is not possible.
     """
     json = request.get_json()
     field = "None"
@@ -524,17 +542,158 @@ def return_frequencies():
         backup_type = json["backup_type"]
         field = "variable"
         variable = json["variable"]
+        return jsonify(
+            Analyzer.time_series_get_frequencies(task_id, backup_type, variable)
+        )
     except KeyError:
         return "Missing field of type " + field, 400
+    except AttributeError as att:
+        return (
+            "No time series analysis possible because of failed data loading: "
+            + str(att),
+            500,
+        )
 
-    return jsonify(Time_series_analyzer.get_frequencies(task_id, backup_type, variable))
+
+@app.route("/setTimeSeriesThreshold", methods=["POST"])
+def set_time_series_threshold():
+    """Sets a new threshold value for the time series analysis, should be between 1 and 0
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: threshold
+        schema:
+            type: string
+    responses:
+        200:
+            description: Threshold set
+        400:
+            description: The value set for the threshold was not valid
+    """
+    try:
+        threshold = float(request.args.get("threshold"))
+    except:
+        return (
+            "Threshold value could not be converted to float, was " + str(threshold),
+            400,
+        )
+    if threshold > 1 or threshold < 0:
+        return "Threshold value not between 1 and 0, was " + str(threshold), 400
+    Analyzer.time_series_analyzer.set_threshold(threshold), 200
+    return "Setting threshold was succesful", 200
+
+
+@app.route("/setTimeSeriesClusters", methods=["POST"])
+def set_time_series_clusters():
+    """Sets a new cluster value for the time series analysis
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: clusters
+        schema:
+            type: integer
+    responses:
+        200:
+            description: Clusters number set
+        400:
+            description: The value set for the clusters was not valid
+    """
+    try:
+        clusters = int(request.args.get("clusters"))
+    except:
+        return "Clusters value not an integer, was " + str(clusters), 400
+    Analyzer.time_series_analyzer.set_clusters(clusters)
+    return "Setting clusters was succesful", 200
+
+
+@app.route("/setTrainingDataLimits", methods=["POST"])
+def set_training_limits():
+    """Sets start and end index of the values to be used as a training set.
+    ---
+    parameters:
+      - name: Input
+        in: body
+        type: object
+        required: true
+        properties:
+            body:
+                type: object
+                items: '#/definitions/LimitBody'
+                properties:
+                    training_series_start:
+                        type: int
+                        example: 4
+                    training_series_end:
+                        type: int
+                        example: 329
+    definitions:
+        LimitBody:
+            type: object
+            properties:
+                training_series_start:
+                        type: int
+                        example: 4
+                training_series_end:
+                        type: int
+                        example: 329
+    responses:
+        200:
+            description: Values set succesfully
+    """
+    if request.method == "POST":
+        data = request.get_json()
+        obj = data["body"]
+        try:
+            start = int(obj["training_series_start"])
+            end = int(obj["training_series_end"])
+        except:
+            return "Indices were not valid integers", 400
+
+        if start >= end:
+            return "Start index was not smaller than end index", 400
+
+        Analyzer.time_series_analyzer.set_training_start(start)
+        Analyzer.time_series_analyzer.set_training_end(end)
+        return "Indices set succesfully", 200
+
+
+@app.route("/calcTrainingDataLimits", methods=["GET"])
+def calculate_training_indices():
+    """Triggers automatic calculation of the indices for training data in basic time series analysis. Only possible when at least one analysis already done.
+    ---
+    responses:
+      200:
+        description: Calculation was succesful
+      500:
+        description: Calculation could not be completed
+    """
+    try:
+        Analyzer.time_series_analyzer.calc_training_indices()
+    except NameError as name:
+        return (
+            "Run time series analysis first, calculates initial training series bounds. "
+            + str(name),
+            500,
+        )
+    except Exception as ex:
+        return (
+            "Calculation of training series indices encountered an exception: "
+            + str(ex),
+            500,
+        )
+    return "Calculation of training series was succesful", 200
 
 
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
-    time_series_analyzer = Time_series_analyzer(database)
+    parameters = []
+    parameters.append(os.getenv("ANOMALY_THRESHOLD"))
+    parameters.append(os.getenv("CLUSTER_NUMBER"))
+    time_series_analyzer = Time_series_analyzer(parameters)
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(
         database,
