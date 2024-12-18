@@ -1,0 +1,78 @@
+<h3>Email Alert Recipients</h3>
+<div class="clr-row">
+  <div class="clr-col-lg-12 clr-col-lg-12">
+    <clr-datagrid
+      *ngIf="emailsSubject$ | async as emails"
+      [clrDgLoading]="isLoading"
+      [(clrDgSelected)]="selectedEmails"
+    >
+      <clr-dg-action-bar>
+        <div class="btn-group">
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary"
+            (click)="showEmailModal = true"
+          >
+            <cds-icon shape="plus"></cds-icon>
+            New
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-danger"
+            (click)="removeEmail(selectedEmails)"
+            [disabled]="selectedEmails.length === 0"
+          >
+            <cds-icon shape="lock"></cds-icon>
+            Delete
+          </button>
+        </div>
+      </clr-dg-action-bar>
+
+      <clr-dg-column>Email</clr-dg-column>
+      <clr-dg-placeholder>We couldn't find any emails!</clr-dg-placeholder>
+      <clr-dg-row
+        *ngFor="let email of emailsSubject$.getValue()"
+        [clrDgItem]="email"
+      >
+        <clr-dg-cell class="clr-dg-cell">{{ email.mail }}</clr-dg-cell>
+      </clr-dg-row>
+
+      <clr-dg-footer> </clr-dg-footer>
+    </clr-datagrid>
+  </div>
+</div>
+
+<clr-modal [(clrModalOpen)]="showEmailModal">
+  <h3 class="modal-title">Add Email Recipient</h3>
+  <div class="modal-body">
+    <form clrForm [formGroup]="emailForm" (ngSubmit)="saveChanges()">
+      <clr-spinner *ngIf="isLoading"></clr-spinner>
+      <clr-input-container>
+        <label>Email Address</label>
+        <input clrInput type="email" formControlName="email" />
+        <clr-control-error
+          *ngIf="
+            emailForm.get('email')?.touched && emailForm.get('email')?.invalid
+          "
+          >Please enter a valid email address</clr-control-error
+        >
+      </clr-input-container>
+      <div class="error" *ngIf="modalError">
+        {{ modalError }}
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="resetForm()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="saveChanges()"
+      [disabled]="!emailForm.valid"
+    >
+      Add
+    </button>
+  </div>
+</clr-modal>

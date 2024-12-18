@@ -10,7 +10,7 @@ import { ClrDatagridStateInterface } from '@clr/angular';
 import { APIResponse } from '../../../shared/types/api-response';
 import { Backup } from '../../../shared/types/backup';
 import { BackupTask } from '../../../shared/types/backup.task';
-import { get } from 'http';
+import { BackupType } from '../../../shared/enums/backup.types';
 
 describe('BackupsComponent', () => {
   let component: BackupsComponent;
@@ -22,13 +22,15 @@ describe('BackupsComponent', () => {
         id: '1',
         sizeMB: 500,
         creationDate: new Date(),
-        saveset: ''
+        saveset: '',
+        type: BackupType.DIFFERENTIAL,
       },
       {
         id: '2',
         sizeMB: 750,
         creationDate: new Date(),
-        saveset: ''
+        saveset: '',
+        type: BackupType.DIFFERENTIAL,
       },
     ],
     paginationData: {
@@ -133,6 +135,7 @@ describe('BackupsComponent', () => {
         saveset: null,
         toSizeMB: null,
         taskName: null,
+        type: null,
       };
       (dateFilter.ranges as any)['_isActive'] = true;
 
@@ -154,6 +157,7 @@ describe('BackupsComponent', () => {
         toSizeMB: 500,
         id: null,
         taskName: null,
+        type: null,
       };
       (sizeFilter.ranges as any)['_isActive'] = true;
 
@@ -171,10 +175,11 @@ describe('BackupsComponent', () => {
         fromDate: null,
         toDate: null,
         fromSizeMB: null,
-        saveset: "saveset",
+        saveset: 'saveset',
         toSizeMB: null,
-        id: '000d88',
+        id: null,
         taskName: null,
+        type: null,
       };
       (savesetFilter.ranges as any)['_isActive'] = true;
 
@@ -190,11 +195,12 @@ describe('BackupsComponent', () => {
       taskFilter.ranges = {
         fromDate: null,
         toDate: null,
-        saveset: null, 
+        saveset: null,
         fromSizeMB: null,
         toSizeMB: null,
         id: null,
         taskName: 'test',
+        type: null,
       };
       (taskFilter.ranges as any)['_isActive'] = true;
 
@@ -203,6 +209,27 @@ describe('BackupsComponent', () => {
       const params = component['buildFilterParams']();
 
       expect(params.taskName).toBe(taskFilter.ranges.taskName);
+    });
+
+    it('should build filter params with active type filter', () => {
+      const typeFilter = new CustomFilter('type');
+      typeFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        saveset: null,
+        fromSizeMB: null,
+        toSizeMB: null,
+        id: null,
+        taskName: null,
+        type: [BackupType.DIFFERENTIAL],
+      };
+      (typeFilter.ranges as any)['_isActive'] = true;
+
+      component['typeFilter'] = typeFilter;
+
+      const params = component['buildFilterParams']();
+
+      expect(params.types).toBe(typeFilter.ranges.type);
     });
   });
 

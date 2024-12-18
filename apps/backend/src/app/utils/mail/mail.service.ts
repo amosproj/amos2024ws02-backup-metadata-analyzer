@@ -1,5 +1,10 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { Alert } from '../../alerting/entity/alerts/alert';
@@ -165,6 +170,13 @@ export class MailService {
   async addMailReceiver(
     createMailReceiverDto: CreateMailReceiverDto
   ): Promise<MailReceiverEntity> {
+    if (
+      await this.mailReceiverEntityRepository.findOneBy({
+        mail: createMailReceiverDto.mail,
+      })
+    ) {
+      throw new ConflictException('Mail receiver already exists');
+    }
     return await this.mailReceiverEntityRepository.save(createMailReceiverDto);
   }
 

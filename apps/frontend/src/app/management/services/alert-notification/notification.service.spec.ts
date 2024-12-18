@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from './notification.service';
 import { of } from 'rxjs';
-import { AlertType } from '../../shared/types/alertType';
-import { SeverityType } from '../../shared/enums/severityType';
+import { AlertType } from '../../../shared/types/alertType';
+import { SeverityType } from '../../../shared/enums/severityType';
 
 describe('NotificationService', () => {
   let service: NotificationService;
