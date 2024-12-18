@@ -1,0 +1,22 @@
+Title	URL	Assignees	Status
+Avoid breacking changes	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/76		In Progress
+Feature Freeze on Tuesday 12 o'clock	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/99		In Progress
+If someone works something needing clarification, it would be very nice for that person to write a couple of sentences as a comment to help others.	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/136		In Progress
+Communicate to the IPs how beneficial their feedback and insights were this sprint	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/137		In Progress
+The developers should review and clarify the new backlog items ahead of the team meeting	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/138		In Progress
+POs inform SD's if issues for next sprint are prepared	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/75		Done
+Clarify deadline deliverables	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/77	LaraSlzb	Done
+Schedule meeting with SEP for clarification of the data	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/61		Done
+Finding meeting time via voting in slack	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/62		Done
+SDs organize independently meeting with SEP about dev topics.	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/63		Done
+Plan time for technical reviews, no last minute implementations	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/39		Done
+Merge features to dev before meeting, merge dev (release candidate) to main directly after meeting	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/40		Done
+Protect main branch (except deliverable folder) from commits (only with PR)	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/41		Done
+Start a thread in the slack gerneral channels for troubleshooting	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/25		Done
+SM should be asked if questions are not beeing answered	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/15		Done
+Recipient of message should be tagged	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/14		Done
+Important documents, which are not commited in Github, should be saved in the Google Drive folder	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/13		Done
+Troubleshooting and exchange of experiences related to docker in dev meeting	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/23		Done
+Agreement on one formatter	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/24		Done
+Update BOM if you add new packages	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/27		Done
+Notify everyone about dev meetings by writing a slack message	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/26		Done
