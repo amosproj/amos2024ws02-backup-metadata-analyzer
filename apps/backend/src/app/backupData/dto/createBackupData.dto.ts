@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 import { BackupType } from './backupType';
 
 export class CreateBackupDataDto {
@@ -9,6 +15,12 @@ export class CreateBackupDataDto {
   })
   @IsUUID()
   id!: string;
+
+  @ApiProperty({
+    description: 'saveset name of the backup',
+    required: true,
+  })
+  saveset!: string;
 
   @ApiProperty({
     description: 'Size of Backup in MB',
@@ -23,7 +35,7 @@ export class CreateBackupDataDto {
     nullable: false,
     required: true,
     enum: BackupType,
-    default: BackupType.FULL
+    default: BackupType.FULL,
   })
   @IsOptional()
   @IsEnum(BackupType)
@@ -36,4 +48,11 @@ export class CreateBackupDataDto {
   })
   @IsDateString({ strict: true })
   creationDate!: Date;
+
+  @ApiProperty({
+    description: 'Task Id',
+    nullable: true,
+    required: false,
+  })
+  taskId?: string;
 }

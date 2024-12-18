@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSizeAlertDto {
+
   @ApiProperty({
-    description: 'Id of the belonging Backup',
+    description: 'Uuid of the Backup',
     required: true,
   })
   backupId!: string;

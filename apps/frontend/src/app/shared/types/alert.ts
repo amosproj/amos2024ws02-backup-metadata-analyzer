@@ -4,7 +4,7 @@ import { AlertType } from './alertType';
 export interface Alert {
   id: string;
   alertType: AlertType;
-  backup: Backup;
+  backup?: Backup;
 }
 
 export interface SizeAlert extends Alert {
@@ -15,4 +15,11 @@ export interface SizeAlert extends Alert {
 export interface CreationDateAlert extends Alert {
   date: Date;
   referenceDate: Date;
+}
+
+export interface StorageFillAlert extends Alert {
+  dataStoreName: string;
+  filled: number;
+  highWaterMark: number;
+  capacity: number;
 }

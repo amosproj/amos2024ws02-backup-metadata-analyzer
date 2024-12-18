@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
@@ -9,6 +9,8 @@ import { CustomFilter } from './backupfilter';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { APIResponse } from '../../../shared/types/api-response';
 import { Backup } from '../../../shared/types/backup';
+import { BackupTask } from '../../../shared/types/backup.task';
+import { BackupType } from '../../../shared/enums/backup.types';
 
 describe('BackupsComponent', () => {
   let component: BackupsComponent;
@@ -20,11 +22,15 @@ describe('BackupsComponent', () => {
         id: '1',
         sizeMB: 500,
         creationDate: new Date(),
+        saveset: '',
+        type: BackupType.DIFFERENTIAL,
       },
       {
         id: '2',
         sizeMB: 750,
         creationDate: new Date(),
+        saveset: '',
+        type: BackupType.DIFFERENTIAL,
       },
     ],
     paginationData: {
@@ -35,6 +41,7 @@ describe('BackupsComponent', () => {
   beforeEach(() => {
     mockBackupService = {
       getAllBackups: vi.fn().mockReturnValue(of(mockBackups)),
+      getAllBackupTasks: vi.fn().mockReturnValue(of([])),
     };
 
     mockChartService = {
@@ -123,8 +130,12 @@ describe('BackupsComponent', () => {
       dateFilter.ranges = {
         fromDate: new Date('2023-01-01').toISOString(),
         toDate: new Date('2023-12-31').toISOString(),
+        id: null,
         fromSizeMB: null,
+        saveset: null,
         toSizeMB: null,
+        taskName: null,
+        type: null,
       };
       (dateFilter.ranges as any)['_isActive'] = true;
 
@@ -141,8 +152,12 @@ describe('BackupsComponent', () => {
       sizeFilter.ranges = {
         fromDate: null,
         toDate: null,
+        saveset: null,
         fromSizeMB: 100,
         toSizeMB: 500,
+        id: null,
+        taskName: null,
+        type: null,
       };
       (sizeFilter.ranges as any)['_isActive'] = true;
 
@@ -152,6 +167,69 @@ describe('BackupsComponent', () => {
 
       expect(params.fromSizeMB).toBe(sizeFilter.ranges.fromSizeMB);
       expect(params.toSizeMB).toBe(sizeFilter.ranges.toSizeMB);
+    });
+
+    it('should build filter params with active id filter', () => {
+      const savesetFilter = new CustomFilter('saveset');
+      savesetFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        fromSizeMB: null,
+        saveset: 'saveset',
+        toSizeMB: null,
+        id: null,
+        taskName: null,
+        type: null,
+      };
+      (savesetFilter.ranges as any)['_isActive'] = true;
+
+      component['backupSavesetFilter'] = savesetFilter;
+
+      const params = component['buildFilterParams']();
+
+      expect(params.saveset).toBe(savesetFilter.ranges.saveset);
+    });
+
+    it('should build filter params with active task filter', () => {
+      const taskFilter = new CustomFilter('taskName');
+      taskFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        saveset: null,
+        fromSizeMB: null,
+        toSizeMB: null,
+        id: null,
+        taskName: 'test',
+        type: null,
+      };
+      (taskFilter.ranges as any)['_isActive'] = true;
+
+      component['taskFilter'] = taskFilter;
+
+      const params = component['buildFilterParams']();
+
+      expect(params.taskName).toBe(taskFilter.ranges.taskName);
+    });
+
+    it('should build filter params with active type filter', () => {
+      const typeFilter = new CustomFilter('type');
+      typeFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        saveset: null,
+        fromSizeMB: null,
+        toSizeMB: null,
+        id: null,
+        taskName: null,
+        type: [BackupType.DIFFERENTIAL],
+      };
+      (typeFilter.ranges as any)['_isActive'] = true;
+
+      component['typeFilter'] = typeFilter;
+
+      const params = component['buildFilterParams']();
+
+      expect(params.types).toBe(typeFilter.ranges.type);
     });
   });
 
@@ -191,6 +269,103 @@ describe('BackupsComponent', () => {
         'backupTimelineChart',
         'week'
       );
+    });
+  });
+
+  describe('Search and Task Selection', () => {
+    it('should handle task search input', () => {
+      const searchTerm = 'backup-task';
+      const searchSpy = vi.spyOn(component['backupTaskSearchTerm$'], 'next');
+
+      component.onSearchInput(searchTerm);
+
+      expect(searchSpy).toHaveBeenCalledWith(searchTerm);
+    });
+
+    it('should update selected backup tasks', () => {
+      const mockTasks = [
+        { id: '1', displayName: 'Task 1' },
+        { id: '2', displayName: 'Task 2' },
+      ] as BackupTask[];
+      const taskSubjectSpy = vi.spyOn(component['backupTaskSubject$'], 'next');
+
+      component.setBackupTask(mockTasks);
+
+      expect(component['selectedTask']).toEqual(mockTasks);
+      expect(taskSubjectSpy).toHaveBeenCalledWith(mockTasks);
+    });
+  });
+
+  describe('Filter Panel', () => {
+    it('should toggle filter panel state', () => {
+      expect(component['filterPanel']).toBe(false);
+
+      component['changeFilterPanelState']();
+      expect(component['filterPanel']).toBe(true);
+
+      component['changeFilterPanelState']();
+      expect(component['filterPanel']).toBe(false);
+    });
+  });
+
+  describe('Chart Data Updates', () => {
+    it('should update charts when new data is received', (done) => {
+      const mockResponse = {
+        data: [
+          { id: '1', sizeMB: 100, creationDate: new Date() },
+          { id: '2', sizeMB: 200, creationDate: new Date() },
+        ],
+        paginationData: { total: 2 },
+      };
+
+      mockBackupService.getAllBackups.mockReturnValue(of(mockResponse));
+
+      component.chartBackups$.subscribe(() => {
+        expect(mockChartService.prepareColumnData).toHaveBeenCalled();
+        expect(mockChartService.preparePieData).toHaveBeenCalled();
+        expect(mockChartService.updateChart).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
+
+  describe('Task Filtering', () => {
+    it('should filter tasks based on search term', (done) => {
+      const mockTasks = [
+        { id: '1', displayName: 'Daily Backup' },
+        { id: '2', displayName: 'Weekly Backup' },
+      ] as BackupTask[];
+
+      mockBackupService.getAllBackupTasks.mockReturnValue(of(mockTasks));
+
+      component['selectedbackupTasks$'].subscribe((filteredTasks) => {
+        expect(filteredTasks).toEqual([]);
+      });
+    });
+    it('should handle empty search term', (done) => {
+      const mockTasks = [
+        { id: '1', displayName: 'Daily Backup' },
+      ] as BackupTask[];
+
+      mockBackupService.getAllBackupTasks.mockReturnValue(of(mockTasks));
+      component.onSearchInput('');
+
+      (component as any).selectedbackupTasks$.subscribe(
+        (filteredTasks: BackupTask[]) => {
+          expect(filteredTasks).toEqual([]);
+        }
+      );
+    });
+  });
+
+  describe('Loading States', () => {
+    it('should manage loading state during refresh', () => {
+      const mockState: ClrDatagridStateInterface<any> = {
+        page: { size: 10, current: 1 },
+      };
+
+      component.refresh(mockState);
+
+      expect(component.loading).toBe(false);
     });
   });
 });

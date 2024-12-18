@@ -7,6 +7,7 @@ import { BackupDataModule } from '../backupData/backupData.module';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
+import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entit
       AlertTypeEntity,
       SizeAlertEntity,
       CreationDateAlertEntity,
+      StorageFillAlertEntity,
     ]),
   ],
   providers: [AlertingService],

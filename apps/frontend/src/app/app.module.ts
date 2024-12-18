@@ -19,6 +19,14 @@ import {
   warningStandardIcon,
   cogIcon,
   bellIcon,
+  angleIcon,
+  tagIcon,
+  dataClusterIcon,
+  filterIcon,
+  envelopeIcon,
+  plusIcon,
+  lockIcon,
+  trashIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -27,6 +35,8 @@ import { BackupsComponent } from './backups-overview/backups/backups/backups.com
 import { BASE_URL } from './shared/types/configuration';
 import { AlertComponent } from './alert/component/alert.component';
 import { NotificationSettingsComponent } from './management/components/settings/notification-settings/notification-settings.component';
+import { EmailReceiverSettingsComponent } from './management/components/settings/email-receiver-settings/email-receiver-settings.component';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/component/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +46,8 @@ import { NotificationSettingsComponent } from './management/components/settings/
     BackupsComponent,
     AlertComponent,
     NotificationSettingsComponent,
+    EmailReceiverSettingsComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -61,7 +73,15 @@ export class AppModule {
       warningStandardIcon,
       errorStandardIcon,
       cogIcon,
-      bellIcon
+      bellIcon,
+      angleIcon,
+      tagIcon,
+      dataClusterIcon,
+      filterIcon,
+      envelopeIcon,
+      plusIcon,
+      lockIcon,
+      trashIcon,
     );
   }
 }

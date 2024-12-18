@@ -8,6 +8,7 @@ from datetime import datetime
 from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
 
+
 def test_hello_world():
     """Test the hello_world function."""
     assert hello_world() == "Hello, world!"

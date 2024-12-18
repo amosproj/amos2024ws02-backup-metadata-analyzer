@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Between, ILike, Repository } from 'typeorm';
+import { Between, ILike, In, Repository } from 'typeorm';
 import { BackupDataService } from './backupData.service';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
@@ -9,10 +9,13 @@ import { CreateBackupDataDto } from './dto/createBackupData.dto';
 import { BackupDataOrderByOptions } from './dto/backupDataOrderOptions.dto';
 import { SortOrder } from '../utils/pagination/SortOrder';
 import { BackupType } from './dto/backupType';
+import { TaskEntity } from '../tasks/entity/task.entity';
+import { TasksService } from '../tasks/tasks.service';
 
 const mockBackupDataEntity: BackupDataEntity = {
   id: '123e4567-e89b-12d3-a456-426614174062',
   sizeMB: 100,
+  saveset: 'backup',
   type: BackupType.FULL,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
 };
@@ -31,9 +34,16 @@ describe('BackupDataService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BackupDataService,
+        TasksService,
         {
           provide: getRepositoryToken(BackupDataEntity),
           useValue: mockBackupDataRepository,
+        },
+        {
+          provide: getRepositoryToken(TaskEntity),
+          useValue: {
+            findOneBy: jest.fn().mockResolvedValue(new TaskEntity()),
+          },
         },
       ],
     }).compile();
@@ -59,9 +69,7 @@ describe('BackupDataService', () => {
       expect(repository.findAndCount).toHaveBeenCalledWith({
         take: 5,
         order: { creationDate: 'DESC' },
-        where: {
-          type: BackupType.FULL,
-        },
+        where: {},
       });
     });
   });
@@ -70,7 +78,7 @@ describe('BackupDataService', () => {
     it('should create a where clause for ID search', () => {
       const filterDto: BackupDataFilterDto = { id: '123' };
       const where = service.createWhereClause(filterDto);
-      expect(where).toEqual({ id: ILike('%123%'), type: BackupType.FULL });
+      expect(where).toEqual({ id: ILike('%123%') });
     });
 
     it('should create a where clause for date range search', () => {
@@ -81,7 +89,6 @@ describe('BackupDataService', () => {
       const where = service.createWhereClause(filterDto);
       expect(where).toEqual({
         creationDate: Between(expect.any(Date), expect.any(Date)),
-        type: BackupType.FULL,
       });
     });
 
@@ -90,7 +97,6 @@ describe('BackupDataService', () => {
       const where = service.createWhereClause(filterDto);
       expect(where).toEqual({
         sizeMB: Between(10, 100),
-        type: BackupType.FULL,
       });
     });
 
@@ -107,7 +113,6 @@ describe('BackupDataService', () => {
         id: ILike('%123%'),
         creationDate: Between(expect.any(Date), expect.any(Date)),
         sizeMB: Between(10, 100),
-        type: BackupType.FULL,
       });
     });
 
@@ -123,6 +128,49 @@ describe('BackupDataService', () => {
       expect(() => service.createWhereClause(filterDto)).toThrow(
         BadRequestException
       );
+    });
+
+    it('should create a where clause for taskId search', () => {
+      const filterDto: BackupDataFilterDto = { taskId: 'task-123' };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        taskId: { id: 'task-123' },
+      });
+    });
+
+    it('should create a where clause for taskName search', () => {
+      const filterDto: BackupDataFilterDto = { taskName: 'backup-task' };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        taskId: { displayName: ILike('%backup-task%') },
+      });
+    });
+
+    it('should create a where clause for type search with a single type', () => {
+      const filterDto: BackupDataFilterDto = { types: [BackupType.FULL] };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        type: In([BackupType.FULL]),
+      });
+    });
+
+    it('should create a where clause for type search with multiple types', () => {
+      const filterDto: BackupDataFilterDto = {
+        types: [BackupType.FULL, BackupType.INCREMENTAL],
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        type: In([BackupType.FULL, BackupType.INCREMENTAL]),
+      });
+    });
+
+    it('should create a where clause for multiple taskIds', () => {
+      const filterDto: BackupDataFilterDto = {};
+      const filterByTaskIdsDto = { taskIds: ['task-1', 'task-2'] };
+      const where = service.createWhereClause(filterDto, filterByTaskIdsDto);
+      expect(where).toEqual({
+        taskId: [{ id: 'task-1' }, { id: 'task-2' }],
+      });
     });
   });
 
@@ -151,7 +199,8 @@ describe('BackupDataService', () => {
 
   describe('create', () => {
     it('should create a new backup data entity', async () => {
-      let createBackupDataDto: CreateBackupDataDto = new CreateBackupDataDto();
+      const createBackupDataDto: CreateBackupDataDto =
+        new CreateBackupDataDto();
       Object.assign(createBackupDataDto, mockBackupDataEntity);
 
       const result = await service.create(createBackupDataDto);
@@ -163,8 +212,8 @@ describe('BackupDataService', () => {
   describe('createBatched', () => {
     it('should create new backup data entities batched', async () => {
       const createBackupDataDtos: CreateBackupDataDto[] = [
-        { id: '1', sizeMB: 100, creationDate: new Date() },
-        { id: '2', sizeMB: 200, creationDate: new Date() },
+        { id: '1', sizeMB: 100, creationDate: new Date(), saveset: 'backup' },
+        { id: '2', sizeMB: 200, creationDate: new Date(), saveset: 'backup' },
       ];
 
       await service.createBatched(createBackupDataDtos);
@@ -172,6 +221,7 @@ describe('BackupDataService', () => {
       expect(repository.save).toHaveBeenCalledWith(createBackupDataDtos);
     });
   });
+
   describe('findOneById', () => {
     it('should return a backup data entity by id', async () => {
       const result = await service.findOneById(mockBackupDataEntity.id);
@@ -179,6 +229,19 @@ describe('BackupDataService', () => {
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { id: mockBackupDataEntity.id },
       });
+    });
+  });
+
+  describe('createBatched', () => {
+    it('should create new backup data entities batched', async () => {
+      const createBackupDataDtos: CreateBackupDataDto[] = [
+        { id: '1', sizeMB: 100, creationDate: new Date(), saveset: 'backup' },
+        { id: '2', sizeMB: 200, creationDate: new Date(), saveset: 'backup' },
+      ];
+
+      await service.createBatched(createBackupDataDtos);
+
+      expect(repository.save).toHaveBeenCalledWith(createBackupDataDtos);
     });
   });
 });

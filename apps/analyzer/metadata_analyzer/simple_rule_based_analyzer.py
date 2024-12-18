@@ -4,6 +4,7 @@ import metadata_analyzer.backend
 from datetime import datetime, timedelta
 from metadata_analyzer.size_alert import SizeAlert
 from metadata_analyzer.creation_date_alert import CreationDateAlert
+from metadata_analyzer.storage_fill_alert import StorageFillAlert
 
 
 class SimpleRuleBasedAnalyzer:
@@ -66,6 +67,7 @@ class SimpleRuleBasedAnalyzer:
                 or result.fdi_type != "F"
                 or result.data_size is None
                 or result.start_time is None
+                or result.subtask_flag != "0"
             ):
                 continue
             groups[result.task].append(result)
@@ -109,6 +111,7 @@ class SimpleRuleBasedAnalyzer:
                 or (result.fdi_type != "F" and result.fdi_type != "D")
                 or result.data_size is None
                 or result.start_time is None
+                or result.subtask_flag != "0"
             ):
                 continue
             if result.fdi_type == "F":
@@ -152,6 +155,7 @@ class SimpleRuleBasedAnalyzer:
                 or result.fdi_type != "I"
                 or result.data_size is None
                 or result.start_time is None
+                or result.subtask_flag != "0"
             ):
                 continue
             groups[result.task].append(result)
@@ -220,7 +224,9 @@ class SimpleRuleBasedAnalyzer:
             if (result.task == ""
                 or result.fdi_type != 'F'
                 or result.data_size is None
-                or result.start_time is None):
+                or result.start_time is None
+                or result.subtask_flag != "0"
+            ):
                 continue
             groups[result.task].append(result)
 
@@ -285,3 +291,28 @@ class SimpleRuleBasedAnalyzer:
             times.append(result.start_time)
 
         return alerts
+
+    # Search for data stores that are almost full
+    def analyze_storage_capacity(self, data, alert_limit):
+        alerts = []
+        for data_store in data:
+            # Skip data stores with missing data
+            if (
+                data_store.capacity is None
+                or data_store.filled is None
+                or data_store.high_water_mark is None
+            ):
+                continue
+            if data_store.filled > data_store.high_water_mark:
+                alerts.append(StorageFillAlert(data_store))
+
+        if alert_limit is None:
+            alert_limit = 10
+
+        # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
+        count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+        # Send the alerts to the backend
+        for alert in alerts[:count]:
+            self.backend.create_storage_fill_alert(alert.as_json())
+
+        return {"count": count}

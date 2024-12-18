@@ -1,8 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../service/alert-service.service';
-import { Alert, CreationDateAlert, SizeAlert } from '../../shared/types/alert';
+import {
+  Alert,
+  CreationDateAlert,
+  SizeAlert,
+  StorageFillAlert,
+} from '../../shared/types/alert';
 import { DatePipe } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, tap } from 'rxjs';
 import { SeverityType } from '../../shared/enums/severityType';
 
 @Component({
@@ -12,6 +17,7 @@ import { SeverityType } from '../../shared/enums/severityType';
   providers: [DatePipe],
 })
 export class AlertComponent implements OnInit, OnDestroy {
+  protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
 
   alerts: Alert[] = [];
@@ -117,6 +123,10 @@ export class AlertComponent implements OnInit, OnDestroy {
         const creationDateAlert = alert as CreationDateAlert;
         reason = `Backup was started at an unusual time`;
         break;
+      case 'STORAGE_FILL_ALERT':
+        const storageFillAlert = alert as StorageFillAlert;
+        reason = `Less available storage space than expected`;
+        break;
     }
     return reason;
   }
@@ -145,6 +155,11 @@ export class AlertComponent implements OnInit, OnDestroy {
 
         description = `Backup was started at ${creationDateAlert.date.toString()}, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
         break;
+      case 'STORAGE_FILL_ALERT':
+        const storageFillAlert = alert as StorageFillAlert;
+        description = `The current storage fill is ${storageFillAlert.filled.toString()} GiB, which is above the threshold of ${storageFillAlert.highWaterMark.toString()}
+         GiB. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()} GiB`;
+        break;
     }
     return description;
   }
@@ -152,8 +167,6 @@ export class AlertComponent implements OnInit, OnDestroy {
   formatDate(date: Date): string {
     return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
   }
-
-  protected readonly SeverityType = SeverityType;
 
   ngOnDestroy(): void {
     this.destroy$.next();

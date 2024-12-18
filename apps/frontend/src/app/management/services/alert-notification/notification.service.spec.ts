@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from './notification.service';
 import { of } from 'rxjs';
-import { NotificationSettings } from '../../shared/types/notifications';
+import { AlertType } from '../../../shared/types/alertType';
+import { SeverityType } from '../../../shared/enums/severityType';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -49,11 +50,11 @@ describe('NotificationService', () => {
   // Unit Tests for updateNotificationSettings
   describe('updateNotificationSettings', () => {
     it('should activate user notifications', async () => {
-      const mockNotification: NotificationSettings = {
+      const mockNotification: AlertType = {
         id: '1',
         user_active: true,
         name: 'Email Notifications',
-        severity: '',
+        severity: SeverityType.INFO,
         master_active: false,
       };
 
@@ -64,18 +65,18 @@ describe('NotificationService', () => {
         .toPromise();
 
       expect(httpClientMock.patch).toHaveBeenCalledWith(
-        `${mockBaseUrl}/alerting/type/1/activate/user`,
-        { params: mockNotification }
+        `${mockBaseUrl}/alerting/type/1/user`,
+        { status: mockNotification.user_active }
       );
       expect(result).toEqual(mockNotification);
     });
 
     it('should deactivate user notifications', async () => {
-      const mockNotification: NotificationSettings = {
+      const mockNotification: AlertType = {
         id: '1',
         user_active: false,
         name: 'Email Notifications',
-        severity: '',
+        severity: SeverityType.WARNING,
         master_active: false,
       };
 
@@ -86,8 +87,8 @@ describe('NotificationService', () => {
         .toPromise();
 
       expect(httpClientMock.patch).toHaveBeenCalledWith(
-        `${mockBaseUrl}/alerting/type/1/deactivate/user`,
-        { params: mockNotification }
+        `${mockBaseUrl}/alerting/type/1/user`,
+        { status: mockNotification.user_active }
       );
       expect(result).toEqual(mockNotification);
     });
@@ -102,7 +103,7 @@ describe('NotificationService', () => {
           id: '1',
           user_active: false,
           name: 'Email Notifications',
-          severity: '',
+          severity: SeverityType.WARNING,
           master_active: false,
         },
       ];
@@ -115,7 +116,7 @@ describe('NotificationService', () => {
       expect(fetchedSettings).toEqual(initialSettings);
 
       // Update settings
-      const updatedNotification: NotificationSettings = {
+      const updatedNotification: AlertType = {
         ...initialSettings[0],
         user_active: true,
       };

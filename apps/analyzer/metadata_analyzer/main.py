@@ -4,6 +4,7 @@ from metadata_analyzer.database import Database
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
 from metadata_analyzer.analyzer import Analyzer
+from metadata_analyzer.time_series_analyzer import Time_series_analyzer
 from metadata_analyzer.backend import Backend
 from flasgger import Swagger
 import requests
@@ -195,6 +196,7 @@ def simple_rule_based_analysis():
         return "Invalid value for alert limit", 400
 
 
+
 @app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
 def simple_rule_based_analysis_diff():
     """Fulfills a simple rule based analysis on diff backups.
@@ -242,6 +244,7 @@ def simple_rule_based_analysis_diff():
     except ValueError:
         print("Alert limit is not a number")
         return "Invalid value for alert limit", 400
+
 
 
 @app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
@@ -317,12 +320,229 @@ def simple_rule_based_analysis_creation_dates():
     except ValueError:
         return "Invalid value for alert limit", 400
 
+
+@app.route("/simpleRuleBasedAnalysisStorageCapacity", methods=["POST"])
+def simple_rule_based_analysis_storage_capacity():
+    """Runs a simple rule based analysis on data stores searching for ones with
+    almost full
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    responses:
+        200:
+            description: Number of created alerts
+        400:
+            description: The value set for the alert limit was not valid
+    """
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(
+            Analyzer.simple_rule_based_analysis_storage_capacity(int(alert_limit))
+        )
+    except ValueError:
+        return "Invalid value for alert limit", 400
+
+
+
+# TODO yaml for swagger
+@app.route("/kMeansAnomalies", methods=["POST"])
+def runTimeSeriesTests():
+    """Runs k-means anomaly detection on the specified dataset.
+    ---
+    parameters:
+      - name: input
+        in: body
+        type: object
+        required: true
+        properties:
+            variable:
+                type: string
+                example: 'data_size'
+            task_id:
+                type: string
+                example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+            backup_type:
+                type: string
+                example: 'F'
+            frequency:
+                type: int
+                example: 86401
+            window_size:
+                type: int
+                example: 2
+    definitions:
+        MeansBody:
+            type: object
+            properties:
+                variable:
+                    type: string
+                    example: 'data_size'
+                task_id:
+                    type: string
+                    example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+                backup_type:
+                    type: string
+                    example: 'F'
+                frequency:
+                    type: int
+                    example: 86401
+                windows_size:
+                    type: int
+                    example: 2
+        Timestamps:
+            type: array
+            items:
+                type: string
+            example:
+                - 'Tue, 10 Sep 2024 21:01:22 GMT'
+                - 'Sat, 21 Sep 2024 21:01:33 GMT'
+                - 'Sun, 22 Sep 2024 21:01:34 GMT'
+                - 'Tue, 08 Oct 2024 21:01:50 GMT'
+                - 'Wed, 09 Oct 2024 21:01:51 GMT'
+    responses:
+      200:
+        description: The timestamps of the anomalies
+        schema:
+          $ref: '#/definitions/Timestamps'
+    """
+    json = request.get_json()
+    field = "None"
+    try:
+        field = "variable"
+        variable = json["variable"]
+        field = "task_id"
+        task_id = json["task_id"]
+        field = "frequency"
+        frequency = json["frequency"]
+        field = "backup_type"
+        backup_type = json["backup_type"]
+        field = "window_size"
+        window_size = json["window_size"]
+    except KeyError:
+        return "Missing field of type " + field, 400
+
+    try:
+        result = Analyzer.simple_time_series_analysis(
+            variable, task_id, frequency, backup_type, window_size
+        )
+        return jsonify(result)
+    except ValueError as val:
+        return "Value error occured: " + str(val), 400
+
+
+@app.route("/getTaskIds", methods=["GET"])
+def return_task_ids():
+    """Gets task ids of current dataset, necessary for time series analysis.
+    ---
+    definitions:
+        task_ids:
+            type: object
+            properties:
+                1:
+                    type: string
+                    example: 'd6f0d862-ef51-4f01-8d34-5503a58c6421'
+                2:
+                    type: string
+                    example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+                3:
+                    type: string
+                    example: '8cc9efbc-d392-430d-8844-af04da35e7d6'
+    responses:
+      200:
+        description: All possible task ids
+        schema:
+          $ref: '#/definitions/task_ids'
+    """
+    return jsonify(Time_series_analyzer.get_task_ids())
+
+
+@app.route("/getFrequenciesForTask", methods=["POST"])
+def return_frequencies():
+    """Gets frequencies for a specific task, variable and backup type.
+    ---
+    parameters:
+      - name: input
+        in: body
+        type: object
+        required: true
+        properties:
+            variable:
+                type: string
+                example: 'data_size'
+            task_id:
+                type: string
+                example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+            backup_type:
+                type: string
+                example: 'F'
+    definitions:
+        Frequencies:
+            type: object
+            properties:
+                count:
+                    type: object
+                    properties:
+                        0:
+                            type: int
+                            example: 20
+                        1:
+                            type: int
+                            example: 17
+                        2:
+                            type: int
+                            example: 5
+                sbc_start:
+                    type: object
+                    properties:
+                        0:
+                            type: int
+                            example: 86400
+                        1:
+                            type: int
+                            example: 86401
+                        2:
+                            type: int
+                            example: 86399
+    responses:
+      200:
+        description: All backup frequencies found that meet the conditions, ranked by times appeared
+        schema:
+          $ref: '#/definitions/Frequencies'
+    """
+    json = request.get_json()
+    field = "None"
+    try:
+        field = "task_id"
+        task_id = json["task_id"]
+        field = "backup_type"
+        backup_type = json["backup_type"]
+        field = "variable"
+        variable = json["variable"]
+    except KeyError:
+        return "Missing field of type " + field, 400
+
+    return jsonify(Time_series_analyzer.get_frequencies(task_id, backup_type, variable))
+
+
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
     simple_analyzer = SimpleAnalyzer()
+    time_series_analyzer = Time_series_analyzer(database)
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, simple_analyzer, simple_rule_based_analyzer)
+    Analyzer.init(
+        database,
+        backend,
+        simple_analyzer,
+        simple_rule_based_analyzer,
+        time_series_analyzer,
+    )
 
     print(f"FLASK_RUN_HOST: {os.getenv('FLASK_RUN_HOST')}")
     print(f"FLASK_RUN_PORT: {os.getenv('FLASK_RUN_PORT')}")

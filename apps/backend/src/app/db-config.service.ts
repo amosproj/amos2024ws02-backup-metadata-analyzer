@@ -15,9 +15,18 @@ import { AlertTypeEntity } from './alerting/entity/alertType.entity';
 import { AlertType1732873882256 } from './migrations/1732873882256-AlertType';
 import { AlertTypeNameUnique1732874749343 } from './migrations/1732874749343-AlertTypeNameUnique';
 import { SizeAlertEntity } from './alerting/entity/alerts/sizeAlert.entity';
+import { StorageFillAlertEntity } from './alerting/entity/alerts/storageFillAlert.entity';
 import { NewAlertStructure1732887680122 } from './migrations/1732887680122-NewAlertStructure';
 import { CreationDateAlertEntity } from './alerting/entity/alerts/creationDateAlert.entity';
 import { CreationDateAlert1733070019992 } from './migrations/1733070019992-CreationDateAlert';
+import { TaskEntity } from './tasks/entity/task.entity';
+import { Tasks1733397652480 } from './migrations/1733397652480-Tasks';
+import { MailReceiverEntity } from './utils/mail/entity/MailReceiver.entity';
+import { MailReceiver1733580333590 } from './migrations/1733580333590-MailReceiver';
+import { AddSaveset1733760846109 } from './migrations/1733760846109-AddSaveset';
+import { StorageFillAlert1733739256545 } from './migrations/1733739256545-StorageFillAlert';
+import { StorageFillAlertChangedColumns1733765217660 } from './migrations/1733765217660-StorageFillAlertChangedColumns';
+import { StorageFillAlertChangedColumnsDecimal1733768959317 } from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
 
 /**
  * Used by NestJS to reach database.
@@ -26,7 +35,7 @@ import { CreationDateAlert1733070019992 } from './migrations/1733070019992-Creat
 export class DbConfigService implements TypeOrmOptionsFactory {
   constructor(
     @Inject(ConfigService)
-    private configService: ConfigService
+    private readonly configService: ConfigService
   ) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions & DataSourceOptions {
@@ -43,6 +52,9 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AlertTypeEntity,
         SizeAlertEntity,
         CreationDateAlertEntity,
+        StorageFillAlertEntity,
+        TaskEntity,
+        MailReceiverEntity,
       ],
       migrationsRun: true,
       migrations: [
@@ -57,8 +69,15 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AlertTypeNameUnique1732874749343,
         NewAlertStructure1732887680122,
         CreationDateAlert1733070019992,
+        Tasks1733397652480,
+        MailReceiver1733580333590,
+        AddSaveset1733760846109,
+        StorageFillAlert1733739256545,
+        StorageFillAlertChangedColumns1733765217660,
+        StorageFillAlertChangedColumnsDecimal1733768959317,
       ],
       logging: true,
+      logger: 'debug',
     };
   }
 }

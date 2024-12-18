@@ -13,15 +13,22 @@ import { SeverityType } from './dto/severityType';
 import { Alert } from './entity/alerts/alert';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { BackupType } from '../backupData/dto/backupType';
-import { CREATION_DATE_ALERT, SIZE_ALERT } from '../utils/constants';
+import {
+  CREATION_DATE_ALERT,
+  SIZE_ALERT,
+  STORAGE_FILL_ALERT,
+} from '../utils/constants';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
+import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
+import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
   sizeMB: 100,
   type: BackupType.FULL,
   creationDate: new Date(),
+  saveset: 'saveset1',
 };
 
 const mockedSizeAlertTypeEntity: AlertTypeEntity = {
@@ -35,6 +42,14 @@ const mockedSizeAlertTypeEntity: AlertTypeEntity = {
 const mockedCreationDateAlertTypeEntity: AlertTypeEntity = {
   id: 'alert-type-id2',
   name: CREATION_DATE_ALERT,
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const mockedStorageFillAlertTypeEntity: AlertTypeEntity = {
+  id: 'storage-fill-alert1',
+  name: STORAGE_FILL_ALERT,
   severity: SeverityType.WARNING,
   user_active: true,
   master_active: true,
@@ -67,6 +82,7 @@ describe('AlertingService', () => {
   let alertTypeRepository: Repository<AlertTypeEntity>;
   let mailService: MailService;
   let backupDataService: BackupDataService;
+  let storageFillAlertEntityRepsitory: Repository<StorageFillAlertEntity>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -108,6 +124,14 @@ describe('AlertingService', () => {
             }),
             save: jest.fn(),
             find: jest.fn().mockResolvedValue([]),
+          },
+        },
+        {
+          provide: getRepositoryToken(StorageFillAlertEntity),
+          useValue: {
+            find: jest.fn().mockResolvedValue([]),
+            findOneBy: jest.fn().mockResolvedValue(null),
+            save: jest.fn(),
           },
         },
         {
