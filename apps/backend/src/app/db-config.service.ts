@@ -26,8 +26,11 @@ import { MailReceiver1733580333590 } from './migrations/1733580333590-MailReceiv
 import { AddSaveset1733760846109 } from './migrations/1733760846109-AddSaveset';
 import { StorageFillAlert1733739256545 } from './migrations/1733739256545-StorageFillAlert';
 import { StorageFillAlertChangedColumns1733765217660 } from './migrations/1733765217660-StorageFillAlertChangedColumns';
-import { StorageFillAlertChangedColumnsDecimal1733768959317 } from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
+import {
+  StorageFillAlertChangedColumnsDecimal1733768959317
+} from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
 import { AddScheduledTimeToBackup1734538152155 } from './migrations/1734538152155-AddScheduledTimeToBackup';
+import { DataStoreEntity } from './dataStores/entity/dataStore.entity';
 
 /**
  * Used by NestJS to reach database.
@@ -56,6 +59,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         StorageFillAlertEntity,
         TaskEntity,
         MailReceiverEntity,
+        DataStoreEntity,
       ],
       migrationsRun: true,
       migrations: [
@@ -76,7 +80,8 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         StorageFillAlert1733739256545,
         StorageFillAlertChangedColumns1733765217660,
         StorageFillAlertChangedColumnsDecimal1733768959317,
-        AddScheduledTimeToBackup1734538152155
+        AddScheduledTimeToBackup1734538152155,
+        DataStoreEntity,
       ],
       logging: true,
       logger: 'debug',
