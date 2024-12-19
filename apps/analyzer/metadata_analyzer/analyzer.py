@@ -129,7 +129,8 @@ class Analyzer:
 				continue
 
 			storage_data = {
-				"id": storage.name,
+				"id": storage.uuid,
+				"displayName": storage.name,
 				"capacity": storage.capacity,
 				"highWaterMark": storage.high_water_mark,
 				"filled": storage.filled,
