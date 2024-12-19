@@ -1,10 +1,21 @@
-.data-store {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+.data-store-card {
+    margin-bottom: 20px;
 }
 
 .data-store-name {
-    width: 150px;
+    font-weight: bold;
     margin-right: 10px;
+}
+
+.progress-bar-container {
+    position: relative;
+    width: 100%;
+}
+
+.high-water-mark {
+    height: 100%;
+    width: 2px;
+    background-color: red;
+    position: absolute;
+    top: 0;
 }

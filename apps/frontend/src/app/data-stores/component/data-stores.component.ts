@@ -19,7 +19,9 @@ export class DataStoresComponent implements OnInit, OnDestroy {
       .getAllDataStores()
       .pipe(takeUntil(this.destroy$))
       .subscribe((dataStores) => {
-        this.dataStores = dataStores;
+        this.dataStores = dataStores.sort(
+          (a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a)
+        );
       });
   }
 
@@ -29,6 +31,14 @@ export class DataStoresComponent implements OnInit, OnDestroy {
   }
 
   getFilledPercentage(dataStore: DataStore): number {
-    return parseFloat(((dataStore.filled / dataStore.capacity) * 100).toFixed(2));
+    return parseFloat(
+      ((dataStore.filled / dataStore.capacity) * 100).toFixed(1)
+    );
+  }
+
+  getHighWaterMarkPercentage(dataStore: DataStore): number {
+    return parseFloat(
+      ((dataStore.highWaterMark / dataStore.capacity) * 100).toFixed(2)
+    );
   }
 }

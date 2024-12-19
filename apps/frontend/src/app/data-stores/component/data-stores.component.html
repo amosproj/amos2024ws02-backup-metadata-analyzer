@@ -1,9 +1,19 @@
-<div *ngFor="let dataStore of dataStores" class="data-store">
-  <span class="data-store-name">{{ dataStore.displayName }}</span>
-  <clr-progress-bar
-    [clrValue]="getFilledPercentage(dataStore)"
-    [clrMax]="100"
-    [clrLabeled]="true"
-    [clrDisplayval]="getFilledPercentage(dataStore) + '%'">
-  </clr-progress-bar>
-</div>
+<clr-card class="data-store-card">
+  <clr-card-header>
+    <span class="data-store-name">Data Stores</span>
+  </clr-card-header>
+  <clr-card-block>
+    <div *ngFor="let dataStore of dataStores" class="data-store">
+      <span class="data-store-name">{{ dataStore.displayName }}</span>
+      <div class="progress-bar-container">
+        <clr-progress-bar
+          [clrValue]="getFilledPercentage(dataStore)"
+          [clrMax]="100"
+          [clrLabeled]="true"
+          [clrDisplayval]="getFilledPercentage(dataStore) + '%'">
+        </clr-progress-bar>
+        <div class="high-water-mark" [style.left.%]="getHighWaterMarkPercentage(dataStore)"></div>
+      </div>
+    </div>
+  </clr-card-block>
+</clr-card>
