@@ -11,6 +11,7 @@ import { DataStore } from '../../shared/types/data-store';
 export class DataStoresComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   dataStores: DataStore[] = [];
+  showAll = false;
 
   constructor(private readonly dataStoresService: DataStoresService) {}
 
@@ -40,5 +41,9 @@ export class DataStoresComponent implements OnInit, OnDestroy {
     return parseFloat(
       ((dataStore.highWaterMark / dataStore.capacity) * 100).toFixed(2)
     );
+  }
+
+  toggleShowAll(): void {
+    this.showAll = !this.showAll;
   }
 }

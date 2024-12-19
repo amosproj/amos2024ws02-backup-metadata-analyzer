@@ -5,11 +5,15 @@
 .data-store-name {
     font-weight: bold;
     margin-right: 10px;
+    display: inline-block;
+    width: 30%;
 }
 
 .progress-bar-container {
     position: relative;
-    width: 100%;
+    width: 70%;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .high-water-mark {
@@ -18,4 +22,34 @@
     background-color: red;
     position: absolute;
     top: 0;
+}
+
+.card {
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.card-header {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-bottom: 1px solid #dcdcdc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.card-block {
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.card-footer {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-top: 1px solid #dcdcdc;
+    text-align: right;
 }
