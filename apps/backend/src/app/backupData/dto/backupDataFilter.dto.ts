@@ -71,4 +71,20 @@ export class BackupDataFilterDto {
   @IsOptional()
   @IsEnum(BackupType, { each: true })
   types?: BackupType[];
+
+  @ApiProperty({
+    description: 'From Scheduled Date',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  fromScheduledDate?: string;
+
+  @ApiProperty({
+    description: 'To Scheduled Date',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  toScheduledDate?: string;
 }

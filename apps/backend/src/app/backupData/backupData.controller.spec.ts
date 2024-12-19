@@ -15,6 +15,7 @@ const mockBackupDataEntity: BackupDataEntity = {
   saveset: 'backup-123',
   type: BackupType.FULL,
   creationDate: new Date('2023-12-30 00:00:00.000000'),
+  scheduledTime: new Date('2023-06-15 00:00:00.000000'),
 };
 
 const mockBackupDataRepository = {
@@ -91,6 +92,7 @@ describe('BackupDataController (e2e)', () => {
     expect(response.body).toEqual({
       ...mockBackupDataEntity,
       creationDate: mockBackupDataEntity.creationDate.toISOString(),
+      scheduledTime: mockBackupDataEntity?.scheduledTime?.toISOString(),
     });
 
     expect(mockBackupDataRepository.findOne).toBeCalledWith({
@@ -108,6 +110,7 @@ describe('BackupDataController (e2e)', () => {
         {
           ...mockBackupDataEntity,
           creationDate: mockBackupDataEntity.creationDate.toISOString(),
+          scheduledTime: mockBackupDataEntity?.scheduledTime?.toISOString(),
         },
       ],
       paginationData: {
@@ -135,6 +138,7 @@ describe('BackupDataController (e2e)', () => {
         {
           ...mockBackupDataEntity,
           creationDate: mockBackupDataEntity.creationDate.toISOString(),
+          scheduledTime: mockBackupDataEntity?.scheduledTime?.toISOString(),
         },
       ],
       paginationData: {
@@ -195,6 +199,7 @@ describe('BackupDataController (e2e)', () => {
         {
           ...mockBackupDataEntity,
           creationDate: mockBackupDataEntity.creationDate.toISOString(),
+          scheduledTime: mockBackupDataEntity?.scheduledTime?.toISOString(),
         },
       ],
       paginationData: {
@@ -220,6 +225,32 @@ describe('BackupDataController (e2e)', () => {
       where: {
         type: In([BackupType.FULL, BackupType.INCREMENTAL]),
       },
+    });
+  });
+
+  it('/backupData/filter (POST) with scheduled date range should return backup data entries within scheduled date range', async () => {
+    const response = await request(app.getHttpServer())
+      .post(
+        '/backupData/filter?fromScheduledDate=2023-01-01&toScheduledDate=2023-12-31'
+      )
+      .expect(201);
+
+    expect(response.body).toEqual({
+      data: [
+        {
+          ...mockBackupDataEntity,
+          creationDate: mockBackupDataEntity.creationDate.toISOString(),
+          scheduledTime: mockBackupDataEntity?.scheduledTime?.toISOString(),
+        },
+      ],
+      paginationData: {
+        total: 1,
+      },
+    });
+
+    expect(mockBackupDataRepository.findAndCount).toBeCalledWith({
+      order: { creationDate: 'DESC' },
+      where: { scheduledTime: expect.any(Object) },
     });
   });
 });

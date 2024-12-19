@@ -55,4 +55,12 @@ export class CreateBackupDataDto {
     required: false,
   })
   taskId?: string;
+
+  @ApiProperty({
+    description: 'Scheduled Time',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString({ strict: true })
+  scheduledTime?: Date;
 }
