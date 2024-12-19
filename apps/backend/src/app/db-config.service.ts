@@ -31,6 +31,7 @@ import {
 } from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
 import { AddScheduledTimeToBackup1734538152155 } from './migrations/1734538152155-AddScheduledTimeToBackup';
 import { DataStoreEntity } from './dataStores/entity/dataStore.entity';
+import { DataStores1734616685846 } from './migrations/1734616685846-DataStores';
 
 /**
  * Used by NestJS to reach database.
@@ -81,7 +82,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         StorageFillAlertChangedColumns1733765217660,
         StorageFillAlertChangedColumnsDecimal1733768959317,
         AddScheduledTimeToBackup1734538152155,
-        DataStoreEntity,
+        DataStores1734616685846,
       ],
       logging: true,
       logger: 'debug',

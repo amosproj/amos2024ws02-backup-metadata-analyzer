@@ -15,7 +15,7 @@ class Backend:
         r.raise_for_status()
 
     def send_storage_data(self, storage):
-        url = self.backend_url + "storage"
+        url = self.backend_url + "dataStores"
         r = requests.post(url, json=storage)
         r.raise_for_status()
 
