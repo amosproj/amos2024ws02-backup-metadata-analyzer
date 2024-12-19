@@ -4,29 +4,28 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { appRoutes } from './app.routes';
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
 import {
+  angleIcon,
+  bellIcon,
   ClarityIcons,
+  cogIcon,
+  dataClusterIcon,
+  envelopeIcon,
   errorStandardIcon,
+  filterIcon,
   homeIcon,
+  lockIcon,
+  plusIcon,
   searchIcon,
   tableIcon,
+  tagIcon,
+  trashIcon,
   uploadCloudIcon,
   warningStandardIcon,
-  cogIcon,
-  bellIcon,
-  angleIcon,
-  tagIcon,
-  dataClusterIcon,
-  filterIcon,
-  envelopeIcon,
-  plusIcon,
-  lockIcon,
-  trashIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -37,6 +36,7 @@ import { AlertComponent } from './alert/component/alert.component';
 import { NotificationSettingsComponent } from './management/components/settings/notification-settings/notification-settings.component';
 import { EmailReceiverSettingsComponent } from './management/components/settings/email-receiver-settings/email-receiver-settings.component';
 import { ConfirmDialogComponent } from './shared/components/confirm-dialog/component/confirm-dialog/confirm-dialog.component';
+import { DataStoresComponent } from './data-stores/component/data-stores.component';
 
 @NgModule({
   declarations: [
@@ -48,6 +48,7 @@ import { ConfirmDialogComponent } from './shared/components/confirm-dialog/compo
     NotificationSettingsComponent,
     EmailReceiverSettingsComponent,
     ConfirmDialogComponent,
+    DataStoresComponent,
   ],
   imports: [
     BrowserModule,
@@ -81,7 +82,7 @@ export class AppModule {
       envelopeIcon,
       plusIcon,
       lockIcon,
-      trashIcon,
+      trashIcon
     );
   }
 }
