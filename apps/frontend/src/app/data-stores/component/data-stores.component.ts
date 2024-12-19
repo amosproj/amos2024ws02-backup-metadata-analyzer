@@ -27,4 +27,8 @@ export class DataStoresComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  getFilledPercentage(dataStore: DataStore): number {
+    return parseFloat(((dataStore.filled / dataStore.capacity) * 100).toFixed(2));
+  }
 }

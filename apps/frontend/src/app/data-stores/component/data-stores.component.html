@@ -1,0 +1,9 @@
+<div *ngFor="let dataStore of dataStores" class="data-store">
+  <span class="data-store-name">{{ dataStore.displayName }}</span>
+  <clr-progress-bar
+    [clrValue]="getFilledPercentage(dataStore)"
+    [clrMax]="100"
+    [clrLabeled]="true"
+    [clrDisplayval]="getFilledPercentage(dataStore) + '%'">
+  </clr-progress-bar>
+</div>
