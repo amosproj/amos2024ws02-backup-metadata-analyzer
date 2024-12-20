@@ -61,6 +61,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected backupSavesetFilter: CustomFilter;
   selectedBackupTypesForTable: string[] = [];
   protected typeFilter: CustomFilter;
+  protected scheduledTimeFilter: CustomFilter;
 
   //Filters for Charts
   selectedBackupTypesForCharts: string[] = [];
@@ -99,6 +100,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
     this.backupSavesetFilter = new CustomFilter('saveset');
+    this.scheduledTimeFilter = new CustomFilter('scheduledTime');
     this.taskFilter = new CustomFilter('taskName');
     this.typeFilter = new CustomFilter('type');
 
@@ -217,6 +219,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       this.backupSavesetFilter.changes.pipe(startWith(null)),
       this.taskFilter.changes.pipe(startWith(null)),
       this.typeFilter.changes.pipe(startWith(null)),
+      this.scheduledTimeFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
         map(() => this.buildFilterParams()),
@@ -287,6 +290,12 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
     if (this.backupSavesetFilter.isActive()) {
       params.saveset = this.backupSavesetFilter.ranges.saveset;
+    }
+
+    if (this.scheduledTimeFilter.isActive()) {
+      params.fromScheduledDate =
+        this.scheduledTimeFilter.ranges.fromScheduledTime;
+      params.toScheduledDate = this.scheduledTimeFilter.ranges.toScheduledTime;
     }
 
     if (this.taskFilter.isActive()) {
