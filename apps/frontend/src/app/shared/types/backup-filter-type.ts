@@ -1,4 +1,4 @@
-import { BackupType } from "../enums/backup.types";
+import { BackupType } from '../enums/backup.types';
 
 export type BackupFilterParams = {
   limit?: number;
@@ -14,4 +14,6 @@ export type BackupFilterParams = {
   taskName?: string | null;
   saveset?: string | null;
   types?: BackupType[] | null;
+  fromScheduledDate?: string | null;
+  toScheduledDate?: string | null;
 };

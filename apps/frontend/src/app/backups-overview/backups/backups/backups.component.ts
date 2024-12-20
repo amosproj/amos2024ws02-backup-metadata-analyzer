@@ -22,6 +22,7 @@ import { ChartService } from '../../service/chart-service/chart-service.service'
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
 import { BackupType } from '../../../shared/enums/backup.types';
+import { DatePipe } from '@angular/common';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -37,6 +38,7 @@ interface TimeRangeConfig {
   selector: 'app-backups',
   templateUrl: './backups.component.html',
   styleUrl: './backups.component.css',
+  providers: [DatePipe],
 })
 export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
@@ -61,6 +63,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected backupSavesetFilter: CustomFilter;
   selectedBackupTypesForTable: string[] = [];
   protected typeFilter: CustomFilter;
+  protected scheduledTimeFilter: CustomFilter;
 
   //Filters for Charts
   selectedBackupTypesForCharts: string[] = [];
@@ -94,11 +97,13 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
   constructor(
     private readonly backupService: BackupService,
-    private readonly chartService: ChartService
+    private readonly chartService: ChartService,
+    private readonly datePipe: DatePipe
   ) {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
     this.backupSavesetFilter = new CustomFilter('saveset');
+    this.scheduledTimeFilter = new CustomFilter('scheduledTime');
     this.taskFilter = new CustomFilter('taskName');
     this.typeFilter = new CustomFilter('type');
 
@@ -217,6 +222,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       this.backupSavesetFilter.changes.pipe(startWith(null)),
       this.taskFilter.changes.pipe(startWith(null)),
       this.typeFilter.changes.pipe(startWith(null)),
+      this.scheduledTimeFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
         map(() => this.buildFilterParams()),
@@ -287,6 +293,12 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
     if (this.backupSavesetFilter.isActive()) {
       params.saveset = this.backupSavesetFilter.ranges.saveset;
+    }
+
+    if (this.scheduledTimeFilter.isActive()) {
+      params.fromScheduledDate =
+        this.scheduledTimeFilter.ranges.fromScheduledTime;
+      params.toScheduledDate = this.scheduledTimeFilter.ranges.toScheduledTime;
     }
 
     if (this.taskFilter.isActive()) {
@@ -389,5 +401,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     } else {
       this.filterPanel = true;
     }
+  }
+
+  formatDate(date?: Date): string {
+    return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') ?? '';
   }
 }

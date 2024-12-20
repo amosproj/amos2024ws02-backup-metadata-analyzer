@@ -8,4 +8,5 @@ export interface Backup {
   creationDate: Date;
   taskId?: BackupTask;
   type: BackupType;
+  scheduledTime?: Date;
 }
