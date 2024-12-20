@@ -11,6 +11,7 @@ import { APIResponse } from '../../../shared/types/api-response';
 import { Backup } from '../../../shared/types/backup';
 import { BackupTask } from '../../../shared/types/backup.task';
 import { BackupType } from '../../../shared/enums/backup.types';
+import { DatePipe } from '@angular/common';
 
 describe('BackupsComponent', () => {
   let component: BackupsComponent;
@@ -58,6 +59,7 @@ describe('BackupsComponent', () => {
         BackupsComponent,
         { provide: BackupService, useValue: mockBackupService },
         { provide: ChartService, useValue: mockChartService },
+        { provide: DatePipe, useValue: { transform: vi.fn() } },
       ],
     });
 
@@ -136,6 +138,8 @@ describe('BackupsComponent', () => {
         toSizeMB: null,
         taskName: null,
         type: null,
+        toScheduledTime: null,
+        fromScheduledTime: null,
       };
       (dateFilter.ranges as any)['_isActive'] = true;
 
@@ -145,6 +149,32 @@ describe('BackupsComponent', () => {
 
       expect(params.fromDate).toBe(dateFilter.ranges.fromDate);
       expect(params.toDate).toBe(dateFilter.ranges.toDate);
+    });
+
+    it('should build filter params with active scheduledTime filter', () => {
+      const scheduledTimeFilter = new CustomFilter('scheduledTime');
+      scheduledTimeFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        id: null,
+        fromSizeMB: null,
+        saveset: null,
+        toSizeMB: null,
+        taskName: null,
+        type: null,
+        toScheduledTime: new Date('2023-01-01').toISOString(),
+        fromScheduledTime: new Date('2023-12-31').toISOString(),
+      };
+      (scheduledTimeFilter.ranges as any)['_isActive'] = true;
+
+      component['scheduledTimeFilter'] = scheduledTimeFilter;
+
+      const params = component['buildFilterParams']();
+
+      expect(params.fromScheduledDate).toBe(
+        scheduledTimeFilter.ranges.fromScheduledTime
+      );
+      expect(params.toScheduledDate).toBe(scheduledTimeFilter.ranges.toScheduledTime);
     });
 
     it('should build filter params with active size filter', () => {
@@ -158,6 +188,8 @@ describe('BackupsComponent', () => {
         id: null,
         taskName: null,
         type: null,
+        toScheduledTime: null,
+        fromScheduledTime: null,
       };
       (sizeFilter.ranges as any)['_isActive'] = true;
 
@@ -180,6 +212,8 @@ describe('BackupsComponent', () => {
         id: null,
         taskName: null,
         type: null,
+        toScheduledTime: null,
+        fromScheduledTime: null,
       };
       (savesetFilter.ranges as any)['_isActive'] = true;
 
@@ -201,6 +235,8 @@ describe('BackupsComponent', () => {
         id: null,
         taskName: 'test',
         type: null,
+        toScheduledTime: null,
+        fromScheduledTime: null,
       };
       (taskFilter.ranges as any)['_isActive'] = true;
 
@@ -222,6 +258,8 @@ describe('BackupsComponent', () => {
         id: null,
         taskName: null,
         type: [BackupType.DIFFERENTIAL],
+        toScheduledTime: null,
+        fromScheduledTime: null,
       };
       (typeFilter.ranges as any)['_isActive'] = true;
 
