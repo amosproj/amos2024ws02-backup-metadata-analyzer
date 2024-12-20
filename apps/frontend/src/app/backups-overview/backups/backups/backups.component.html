@@ -254,8 +254,8 @@
         <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.taskId?.displayName ?? '' }}</clr-dg-cell>
         <clr-dg-cell>{{ backup.type }}</clr-dg-cell>
-        <clr-dg-cell>{{ backup.creationDate | date }}</clr-dg-cell>
-        <clr-dg-cell>{{ backup.scheduledTime | date }}</clr-dg-cell>
+        <clr-dg-cell>{{ formatDate(backup.creationDate) }}</clr-dg-cell>
+        <clr-dg-cell>{{ formatDate(backup.scheduledTime) }}</clr-dg-cell>
       </clr-dg-row>
 
       <clr-dg-footer>

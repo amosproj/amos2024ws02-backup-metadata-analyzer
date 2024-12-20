@@ -22,6 +22,7 @@ import { ChartService } from '../../service/chart-service/chart-service.service'
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
 import { BackupType } from '../../../shared/enums/backup.types';
+import { DatePipe } from '@angular/common';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -37,6 +38,7 @@ interface TimeRangeConfig {
   selector: 'app-backups',
   templateUrl: './backups.component.html',
   styleUrl: './backups.component.css',
+  providers: [DatePipe],
 })
 export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
@@ -95,7 +97,8 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
   constructor(
     private readonly backupService: BackupService,
-    private readonly chartService: ChartService
+    private readonly chartService: ChartService,
+    private readonly datePipe: DatePipe
   ) {
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
@@ -398,5 +401,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     } else {
       this.filterPanel = true;
     }
+  }
+
+  formatDate(date?: Date): string {
+    return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') ?? '';
   }
 }
