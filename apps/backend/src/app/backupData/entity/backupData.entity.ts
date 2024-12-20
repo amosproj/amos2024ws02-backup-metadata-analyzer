@@ -54,4 +54,11 @@ export class BackupDataEntity {
   })
   @JoinColumn({ name: 'taskId', referencedColumnName: 'id' })
   taskId?: TaskEntity;
+
+  @ApiProperty({
+    description: 'Scheduled Time',
+    required: false,
+  })
+  @Column({ type: 'timestamp', nullable: true })
+  scheduledTime?: Date;
 }

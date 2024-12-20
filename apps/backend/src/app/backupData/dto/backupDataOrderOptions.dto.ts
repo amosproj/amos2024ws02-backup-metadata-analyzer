@@ -9,6 +9,7 @@ export enum BackupDataOrderByOptions {
   TASK_NAME = 'taskName',
   SAVESET = 'saveset',
   TYPE = 'type',
+  SCHEDULED_TIME = 'scheduledTime',
 }
 
 export class BackupDataOrderOptionsDto {
