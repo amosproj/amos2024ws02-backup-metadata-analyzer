@@ -1,7 +1,5 @@
-import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
+import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { AlertComponent } from './alert.component';
-import { AlertServiceService } from '../service/alert-service.service';
-import { DatePipe } from '@angular/common';
 import { of } from 'rxjs';
 import { Alert, SizeAlert } from '../../shared/types/alert';
 import { randomUUID } from 'crypto';
@@ -11,8 +9,6 @@ describe('AlertComponent', () => {
   let component: AlertComponent;
   let mockAlertService: {
     getAllAlerts: Mock;
-    //getAllAlerts: vi.Mock;
-    //getAllAlerts: vi.Mock;
   };
   let mockDatePipe: {
     transform: Mock;
@@ -39,40 +35,49 @@ describe('AlertComponent', () => {
         {
           id: randomUUID().toString(),
           alertType: {
-            id: randomUUID().toString(), name: 'test',
+            id: randomUUID().toString(),
+            name: 'test',
             severity: SeverityType.CRITICAL,
             user_active: false,
-            master_active: false
+            master_active: false,
           },
           backup: {
-            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
-            saveset: 'saveset'
+            id: randomUUID().toString(),
+            sizeMB: 0,
+            creationDate: new Date(),
+            saveset: 'saveset',
           },
         },
         {
           id: randomUUID().toString(),
           alertType: {
-            id: randomUUID().toString(), name: 'test',
+            id: randomUUID().toString(),
+            name: 'test',
             severity: SeverityType.INFO,
             user_active: false,
-            master_active: false
+            master_active: false,
           },
           backup: {
-            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
-            saveset: 'saveset'
+            id: randomUUID().toString(),
+            sizeMB: 0,
+            creationDate: new Date(),
+            saveset: 'saveset',
           },
         },
         {
           id: randomUUID().toString(),
           alertType: {
-            id: randomUUID().toString(), name: 'test',
+            id: randomUUID().toString(),
+            name: 'test',
             severity: SeverityType.WARNING,
             user_active: false,
-            master_active: false
+            master_active: false,
           },
           backup: {
-            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
-            saveset: 'saveset'
+            id: randomUUID().toString(),
+            sizeMB: 0,
+            creationDate: new Date(),
+            saveset: 'saveset',
           },
         },
       ];
@@ -108,14 +113,17 @@ describe('AlertComponent', () => {
         {
           id: randomUUID().toString(),
           alertType: {
-            id: randomUUID().toString(), name: 'test',
+            id: randomUUID().toString(),
+            name: 'test',
             severity: SeverityType.CRITICAL,
             user_active: false,
-            master_active: false
+            master_active: false,
           },
           backup: {
-            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
-            saveset: 'saveset'
+            id: randomUUID().toString(),
+            sizeMB: 0,
+            creationDate: new Date(),
+            saveset: 'saveset',
           },
         },
       ];
@@ -127,14 +135,17 @@ describe('AlertComponent', () => {
         {
           id: randomUUID().toString(),
           alertType: {
-            id: randomUUID().toString(), name: 'test',
+            id: randomUUID().toString(),
+            name: 'test',
             severity: SeverityType.WARNING,
             user_active: false,
-            master_active: false
+            master_active: false,
           },
           backup: {
-            id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
-            saveset: 'saveset'
+            id: randomUUID().toString(),
+            sizeMB: 0,
+            creationDate: new Date(),
+            saveset: 'saveset',
           },
         },
       ];
@@ -157,32 +168,37 @@ describe('AlertComponent', () => {
 
   describe('getAlertClass', () => {
     it('should return correct alert class based on alert type', () => {
-
       const criticalAlert: Alert = {
         id: randomUUID().toString(),
         alertType: {
-          id: randomUUID().toString(), name: 'test',
+          id: randomUUID().toString(),
+          name: 'test',
           severity: SeverityType.CRITICAL,
           user_active: false,
-          master_active: false
+          master_active: false,
         },
         backup: {
-          id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
-          saveset: 'saveset'
+          id: randomUUID().toString(),
+          sizeMB: 0,
+          creationDate: new Date(),
+          saveset: 'saveset',
         },
       };
 
-      const nonCriticalAlert: Alert =         {
+      const nonCriticalAlert: Alert = {
         id: randomUUID().toString(),
         alertType: {
-          id: randomUUID().toString(), name: 'test',
+          id: randomUUID().toString(),
+          name: 'test',
           severity: SeverityType.WARNING,
           user_active: false,
-          master_active: false
+          master_active: false,
         },
         backup: {
-          id: randomUUID().toString(), sizeMB: 0, creationDate: new Date(),
-          saveset: 'saveset'
+          id: randomUUID().toString(),
+          sizeMB: 0,
+          creationDate: new Date(),
+          saveset: 'saveset',
         },
       };
 
@@ -196,17 +212,20 @@ describe('AlertComponent', () => {
       const alert: SizeAlert = {
         id: randomUUID().toString(),
         alertType: {
-          id: randomUUID().toString(), name: 'SIZE_ALERT',
+          id: randomUUID().toString(),
+          name: 'SIZE_ALERT',
           severity: SeverityType.WARNING,
           user_active: false,
-          master_active: false
+          master_active: false,
         },
         backup: {
-          id: randomUUID().toString(), sizeMB: 20, creationDate: new Date(),
-          saveset: 'saveset'
+          id: randomUUID().toString(),
+          sizeMB: 20,
+          creationDate: new Date(),
+          saveset: 'saveset',
         },
         size: 20,
-        referenceSize: 100
+        referenceSize: 100,
       };
 
       expect(component.getAlertReason(alert)).toBe('Size of backup decreased');
@@ -216,17 +235,20 @@ describe('AlertComponent', () => {
       const alert: SizeAlert = {
         id: randomUUID().toString(),
         alertType: {
-          id: randomUUID().toString(), name: 'SIZE_ALERT',
+          id: randomUUID().toString(),
+          name: 'SIZE_ALERT',
           severity: SeverityType.WARNING,
           user_active: false,
-          master_active: false
+          master_active: false,
         },
         backup: {
-          id: randomUUID().toString(), sizeMB: 100, creationDate: new Date(),
-          saveset: 'saveset'
+          id: randomUUID().toString(),
+          sizeMB: 100,
+          creationDate: new Date(),
+          saveset: 'saveset',
         },
         size: 100,
-        referenceSize: 20
+        referenceSize: 20,
       };
 
       expect(component.getAlertReason(alert)).toBe('Size of backup increased');

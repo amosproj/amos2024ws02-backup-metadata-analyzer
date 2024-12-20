@@ -16,14 +16,7 @@ export class DataStoresComponent implements OnInit, OnDestroy {
   constructor(private readonly dataStoresService: DataStoresService) {}
 
   ngOnInit(): void {
-    this.dataStoresService
-      .getAllDataStores()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((dataStores) => {
-        this.dataStores = dataStores.sort(
-          (a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a)
-        );
-      });
+    this.loadDataStores();
   }
 
   ngOnDestroy(): void {
@@ -45,5 +38,16 @@ export class DataStoresComponent implements OnInit, OnDestroy {
 
   toggleShowAll(): void {
     this.showAll = !this.showAll;
+  }
+
+  loadDataStores() {
+    this.dataStoresService
+      .getAllDataStores()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((dataStores) => {
+        this.dataStores = dataStores.sort(
+          (a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a)
+        );
+      });
   }
 }
