@@ -21,9 +21,9 @@ export class AlertComponent implements OnInit, OnDestroy {
   readonly DAYS = 7;
 
   alerts: Alert[] = [];
-  criticalAlertsCount: number = 0;
-  warningAlertsCount: number = 0;
-  infoAlertsCount: number = 0;
+  criticalAlertsCount = 0;
+  warningAlertsCount = 0;
+  infoAlertsCount = 0;
 
   status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
@@ -153,7 +153,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       case 'CREATION_DATE_ALERT':
         const creationDateAlert = alert as CreationDateAlert;
 
-        description = `Backup was started at ${creationDateAlert.date.toString()}, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
+        description = `Backup was started at ${this.formatDate(creationDateAlert.date)}, but based on previous backups, it should have been started at around ${this.formatDate(creationDateAlert.referenceDate)}`;
         break;
       case 'STORAGE_FILL_ALERT':
         const storageFillAlert = alert as StorageFillAlert;
