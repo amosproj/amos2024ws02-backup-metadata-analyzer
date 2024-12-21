@@ -1,5 +1,11 @@
 <clr-main-container>
   <clr-header class="header">
+    <div class="header-hamburger-trigger" (click)="collapsed = !collapsed">
+      <button type="button" class="header-hamburger">
+        <cds-icon shape="bars"></cds-icon>
+      </button>
+    </div>
+
     <img src="../../../../public/team_logo.png" alt="Team Logo" width="50" />
     <span class="title">Metadata Analyzer</span>
     <div class="header-actions">
@@ -28,42 +34,35 @@
   </clr-header>
 
   <div class="content-container">
-    <clr-vertical-nav class="clr-vertical-nav has-nav-groups clr-nav-level-1">
+    <clr-vertical-nav
+      class="clr-vertical-nav has-nav-groups clr-nav-level-1"
+      [clrVerticalNavCollapsible]="true"
+      [clrVerticalNavCollapsed]="collapsed"
+      (clrVerticalNavCollapsedChange) = "collapsed = $event"
+    >
       <div class="nav-content">
-        <clr-vertical-nav-group class="nav-group">
-          <clr-vertical-nav-item routerLink="/" routerLinkActive="active">
-            <cds-icon shape="home"></cds-icon>
-            <span class="nav-text">Dashboard</span>
-          </clr-vertical-nav-item>
+        <clr-vertical-nav-item routerLink="/" routerLinkActive="active" class="hover-item">
+          <cds-icon clrVerticalNavIcon shape="home"></cds-icon>
+          <span class="nav-text">Dashboard</span>
+        </clr-vertical-nav-item>
 
-          <clr-vertical-nav-group-children>
-            <a
-              clrVerticalNavLink
-              clrAriaCurrentLink
-              routerLink="/"
-              routerLinkActive="active"
-              class="nav-link"
-              ><span class="nav-text">Overview</span></a
-            >
-          </clr-vertical-nav-group-children>
-        </clr-vertical-nav-group>
+        <clr-vertical-nav-item routerLink="/upload" routerLinkActive="active" class="hover-item">
+          <cds-icon clrVerticalNavIcon shape="upload-cloud"></cds-icon>
+          <span class="nav-text">Upload</span>
+        </clr-vertical-nav-item>
 
-        <clr-vertical-nav-group class="nav-group">
-          <clr-vertical-nav-item routerLink="/upload" routerLinkActive="active">
-            <cds-icon shape="upload-cloud"></cds-icon>
-            <span class="nav-text">Upload</span>
-          </clr-vertical-nav-item>
-        </clr-vertical-nav-group>
+        <clr-vertical-nav-item routerLink="/findData" routerLinkActive="active" class="hover-item">
+          <cds-icon clrVerticalNavIcon shape="search"></cds-icon>
+          <span class="nav-text">Find Data</span>
+        </clr-vertical-nav-item>
+      </div>
 
-        <clr-vertical-nav-group class="nav-group">
-          <clr-vertical-nav-item
-            routerLink="/findData"
-            routerLinkActive="active"
-          >
-            <cds-icon shape="search"></cds-icon>
-            <span class="nav-text">Find Data</span>
-          </clr-vertical-nav-item>
-        </clr-vertical-nav-group>
+      <div class="nav-footer">
+        <img src="../../../../public/team_logo.png" alt="Team Logo" width="50"  *ngIf="collapsed === false"/>
+        <clr-vertical-nav-item routerLink="/" routerLinkActive="active" class="hover-item" id="nav-footer">
+          <cds-icon clrVerticalNavIcon shape="book"></cds-icon>
+          <span class="nav-text">How to get started?</span>
+        </clr-vertical-nav-item>
       </div>
     </clr-vertical-nav>
 

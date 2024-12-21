@@ -18,3 +18,26 @@
   --clr-header-font-color: #000;
   --clr-header-font-color-hover: #000;
 }
+
+.nav-footer {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding-bottom: 20px;
+  border-top: 1px solid #ccc;
+
+  img {
+    align-self: center;
+  }
+}
+
+.hover-item {
+  cursor: pointer;
+  padding-left: 2px;
+  padding-bottom: 10px;
+}
+
+
+.nav-content {
+  padding-bottom: 4rem;
+}

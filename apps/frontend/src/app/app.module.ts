@@ -11,6 +11,7 @@ import { ClarityModule } from '@clr/angular';
 import {
   angleIcon,
   bellIcon,
+  bookIcon,
   ClarityIcons,
   cogIcon,
   dataClusterIcon,
@@ -82,7 +83,8 @@ export class AppModule {
       envelopeIcon,
       plusIcon,
       lockIcon,
-      trashIcon
+      trashIcon,
+      bookIcon
     );
   }
 }

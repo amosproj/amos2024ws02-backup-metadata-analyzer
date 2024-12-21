@@ -9,6 +9,7 @@ import { NotificationSettingsComponent } from './management/components/settings/
 })
 export class AppComponent {
   title = 'metadata-analyzer-frontend';
+  collapsed = true;
   @ViewChild(NotificationSettingsComponent)
   private notificationSettings!: NotificationSettingsComponent;
  
