@@ -15,17 +15,11 @@ import {
 } from 'rxjs';
 import { BackupService } from '../service/backup-service/backup-service.service';
 import { Backup } from '../../shared/types/backup';
-import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
-import { CustomFilter } from './backupfilter';
-import { BackupFilterParams } from '../../shared/types/backup-filter-type';
+import { ClrDatagridSortOrder } from '@clr/angular';
 import { ChartService } from '../service/chart-service/chart-service.service';
 import { APIResponse } from '../../shared/types/api-response';
 import { BackupTask } from '../../shared/types/backup.task';
 import { BackupType } from '../../shared/enums/backup.types';
-
-const INITIAL_FILTER: BackupFilterParams = {
-  limit: 10,
-};
 
 interface TimeRangeConfig {
   fromDate: Date;
@@ -54,14 +48,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     return isNaN(Number(item));
   });
 
-  //Filters for Table
-  protected backupSizeFilter: CustomFilter;
-  protected backupDateFilter: CustomFilter;
-  protected taskFilter: CustomFilter;
-  protected backupSavesetFilter: CustomFilter;
-  selectedBackupTypesForTable: string[] = [];
-  protected typeFilter: CustomFilter;
-
   //Filters for Charts
   selectedBackupTypesForCharts: string[] = [];
   protected selectedTask: BackupTask[] = [];
@@ -81,13 +67,10 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
 
   readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
   readonly backupTypesForChartsSubject$ = new BehaviorSubject<BackupType[]>([]);
-  private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
-    INITIAL_FILTER
-  );
+
   private readonly destroy$ = new Subject<void>();
 
   //Observables
-  readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
   allBackupTasks$: Observable<BackupTask[]>;
   protected selectedbackupTasks$: Observable<BackupTask[]>;
@@ -96,20 +79,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     private readonly backupService: BackupService,
     private readonly chartService: ChartService
   ) {
-    this.backupSizeFilter = new CustomFilter('size');
-    this.backupDateFilter = new CustomFilter('date');
-    this.backupSavesetFilter = new CustomFilter('saveset');
-    this.taskFilter = new CustomFilter('taskName');
-    this.typeFilter = new CustomFilter('type');
-
-    /**
-     * Load all backups and filter them based on the filter options for table
-     */
-    this.backups$ = this.filterOptions$.pipe(
-      switchMap((params) => this.backupService.getAllBackups(params)),
-      takeUntil(this.destroy$)
-    );
-
     /**
      * Load all backups and filter them based on the filter options for charts
      */
@@ -211,19 +180,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    combineLatest([
-      this.backupDateFilter.changes.pipe(startWith(null)),
-      this.backupSizeFilter.changes.pipe(startWith(null)),
-      this.backupSavesetFilter.changes.pipe(startWith(null)),
-      this.taskFilter.changes.pipe(startWith(null)),
-      this.typeFilter.changes.pipe(startWith(null)),
-    ])
-      .pipe(
-        map(() => this.buildFilterParams()),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((params) => this.filterOptions$.next(params));
-
     this.setTimeRange('month');
   }
 
@@ -269,38 +225,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   /**
-   * Set filter options for the backup datagrid
-   * @returns Filter options
-   */
-  private buildFilterParams(): BackupFilterParams {
-    const params: BackupFilterParams = { ...INITIAL_FILTER };
-
-    if (this.backupDateFilter.isActive()) {
-      params.fromDate = this.backupDateFilter.ranges.fromDate;
-      params.toDate = this.backupDateFilter.ranges.toDate;
-    }
-
-    if (this.backupSizeFilter.isActive()) {
-      params.fromSizeMB = this.backupSizeFilter.ranges.fromSizeMB;
-      params.toSizeMB = this.backupSizeFilter.ranges.toSizeMB;
-    }
-
-    if (this.backupSavesetFilter.isActive()) {
-      params.saveset = this.backupSavesetFilter.ranges.saveset;
-    }
-
-    if (this.taskFilter.isActive()) {
-      params.taskName = this.taskFilter.ranges.taskName;
-    }
-
-    if (this.typeFilter.isActive()) {
-      params.types = this.typeFilter.ranges.type;
-    }
-
-    return params;
-  }
-
-  /**
    * Set time range for the charts
    * @param range time range for the charts
    */
@@ -342,42 +266,12 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupTypesForChartsSubject$.next(types);
   }
 
-  setBackupTypesForTable(types: BackupType[]): void {
-    this.selectedBackupTypesForTable = types;
-    this.typeFilter.updateRanges({ type: types });
-  }
-
   /**
    * Add search Term to backupTaskSearchTerm$ subject for the Backup task search
    * @param term Search term for the Backup task
    */
   onSearchInput(term: string): void {
     this.backupTaskSearchTerm$.next(term);
-  }
-
-  /**
-   * Check the filter states and add new filter values to the filterOptions$ subject
-   * @param state filter values
-   */
-  refresh(state: ClrDatagridStateInterface<any>): void {
-    this.loading = true;
-
-    const params: BackupFilterParams = {
-      ...INITIAL_FILTER,
-      limit: state.page?.size ?? this.pageSize,
-      offset: state.page?.current
-        ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
-        : 0,
-      sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
-      orderBy: state.sort?.by ? state.sort.by.toString() : 'creationDate',
-    };
-
-    if (state.filters) {
-      Object.assign(params, this.buildFilterParams());
-    }
-
-    this.filterOptions$.next(params);
-    this.loading = false;
   }
 
   /**
