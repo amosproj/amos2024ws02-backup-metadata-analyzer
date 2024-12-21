@@ -37,6 +37,7 @@ import { NotificationSettingsComponent } from './management/components/settings/
 import { EmailReceiverSettingsComponent } from './management/components/settings/email-receiver-settings/email-receiver-settings.component';
 import { ConfirmDialogComponent } from './shared/components/confirm-dialog/component/confirm-dialog/confirm-dialog.component';
 import { DataStoresComponent } from './data-stores/component/data-stores.component';
+import { InformationPanelComponent } from './backups-overview/component/information-panel/information-panel.component';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { DataStoresComponent } from './data-stores/component/data-stores.compone
     EmailReceiverSettingsComponent,
     ConfirmDialogComponent,
     DataStoresComponent,
+    InformationPanelComponent,
   ],
   imports: [
     BrowserModule,
