@@ -1,7 +1,7 @@
 import { ClrDatagridFilterInterface } from '@clr/angular';
-import { Backup } from '../../../shared/types/backup';
+import { Backup } from '../../shared/types/backup';
 import { Subject } from 'rxjs';
-import { BackupType } from '../../../shared/enums/backup.types';
+import { BackupType } from '../../shared/enums/backup.types';
 
 export class CustomFilter implements ClrDatagridFilterInterface<Backup> {
   public ranges: {

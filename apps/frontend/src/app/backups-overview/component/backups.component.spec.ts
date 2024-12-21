@@ -3,14 +3,14 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { BackupsComponent } from './backups.component';
-import { BackupService } from '../../service/backup-service/backup-service.service';
-import { ChartService } from '../../service/chart-service/chart-service.service';
+import { BackupService } from '../service/backup-service/backup-service.service';
+import { ChartService } from '../service/chart-service/chart-service.service';
 import { CustomFilter } from './backupfilter';
 import { ClrDatagridStateInterface } from '@clr/angular';
-import { APIResponse } from '../../../shared/types/api-response';
-import { Backup } from '../../../shared/types/backup';
-import { BackupTask } from '../../../shared/types/backup.task';
-import { BackupType } from '../../../shared/enums/backup.types';
+import { APIResponse } from '../../shared/types/api-response';
+import { Backup } from '../../shared/types/backup';
+import { BackupTask } from '../../shared/types/backup.task';
+import { BackupType } from '../../shared/enums/backup.types';
 
 describe('BackupsComponent', () => {
   let component: BackupsComponent;
