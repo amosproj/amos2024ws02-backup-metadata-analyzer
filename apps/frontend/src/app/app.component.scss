@@ -41,3 +41,15 @@
 .nav-content {
   padding-bottom: 4rem;
 }
+
+.page-footer {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+  background-color: var(--clr-header-bg-color);
+
+  p {
+    color: #ddd;
+  }
+}

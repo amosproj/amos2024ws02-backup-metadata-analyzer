@@ -38,28 +38,50 @@
       class="clr-vertical-nav has-nav-groups clr-nav-level-1"
       [clrVerticalNavCollapsible]="true"
       [clrVerticalNavCollapsed]="collapsed"
-      (clrVerticalNavCollapsedChange) = "collapsed = $event"
+      (clrVerticalNavCollapsedChange)="collapsed = $event"
     >
       <div class="nav-content">
-        <clr-vertical-nav-item routerLink="/" routerLinkActive="active" class="hover-item">
+        <clr-vertical-nav-item
+          routerLink="/"
+          routerLinkActive="active"
+          class="hover-item"
+        >
           <cds-icon clrVerticalNavIcon shape="home"></cds-icon>
           <span class="nav-text">Dashboard</span>
         </clr-vertical-nav-item>
 
-        <clr-vertical-nav-item routerLink="/upload" routerLinkActive="active" class="hover-item">
+        <clr-vertical-nav-item
+          routerLink="/upload"
+          routerLinkActive="active"
+          class="hover-item"
+        >
           <cds-icon clrVerticalNavIcon shape="upload-cloud"></cds-icon>
           <span class="nav-text">Upload</span>
         </clr-vertical-nav-item>
 
-        <clr-vertical-nav-item routerLink="/findData" routerLinkActive="active" class="hover-item">
+        <clr-vertical-nav-item
+          routerLink="/findData"
+          routerLinkActive="active"
+          class="hover-item"
+        >
           <cds-icon clrVerticalNavIcon shape="search"></cds-icon>
           <span class="nav-text">Find Data</span>
         </clr-vertical-nav-item>
       </div>
 
       <div class="nav-footer">
-        <img src="../../../../public/team_logo.png" alt="Team Logo" width="50"  *ngIf="collapsed === false"/>
-        <clr-vertical-nav-item routerLink="/" routerLinkActive="active" class="hover-item" id="nav-footer">
+        <img
+          src="../../../../public/team_logo.png"
+          alt="Team Logo"
+          width="50"
+          *ngIf="collapsed === false"
+        />
+        <clr-vertical-nav-item
+          routerLink="/"
+          routerLinkActive="active"
+          class="hover-item"
+          id="nav-footer"
+        >
           <cds-icon clrVerticalNavIcon shape="book"></cds-icon>
           <span class="nav-text">How to get started?</span>
         </clr-vertical-nav-item>
@@ -68,6 +90,11 @@
 
     <main class="content-area">
       <router-outlet></router-outlet>
+      <footer class="page-footer">
+        <div>
+          <p>&copy; 2024 Metadata Analyzer. All rights reserved.</p>
+        </div>
+      </footer>
     </main>
   </div>
 </clr-main-container>
