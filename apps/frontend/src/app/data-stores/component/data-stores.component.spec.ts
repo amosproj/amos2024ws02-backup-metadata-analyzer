@@ -32,7 +32,7 @@ describe('DataStoresComponent', () => {
       getAllDataStores: vi.fn().mockReturnValue(of(dataStores)),
     };
 
-    component = new DataStoresComponent(mockDataStoresService);
+    component = new DataStoresComponent(mockDataStoresService as any);
   });
 
   describe('dataStores$', () => {
