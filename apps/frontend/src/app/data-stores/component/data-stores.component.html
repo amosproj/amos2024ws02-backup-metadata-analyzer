@@ -3,7 +3,8 @@
     <span class="data-store-name">Data Stores</span>
   </div>
   <div class="card-body">
-    <div *ngFor="let dataStore of (showAll ? dataStores : dataStores.slice(0, 5))" class="data-store">
+    <div *ngFor="let dataStore of (showAll ? (dataStores$ | async) : (dataStores$ | async)?.slice(0, 5))"
+         class="data-store">
       <span class="data-store-name">{{ dataStore.displayName }}</span>
       <div class="progress-bar-container">
         <clr-progress-bar
@@ -15,11 +16,11 @@
         <div class="high-water-mark" [style.left.%]="getHighWaterMarkPercentage(dataStore)"></div>
       </div>
     </div>
-    <button *ngIf="dataStores.length > 5" class="show-more-btn" (click)="toggleShowAll()">
-      {{ showAll ? 'Weniger anzeigen' : 'Mehr anzeigen' }}
+    <button *ngIf="((dataStores$ | async)?.length ?? 0) > 5" class="show-more-btn" (click)="toggleShowAll()">
+      {{ showAll ? 'Show less' : 'Show all' }}
     </button>
   </div>
   <div class="card-footer">
-    {{ dataStores.length }} Data Stores are being monitored.
+    {{ (dataStores$ | async)?.length }} Data Stores are being monitored.
   </div>
 </div>

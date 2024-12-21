@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { DataStoresService } from '../service/data-stores-service.service';
-import { Subject, takeUntil } from 'rxjs';
+import { map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { DataStore } from '../../shared/types/data-store';
 
 @Component({
@@ -8,15 +8,18 @@ import { DataStore } from '../../shared/types/data-store';
   templateUrl: './data-stores.component.html',
   styleUrl: './data-stores.component.css',
 })
-export class DataStoresComponent implements OnInit, OnDestroy {
+export class DataStoresComponent implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
-  dataStores: DataStore[] = [];
+  dataStores$: Observable<DataStore[]>;
+
   showAll = false;
 
-  constructor(private readonly dataStoresService: DataStoresService) {}
-
-  ngOnInit(): void {
-    this.loadDataStores();
+  constructor(private readonly dataStoresService: DataStoresService) {
+    this.dataStores$ = this.dataStoresService
+      .getAllDataStores()
+      .pipe(takeUntil(this.destroy$),
+        map(dataStores => this.sortDataStores(dataStores)),
+        shareReplay(1));
   }
 
   ngOnDestroy(): void {
@@ -40,14 +43,7 @@ export class DataStoresComponent implements OnInit, OnDestroy {
     this.showAll = !this.showAll;
   }
 
-  loadDataStores() {
-    this.dataStoresService
-      .getAllDataStores()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((dataStores) => {
-        this.dataStores = dataStores.sort(
-          (a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a)
-        );
-      });
+  private sortDataStores(dataStores: DataStore[]): DataStore[] {
+    return dataStores.sort((a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a));
   }
 }
