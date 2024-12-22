@@ -2,6 +2,8 @@ import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { SidePanelComponent } from './side-panel/side-panel.component';
 import { BehaviorSubject } from 'rxjs';
 import { BackupTask } from '../../shared/types/backup.task';
+import { ChartType } from '../../shared/enums/chartType';
+import { ChartInformation } from '../../shared/types/chartInformation';
 
 @Component({
   selector: 'app-backups',
@@ -9,10 +11,21 @@ import { BackupTask } from '../../shared/types/backup.task';
   styleUrl: './backups.component.css',
 })
 export class BackupsComponent implements AfterViewInit {
-  protected filterPanel = false;
-
   @ViewChild(SidePanelComponent) sidePanelComponent!: SidePanelComponent;
   backupTaskSubject$: BehaviorSubject<BackupTask[]> | undefined;
+
+  readonly charts: ChartInformation[] = [
+    {
+      id: 'overviewSizePieChart',
+      type: ChartType.SIZEPIECHART,
+    },
+    {
+      id: 'overviewSizeColumnChart',
+      type: ChartType.SIZECOLUMNCHART,
+    },
+  ];
+
+  protected filterPanel = false;
 
   ngAfterViewInit(): void {
     this.backupTaskSubject$ = this.sidePanelComponent.backupTaskSubject$;

@@ -1,4 +1,10 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { BackupType } from '../../../shared/enums/backup.types';
 import {
   BehaviorSubject,
@@ -19,6 +25,8 @@ import { BackupService } from '../../service/backup-service/backup-service.servi
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { Backup } from '../../../shared/types/backup';
 import { APIResponse } from '../../../shared/types/api-response';
+import { ChartInformation } from '../../../shared/types/chartInformation';
+import { ChartType } from '../../../shared/enums/chartType';
 
 interface TimeRangeConfig {
   fromDate: Date;
@@ -32,19 +40,27 @@ interface TimeRangeConfig {
   styleUrl: './side-panel.component.css',
 })
 export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
+  // Determine if the filter panel is open or closed
+  @Input() isOpen = false;
+
+  // Charts to create
+  @Input() charts: ChartInformation[] = [];
+
+  // Time ranges for the charts
   protected timeRanges: ('week' | 'month' | 'year')[] = [
     'week',
     'month',
     'year',
   ];
-  loading = false;
-  @Input() isOpen = false;
 
+  loading = false;
+
+  // Filters for Charts
+  // Backup types for the filter
   backupEnumTypes = Object.keys(BackupType).filter((item) => {
     return isNaN(Number(item));
   });
 
-  //Filters for Charts
   selectedBackupTypes: string[] = [];
   protected selectedTask: BackupTask[] = [];
 
@@ -183,33 +199,45 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   ngAfterViewInit(): void {
     setTimeout(() => {
-      this.chartService.createChart(
-        {
-          id: 'backupSizeChart',
-          type: 'pie',
-          valueField: 'value',
-          categoryField: 'category',
-          seriesName: 'SizeDistribution',
-        },
-        this.chartBackups$.pipe(
-          map((response: APIResponse<Backup>) => response.data)
-        )
-      );
-      this.chartService.createChart(
-        {
-          id: 'backupTimelineChart',
-          type: 'column',
-          valueYField: 'sizeMB',
-          valueXField: 'creationDate',
-          seriesName: 'BackupSize',
-          tooltipText:
-            "[bold]{valueY}[/] MB\n{valueX.formatDate('yyyy-MM-dd HH:mm')}\nBackups: {count}",
-        },
-        this.chartBackups$.pipe(
-          map((response: APIResponse<Backup>) => response.data)
-        ),
-        this.timeRangeSubject$.getValue().range
-      );
+      // Create charts
+      for (const chart of this.charts) {
+        switch (chart.type) {
+          case ChartType.SIZEPIECHART:
+            this.chartService.createChart(
+              {
+                id: chart.id,
+                type: 'pie',
+                valueField: 'value',
+                categoryField: 'category',
+                seriesName: 'SizeDistribution',
+              },
+              this.chartBackups$.pipe(
+                map((response: APIResponse<Backup>) => response.data)
+              )
+            );
+            break;
+          case ChartType.SIZECOLUMNCHART:
+            this.chartService.createChart(
+              {
+                id: chart.id,
+                type: 'column',
+                valueYField: 'sizeMB',
+                valueXField: 'creationDate',
+                seriesName: 'BackupSize',
+                tooltipText:
+                  "[bold]{valueY}[/] MB\n{valueX.formatDate('yyyy-MM-dd HH:mm')}\nBackups: {count}",
+              },
+              this.chartBackups$.pipe(
+                map((response: APIResponse<Backup>) => response.data)
+              ),
+              this.timeRangeSubject$.getValue().range
+            );
+            break;
+          default:
+            console.error('Unknown chart type:', chart.type);
+            break;
+        }
+      }
     }, 100);
   }
 
@@ -244,7 +272,14 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       toDate,
       range,
     });
-    this.chartService.updateTimeRange('backupTimelineChart', range);
+
+    // Update all charts with the new time range
+    for (const chart of this.charts) {
+      //So far only relevant for the column chart
+      if (chart.type === ChartType.SIZECOLUMNCHART) {
+        this.chartService.updateTimeRange(chart.id, range);
+      }
+    }
   }
 
   /**
