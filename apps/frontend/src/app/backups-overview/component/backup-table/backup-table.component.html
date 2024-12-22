@@ -77,9 +77,9 @@
         <clr-dg-filter [clrDgFilter]="typeFilter">
           <clr-combobox-container>
             <clr-combobox
-              [(ngModel)]="selectedBackupTypesForTable"
+              [(ngModel)]="selectedBackupTypes"
               [clrMulti]="true"
-              (ngModelChange)="setBackupTypesForTable($event)"
+              (ngModelChange)="setBackupTypes($event)"
               placeholder="Select backup types">
               <ng-container *clrOptionSelected="let value">
                 {{ value }}

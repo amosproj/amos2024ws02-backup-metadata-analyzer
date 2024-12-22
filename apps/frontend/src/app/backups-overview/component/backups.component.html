@@ -19,9 +19,9 @@
             (click)="changeFilterPanelState()"
           >
             <cds-icon shape="filter"></cds-icon>
-            <div *ngIf="(backupTaskSubject$ | async)?.length as activeFilters">
+            <!--<div *ngIf="(backupTaskSubject$ | async)?.length as activeFilters">
               <span class="badge badge-info">{{ activeFilters }}</span>
-            </div>
+            </div>-->
           </button>
         </div>
       </div>
@@ -45,9 +45,9 @@
             (click)="changeFilterPanelState()"
           >
             <cds-icon shape="filter"></cds-icon>
-            <div *ngIf="(backupTaskSubject$ | async)?.length as activeFilters">
+            <!--<div *ngIf="(backupTaskSubject$ | async)?.length as activeFilters">
               <span class="badge badge-info">{{ activeFilters }}</span>
-            </div>
+            </div>-->
           </button>
         </div>
       </div>
@@ -62,91 +62,4 @@
   <app-backup-table class="clr-col-lg-12 clr-col-lg-12"></app-backup-table>
 </div>
 
-<clr-side-panel
-  [(clrSidePanelOpen)]="filterPanel"
-  position="right"
-  [clrSidePanelSize]="'md'"
->
-  <div class="side-panel-title">Chart Filter Options</div>
-  <div class="side-panel-body">
-    <div>
-      <h5>Time Range</h5>
-      <div class="btn-group-vertical">
-        <button
-          *ngFor="let range of timeRanges"
-          class="btn"
-          [class.btn-primary]="(timeRange$ | async) === range"
-          (click)="setTimeRange(range)"
-        >
-          Last {{ range | titlecase }}
-        </button>
-      </div>
-    </div>
-
-    <div>
-      <h5>Tasks</h5>
-      <clr-combobox-container *ngIf="allBackupTasks$" class="backupTaskFilter">
-        <clr-combobox
-          name="task"
-          [(ngModel)]="selectedTask"
-          [clrLoading]="tasksLoading"
-          clrMulti="true"
-          (ngModelChange)="setBackupTask($event)"
-          (clrInputChange)="onSearchInput($event)"
-          placeholder="Select backup task"
-          [clrPosition]="'bottom-left'"
-        >
-          <ng-container *clrOptionSelected="let task">
-            <span class="selected-item">
-              <cds-icon
-                shape="tag"
-                aria-label="selected backup task tag"
-              ></cds-icon>
-              {{ task ? task.displayName : 'All Tasks' }}
-            </span>
-          </ng-container>
-
-          <clr-options>
-            <ng-container *ngIf="selectedbackupTasks$ | async as tasks">
-              <clr-option
-                *clrOptionItems="let task of tasks; field: 'displayName'"
-                [clrValue]="task"
-              >
-                <cds-icon
-                  shape="data-cluster"
-                  aria-label="backup task"
-                ></cds-icon>
-                {{ task.displayName }}
-              </clr-option>
-            </ng-container>
-          </clr-options>
-        </clr-combobox>
-        <clr-control-error>There was an error</clr-control-error>
-      </clr-combobox-container>
-    </div>
-    <div>
-      <h5>Types</h5>
-      <clr-combobox-container class="backupTaskFilter">
-        <clr-combobox
-          [(ngModel)]="selectedBackupTypesForCharts"
-          [clrMulti]="true"
-          (ngModelChange)="setBackupTypesForCharts($event)"
-          placeholder="Select backup types">
-          <ng-container *clrOptionSelected="let value">
-            {{ value }}
-          </ng-container>
-          <clr-options>
-            <clr-option *ngFor="let option of backupEnumTypes" [clrValue]="option">
-              {{ option }}
-            </clr-option>
-          </clr-options>
-        </clr-combobox>
-      </clr-combobox-container>
-    </div>
-  </div>
-  <div class="side-panel-footer">
-    <button class="btn btn-outline" (click)="changeFilterPanelState()">
-      Close
-    </button>
-  </div>
-</clr-side-panel>
+<app-side-panel [isOpen]="filterPanel"></app-side-panel>

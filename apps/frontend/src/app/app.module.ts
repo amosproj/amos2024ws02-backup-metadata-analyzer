@@ -39,6 +39,7 @@ import { ConfirmDialogComponent } from './shared/components/confirm-dialog/compo
 import { DataStoresComponent } from './data-stores/component/data-stores.component';
 import { InformationPanelComponent } from './backups-overview/component/information-panel/information-panel.component';
 import { BackupTableComponent } from './backups-overview/component/backup-table/backup-table.component';
+import { SidePanelComponent } from './backups-overview/component/side-panel/side-panel.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { BackupTableComponent } from './backups-overview/component/backup-table/
     DataStoresComponent,
     InformationPanelComponent,
     BackupTableComponent,
+    SidePanelComponent,
   ],
   imports: [
     BrowserModule,

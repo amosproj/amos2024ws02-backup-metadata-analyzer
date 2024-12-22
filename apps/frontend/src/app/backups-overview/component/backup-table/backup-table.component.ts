@@ -37,10 +37,10 @@ export class BackupTableComponent implements OnInit, OnDestroy {
   protected backupDateFilter: CustomFilter;
   protected taskFilter: CustomFilter;
   protected backupSavesetFilter: CustomFilter;
-  selectedBackupTypesForTable: string[] = [];
+  selectedBackupTypes: string[] = [];
   protected typeFilter: CustomFilter;
 
-  private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
+  private readonly filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
   );
 
@@ -48,7 +48,7 @@ export class BackupTableComponent implements OnInit, OnDestroy {
 
   readonly backups$: Observable<APIResponse<Backup>>;
 
-  constructor(private backupService: BackupService) {
+  constructor(private readonly backupService: BackupService) {
     //Initialize filters
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
@@ -115,8 +115,8 @@ export class BackupTableComponent implements OnInit, OnDestroy {
     return params;
   }
 
-  setBackupTypesForTable(types: BackupType[]): void {
-    this.selectedBackupTypesForTable = types;
+  setBackupTypes(types: BackupType[]): void {
+    this.selectedBackupTypes = types;
     this.typeFilter.updateRanges({ type: types });
   }
 
