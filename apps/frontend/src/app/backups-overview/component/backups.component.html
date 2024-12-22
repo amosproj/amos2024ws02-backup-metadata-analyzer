@@ -19,9 +19,9 @@
             (click)="changeFilterPanelState()"
           >
             <cds-icon shape="filter"></cds-icon>
-            <!--<div *ngIf="(backupTaskSubject$ | async)?.length as activeFilters">
+            <div *ngIf="((backupTaskSubject$ | async)?.length ?? 0) as activeFilters">
               <span class="badge badge-info">{{ activeFilters }}</span>
-            </div>-->
+            </div>
           </button>
         </div>
       </div>
@@ -45,9 +45,9 @@
             (click)="changeFilterPanelState()"
           >
             <cds-icon shape="filter"></cds-icon>
-            <!--<div *ngIf="(backupTaskSubject$ | async)?.length as activeFilters">
+            <div *ngIf="((backupTaskSubject$ | async)?.length ?? 0) as activeFilters">
               <span class="badge badge-info">{{ activeFilters }}</span>
-            </div>-->
+            </div>
           </button>
         </div>
       </div>
