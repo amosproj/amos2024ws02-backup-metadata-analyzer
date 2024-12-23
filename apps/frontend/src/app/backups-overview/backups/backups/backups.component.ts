@@ -22,6 +22,7 @@ import { ChartService } from '../../service/chart-service/chart-service.service'
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
 import { BackupType } from '../../../shared/enums/backup.types';
+import { shortenBytes } from '../../../shared/utils/shortenBytes';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -390,4 +391,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       this.filterPanel = true;
     }
   }
+
+  protected readonly shortenBytes = shortenBytes;
 }
