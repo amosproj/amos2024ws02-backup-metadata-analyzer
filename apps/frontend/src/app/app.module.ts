@@ -16,7 +16,8 @@ import {
   dataClusterIcon,
   envelopeIcon,
   errorStandardIcon,
-  filterIcon, helpIcon,
+  filterIcon,
+  helpIcon,
   homeIcon,
   lockIcon,
   plusIcon,
@@ -25,7 +26,7 @@ import {
   tagIcon,
   trashIcon,
   uploadCloudIcon,
-  warningStandardIcon
+  warningStandardIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -40,6 +41,7 @@ import { DataStoresComponent } from './backups-overview-page/component/data-stor
 import { InformationPanelComponent } from './backups-overview-page/component/information-panel/information-panel.component';
 import { BackupTableComponent } from './backups-overview-page/component/backup-table/backup-table.component';
 import { SidePanelComponent } from './shared/components/filter-side-panel/side-panel.component';
+import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +57,7 @@ import { SidePanelComponent } from './shared/components/filter-side-panel/side-p
     InformationPanelComponent,
     BackupTableComponent,
     SidePanelComponent,
+    BackupStatisticsPageComponent
   ],
   imports: [
     BrowserModule,

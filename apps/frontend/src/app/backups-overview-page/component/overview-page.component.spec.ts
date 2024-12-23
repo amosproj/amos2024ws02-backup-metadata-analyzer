@@ -28,4 +28,16 @@ describe('OverviewPageComponent', () => {
       expect(component['filterPanel']).toBe(false);
     });
   });
+
+  describe('Information Panel', () => {
+    it('should toggle information panel state', () => {
+      expect(component['isInfoPanelOpen']).toBe(false);
+
+      component['toggleInfoPanel']();
+      expect(component['isInfoPanelOpen']).toBe(true);
+
+      component['toggleInfoPanel']();
+      expect(component['isInfoPanelOpen']).toBe(false);
+    });
+  });
 });

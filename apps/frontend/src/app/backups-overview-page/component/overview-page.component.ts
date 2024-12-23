@@ -6,7 +6,7 @@ import { ChartType } from '../../shared/enums/chartType';
 import { ChartInformation } from '../../shared/types/chartInformation';
 
 @Component({
-  selector: 'app-backups',
+  selector: 'app-overview-page',
   templateUrl: './overview-page.component.html',
   styleUrl: './overview-page.component.css',
 })
