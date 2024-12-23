@@ -8,6 +8,7 @@ import { BackupType } from '../../../shared/enums/backup.types';
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { BackupService } from '../../service/backup-service/backup-service.service';
 import { BackupTask } from '../../../shared/types/backup.task';
+import { ChartType } from '../../../shared/enums/chartType';
 
 describe('SidePanelComponent', () => {
   let component: SidePanelComponent;
@@ -67,6 +68,10 @@ describe('SidePanelComponent', () => {
 
   describe('setTimeRange', () => {
     it('should set time range to week', () => {
+      component['charts'] = [
+        { id: 'overviewSizeColumnChart', type: ChartType.SIZECOLUMNCHART },
+      ];
+
       const spy = vi.spyOn(component['timeRangeSubject$'], 'next');
       const chartServiceSpy = vi.spyOn(mockChartService, 'updateTimeRange');
 
@@ -77,7 +82,7 @@ describe('SidePanelComponent', () => {
       expect(emittedValue.fromDate).toBeDefined();
       expect(emittedValue.toDate).toBeDefined();
       expect(chartServiceSpy).toHaveBeenCalledWith(
-        'backupTimelineChart',
+        'overviewSizeColumnChart',
         'week'
       );
     });
@@ -108,6 +113,11 @@ describe('SidePanelComponent', () => {
     });
 
     it('should create charts after view init', () => {
+      component['charts'] = [
+        { id: 'overviewSizePieChart', type: ChartType.SIZEPIECHART },
+        { id: 'overviewSizeColumnChart', type: ChartType.SIZECOLUMNCHART },
+      ];
+
       vi.useFakeTimers();
       component.ngAfterViewInit();
       vi.advanceTimersByTime(200);
@@ -119,10 +129,13 @@ describe('SidePanelComponent', () => {
 
   describe('Time Range and Chart Data Integration', () => {
     it('should handle time range changes and update charts', () => {
+      component['charts'] = [
+        { id: 'overviewSizeColumnChart', type: ChartType.SIZECOLUMNCHART },
+      ];
       component.setTimeRange('week');
 
       expect(mockChartService.updateTimeRange).toHaveBeenCalledWith(
-        'backupTimelineChart',
+        'overviewSizeColumnChart',
         'week'
       );
     });
@@ -166,6 +179,11 @@ describe('SidePanelComponent', () => {
 
   describe('Chart Data Updates', () => {
     it('should update charts when new data is received', (done) => {
+      component['charts'] = [
+        { id: 'overviewSizePieChart', type: ChartType.SIZEPIECHART },
+        { id: 'overviewSizeColumnChart', type: ChartType.SIZECOLUMNCHART },
+      ];
+
       const mockResponse = {
         data: [
           { id: '1', sizeMB: 100, creationDate: new Date() },
