@@ -39,7 +39,7 @@ import { EmailReceiverSettingsComponent } from './management/components/settings
 import { ConfirmDialogComponent } from './shared/components/confirm-dialog/component/confirm-dialog/confirm-dialog.component';
 import { DataStoresComponent } from './backups-overview-page/component/data-stores-panel/data-stores.component';
 import { InformationPanelComponent } from './backups-overview-page/component/information-panel/information-panel.component';
-import { BackupTableComponent } from './backups-overview-page/component/backup-table/backup-table.component';
+import { BackupTableComponent } from './backup-statistics-page/component/backup-table/backup-table.component';
 import { SidePanelComponent } from './shared/components/filter-side-panel/side-panel.component';
 import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
 

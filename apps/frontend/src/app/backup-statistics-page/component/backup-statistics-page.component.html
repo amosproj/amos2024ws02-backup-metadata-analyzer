@@ -1,1 +1,58 @@
 <h1>Backups Statistics</h1>
+
+<div class="clr-row">
+  <app-backup-table class="clr-col-lg-12 clr-col-lg-12"></app-backup-table>
+</div>
+
+<div class="clr-row">
+  <div class="clr-col-12 clr-col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-title">Recent Backup Timeline:</div>
+        <div class="card-header-actions">
+          <button
+            class="btn btn-sm btn-link"
+            (click)="changeFilterPanelState()"
+          >
+            <cds-icon shape="filter"></cds-icon>
+            <div *ngIf="((backupTaskSubject$ | async)?.length ?? 0) as activeFilters">
+              <span class="badge badge-info">{{ activeFilters }}</span>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="card-block">
+        <div
+          id="backupStatisticsPageSizeColumnChart"
+          class="mt-4"
+          style="width: 100%; height: 400px"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="clr-col-12 clr-col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-title">Recent Backup Size Distribution:</div>
+        <div class="card-header-actions">
+          <button
+            class="btn btn-sm btn-link"
+            (click)="changeFilterPanelState()"
+          >
+            <cds-icon shape="filter"></cds-icon>
+            <div *ngIf="((backupTaskSubject$ | async)?.length ?? 0) as activeFilters">
+              <span class="badge badge-info">{{ activeFilters }}</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="card-block">
+        <div id="backupStatisticsPageSizePieChart" style="width: 100%; height: 400px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-side-panel [isOpen]="filterPanel" [charts]="charts"></app-side-panel>

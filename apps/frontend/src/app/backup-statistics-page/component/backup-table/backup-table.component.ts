@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CustomFilter } from '../backupfilter';
+import { CustomFilter } from '../../../backups-overview-page/component/backupfilter';
 import {
   BehaviorSubject,
   combineLatest,

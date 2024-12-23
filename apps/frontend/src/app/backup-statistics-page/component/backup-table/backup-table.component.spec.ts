@@ -7,7 +7,7 @@ import { APIResponse } from '../../../shared/types/api-response';
 import { BackupType } from '../../../shared/enums/backup.types';
 import { BackupService } from '../../../shared/services/backup-service/backup-service.service';
 import { ClrDatagridStateInterface } from '@clr/angular';
-import { CustomFilter } from '../backupfilter';
+import { CustomFilter } from '../../../backups-overview-page/component/backupfilter';
 
 describe('BackupTableComponent', () => {
   let component: BackupTableComponent;
