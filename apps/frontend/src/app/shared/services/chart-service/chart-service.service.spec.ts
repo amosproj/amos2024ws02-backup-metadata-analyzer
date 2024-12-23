@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChartService } from './chart-service.service';
 import * as am5 from '@amcharts/amcharts5';
 import { of } from 'rxjs';
-import type { ChartConfig } from '../../../shared/types/chart-config';
+import type { ChartConfig } from '../../types/chart-config';
 
 Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
   value: () => ({

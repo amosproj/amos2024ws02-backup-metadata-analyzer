@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { of } from 'rxjs';
 import { randomUUID } from 'crypto';
 import { DataStoresComponent } from './data-stores.component';
-import { DataStore } from '../../shared/types/data-store';
+import { DataStore } from '../../../shared/types/data-store';
 
 const dataStores: DataStore[] = [
   {

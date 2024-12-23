@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
-import { BackupsComponent } from './backups.component';
+import { OverviewPageComponent } from './overview-page.component';
 
-describe('BackupsComponent', () => {
-  let component: BackupsComponent;
+describe('OverviewPageComponent', () => {
+  let component: OverviewPageComponent;
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [BackupsComponent],
+      providers: [OverviewPageComponent],
     });
 
-    component = TestBed.inject(BackupsComponent);
+    component = TestBed.inject(OverviewPageComponent);
   });
 
   it('should create the component', () => {

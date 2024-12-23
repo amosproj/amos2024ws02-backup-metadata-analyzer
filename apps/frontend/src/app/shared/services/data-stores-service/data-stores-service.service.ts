@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DataStore } from '../../shared/types/data-store';
-import { BASE_URL } from '../../shared/types/configuration';
+import { DataStore } from '../../types/data-store';
+import { BASE_URL } from '../../types/configuration';
 
 @Injectable({
   providedIn: 'root',

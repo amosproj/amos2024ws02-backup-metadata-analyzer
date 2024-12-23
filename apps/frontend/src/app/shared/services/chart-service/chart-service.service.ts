@@ -5,13 +5,13 @@ import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5percent from '@amcharts/amcharts5/percent';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import { ITimeInterval } from '@amcharts/amcharts5/.internal/core/util/Time';
-import { Backup } from '../../../shared/types/backup';
+import { Backup } from '../../types/backup';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import {
   ChartConfig,
   ChartType,
   TimeRange,
-} from '../../../shared/types/chart-config';
+} from '../../types/chart-config';
 
 @Injectable({
   providedIn: 'root',

@@ -4,7 +4,7 @@ import { of, throwError } from 'rxjs';
 
 import { fail } from 'assert';
 import { DataStoresService } from './data-stores-service.service';
-import { DataStore } from '../../shared/types/data-store';
+import { DataStore } from '../../types/data-store';
 
 describe('BackupService', () => {
   let service: DataStoresService;

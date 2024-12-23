@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { AlertComponent } from './alert.component';
 import { of } from 'rxjs';
-import { Alert, SizeAlert } from '../../shared/types/alert';
+import { Alert, SizeAlert } from '../../../../shared/types/alert';
 import { randomUUID } from 'crypto';
-import { SeverityType } from '../../shared/enums/severityType';
+import { SeverityType } from '../../../../shared/enums/severityType';
 
 describe('AlertComponent', () => {
   let component: AlertComponent;

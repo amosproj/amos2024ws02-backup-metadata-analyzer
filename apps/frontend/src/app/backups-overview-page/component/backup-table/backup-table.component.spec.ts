@@ -5,7 +5,7 @@ import { BackupTableComponent } from './backup-table.component';
 import { Backup } from '../../../shared/types/backup';
 import { APIResponse } from '../../../shared/types/api-response';
 import { BackupType } from '../../../shared/enums/backup.types';
-import { BackupService } from '../../service/backup-service/backup-service.service';
+import { BackupService } from '../../../shared/services/backup-service/backup-service.service';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { CustomFilter } from '../backupfilter';
 

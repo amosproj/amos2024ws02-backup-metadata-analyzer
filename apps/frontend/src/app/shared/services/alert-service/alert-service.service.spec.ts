@@ -4,13 +4,13 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { AlertServiceService } from './alert-service.service';
-import { BASE_URL } from '../../shared/types/configuration';
-import { Alert } from '../../shared/types/alert';
+import { BASE_URL } from '../../types/configuration';
+import { Alert } from '../../types/alert';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AlertType } from '../../shared/types/alertType';
-import { BackupService } from '../../backups-overview/service/backup-service/backup-service.service';
+import { AlertType } from '../../types/alertType';
+import { BackupService } from '../backup-service/backup-service.service';
 import { randomUUID } from 'node:crypto';
-import { SeverityType } from '../../shared/enums/severityType';
+import { SeverityType } from '../../enums/severityType';
 
 describe('AlertServiceService', () => {
   let service: AlertServiceService;

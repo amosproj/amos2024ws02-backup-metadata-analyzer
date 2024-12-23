@@ -1,11 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Observable, shareReplay } from 'rxjs';
-import { BASE_URL } from '../../../shared/types/configuration';
-import { Backup } from '../../../shared/types/backup';
-import { APIResponse } from '../../../shared/types/api-response';
-import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
-import { BackupTask } from '../../../shared/types/backup.task';
+import { BASE_URL } from '../../types/configuration';
+import { Backup } from '../../types/backup';
+import { APIResponse } from '../../types/api-response';
+import { BackupFilterParams } from '../../types/backup-filter-type';
+import { BackupTask } from '../../types/backup.task';
 
 @Injectable({
   providedIn: 'root',

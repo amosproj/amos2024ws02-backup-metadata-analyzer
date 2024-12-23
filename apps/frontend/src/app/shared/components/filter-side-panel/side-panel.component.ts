@@ -5,7 +5,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { BackupType } from '../../../shared/enums/backup.types';
+import { BackupType } from '../../enums/backup.types';
 import {
   BehaviorSubject,
   combineLatest,
@@ -20,13 +20,13 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { BackupTask } from '../../../shared/types/backup.task';
-import { BackupService } from '../../service/backup-service/backup-service.service';
-import { ChartService } from '../../service/chart-service/chart-service.service';
-import { Backup } from '../../../shared/types/backup';
-import { APIResponse } from '../../../shared/types/api-response';
-import { ChartInformation } from '../../../shared/types/chartInformation';
-import { ChartType } from '../../../shared/enums/chartType';
+import { BackupTask } from '../../types/backup.task';
+import { BackupService } from '../../services/backup-service/backup-service.service';
+import { ChartService } from '../../services/chart-service/chart-service.service';
+import { Backup } from '../../types/backup';
+import { APIResponse } from '../../types/api-response';
+import { ChartInformation } from '../../types/chartInformation';
+import { ChartType } from '../../enums/chartType';
 
 interface TimeRangeConfig {
   fromDate: Date;

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
-import { BASE_URL } from '../../shared/types/configuration';
+import { BASE_URL } from '../../types/configuration';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
-import { Alert } from '../../shared/types/alert';
+import { Alert } from '../../types/alert';
 
 @Injectable({
   providedIn: 'root',

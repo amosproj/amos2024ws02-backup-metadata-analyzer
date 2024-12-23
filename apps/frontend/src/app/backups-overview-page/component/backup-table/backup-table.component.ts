@@ -12,7 +12,7 @@ import {
 } from 'rxjs';
 import { APIResponse } from '../../../shared/types/api-response';
 import { Backup } from '../../../shared/types/backup';
-import { BackupService } from '../../service/backup-service/backup-service.service';
+import { BackupService } from '../../../shared/services/backup-service/backup-service.service';
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { BackupType } from '../../../shared/enums/backup.types';
 import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';

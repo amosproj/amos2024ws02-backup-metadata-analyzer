@@ -1,14 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AlertServiceService } from '../service/alert-service.service';
+import { AlertServiceService } from '../../../../shared/services/alert-service/alert-service.service';
 import {
   Alert,
   CreationDateAlert,
   SizeAlert,
   StorageFillAlert,
-} from '../../shared/types/alert';
+} from '../../../../shared/types/alert';
 import { DatePipe } from '@angular/common';
 import { Subject, takeUntil, tap } from 'rxjs';
-import { SeverityType } from '../../shared/enums/severityType';
+import { SeverityType } from '../../../../shared/enums/severityType';
 
 @Component({
   selector: 'app-alert',
@@ -21,9 +21,9 @@ export class AlertComponent implements OnInit, OnDestroy {
   readonly DAYS = 7;
 
   alerts: Alert[] = [];
-  criticalAlertsCount: number = 0;
-  warningAlertsCount: number = 0;
-  infoAlertsCount: number = 0;
+  criticalAlertsCount = 0;
+  warningAlertsCount = 0;
+  infoAlertsCount = 0;
 
   status: 'OK' | 'Warning' | 'Critical' = 'OK';
 

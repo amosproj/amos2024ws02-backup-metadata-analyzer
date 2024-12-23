@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
-import { SidePanelComponent } from './side-panel/side-panel.component';
+import { SidePanelComponent } from '../../shared/components/filter-side-panel/side-panel.component';
 import { BehaviorSubject } from 'rxjs';
 import { BackupTask } from '../../shared/types/backup.task';
 import { ChartType } from '../../shared/enums/chartType';
@@ -7,10 +7,10 @@ import { ChartInformation } from '../../shared/types/chartInformation';
 
 @Component({
   selector: 'app-backups',
-  templateUrl: './backups.component.html',
-  styleUrl: './backups.component.css',
+  templateUrl: './overview-page.component.html',
+  styleUrl: './overview-page.component.css',
 })
-export class BackupsComponent implements AfterViewInit {
+export class OverviewPageComponent implements AfterViewInit {
   @ViewChild(SidePanelComponent) sidePanelComponent!: SidePanelComponent;
   backupTaskSubject$: BehaviorSubject<BackupTask[]> | undefined;
 

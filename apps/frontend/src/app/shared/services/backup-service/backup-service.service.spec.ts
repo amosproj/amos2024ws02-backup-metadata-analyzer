@@ -3,10 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 
 import { BackupService } from './backup-service.service';
-import { APIResponse } from '../../../shared/types/api-response';
-import { Backup } from '../../../shared/types/backup';
-import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
-import { BackupTask } from '../../../shared/types/backup.task';
+import { APIResponse } from '../../types/api-response';
+import { Backup } from '../../types/backup';
+import { BackupFilterParams } from '../../types/backup-filter-type';
+import { BackupTask } from '../../types/backup.task';
 import { fail } from 'assert';
 
 describe('BackupService', () => {

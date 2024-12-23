@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
-import { DataStoresService } from '../service/data-stores-service.service';
+import { DataStoresService } from '../../../shared/services/data-stores-service/data-stores-service.service';
 import { map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
-import { DataStore } from '../../shared/types/data-store';
+import { DataStore } from '../../../shared/types/data-store';
 
 @Component({
   selector: 'app-data-stores',

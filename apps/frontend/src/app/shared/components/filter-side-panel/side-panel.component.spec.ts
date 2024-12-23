@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { SidePanelComponent } from './side-panel.component';
-import { APIResponse } from '../../../shared/types/api-response';
-import { Backup } from '../../../shared/types/backup';
-import { BackupType } from '../../../shared/enums/backup.types';
-import { ChartService } from '../../service/chart-service/chart-service.service';
-import { BackupService } from '../../service/backup-service/backup-service.service';
-import { BackupTask } from '../../../shared/types/backup.task';
-import { ChartType } from '../../../shared/enums/chartType';
+import { APIResponse } from '../../types/api-response';
+import { Backup } from '../../types/backup';
+import { BackupType } from '../../enums/backup.types';
+import { ChartService } from '../../services/chart-service/chart-service.service';
+import { BackupService } from '../../services/backup-service/backup-service.service';
+import { BackupTask } from '../../types/backup.task';
+import { ChartType } from '../../enums/chartType';
 
 describe('SidePanelComponent', () => {
   let component: SidePanelComponent;
