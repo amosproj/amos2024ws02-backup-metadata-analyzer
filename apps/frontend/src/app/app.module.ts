@@ -16,7 +16,7 @@ import {
   dataClusterIcon,
   envelopeIcon,
   errorStandardIcon,
-  filterIcon,
+  filterIcon, helpIcon,
   homeIcon,
   lockIcon,
   plusIcon,
@@ -25,7 +25,7 @@ import {
   tagIcon,
   trashIcon,
   uploadCloudIcon,
-  warningStandardIcon,
+  warningStandardIcon
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
@@ -88,7 +88,8 @@ export class AppModule {
       envelopeIcon,
       plusIcon,
       lockIcon,
-      trashIcon
+      trashIcon,
+      helpIcon
     );
   }
 }

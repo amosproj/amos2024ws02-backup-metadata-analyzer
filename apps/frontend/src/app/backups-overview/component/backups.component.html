@@ -1,11 +1,16 @@
 <h1 class="header">Backups Overview</h1>
-<div class="alert-info-section">
+<div class="top-section">
+  <app-data-stores class="data-stores-panel"></app-data-stores>
   <app-alert class="alert-panel"></app-alert>
-  <app-information-panel class="info"></app-information-panel>
 </div>
 
 <div class="clr-row">
-  <app-data-stores class="clr-col-12"></app-data-stores>
+  <div class="info-panel clr-col-6" (click)="toggleInfoPanel()">
+    <span>About this page</span>
+    <cds-icon class="info-badge" shape="help" solid="true"></cds-icon>
+  </div>
+
+  <app-information-panel *ngIf="isInfoPanelOpen" class="info"></app-information-panel>
 </div>
 
 <div class="clr-row">

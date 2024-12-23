@@ -25,6 +25,7 @@ export class BackupsComponent implements AfterViewInit {
     },
   ];
 
+  protected isInfoPanelOpen = false;
   protected filterPanel = false;
 
   ngAfterViewInit(): void {
@@ -36,5 +37,9 @@ export class BackupsComponent implements AfterViewInit {
    */
   protected changeFilterPanelState(): void {
     this.filterPanel = !this.filterPanel;
+  }
+
+  protected toggleInfoPanel() {
+    this.isInfoPanelOpen = !this.isInfoPanelOpen;
   }
 }
