@@ -4,14 +4,6 @@
     position: relative;
 }
 
-.top-section {
-    display: flex;
-    gap: 40px;
-    margin: 20px 0;
-    align-items: center;
-    position: relative;
-}
-
 .info-panel {
     border: 1px solid #0D233A;
     display: flex;
@@ -29,11 +21,6 @@
     width: 30px;
     height: 30px;
     margin-left: 6px;
-}
-
-.alert-panel,
-.data-stores-panel {
-    flex: 1;
 }
 
 .card {

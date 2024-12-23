@@ -16,10 +16,6 @@ export class OverviewPageComponent implements AfterViewInit {
 
   readonly charts: ChartInformation[] = [
     {
-      id: 'overviewSizePieChart',
-      type: ChartType.SIZEPIECHART,
-    },
-    {
       id: 'overviewSizeColumnChart',
       type: ChartType.SIZECOLUMNCHART,
     },
