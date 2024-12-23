@@ -4,6 +4,23 @@ import { randomUUID } from 'crypto';
 import { DataStoresComponent } from './data-stores.component';
 import { DataStore } from '../../shared/types/data-store';
 
+const dataStores: DataStore[] = [
+  {
+    id: randomUUID().toString(),
+    displayName: 'test',
+    capacity: 100,
+    filled: 50,
+    highWaterMark: 80,
+  },
+  {
+    id: randomUUID().toString(),
+    displayName: 'test2',
+    capacity: 100,
+    filled: 80,
+    highWaterMark: 80,
+  },
+];
+
 describe('DataStoresComponent', () => {
   let component: DataStoresComponent;
   let mockDataStoresService: {
@@ -12,37 +29,19 @@ describe('DataStoresComponent', () => {
 
   beforeEach(() => {
     mockDataStoresService = {
-      getAllDataStores: vi.fn(),
+      getAllDataStores: vi.fn().mockReturnValue(of(dataStores)),
     };
 
     component = new DataStoresComponent(mockDataStoresService as any);
   });
 
-  describe('loadDataStores', () => {
-    it('should load data stores correctly', () => {
-      const dataStores: DataStore[] = [
-        {
-          id: randomUUID().toString(),
-          displayName: 'test',
-          capacity: 100,
-          filled: 50,
-          highWaterMark: 80,
-        },
-        {
-          id: randomUUID().toString(),
-          displayName: 'test2',
-          capacity: 100,
-          filled: 80,
-          highWaterMark: 80,
-        },
-      ];
-
+  describe('dataStores$', () => {
+    it('should load data stores correctly', (done) => {
       mockDataStoresService.getAllDataStores.mockReturnValue(of(dataStores));
 
-      component.loadDataStores();
-
-      expect(component.dataStores).toEqual(dataStores);
-      expect(component.showAll).toBeFalsy();
+      component.dataStores$.subscribe((result) => {
+        expect(result).toEqual(dataStores);
+      });
     });
   });
 
