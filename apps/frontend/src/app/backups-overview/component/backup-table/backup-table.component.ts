@@ -16,6 +16,7 @@ import { BackupService } from '../../service/backup-service/backup-service.servi
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { BackupType } from '../../../shared/enums/backup.types';
 import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
+import { shortenBytes } from '../../../shared/utils/shortenBytes';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -146,4 +147,5 @@ export class BackupTableComponent implements OnInit, OnDestroy {
   }
 
   protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
+  protected readonly shortenBytes = shortenBytes;
 }

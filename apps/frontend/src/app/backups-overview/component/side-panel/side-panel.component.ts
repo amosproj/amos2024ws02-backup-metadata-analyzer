@@ -5,7 +5,6 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { BackupType } from '../../../shared/enums/backup.types';
 import {
   BehaviorSubject,
   combineLatest,
@@ -20,7 +19,6 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { BackupTask } from '../../../shared/types/backup.task';
 import { BackupService } from '../../service/backup-service/backup-service.service';
 import { ChartService } from '../../service/chart-service/chart-service.service';
 import { Backup } from '../../../shared/types/backup';
@@ -30,10 +28,6 @@ import { ChartType } from '../../../shared/enums/chartType';
 import { BackupTask } from '../../../shared/types/backup.task';
 import { BackupType } from '../../../shared/enums/backup.types';
 import { shortenBytes } from '../../../shared/utils/shortenBytes';
-
-const INITIAL_FILTER: BackupFilterParams = {
-  limit: 10,
-};
 
 interface TimeRangeConfig {
   fromDate: Date;
