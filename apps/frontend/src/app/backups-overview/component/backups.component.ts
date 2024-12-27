@@ -1,9 +1,8 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { SidePanelComponent } from './side-panel/side-panel.component';
-import { BehaviorSubject } from 'rxjs';
-import { BackupTask } from '../../shared/types/backup.task';
 import { ChartType } from '../../shared/enums/chartType';
 import { ChartInformation } from '../../shared/types/chartInformation';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-backups',
@@ -12,7 +11,7 @@ import { ChartInformation } from '../../shared/types/chartInformation';
 })
 export class BackupsComponent implements AfterViewInit {
   @ViewChild(SidePanelComponent) sidePanelComponent!: SidePanelComponent;
-  backupTaskSubject$: BehaviorSubject<BackupTask[]> | undefined;
+  filterCount$: Observable<number> = of(0);
 
   readonly charts: ChartInformation[] = [
     {
@@ -28,7 +27,7 @@ export class BackupsComponent implements AfterViewInit {
   protected filterPanel = false;
 
   ngAfterViewInit(): void {
-    this.backupTaskSubject$ = this.sidePanelComponent.backupTaskSubject$;
+    this.filterCount$ = this.sidePanelComponent.filterCount$;
   }
 
   /**

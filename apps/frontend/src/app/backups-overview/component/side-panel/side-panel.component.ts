@@ -12,6 +12,7 @@ import {
   distinctUntilChanged,
   map,
   Observable,
+  of,
   shareReplay,
   startWith,
   Subject,
@@ -27,7 +28,6 @@ import { ChartInformation } from '../../../shared/types/chartInformation';
 import { ChartType } from '../../../shared/enums/chartType';
 import { BackupTask } from '../../../shared/types/backup.task';
 import { BackupType } from '../../../shared/enums/backup.types';
-import { shortenBytes } from '../../../shared/utils/shortenBytes';
 
 interface TimeRangeConfig {
   fromDate: Date;
@@ -55,6 +55,8 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   loading = false;
+
+  filterCount$: Observable<number> = of(0);
 
   // Filters for Charts
   // Backup types for the filter
@@ -193,6 +195,10 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.setTimeRange('month');
+    this.filterCount$ = combineLatest([
+      this.backupTaskSubject$,
+      this.backupTypesSubject$,
+    ]).pipe(map(([tasks, types]) => tasks.length + types.length));
   }
 
   /**
@@ -311,6 +317,4 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   protected changeFilterPanelState(): void {
     this.isOpen = !this.isOpen;
   }
-
-  protected readonly shortenBytes = shortenBytes;
 }
