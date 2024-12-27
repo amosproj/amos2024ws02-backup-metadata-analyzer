@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import { BackupType } from '../../../shared/enums/backup.types';
 import {
   BehaviorSubject,
   combineLatest,
@@ -13,19 +20,13 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { BackupService } from '../../service/backup-service/backup-service.service';
-import { Backup } from '../../../shared/types/backup';
-import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
-import { CustomFilter } from './backupfilter';
-import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
-import { ChartService } from '../../service/chart-service/chart-service.service';
-import { APIResponse } from '../../../shared/types/api-response';
 import { BackupTask } from '../../../shared/types/backup.task';
-import { BackupType } from '../../../shared/enums/backup.types';
-
-const INITIAL_FILTER: BackupFilterParams = {
-  limit: 10,
-};
+import { BackupService } from '../../service/backup-service/backup-service.service';
+import { ChartService } from '../../service/chart-service/chart-service.service';
+import { Backup } from '../../../shared/types/backup';
+import { APIResponse } from '../../../shared/types/api-response';
+import { ChartInformation } from '../../../shared/types/chartInformation';
+import { ChartType } from '../../../shared/enums/chartType';
 
 interface TimeRangeConfig {
   fromDate: Date;
@@ -34,38 +35,34 @@ interface TimeRangeConfig {
 }
 
 @Component({
-  selector: 'app-backups',
-  templateUrl: './backups.component.html',
-  styleUrl: './backups.component.css',
+  selector: 'app-side-panel',
+  templateUrl: './side-panel.component.html',
+  styleUrl: './side-panel.component.css',
 })
-export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
-  protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
+export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
+  // Determine if the filter panel is open or closed
+  @Input() isOpen = false;
 
+  // Charts to create
+  @Input() charts: ChartInformation[] = [];
+
+  // Time ranges for the charts
   protected timeRanges: ('week' | 'month' | 'year')[] = [
     'week',
     'month',
     'year',
   ];
-  tasksLoading = false;
-  loading = false;
-  pageSize = 10;
 
+  loading = false;
+
+  // Filters for Charts
+  // Backup types for the filter
   backupEnumTypes = Object.keys(BackupType).filter((item) => {
     return isNaN(Number(item));
   });
 
-  //Filters for Table
-  protected backupSizeFilter: CustomFilter;
-  protected backupDateFilter: CustomFilter;
-  protected taskFilter: CustomFilter;
-  protected backupSavesetFilter: CustomFilter;
-  selectedBackupTypesForTable: string[] = [];
-  protected typeFilter: CustomFilter;
-
-  //Filters for Charts
-  selectedBackupTypesForCharts: string[] = [];
+  selectedBackupTypes: string[] = [];
   protected selectedTask: BackupTask[] = [];
-  protected filterPanel = false;
 
   //Subjects
   private readonly timeRangeSubject$ = new BehaviorSubject<TimeRangeConfig>({
@@ -80,14 +77,11 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   protected backupTaskSearchTerm$: Subject<string> = new Subject<string>();
 
   readonly backupTaskSubject$ = new BehaviorSubject<BackupTask[]>([]);
-  readonly backupTypesForChartsSubject$ = new BehaviorSubject<BackupType[]>([]);
-  private filterOptions$ = new BehaviorSubject<BackupFilterParams>(
-    INITIAL_FILTER
-  );
+  readonly backupTypesSubject$ = new BehaviorSubject<BackupType[]>([]);
+
   private readonly destroy$ = new Subject<void>();
 
   //Observables
-  readonly backups$: Observable<APIResponse<Backup>>;
   readonly chartBackups$: Observable<APIResponse<Backup>>;
   allBackupTasks$: Observable<BackupTask[]>;
   protected selectedbackupTasks$: Observable<BackupTask[]>;
@@ -96,20 +90,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     private readonly backupService: BackupService,
     private readonly chartService: ChartService
   ) {
-    this.backupSizeFilter = new CustomFilter('size');
-    this.backupDateFilter = new CustomFilter('date');
-    this.backupSavesetFilter = new CustomFilter('saveset');
-    this.taskFilter = new CustomFilter('taskName');
-    this.typeFilter = new CustomFilter('type');
-
-    /**
-     * Load all backups and filter them based on the filter options for table
-     */
-    this.backups$ = this.filterOptions$.pipe(
-      switchMap((params) => this.backupService.getAllBackups(params)),
-      takeUntil(this.destroy$)
-    );
-
     /**
      * Load all backups and filter them based on the filter options for charts
      */
@@ -159,7 +139,7 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
           return prevIds === currIds;
         })
       ),
-      this.backupTypesForChartsSubject$.pipe(
+      this.backupTypesSubject$.pipe(
         distinctUntilChanged((prev, curr) => {
           if (!prev && !curr) return true;
           if (!prev || !curr) return false;
@@ -211,19 +191,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    combineLatest([
-      this.backupDateFilter.changes.pipe(startWith(null)),
-      this.backupSizeFilter.changes.pipe(startWith(null)),
-      this.backupSavesetFilter.changes.pipe(startWith(null)),
-      this.taskFilter.changes.pipe(startWith(null)),
-      this.typeFilter.changes.pipe(startWith(null)),
-    ])
-      .pipe(
-        map(() => this.buildFilterParams()),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((params) => this.filterOptions$.next(params));
-
     this.setTimeRange('month');
   }
 
@@ -232,33 +199,45 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
    */
   ngAfterViewInit(): void {
     setTimeout(() => {
-      this.chartService.createChart(
-        {
-          id: 'backupSizeChart',
-          type: 'pie',
-          valueField: 'value',
-          categoryField: 'category',
-          seriesName: 'SizeDistribution',
-        },
-        this.chartBackups$.pipe(
-          map((response: APIResponse<Backup>) => response.data)
-        )
-      );
-      this.chartService.createChart(
-        {
-          id: 'backupTimelineChart',
-          type: 'column',
-          valueYField: 'sizeMB',
-          valueXField: 'creationDate',
-          seriesName: 'BackupSize',
-          tooltipText:
-            "[bold]{valueY}[/] MB\n{valueX.formatDate('yyyy-MM-dd HH:mm')}\nBackups: {count}",
-        },
-        this.chartBackups$.pipe(
-          map((response: APIResponse<Backup>) => response.data)
-        ),
-        this.timeRangeSubject$.getValue().range
-      );
+      // Create charts
+      for (const chart of this.charts) {
+        switch (chart.type) {
+          case ChartType.SIZEPIECHART:
+            this.chartService.createChart(
+              {
+                id: chart.id,
+                type: 'pie',
+                valueField: 'value',
+                categoryField: 'category',
+                seriesName: 'SizeDistribution',
+              },
+              this.chartBackups$.pipe(
+                map((response: APIResponse<Backup>) => response.data)
+              )
+            );
+            break;
+          case ChartType.SIZECOLUMNCHART:
+            this.chartService.createChart(
+              {
+                id: chart.id,
+                type: 'column',
+                valueYField: 'sizeMB',
+                valueXField: 'creationDate',
+                seriesName: 'BackupSize',
+                tooltipText:
+                  "[bold]{valueY}[/] MB\n{valueX.formatDate('yyyy-MM-dd HH:mm')}\nBackups: {count}",
+              },
+              this.chartBackups$.pipe(
+                map((response: APIResponse<Backup>) => response.data)
+              ),
+              this.timeRangeSubject$.getValue().range
+            );
+            break;
+          default:
+            console.error('Unknown chart type:', chart.type);
+            break;
+        }
+      }
     }, 100);
   }
 
@@ -266,38 +245,6 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.destroy$.next();
     this.destroy$.complete();
     this.chartService.dispose();
-  }
-
-  /**
-   * Set filter options for the backup datagrid
-   * @returns Filter options
-   */
-  private buildFilterParams(): BackupFilterParams {
-    const params: BackupFilterParams = { ...INITIAL_FILTER };
-
-    if (this.backupDateFilter.isActive()) {
-      params.fromDate = this.backupDateFilter.ranges.fromDate;
-      params.toDate = this.backupDateFilter.ranges.toDate;
-    }
-
-    if (this.backupSizeFilter.isActive()) {
-      params.fromSizeMB = this.backupSizeFilter.ranges.fromSizeMB;
-      params.toSizeMB = this.backupSizeFilter.ranges.toSizeMB;
-    }
-
-    if (this.backupSavesetFilter.isActive()) {
-      params.saveset = this.backupSavesetFilter.ranges.saveset;
-    }
-
-    if (this.taskFilter.isActive()) {
-      params.taskName = this.taskFilter.ranges.taskName;
-    }
-
-    if (this.typeFilter.isActive()) {
-      params.types = this.typeFilter.ranges.type;
-    }
-
-    return params;
   }
 
   /**
@@ -325,7 +272,14 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
       toDate,
       range,
     });
-    this.chartService.updateTimeRange('backupTimelineChart', range);
+
+    // Update all charts with the new time range
+    for (const chart of this.charts) {
+      //So far only relevant for the column chart
+      if (chart.type === ChartType.SIZECOLUMNCHART) {
+        this.chartService.updateTimeRange(chart.id, range);
+      }
+    }
   }
 
   /**
@@ -337,14 +291,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
     this.backupTaskSubject$.next(tasks);
   }
 
-  setBackupTypesForCharts(types: BackupType[]): void {
-    this.selectedBackupTypesForCharts = types;
-    this.backupTypesForChartsSubject$.next(types);
-  }
-
-  setBackupTypesForTable(types: BackupType[]): void {
-    this.selectedBackupTypesForTable = types;
-    this.typeFilter.updateRanges({ type: types });
+  setBackupTypes(types: BackupType[]): void {
+    this.selectedBackupTypes = types;
+    this.backupTypesSubject$.next(types);
   }
 
   /**
@@ -356,38 +305,9 @@ export class BackupsComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   /**
-   * Check the filter states and add new filter values to the filterOptions$ subject
-   * @param state filter values
-   */
-  refresh(state: ClrDatagridStateInterface<any>): void {
-    this.loading = true;
-
-    const params: BackupFilterParams = {
-      ...INITIAL_FILTER,
-      limit: state.page?.size ?? this.pageSize,
-      offset: state.page?.current
-        ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
-        : 0,
-      sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
-      orderBy: state.sort?.by ? state.sort.by.toString() : 'creationDate',
-    };
-
-    if (state.filters) {
-      Object.assign(params, this.buildFilterParams());
-    }
-
-    this.filterOptions$.next(params);
-    this.loading = false;
-  }
-
-  /**
    * Change the state of the filter panel to open or close it
    */
   protected changeFilterPanelState(): void {
-    if (this.filterPanel) {
-      this.filterPanel = false;
-    } else {
-      this.filterPanel = true;
-    }
+    this.isOpen = !this.isOpen;
   }
 }
