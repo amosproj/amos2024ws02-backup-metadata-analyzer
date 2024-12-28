@@ -52,7 +52,7 @@ describe('AppComponent', () => {
 
   it('should have navigation items', () => {
     const navItems = fixture.debugElement.queryAll(By.css('.nav-text'));
-    const expectedNavItems = ['Dashboard', 'Overview', 'Upload', 'Find Data'];
+    const expectedNavItems = ['Dashboard', 'Overview', 'Backup Statistics', 'Upload', 'Find Data'];
 
     // Use a Set to get unique nav item texts
     const uniqueNavItems = [
@@ -67,7 +67,7 @@ describe('AppComponent', () => {
 
   it('should have router links configured', () => {
     const routerLinks = fixture.debugElement.queryAll(By.css('[routerLink]'));
-    const expectedRoutes = ['/', '/', '/upload', '/findData'];
+    const expectedRoutes = ['/', '/', '/backup-statistics', '/upload', '/findData'];
 
     routerLinks.forEach((link, index) => {
       expect(link.nativeElement.getAttribute('routerLink')).toBe(
