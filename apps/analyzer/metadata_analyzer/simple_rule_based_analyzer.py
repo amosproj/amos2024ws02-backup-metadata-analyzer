@@ -217,7 +217,7 @@ class SimpleRuleBasedAnalyzer:
         return {"count": count}
 
     # Search for unusual creation times of 'full' backups made after start_date
-    def analyze_creation_dates(self, data, alert_limit, start_date):
+    def analyze_creation_dates(self, data, schedules, alert_limit, start_date):
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
@@ -230,11 +230,17 @@ class SimpleRuleBasedAnalyzer:
                 continue
             groups[result.task].append(result)
 
+        # Create a dictionary from schedule name to the schedule object
+        schedule_dict = dict()
+        for schedule in schedules:
+            schedule_dict[schedule.name] = schedule
+
+
         alerts = []
         # Iterate through each group to find unusual creation times
         for task, unordered_results in groups.items():
             results = sorted(unordered_results, key=lambda result: result.start_time)
-            alerts += self._analyze_creation_dates_of_one_task(results, start_date)
+            alerts += self._analyze_creation_dates_of_one_task(results, schedule_dict, start_date)
     
 
         # Because we ignore alerts which would be created earlier than the current latest alert,
@@ -255,14 +261,35 @@ class SimpleRuleBasedAnalyzer:
     
 
     # Analyzes the creation times of a group of results from one task.
-    def _analyze_creation_dates_of_one_task(self, results, start_date):
-        alerts = []
+    def _analyze_creation_dates_of_one_task(self, results, schedule_dict, start_date):
+        # Group all results by their schedule
+        schedule_groups = defaultdict(list)
         for result in results:
-            # Don't generate alerts for results older than the start_date
-            if result.start_time <= start_date:
-                continue
+            schedule_groups[result.schedule].append(result)
 
-            # TODO: Analysis
+        alerts = []
+        for schedule_name, schedule_group in schedule_groups.items():
+            # Get the schedule for this schedule group
+            schedule = schedule_dict[schedule_name]
+            # Calculate the expected timedelta between two backups for this schedule
+            multiplier = {
+                "MIN": 60,
+                "HOU": 60 * 60,
+                "DAY": 24 * 60 * 60,
+            }[schedule.p_base]
+            expected_delta_seconds = schedule.p_count * multiplier
+            expected_delta = timedelta(seconds=expected_delta_seconds)
+            # Skip the first backup in a schedule group
+            for result1, result2 in zip(schedule_group[:-1], schedule_group[1:]):
+                # Don't generate alerts for results older than the start_date
+                if result2.start_time <= start_date:
+                    continue
+
+                # Calculate the expected time for result2 and compare it with the actual time
+                expected_time = result1.start_time + expected_delta
+                diff = abs(expected_time - result2.start_time)
+                if diff.total_seconds() > 60 * 60: # Diff greater than an hour => alert
+                    alerts.append(CreationDateAlert(result2, expected_time))
 
         return alerts
 
