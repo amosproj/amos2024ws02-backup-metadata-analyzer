@@ -91,3 +91,5 @@ class Schedule(Base):
 
     p_base: Mapped[str]
     p_count: Mapped[int]
+
+    start_time: Mapped[str]

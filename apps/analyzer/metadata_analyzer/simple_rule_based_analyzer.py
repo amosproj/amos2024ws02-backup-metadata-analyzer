@@ -1,7 +1,7 @@
 import sys
 from collections import defaultdict
 import metadata_analyzer.backend
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from metadata_analyzer.size_alert import SizeAlert
 from metadata_analyzer.creation_date_alert import CreationDateAlert
 from metadata_analyzer.storage_fill_alert import StorageFillAlert
@@ -288,17 +288,27 @@ class SimpleRuleBasedAnalyzer:
             multiplier = base_to_seconds[schedule.p_base]
             expected_delta_seconds = schedule.p_count * multiplier
             expected_delta = timedelta(seconds=expected_delta_seconds)
+
             # Skip the first backup in a schedule group
             for result1, result2 in zip(schedule_group[:-1], schedule_group[1:]):
                 # Don't generate alerts for results older than the start_date
                 if result2.start_time <= start_date:
                     continue
 
-                # Calculate the expected time for result2 and compare it with the actual time
-                expected_time = result1.start_time + expected_delta
-                diff = abs(expected_time - result2.start_time)
+                # Calculate the expected date for result2 and compare it with the actual date
+                expected_date = result1.start_time + expected_delta
+
+                if schedule.p_base in ["DAY", "WEE", "MON"]:
+                    start_time = schedule.start_time # Has format "hh:mm"
+                    try:
+                        expected_time = time.fromisoformat(start_time)
+                        expected_date = datetime.combine(expected_date, expected_time)
+                    except ValueError:
+                        print(f"start_time with invalid format: {start_time}")
+
+                diff = abs(expected_date - result2.start_time)
                 if diff.total_seconds() > 60 * 60: # Diff greater than an hour => alert
-                    alerts.append(CreationDateAlert(result2, expected_time))
+                    alerts.append(CreationDateAlert(result2, expected_date))
 
         return alerts
 

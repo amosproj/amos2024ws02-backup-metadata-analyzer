@@ -26,11 +26,12 @@ def _create_mock_data_store(name, capacity, high_water_mark, filled):
     mock_data_store.filled = filled
     return mock_data_store
 
-def _create_mock_schedule(name, p_base, p_count):
+def _create_mock_schedule(name, p_base, p_count, start_time = None):
     mock_schedule = Schedule()
     mock_schedule.name = name
     mock_schedule.p_base = p_base
     mock_schedule.p_count = p_count
+    mock_schedule.start_time = start_time
     return mock_schedule
 
 
@@ -804,7 +805,7 @@ def test_creation_time_alert_schedule_days():
         "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-05T12:00:00"), "bar",
     )
     mock_schedule = _create_mock_schedule(
-        "bar", "DAY", 3
+        "bar", "DAY", 3, "12:00"
     )
 
     database = MockDatabase(
@@ -818,6 +819,87 @@ def test_creation_time_alert_schedule_days():
     assert backend.creation_date_alerts == [{
         "date": mock_result2.start_time.isoformat(),
         "referenceDate": "2000-01-04T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Schedule with weeks as the unit
+def test_creation_time_alert_schedule_weeks():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-15T18:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "WEE", 2, "12:00"
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-15T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Schedule with months as the unit
+def test_creation_time_alert_schedule_months():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-02T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-02-01T18:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "MON", 1, "12:00"
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-02-01T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Check if the start time of the schedule is used
+def test_creation_time_alert_start_time_schedule():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-10T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-11T18:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-12T12:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "DAY", 1, "12:00"
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-11T12:00:00",
         "backupId": mock_result2.uuid
     }]
 
