@@ -16,6 +16,7 @@ import { BackupService } from '../../../shared/services/backup-service/backup-se
 import { BackupFilterParams } from '../../../shared/types/backup-filter-type';
 import { BackupType } from '../../../shared/enums/backup.types';
 import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
+import { DatePipe } from '@angular/common';
 
 const INITIAL_FILTER: BackupFilterParams = {
   limit: 10,
@@ -25,6 +26,7 @@ const INITIAL_FILTER: BackupFilterParams = {
   selector: 'app-backup-table',
   templateUrl: './backup-table.component.html',
   styleUrl: './backup-table.component.css',
+  providers: [DatePipe],
 })
 export class BackupTableComponent implements OnInit, OnDestroy {
   loading = false;
@@ -39,6 +41,7 @@ export class BackupTableComponent implements OnInit, OnDestroy {
   protected backupSavesetFilter: CustomFilter;
   selectedBackupTypes: string[] = [];
   protected typeFilter: CustomFilter;
+  protected scheduledTimeFilter: CustomFilter;
 
   private readonly filterOptions$ = new BehaviorSubject<BackupFilterParams>(
     INITIAL_FILTER
@@ -48,13 +51,17 @@ export class BackupTableComponent implements OnInit, OnDestroy {
 
   readonly backups$: Observable<APIResponse<Backup>>;
 
-  constructor(private readonly backupService: BackupService) {
+  constructor(
+    private readonly backupService: BackupService,
+    private readonly datePipe: DatePipe
+  ) {
     //Initialize filters
     this.backupSizeFilter = new CustomFilter('size');
     this.backupDateFilter = new CustomFilter('date');
     this.backupSavesetFilter = new CustomFilter('saveset');
     this.taskFilter = new CustomFilter('taskName');
     this.typeFilter = new CustomFilter('type');
+    this.scheduledTimeFilter = new CustomFilter('scheduledTime');
 
     //Load all backups and filter them based on the filter options for table
     this.backups$ = this.filterOptions$.pipe(
@@ -70,6 +77,7 @@ export class BackupTableComponent implements OnInit, OnDestroy {
       this.backupSavesetFilter.changes.pipe(startWith(null)),
       this.taskFilter.changes.pipe(startWith(null)),
       this.typeFilter.changes.pipe(startWith(null)),
+      this.scheduledTimeFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
         map(() => this.buildFilterParams()),
@@ -102,6 +110,12 @@ export class BackupTableComponent implements OnInit, OnDestroy {
 
     if (this.backupSavesetFilter.isActive()) {
       params.saveset = this.backupSavesetFilter.ranges.saveset;
+    }
+
+    if (this.scheduledTimeFilter.isActive()) {
+      params.fromScheduledDate =
+        this.scheduledTimeFilter.ranges.fromScheduledTime;
+      params.toScheduledDate = this.scheduledTimeFilter.ranges.toScheduledTime;
     }
 
     if (this.taskFilter.isActive()) {
@@ -143,6 +157,10 @@ export class BackupTableComponent implements OnInit, OnDestroy {
 
     this.filterOptions$.next(params);
     this.loading = false;
+  }
+
+  formatDate(date?: Date): string {
+    return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') ?? '';
   }
 
   protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
