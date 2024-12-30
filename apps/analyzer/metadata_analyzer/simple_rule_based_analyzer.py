@@ -231,7 +231,7 @@ class SimpleRuleBasedAnalyzer:
             groups[result.task].append(result)
 
         alerts = []
-        # Iterate through each group to find drastic size changes
+        # Iterate through each group to find unusual creation times
         for task, unordered_results in groups.items():
             results = sorted(unordered_results, key=lambda result: result.start_time)
             alerts += self._analyze_creation_dates_of_one_task(results, start_date)
@@ -256,41 +256,16 @@ class SimpleRuleBasedAnalyzer:
 
     # Analyzes the creation times of a group of results from one task.
     def _analyze_creation_dates_of_one_task(self, results, start_date):
-        SECONDS_PER_DAY = 24 * 60 * 60
-
         alerts = []
-        # Array that holds the previous creation dates as references times
-        times = [results[0].start_time]
-        # Skip the first result
-        for result in results[1:]:
+        for result in results:
             # Don't generate alerts for results older than the start_date
-            if result.start_time > start_date:
-                # The smallest diff in seconds to the time of a previous backup
-                smallest_diff = SECONDS_PER_DAY
-                reference_time = None
-                for ref_time in times:
-                    diff = (result.start_time - ref_time).seconds
-                    # Considers the wrap around on midnight
-                    if diff > SECONDS_PER_DAY / 2:
-                        diff = SECONDS_PER_DAY - diff
-                    if diff < smallest_diff:
-                        smallest_diff = diff
-                        reference_time = ref_time.time()
+            if result.start_time <= start_date:
+                continue
 
-                    # Early abort if the diff is already small enough
-                    if diff < 60 * 60:
-                        break
-
-                # Reference date consists of the time of the nearest backup in the past and
-                # the date of the actual backup
-                reference_date = datetime.combine(result.start_time, reference_time)
-                if smallest_diff > 60 * 60:
-                    alerts.append(CreationDateAlert(result, reference_date))
-
-            # Put the current backup time into the reference times
-            times.append(result.start_time)
+            # TODO: Analysis
 
         return alerts
+
 
     # Search for data stores that are almost full
     def analyze_storage_capacity(self, data, alert_limit):
