@@ -1,0 +1,33 @@
+.header {
+    background-color: white;
+    justify-content: space-around;
+    position: relative;
+}
+
+.card-block {
+    padding: 20px;
+}
+
+.clr-form-control {
+    margin-top: 0;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header-title {
+    margin: 0;
+    font-weight: 500;
+}
+
+.card-header-actions {
+    display: flex;
+    align-items: center;
+}
+
+:host ::ng-deep .card-header {
+    border-bottom: none !important;
+}

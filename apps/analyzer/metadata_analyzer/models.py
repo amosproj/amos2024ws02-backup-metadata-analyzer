@@ -68,6 +68,7 @@ class DataStore(Base):
 
     # For now I only added the most relevant columns
     name: Mapped[str] = mapped_column(primary_key=True)
+    uuid: Mapped[str]
     capacity: Mapped[float]
     high_water_mark: Mapped[float]
     filled: Mapped[float]
