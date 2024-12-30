@@ -33,6 +33,7 @@ class Result(Base):
     is_backup: Mapped[int]
     state: Mapped[int]
     subtask_flag: Mapped[str]
+    schedule: Mapped[str]
 
     start_time: Mapped[datetime]
     stop_time: Mapped[datetime]
