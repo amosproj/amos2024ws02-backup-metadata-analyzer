@@ -79,3 +79,14 @@ class DataStore(Base):
 
     def __str__(self):
         return repr(self)
+
+
+class Schedule(Base):
+    __tablename__ = "schedules"
+
+    # For now I only added the most relevant columns
+    name: Mapped[str] = mapped_column(primary_key=True)
+    uuid: Mapped[str]
+
+    p_base: Mapped[str]
+    p_count: int
