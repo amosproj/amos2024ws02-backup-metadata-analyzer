@@ -262,6 +262,14 @@ class SimpleRuleBasedAnalyzer:
 
     # Analyzes the creation times of a group of results from one task.
     def _analyze_creation_dates_of_one_task(self, results, schedule_dict, start_date):
+        base_to_seconds = {
+            "MIN": 60,
+            "HOU": 60 * 60,
+            "DAY": 24 * 60 * 60,
+            "WEE": 7 * 24 * 60 * 60,
+            "MON": 30 * 24 * 60 * 60,
+        }
+
         # Group all results by their schedule
         schedule_groups = defaultdict(list)
         for result in results:
@@ -269,14 +277,15 @@ class SimpleRuleBasedAnalyzer:
 
         alerts = []
         for schedule_name, schedule_group in schedule_groups.items():
+            # Skip backups with schedules which are not in the schedule table
+            if schedule_name not in schedule_dict.keys():
+                continue
             # Get the schedule for this schedule group
             schedule = schedule_dict[schedule_name]
+            if schedule.p_base not in base_to_seconds.keys():
+                continue
             # Calculate the expected timedelta between two backups for this schedule
-            multiplier = {
-                "MIN": 60,
-                "HOU": 60 * 60,
-                "DAY": 24 * 60 * 60,
-            }[schedule.p_base]
+            multiplier = base_to_seconds[schedule.p_base]
             expected_delta_seconds = schedule.p_count * multiplier
             expected_delta = timedelta(seconds=expected_delta_seconds)
             # Skip the first backup in a schedule group
