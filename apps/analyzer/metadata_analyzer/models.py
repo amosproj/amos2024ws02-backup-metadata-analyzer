@@ -89,4 +89,4 @@ class Schedule(Base):
     uuid: Mapped[str]
 
     p_base: Mapped[str]
-    p_count: int
+    p_count: Mapped[int]
