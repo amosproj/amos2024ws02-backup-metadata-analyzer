@@ -608,9 +608,37 @@ def test_creation_time_alert_correct_schedule():
 
     assert backend.creation_date_alerts == []
 
+# Backups with a deviation larger than one hour from the schedule should generate alerts
+def test_creation_time_alert_correct_schedule():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T15:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-01T18:00:00"), "bar",
+    )
+    mock_result4 = _create_mock_result(
+        "foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-01T22:00:01"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "HOU", 3
+    )
 
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3, mock_result4], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-
+    assert backend.creation_date_alerts == [{
+        "date": mock_result4.start_time.isoformat(),
+        "referenceDate": "2000-01-01T21:00:00",
+        "backupId": mock_result4.uuid
+    }]
 
 
 
