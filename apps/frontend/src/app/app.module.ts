@@ -20,6 +20,7 @@ import {
   filterIcon,
   helpIcon,
   homeIcon,
+  lineChartIcon,
   lockIcon,
   plusIcon,
   searchIcon,
@@ -43,6 +44,7 @@ import { InformationPanelComponent } from './backups-overview-page/component/inf
 import { BackupTableComponent } from './backup-statistics-page/component/backup-table/backup-table.component';
 import { SidePanelComponent } from './shared/components/filter-side-panel/side-panel.component';
 import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
+import { UserManualComponent } from './management/components/user-manual/user-manual/user-manual.component';
 
 @NgModule({
   declarations: [
@@ -58,7 +60,8 @@ import { BackupStatisticsPageComponent } from './backup-statistics-page/componen
     InformationPanelComponent,
     BackupTableComponent,
     SidePanelComponent,
-    BackupStatisticsPageComponent
+    BackupStatisticsPageComponent,
+    UserManualComponent
   ],
   imports: [
     BrowserModule,
@@ -93,8 +96,9 @@ export class AppModule {
       plusIcon,
       lockIcon,
       trashIcon,
-      helpIcon
-      bookIcon
+      helpIcon,
+      bookIcon,
+      lineChartIcon
     );
   }
 }
