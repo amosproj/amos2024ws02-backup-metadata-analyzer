@@ -42,6 +42,7 @@ class Analyzer:
 			"creationDate": result.start_time.isoformat(),
 			"type": backup_type,
 			"taskId": result.task_uuid,
+			"scheduledTime": result.scheduledTime.isoformat(),
 		}
 
 	# Convert a task from the database into the format used by the backend

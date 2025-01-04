@@ -41,6 +41,7 @@ class Result(Base):
     data_size: Mapped[int]
     throughput: Mapped[str]
     duration: Mapped[int]
+    scheduledTime: Mapped[datetime]
 
     def __repr__(self):
         return f"""Result(uuid={self.uuid})"""
