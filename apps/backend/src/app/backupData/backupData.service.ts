@@ -206,6 +206,49 @@ export class BackupDataService extends PaginationService {
       where.type = In(typesArray);
     }
 
+    // Check if params fromScheduledDate and toScheduledDate are valid dates
+
+    let fromScheduledTime: Date | null = null;
+    let toScheduledTime: Date | null = null;
+    if (backupDataFilterDto.fromScheduledDate) {
+      fromScheduledTime = new Date(backupDataFilterDto.fromScheduledDate);
+      if (Number.isNaN(fromScheduledTime.getTime())) {
+        throw new BadRequestException(
+          'parameter fromScheduledTime is not a valid date'
+        );
+      }
+      //Set time to first millisecond of the day
+      fromScheduledTime.setHours(0);
+      fromScheduledTime.setMinutes(0);
+      fromScheduledTime.setSeconds(0);
+      fromScheduledTime.setMilliseconds(0);
+    }
+    if (backupDataFilterDto.toScheduledDate) {
+      toScheduledTime = new Date(backupDataFilterDto.toScheduledDate);
+      if (Number.isNaN(toScheduledTime.getTime())) {
+        throw new BadRequestException(
+          'parameter toScheduledTime is not a valid date'
+        );
+      }
+      //Set time to last millisecond of the day
+      toScheduledTime.setHours(0);
+      toScheduledTime.setMinutes(0);
+      toScheduledTime.setSeconds(0);
+      toScheduledTime.setDate(toScheduledTime.getDate() + 1);
+      toScheduledTime.setMilliseconds(-1);
+    }
+
+    //Creation date search
+    if (
+      backupDataFilterDto.fromScheduledDate &&
+      backupDataFilterDto.toScheduledDate
+    ) {
+      where.scheduledTime = Between(fromScheduledTime!, toScheduledTime!);
+    } else if (backupDataFilterDto.fromScheduledDate) {
+      where.scheduledTime = MoreThanOrEqual(fromScheduledTime!);
+    } else if (backupDataFilterDto.toScheduledDate) {
+      where.scheduledTime = LessThanOrEqual(toScheduledTime!);
+    }
     return where;
   }
 

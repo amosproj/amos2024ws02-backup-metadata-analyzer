@@ -1,0 +1,85 @@
+<clr-side-panel
+  [(clrSidePanelOpen)]="isOpen"
+  [clrSidePanelSize]="'md'"
+>
+  <div class="side-panel-title">Chart Filter Options</div>
+  <div class="side-panel-body">
+    <div>
+      <h5>Time Range</h5>
+      <div class="btn-group-vertical">
+        <button
+          *ngFor="let range of timeRanges"
+          class="btn"
+          [class.btn-primary]="(timeRange$ | async) === range"
+          (click)="setTimeRange(range)"
+        >
+          Last {{ range | titlecase }}
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <h5>Tasks</h5>
+      <clr-combobox-container *ngIf="allBackupTasks$" class="backupTaskFilter">
+        <clr-combobox
+          name="task"
+          [(ngModel)]="selectedTask"
+          clrMulti="true"
+          (ngModelChange)="setBackupTask($event)"
+          (clrInputChange)="onSearchInput($event)"
+          placeholder="Select backup task"
+        >
+          <ng-container *clrOptionSelected="let task">
+            <span class="selected-item">
+              <cds-icon
+                shape="tag"
+                aria-label="selected backup task tag"
+              ></cds-icon>
+              {{ task ? task.displayName : 'All Tasks' }}
+            </span>
+          </ng-container>
+
+          <clr-options>
+            <ng-container *ngIf="selectedbackupTasks$ | async as tasks">
+              <clr-option
+                *clrOptionItems="let task of tasks; field: 'displayName'"
+                [clrValue]="task"
+              >
+                <cds-icon
+                  shape="data-cluster"
+                  aria-label="backup task"
+                ></cds-icon>
+                {{ task.displayName }}
+              </clr-option>
+            </ng-container>
+          </clr-options>
+        </clr-combobox>
+        <clr-control-error>There was an error</clr-control-error>
+      </clr-combobox-container>
+    </div>
+    <div>
+      <h5>Types</h5>
+      <clr-combobox-container class="backupTaskFilter">
+        <clr-combobox
+          [(ngModel)]="selectedBackupTypes"
+          [clrMulti]="true"
+          (ngModelChange)="setBackupTypes($event)"
+          placeholder="Select backup types">
+          <ng-container *clrOptionSelected="let value">
+            {{ value }}
+          </ng-container>
+          <clr-options>
+            <clr-option *ngFor="let option of backupEnumTypes" [clrValue]="option">
+              {{ option }}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+      </clr-combobox-container>
+    </div>
+  </div>
+  <div class="side-panel-footer">
+    <button class="btn btn-outline" (click)="changeFilterPanelState()">
+      Close
+    </button>
+  </div>
+</clr-side-panel>
