@@ -24,7 +24,7 @@
               routerLinkActive="active"
               routerLink="email-receiver"
               class="nav-text"
-            >Email Receiver</span
+              >Email Receiver</span
             >
           </button>
         </clr-dropdown-menu>
@@ -35,46 +35,40 @@
 
   <div class="content-container">
     <clr-vertical-nav
-      class="clr-vertical-nav has-nav-groups clr-nav-level-1"
+      class="clr-vertical-nav has-nav-groups clr-nav-level-1 custom-nav"
       [clrVerticalNavCollapsible]="true"
       [clrVerticalNavCollapsed]="collapsed"
       (clrVerticalNavCollapsedChange)="collapsed = $event"
     >
       <div class="nav-content">
         <clr-vertical-nav-item
+          clrVerticalNavLink
+          clrAriaCurrentLink
           routerLink="/"
+          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="active"
-          class="hover-item"
+          class="hover-item nav-link"
         >
           <cds-icon clrVerticalNavIcon shape="home"></cds-icon>
           <span class="nav-text">Dashboard</span>
         </clr-vertical-nav-item>
 
-          <clr-vertical-nav-group-children>
-            <a
-              clrVerticalNavLink
-              clrAriaCurrentLink
-              routerLink="/"
-              [routerLinkActiveOptions]="{ exact: true }"
-              routerLinkActive="active"
-              class="nav-link"
-            ><span class="nav-text">Overview</span></a>
-            <a
-              clrVerticalNavLink
-              clrAriaCurrentLink
-              routerLink="/backup-statistics"
-              [routerLinkActiveOptions]="{ exact: true }"
-              routerLinkActive="active"
-              class="nav-link"
-            ><span class="nav-text">Backup Statistics</span>
-            </a>
-          </clr-vertical-nav-group-children>
-        </clr-vertical-nav-group>
+        <clr-vertical-nav-item
+          clrVerticalNavLink
+          clrAriaCurrentLink
+          routerLink="/backup-statistics"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="active"
+          class="nav-link hover-item"
+        >
+          <cds-icon clrVerticalNavIcon shape="line-chart"></cds-icon>
+          <span class="nav-text">Backup Statistics</span>
+        </clr-vertical-nav-item>
 
         <clr-vertical-nav-item
           routerLink="/findData"
           routerLinkActive="active"
-          class="hover-item"
+          class="hover-item nav-link"
         >
           <cds-icon clrVerticalNavIcon shape="search"></cds-icon>
           <span class="nav-text">Find Data</span>
@@ -89,10 +83,10 @@
           *ngIf="collapsed === false"
         />
         <clr-vertical-nav-item
-          routerLink="/"
+          routerLink="/user-manual"
           routerLinkActive="active"
-          class="hover-item"
-          id="nav-footer"
+          class="hover-item nav-link"
+          
         >
           <cds-icon clrVerticalNavIcon shape="book"></cds-icon>
           <span class="nav-text">How to get started?</span>
