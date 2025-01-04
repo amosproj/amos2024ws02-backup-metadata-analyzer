@@ -18,6 +18,7 @@ import {
   envelopeIcon,
   errorStandardIcon,
   filterIcon,
+  helpIcon,
   homeIcon,
   lockIcon,
   plusIcon,
@@ -31,25 +32,33 @@ import {
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
 import { FindTestDataComponent } from './test-upload/component/find-test-data/find-test-data.component';
-import { BackupsComponent } from './backups-overview/backups/backups/backups.component';
+import { OverviewPageComponent } from './backups-overview-page/component/overview-page.component';
 import { BASE_URL } from './shared/types/configuration';
-import { AlertComponent } from './alert/component/alert.component';
+import { AlertComponent } from './backups-overview-page/component/alert-panel/component/alert.component';
 import { NotificationSettingsComponent } from './management/components/settings/notification-settings/notification-settings.component';
 import { EmailReceiverSettingsComponent } from './management/components/settings/email-receiver-settings/email-receiver-settings.component';
 import { ConfirmDialogComponent } from './shared/components/confirm-dialog/component/confirm-dialog/confirm-dialog.component';
-import { DataStoresComponent } from './data-stores/component/data-stores.component';
+import { DataStoresComponent } from './backups-overview-page/component/data-stores-panel/data-stores.component';
+import { InformationPanelComponent } from './backups-overview-page/component/information-panel/information-panel.component';
+import { BackupTableComponent } from './backup-statistics-page/component/backup-table/backup-table.component';
+import { SidePanelComponent } from './shared/components/filter-side-panel/side-panel.component';
+import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TestUploadComponent,
     FindTestDataComponent,
-    BackupsComponent,
+    OverviewPageComponent,
     AlertComponent,
     NotificationSettingsComponent,
     EmailReceiverSettingsComponent,
     ConfirmDialogComponent,
     DataStoresComponent,
+    InformationPanelComponent,
+    BackupTableComponent,
+    SidePanelComponent,
+    BackupStatisticsPageComponent
   ],
   imports: [
     BrowserModule,
@@ -84,6 +93,7 @@ export class AppModule {
       plusIcon,
       lockIcon,
       trashIcon,
+      helpIcon
       bookIcon
     );
   }
