@@ -18,17 +18,13 @@ class Time_series_analyzer:
     temp_df = []
 
     def __init__(self, parameters):
-        global threshold
-        global training_series_start
-        global training_series_end
-        global clusters
-        threshold = float(parameters[0])
-        training_series_start = 0
-        training_series_end = -1
-        clusters = int(parameters[1])
+        Time_series_analyzer.threshold = float(parameters[0])
+        Time_series_analyzer.training_series_start = 0
+        Time_series_analyzer.training_series_end = -1
+        Time_series_analyzer.clusters = int(parameters[1])
 
     def preload_data(self, data):
-        global df
+        
         # read table into a dataframe
         df = pd.DataFrame([res.as_dict() for res in data])
 
@@ -47,32 +43,25 @@ class Time_series_analyzer:
         # sorts dataframe by sbc_start
         df = df.sort_values("sbc_start")
 
+        Time_series_analyzer.df = df
+
     def set_threshold(self, new_threshold):
-        global threshold
-        threshold = new_threshold
+        Time_series_analyzer.threshold = new_threshold
         return True
 
     def set_clusters(self, new_clusters):
-        global clusters
-        clusters = new_clusters
+        Time_series_analyzer.clusters = new_clusters
         return True
 
     def set_training_start(self, start):
-        global training_series_start
-        training_series_start = start
+        Time_series_analyzer.training_series_start = start
         return True
 
     def set_training_end(self, end):
-        global training_series_end
-        training_series_end = end
+        Time_series_analyzer.training_series_end = end
         return True
 
     def k_means_analyze(self, variable, task_id, frequency, backup_type, window_size):
-        global threshold
-        global training_series_start
-        global training_series_end
-        global clusters
-
         working_df = Time_series_analyzer.task_preprocessing(
             backup_type, task_id, variable
         )
@@ -97,37 +86,36 @@ class Time_series_analyzer:
         if len(series) == 0:
             raise ValueError("Series had length 0 after applying specified parameters!")
 
-        global temp_df
-        temp_df = working_df
+        Time_series_analyzer.temp_df = working_df
 
         # if no indices were manually set to override, some are generated that could be useful
-        if training_series_end == -1:
+        if Time_series_analyzer.training_series_end == -1:
             self.calc_training_indices()
 
         # trains series
-        series_train = series[training_series_start:training_series_end]
+        series_train = series[Time_series_analyzer.training_series_start:Time_series_analyzer.training_series_end]
 
         # determines number of clusters for the k means scorer,
         # use clusters for more useful k value
         maxClusters = len(series_train)
 
-        if clusters > maxClusters:
+        if Time_series_analyzer.clusters > maxClusters:
             raise ValueError(
                 "Series had "
                 + str(maxClusters)
                 + " different samples, less than the number of clusters "
-                + str(clusters)
+                + str(Time_series_analyzer.clusters)
             )
 
         # using basic k-means scorer (moving window comparison)
         Kmeans_scorer = KMeansScorer(
-            k=clusters, window=int(window_size), component_wise=False
+            k=Time_series_analyzer.clusters, window=int(window_size), component_wise=False
         )
         Kmeans_scorer.fit(series_train)
         anomaly_score = Kmeans_scorer.score(series)
 
         # detects where anomalies lie, then return binary prediction
-        detector = QuantileDetector(high_quantile=threshold)
+        detector = QuantileDetector(high_quantile=Time_series_analyzer.threshold)
         anomaly_pred = detector.fit_detect(series=anomaly_score)
 
         # TODO decide on interface to backend and return useful values in useful format
@@ -141,11 +129,8 @@ class Time_series_analyzer:
         return anomaly_timestamps
 
     def calc_training_indices(self):
-        global training_series_start
-        global training_series_end
-        global temp_df
 
-        training_df = temp_df
+        training_df = Time_series_analyzer.temp_df
         if 'index' in training_df.columns:
             training_df = training_df.drop('index', axis=1)
         training_df.insert(0, "index", range(0, len(training_df)))
@@ -167,11 +152,10 @@ class Time_series_analyzer:
         grp = max(grouped, key=lambda x: x[1].shape)
         grp = grp[1] # gets series out of tuple
 
-        training_series_start = int(grp.iloc[0]['index'])
-        training_series_end = int(grp.iloc[len(grp) - 1]['index'])
+        Time_series_analyzer.training_series_start = int(grp.iloc[0]['index'])
+        Time_series_analyzer.training_series_end = int(grp.iloc[len(grp) - 1]['index'])
 
     def task_preprocessing(backup_type, task_id, variable):
-        global df
 
         # --------------- Task Specific Preprocessing ---------------#
         # TODO remove when other types are implemented
@@ -180,7 +164,7 @@ class Time_series_analyzer:
                 "k means analysis for this backup type is not yet implemented"
             )
 
-        working_df = df
+        working_df = Time_series_analyzer.df
         # removes backups of types that are not specified
         working_df = working_df[working_df.fdi_type == backup_type]
         # removes backups that do not have chosen task id
@@ -191,9 +175,8 @@ class Time_series_analyzer:
         return working_df
 
     def get_task_ids(self):
-        global df
         # gets all possible values for task_uuid
-        task_ids = df["task_uuid"].unique()
+        task_ids = Time_series_analyzer.df["task_uuid"].unique()
         return dict(enumerate(task_ids.flatten(), 1))
 
     def get_frequencies(self, task_id, backup_type, variable):
