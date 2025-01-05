@@ -298,6 +298,7 @@ class SimpleRuleBasedAnalyzer:
                 # Calculate the expected date for result2 and compare it with the actual date
                 expected_date = result1.start_time + expected_delta
 
+                # Use the start_time of the schedule if the base is in days, weeks or months
                 if schedule.p_base in ["DAY", "WEE", "MON"]:
                     start_time = schedule.start_time # Has format "hh:mm"
                     try:
@@ -305,6 +306,23 @@ class SimpleRuleBasedAnalyzer:
                         expected_date = datetime.combine(expected_date, expected_time)
                     except ValueError:
                         print(f"start_time with invalid format: {start_time}")
+
+                # Check for the weekday of the expected_date if the base is in weeks or months
+                if schedule.p_base in ["WEE", "MON"]:
+                    day_mask = [
+                        schedule.mo,
+                        schedule.tu,
+                        schedule.we,
+                        schedule.th,
+                        schedule.fr,
+                        schedule.sa,
+                        schedule.su,
+                    ]
+                    accepted_days = [i for i in range(7) if day_mask[i] == "1"]
+                    assert accepted_days != [] # Should have at least one accepted day
+
+                    while expected_date.weekday() not in accepted_days:
+                        expected_date += timedelta(days=1)
 
                 diff = abs(expected_date - result2.start_time)
                 if diff.total_seconds() > 60 * 60: # Diff greater than an hour => alert
