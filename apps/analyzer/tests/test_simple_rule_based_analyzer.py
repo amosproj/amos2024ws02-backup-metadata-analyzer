@@ -939,6 +939,69 @@ def test_creation_time_alert_with_specific_day():
         "backupId": mock_result2.uuid
     }]
 
+# Check if the given specific days are used
+def test_creation_time_alert_with_specific_days():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-20T12:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-02-04T12:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "WEE", 2, "12:00", ["fr", "sa"]
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-15T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Check if the given specific days are not used when the base is not weeks or months
+def test_creation_time_alert_with_specific_days_but_base_is_days():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-07T12:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-15T12:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "DAY", 7, "12:00", ["sa"]
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-08T12:00:00",
+        "backupId": mock_result2.uuid
+    },
+    {   
+        "date": mock_result3.start_time.isoformat(),
+        "referenceDate": "2000-01-14T12:00:00",
+        "backupId": mock_result3.uuid
+    }]
+
 
 
 # Tests for the storage fill alerts
