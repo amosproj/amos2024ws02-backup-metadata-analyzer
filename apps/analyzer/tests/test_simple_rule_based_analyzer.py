@@ -32,13 +32,13 @@ def _create_mock_schedule(name, p_base, p_count, start_time = None, days = []):
     mock_schedule.p_base = p_base
     mock_schedule.p_count = p_count
     mock_schedule.start_time = start_time
-    mock_schedule.mo = "mo" in days
-    mock_schedule.tu = "tu" in days
-    mock_schedule.we = "we" in days
-    mock_schedule.th = "th" in days
-    mock_schedule.fr = "fr" in days
-    mock_schedule.sa = "sa" in days
-    mock_schedule.su = "su" in days
+    mock_schedule.mo = "1" if "mo" in days else "0"
+    mock_schedule.tu = "1" if "tu" in days else "0"
+    mock_schedule.we = "1" if "we" in days else "0"
+    mock_schedule.th = "1" if "th" in days else "0"
+    mock_schedule.fr = "1" if "fr" in days else "0"
+    mock_schedule.sa = "1" if "sa" in days else "0"
+    mock_schedule.su = "1" if "su" in days else "0"
     return mock_schedule
 
 
@@ -838,7 +838,7 @@ def test_creation_time_alert_schedule_weeks():
         "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-15T18:00:00"), "bar",
     )
     mock_schedule = _create_mock_schedule(
-        "bar", "WEE", 2, "12:00", ["sa"]
+        "bar", "WEE", 2, "12:00", ["mo", "tu", "we", "th", "fr", "sa", "su"]
     )
 
     database = MockDatabase(
@@ -864,7 +864,7 @@ def test_creation_time_alert_schedule_months():
         "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-02-01T18:00:00"), "bar",
     )
     mock_schedule = _create_mock_schedule(
-        "bar", "MON", 1, "12:00", ["su"]
+        "bar", "MON", 1, "12:00", ["mo", "tu", "we", "th", "fr", "sa", "su"]
     )
 
     database = MockDatabase(
