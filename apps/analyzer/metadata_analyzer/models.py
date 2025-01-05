@@ -93,3 +93,17 @@ class Schedule(Base):
     p_count: Mapped[int]
 
     start_time: Mapped[str]
+
+    mo: Mapped[str]
+    tu: Mapped[str]
+    we: Mapped[str]
+    th: Mapped[str]
+    fr: Mapped[str]
+    sa: Mapped[str]
+    su: Mapped[str]
+
+    def __repr__(self):
+        return f"""Schedule(name={self.name})"""
+
+    def __str__(self):
+        return repr(self)
