@@ -213,7 +213,7 @@ class SimpleRuleBasedAnalyzer:
         # Send the alerts to the backend
         for alert in alerts[:count]:
             self.backend.create_size_alert(alert.as_json())
-            
+
         return {"count": count}
 
     # Search for unusual creation times of 'full' backups made after start_date
@@ -227,8 +227,9 @@ class SimpleRuleBasedAnalyzer:
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
-            if (result.task == ""
-                or result.fdi_type != 'F'
+            if (
+                result.task == ""
+                or result.fdi_type != "F"
                 or result.data_size is None
                 or result.start_time is None
                 or result.subtask_flag != "0"
@@ -239,13 +240,13 @@ class SimpleRuleBasedAnalyzer:
         # Create a dictionary from schedule name to the schedule object
         schedule_dict = self.extract_schedule_dict(schedules)
 
-
         alerts = []
         # Iterate through each group to find unusual creation times
         for task, unordered_results in groups.items():
             results = sorted(unordered_results, key=lambda result: result.start_time)
-            alerts += self._analyze_creation_dates_of_one_task(results, schedule_dict, start_date)
-    
+            alerts += self._analyze_creation_dates_of_one_task(
+                results, schedule_dict, start_date
+            )
 
         # Because we ignore alerts which would be created earlier than the current latest alert,
         # we have to sort the alerts to not miss any alerts in the future
@@ -262,7 +263,6 @@ class SimpleRuleBasedAnalyzer:
             self.backend.create_creation_date_alert(alert.as_json())
 
         return {"count": count}
-    
 
     # Analyzes the creation times of a group of results from one task.
     def _analyze_creation_dates_of_one_task(self, results, schedule_dict, start_date):
@@ -300,10 +300,12 @@ class SimpleRuleBasedAnalyzer:
                     continue
 
                 # Calculate the expected date for result2
-                expected_date = self.compute_expected_date(result1.start_time, expected_delta, schedule)
+                expected_date = self.compute_expected_date(
+                    result1.start_time, expected_delta, schedule
+                )
 
                 diff = abs(expected_date - result2.start_time)
-                if diff.total_seconds() > 60 * 60: # Diff greater than an hour => alert
+                if diff.total_seconds() > 60 * 60:  # Diff greater than an hour => alert
                     alerts.append(CreationDateAlert(result2, expected_date))
 
         return alerts
@@ -313,7 +315,7 @@ class SimpleRuleBasedAnalyzer:
 
         # Use the start_time of the schedule if the base is in days, weeks or months
         if schedule.p_base in ["DAY", "WEE", "MON"]:
-            schedule_start_time = schedule.start_time # Has format "hh:mm"
+            schedule_start_time = schedule.start_time  # Has format "hh:mm"
             try:
                 expected_time = time.fromisoformat(schedule_start_time)
                 expected_date = datetime.combine(expected_date, expected_time)
@@ -332,13 +334,12 @@ class SimpleRuleBasedAnalyzer:
                 schedule.su,
             ]
             accepted_days = [i for i in range(7) if day_mask[i] == "1"]
-            assert accepted_days != [] # Should have at least one accepted day
+            assert accepted_days != []  # Should have at least one accepted day
 
             while expected_date.weekday() not in accepted_days:
                 expected_date += timedelta(days=1)
 
         return expected_date
-
 
     # Search for data stores that are almost full
     def analyze_storage_capacity(self, data, alert_limit):
