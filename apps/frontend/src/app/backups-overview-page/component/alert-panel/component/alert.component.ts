@@ -154,7 +154,7 @@ export class AlertComponent implements OnInit, OnDestroy {
 
         description = `Backup was started at ${this.formatDate(
           creationDateAlert.date
-        )}, but based on previous backups, it should have been started at around ${this.formatDate(
+        )}, but based on the defined schedule, it should have been started at around ${this.formatDate(
           creationDateAlert.referenceDate
         )}`;
         break;
