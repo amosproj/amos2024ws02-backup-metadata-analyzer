@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { BehaviorSubject, forkJoin, Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../../../services/alert-notification/notification.service';
 import { AlertType } from '../../../../shared/types/alertType';
-import { AlertServiceService } from '../../../../alert/service/alert-service.service';
+import { AlertServiceService } from '../../../../shared/services/alert-service/alert-service.service';
 
 @Component({
   selector: 'app-notification-settings',
