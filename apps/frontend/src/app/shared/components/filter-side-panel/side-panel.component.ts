@@ -108,7 +108,6 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadData(): void {
-    console.log('loadData');
     /**
      * Load all backups and filter them based on the filter options for charts
      */
@@ -213,6 +212,22 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
    * Initialize the charts
    */
   ngAfterViewInit(): void {
+    this.createCharts();
+    this.backupService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.createCharts();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.chartService.dispose();
+  }
+
+  createCharts(): void {
     setTimeout(() => {
       // Create charts
       for (const chart of this.charts) {
@@ -254,12 +269,6 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }, 100);
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.chartService.dispose();
   }
 
   /**

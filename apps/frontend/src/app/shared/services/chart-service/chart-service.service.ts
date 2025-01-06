@@ -324,7 +324,6 @@ export class ChartService {
   ): void {
     data$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (backups) => {
-        console.log('Data update');
         series.data.clear();
 
         if (backups?.length) {
