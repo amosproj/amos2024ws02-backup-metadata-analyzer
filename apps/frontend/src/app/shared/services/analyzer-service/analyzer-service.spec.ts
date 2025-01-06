@@ -2,11 +2,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { AnalyzerService } from './analyzer-service';
+import { AlertServiceService } from '../alert-service/alert-service.service';
+import { BackupService } from '../backup-service/backup-service.service';
+import { DataStoresService } from '../data-stores-service/data-stores-service.service';
 
 describe('AnalyzerService', () => {
   let service: AnalyzerService;
   let httpClientMock: {
     post: ReturnType<typeof vi.fn>;
+  };
+  let alertServiceMock: {
+    refresh: ReturnType<typeof vi.fn>;
+  };
+  let dataStoresServiceMock: {
+    refresh: ReturnType<typeof vi.fn>;
+  };
+  let backupServiceMock: {
+    refresh: ReturnType<typeof vi.fn>;
   };
   const baseUrl = 'http://test-url';
 
@@ -14,10 +26,25 @@ describe('AnalyzerService', () => {
     httpClientMock = {
       post: vi.fn(),
     };
+    httpClientMock = {
+      post: vi.fn(),
+    };
+    alertServiceMock = {
+      refresh: vi.fn(),
+    };
+    dataStoresServiceMock = {
+      refresh: vi.fn(),
+    };
+    backupServiceMock = {
+      refresh: vi.fn(),
+    };
 
     service = new AnalyzerService(
       baseUrl,
-      httpClientMock as unknown as HttpClient
+      httpClientMock as unknown as HttpClient,
+      alertServiceMock as unknown as AlertServiceService,
+      dataStoresServiceMock as unknown as DataStoresService,
+      backupServiceMock as unknown as BackupService
     );
   });
 
@@ -30,6 +57,10 @@ describe('AnalyzerService', () => {
           `${baseUrl}/analyzer/refresh`,
           {}
         );
+
+        expect(alertServiceMock.refresh).toHaveBeenCalled();
+        expect(dataStoresServiceMock.refresh).toHaveBeenCalled();
+        expect(backupServiceMock.refresh).toHaveBeenCalled();
       });
     });
   });
