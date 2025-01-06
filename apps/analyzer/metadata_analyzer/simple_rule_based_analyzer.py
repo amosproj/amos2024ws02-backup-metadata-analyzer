@@ -217,6 +217,12 @@ class SimpleRuleBasedAnalyzer:
         return {"count": count}
 
     # Search for unusual creation times of 'full' backups made after start_date
+    def extract_schedule_dict(self, schedules):
+        schedule_dict = dict()
+        for schedule in schedules:
+            schedule_dict[schedule.name] = schedule
+        return schedule_dict
+
     def analyze_creation_dates(self, data, schedules, alert_limit, start_date):
         # Group the 'full' results by their task
         groups = defaultdict(list)
@@ -231,9 +237,7 @@ class SimpleRuleBasedAnalyzer:
             groups[result.task].append(result)
 
         # Create a dictionary from schedule name to the schedule object
-        schedule_dict = dict()
-        for schedule in schedules:
-            schedule_dict[schedule.name] = schedule
+        schedule_dict = self.extract_schedule_dict(schedules)
 
 
         alerts = []
@@ -295,40 +299,45 @@ class SimpleRuleBasedAnalyzer:
                 if result2.start_time <= start_date:
                     continue
 
-                # Calculate the expected date for result2 and compare it with the actual date
-                expected_date = result1.start_time + expected_delta
-
-                # Use the start_time of the schedule if the base is in days, weeks or months
-                if schedule.p_base in ["DAY", "WEE", "MON"]:
-                    start_time = schedule.start_time # Has format "hh:mm"
-                    try:
-                        expected_time = time.fromisoformat(start_time)
-                        expected_date = datetime.combine(expected_date, expected_time)
-                    except ValueError:
-                        print(f"start_time with invalid format: {start_time}")
-
-                # Check for the weekday of the expected_date if the base is in weeks or months
-                if schedule.p_base in ["WEE", "MON"]:
-                    day_mask = [
-                        schedule.mo,
-                        schedule.tu,
-                        schedule.we,
-                        schedule.th,
-                        schedule.fr,
-                        schedule.sa,
-                        schedule.su,
-                    ]
-                    accepted_days = [i for i in range(7) if day_mask[i] == "1"]
-                    assert accepted_days != [] # Should have at least one accepted day
-
-                    while expected_date.weekday() not in accepted_days:
-                        expected_date += timedelta(days=1)
+                # Calculate the expected date for result2
+                expected_date = self.compute_expected_date(result1.start_time, expected_delta, schedule)
 
                 diff = abs(expected_date - result2.start_time)
                 if diff.total_seconds() > 60 * 60: # Diff greater than an hour => alert
                     alerts.append(CreationDateAlert(result2, expected_date))
 
         return alerts
+
+    def compute_expected_date(self, start_time, expected_delta, schedule):
+        expected_date = start_time + expected_delta
+
+        # Use the start_time of the schedule if the base is in days, weeks or months
+        if schedule.p_base in ["DAY", "WEE", "MON"]:
+            schedule_start_time = schedule.start_time # Has format "hh:mm"
+            try:
+                expected_time = time.fromisoformat(schedule_start_time)
+                expected_date = datetime.combine(expected_date, expected_time)
+            except ValueError:
+                print(f"start_time with invalid format: {schedule_start_time}")
+
+        # Check for the weekday of the expected_date if the base is in weeks or months
+        if schedule.p_base in ["WEE", "MON"]:
+            day_mask = [
+                schedule.mo,
+                schedule.tu,
+                schedule.we,
+                schedule.th,
+                schedule.fr,
+                schedule.sa,
+                schedule.su,
+            ]
+            accepted_days = [i for i in range(7) if day_mask[i] == "1"]
+            assert accepted_days != [] # Should have at least one accepted day
+
+            while expected_date.weekday() not in accepted_days:
+                expected_date += timedelta(days=1)
+
+        return expected_date
 
 
     # Search for data stores that are almost full
