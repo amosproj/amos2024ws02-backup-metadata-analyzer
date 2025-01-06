@@ -28,7 +28,7 @@ export class AnalyzerServiceService {
     this.triggerStorageFillAnalysis();
   }
 
-  private async updateBasicBackupData(): Promise<void> {
+  async updateBasicBackupData(): Promise<void> {
     await firstValueFrom(
       this.httpService.post(`${this.analyzerServiceUrl}/updateBasicBackupData`)
     ).then(() => {
@@ -39,7 +39,7 @@ export class AnalyzerServiceService {
   /**
    * Trigger the storage fill analysis.
    */
-  private triggerStorageFillAnalysis() {
+  triggerStorageFillAnalysis() {
     firstValueFrom(
       this.httpService.post(
         `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisStorageCapacity?alertLimit=-1`
@@ -58,7 +58,7 @@ export class AnalyzerServiceService {
   /**
    * Trigger the creationDateAnalysis
    */
-  private triggerCreationDateAnalysis() {
+  triggerCreationDateAnalysis() {
     firstValueFrom(
       this.httpService.post(
         `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisCreationDates?alertLimit=-1`
@@ -77,7 +77,7 @@ export class AnalyzerServiceService {
   /**
    * Trigger the size analysis.
    */
-  private triggerSizeAnalysis() {
+  triggerSizeAnalysis() {
     // Analysis for full backups
     firstValueFrom(
       this.httpService.post(
