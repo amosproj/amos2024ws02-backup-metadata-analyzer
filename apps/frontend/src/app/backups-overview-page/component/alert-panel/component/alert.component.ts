@@ -7,11 +7,9 @@ import {
   StorageFillAlert,
 } from '../../../../shared/types/alert';
 import { DatePipe } from '@angular/common';
-import { Subject, takeUntil, tap } from 'rxjs';
-import { SeverityType } from '../../../../shared/enums/severityType';
+import { shortenBytes } from '../../../../shared/utils/shortenBytes';
 import { Subject, takeUntil } from 'rxjs';
-import { SeverityType } from '../../shared/enums/severityType';
-import { shortenBytes } from '../../shared/utils/shortenBytes';
+import { SeverityType } from '../../../../shared/enums/severityType';
 
 @Component({
   selector: 'app-alert',
