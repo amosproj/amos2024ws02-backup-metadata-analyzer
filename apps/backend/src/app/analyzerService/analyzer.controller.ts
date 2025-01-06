@@ -1,4 +1,4 @@
-import { Controller, Get, Logger, Param } from '@nestjs/common';
+import { Controller, Get, Logger, Param, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AnalyzerServiceService } from './analyzer-service.service';
 
@@ -11,6 +11,13 @@ export class AnalyzerController {
     private readonly analyzerServiceService: AnalyzerServiceService
   ) {}
 
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh the analyzer data, by doing all analyzes again and sending results to backend.' })
+  async refresh(): Promise<void> {
+    return await this.analyzerServiceService.triggerAll();
+  }
+
+  //DEMOS
   @Get('echo/:text')
   @ApiOperation({ summary: 'Echo the given text.' })
   @ApiOkResponse({ type: String })
