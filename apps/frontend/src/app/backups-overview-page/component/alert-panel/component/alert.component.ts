@@ -7,7 +7,7 @@ import {
   StorageFillAlert,
 } from '../../../../shared/types/alert';
 import { DatePipe } from '@angular/common';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
 
 @Component({
@@ -153,7 +153,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       case 'CREATION_DATE_ALERT':
         const creationDateAlert = alert as CreationDateAlert;
 
-        description = `Backup was started at ${creationDateAlert.date.toString()}, but based on previous backups, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
+        description = `Backup was started at ${creationDateAlert.date.toString()}, but based on the defined schedule, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
         break;
       case 'STORAGE_FILL_ALERT':
         const storageFillAlert = alert as StorageFillAlert;
