@@ -18,3 +18,33 @@
   --clr-header-font-color: #000;
   --clr-header-font-color-hover: #000;
 }
+
+.refresh {
+  background-color: transparent;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+//Spin animation
+.refresh-icon {
+  display: inline-block;
+  transition: transform 0.5s linear;
+  width: 24px;
+  height: 24px;
+
+  &.spin {
+    animation: spin 3s infinite linear;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

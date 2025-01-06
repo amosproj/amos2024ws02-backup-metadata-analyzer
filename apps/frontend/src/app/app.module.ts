@@ -21,6 +21,7 @@ import {
   homeIcon,
   lockIcon,
   plusIcon,
+  refreshIcon,
   searchIcon,
   tableIcon,
   tagIcon,
@@ -57,7 +58,7 @@ import { BackupStatisticsPageComponent } from './backup-statistics-page/componen
     InformationPanelComponent,
     BackupTableComponent,
     SidePanelComponent,
-    BackupStatisticsPageComponent
+    BackupStatisticsPageComponent,
   ],
   imports: [
     BrowserModule,
@@ -92,7 +93,8 @@ export class AppModule {
       plusIcon,
       lockIcon,
       trashIcon,
-      helpIcon
+      helpIcon,
+      refreshIcon
     );
   }
 }
