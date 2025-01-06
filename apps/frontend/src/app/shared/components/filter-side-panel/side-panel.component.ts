@@ -13,6 +13,7 @@ import {
   distinctUntilChanged,
   map,
   Observable,
+  of,
   shareReplay,
   startWith,
   Subject,
@@ -82,14 +83,32 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   //Observables
-  readonly chartBackups$: Observable<APIResponse<Backup>>;
-  allBackupTasks$: Observable<BackupTask[]>;
-  protected selectedbackupTasks$: Observable<BackupTask[]>;
+  chartBackups$: Observable<APIResponse<Backup>> = of({
+    data: [],
+    total: 0,
+    paginationData: { limit: 0, offset: 0, total: 0 },
+  });
+  allBackupTasks$: Observable<BackupTask[]> = of([]);
+  protected selectedbackupTasks$: Observable<BackupTask[]> = of([]);
 
   constructor(
     private readonly backupService: BackupService,
     private readonly chartService: ChartService
-  ) {
+  ) {}
+
+  ngOnInit(): void {
+    this.loadData();
+    this.backupService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadData();
+      });
+    this.setTimeRange('month');
+  }
+
+  loadData(): void {
+    console.log('loadData');
     /**
      * Load all backups and filter them based on the filter options for charts
      */
@@ -188,10 +207,6 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       takeUntil(this.destroy$)
     );
-  }
-
-  ngOnInit(): void {
-    this.setTimeRange('month');
   }
 
   /**

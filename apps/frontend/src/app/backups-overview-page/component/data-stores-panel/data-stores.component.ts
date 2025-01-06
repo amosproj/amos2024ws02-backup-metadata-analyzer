@@ -1,6 +1,6 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DataStoresService } from '../../../shared/services/data-stores-service/data-stores-service.service';
-import { map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
+import { map, Observable, of, shareReplay, Subject, takeUntil } from 'rxjs';
 import { DataStore } from '../../../shared/types/data-store';
 
 @Component({
@@ -8,23 +8,35 @@ import { DataStore } from '../../../shared/types/data-store';
   templateUrl: './data-stores.component.html',
   styleUrl: './data-stores.component.css',
 })
-export class DataStoresComponent implements OnDestroy {
+export class DataStoresComponent implements OnDestroy, OnInit {
   private readonly destroy$ = new Subject<void>();
-  dataStores$: Observable<DataStore[]>;
+  dataStores$: Observable<DataStore[]> = of([]);
 
   showAll = false;
 
-  constructor(private readonly dataStoresService: DataStoresService) {
-    this.dataStores$ = this.dataStoresService
-      .getAllDataStores()
-      .pipe(takeUntil(this.destroy$),
-        map(dataStores => this.sortDataStores(dataStores)),
-        shareReplay(1));
+  constructor(private readonly dataStoresService: DataStoresService) {}
+
+  ngOnInit() {
+    this.loadDataStores();
+    this.dataStoresService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadDataStores();
+      });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  loadDataStores(): void {
+    this.dataStores$ = this.dataStoresService.getAllDataStores().pipe(
+      takeUntil(this.destroy$),
+      map((dataStores) => this.sortDataStores(dataStores)),
+      shareReplay(1)
+    );
   }
 
   getFilledPercentage(dataStore: DataStore): number {
@@ -44,6 +56,8 @@ export class DataStoresComponent implements OnDestroy {
   }
 
   private sortDataStores(dataStores: DataStore[]): DataStore[] {
-    return dataStores.sort((a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a));
+    return dataStores.sort(
+      (a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a)
+    );
   }
 }

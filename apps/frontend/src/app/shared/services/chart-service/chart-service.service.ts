@@ -7,11 +7,7 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import { ITimeInterval } from '@amcharts/amcharts5/.internal/core/util/Time';
 import { Backup } from '../../types/backup';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import {
-  ChartConfig,
-  ChartType,
-  TimeRange,
-} from '../../types/chart-config';
+import { ChartConfig, ChartType, TimeRange } from '../../types/chart-config';
 
 @Injectable({
   providedIn: 'root',
@@ -328,6 +324,7 @@ export class ChartService {
   ): void {
     data$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (backups) => {
+        console.log('Data update');
         series.data.clear();
 
         if (backups?.length) {
