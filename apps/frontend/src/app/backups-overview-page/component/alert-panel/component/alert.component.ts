@@ -157,7 +157,7 @@ export class AlertComponent implements OnInit, OnDestroy {
         break;
       case 'STORAGE_FILL_ALERT':
         const storageFillAlert = alert as StorageFillAlert;
-        description = `The current storage fill is ${storageFillAlert.filled.toString()} GiB, which is above the threshold of ${storageFillAlert.highWaterMark.toString()}
+        description = `The current storage fill of storage with name "${storageFillAlert.dataStoreName}" is ${storageFillAlert.filled.toString()} GiB, which is above the threshold of ${storageFillAlert.highWaterMark.toString()}
          GiB. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()} GiB`;
         break;
     }
