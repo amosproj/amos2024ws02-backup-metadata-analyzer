@@ -8,7 +8,7 @@ import { Alert } from '../../types/alert';
   providedIn: 'root',
 })
 export class AlertServiceService {
-  private refreshAlerts = new Subject<void>();
+  private readonly refreshAlerts = new Subject<void>();
   constructor(
     @Inject(BASE_URL) private readonly baseUrl: string,
     private readonly http: HttpClient

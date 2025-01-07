@@ -23,6 +23,7 @@ import {
   lineChartIcon,
   lockIcon,
   plusIcon,
+  refreshIcon,
   searchIcon,
   tableIcon,
   tagIcon,
@@ -96,9 +97,10 @@ export class AppModule {
       plusIcon,
       lockIcon,
       trashIcon,
+      refreshIcon,
       helpIcon,
       bookIcon,
-      lineChartIcon
+      lineChartIcon,
     );
   }
 }

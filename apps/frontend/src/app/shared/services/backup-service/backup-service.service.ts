@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, shareReplay, Subject } from 'rxjs';
 import { BASE_URL } from '../../types/configuration';
 import { Backup } from '../../types/backup';
 import { APIResponse } from '../../types/api-response';
@@ -11,6 +11,8 @@ import { BackupTask } from '../../types/backup.task';
   providedIn: 'root',
 })
 export class BackupService {
+  private readonly refreshBackups = new Subject<void>();
+
   constructor(
     @Inject(BASE_URL) private readonly baseUrl: string,
     private readonly http: HttpClient
@@ -52,5 +54,13 @@ export class BackupService {
 
   getAllBackupTasks(): Observable<BackupTask[]> {
     return this.http.get<BackupTask[]>(`${this.baseUrl}/tasks`);
+  }
+
+  refresh() {
+    this.refreshBackups.next();
+  }
+
+  getRefreshObservable() {
+    return this.refreshBackups.asObservable();
   }
 }

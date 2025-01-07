@@ -13,6 +13,7 @@ import {
   distinctUntilChanged,
   map,
   Observable,
+  of,
   shareReplay,
   startWith,
   Subject,
@@ -82,14 +83,31 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   //Observables
-  readonly chartBackups$: Observable<APIResponse<Backup>>;
-  allBackupTasks$: Observable<BackupTask[]>;
-  protected selectedbackupTasks$: Observable<BackupTask[]>;
+  chartBackups$: Observable<APIResponse<Backup>> = of({
+    data: [],
+    total: 0,
+    paginationData: { limit: 0, offset: 0, total: 0 },
+  });
+  allBackupTasks$: Observable<BackupTask[]> = of([]);
+  protected selectedbackupTasks$: Observable<BackupTask[]> = of([]);
 
   constructor(
     private readonly backupService: BackupService,
     private readonly chartService: ChartService
-  ) {
+  ) {}
+
+  ngOnInit(): void {
+    this.loadData();
+    this.backupService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadData();
+      });
+    this.setTimeRange('month');
+  }
+
+  loadData(): void {
     /**
      * Load all backups and filter them based on the filter options for charts
      */
@@ -190,14 +208,26 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  ngOnInit(): void {
-    this.setTimeRange('month');
-  }
-
   /**
    * Initialize the charts
    */
   ngAfterViewInit(): void {
+    this.createCharts();
+    this.backupService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.createCharts();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.chartService.dispose();
+  }
+
+  createCharts(): void {
     setTimeout(() => {
       // Create charts
       for (const chart of this.charts) {
@@ -239,12 +269,6 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }, 100);
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.chartService.dispose();
   }
 
   /**
