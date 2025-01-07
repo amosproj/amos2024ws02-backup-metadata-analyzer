@@ -107,6 +107,11 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loadData();
       });
     this.setTimeRange('month');
+
+    this.filterCount$ = combineLatest([
+      this.backupTaskSubject$,
+      this.backupTypesSubject$,
+    ]).pipe(map(([tasks, types]) => tasks.length + types.length));
   }
 
   loadData(): void {
@@ -208,14 +213,6 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       takeUntil(this.destroy$)
     );
-  }
-
-  ngOnInit(): void {
-    this.setTimeRange('month');
-    this.filterCount$ = combineLatest([
-      this.backupTaskSubject$,
-      this.backupTypesSubject$,
-    ]).pipe(map(([tasks, types]) => tasks.length + types.length));
   }
 
   /**
