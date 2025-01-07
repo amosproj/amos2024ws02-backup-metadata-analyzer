@@ -1,0 +1,11 @@
+Most basic example endpoint that returns a hello world message.
+    ---
+    definitions:
+        Output:
+            type: string
+            example: 'Hello, world!'
+    responses:
+        200:
+            description: The hello world message
+            schema:
+                $ref: '#/definitions/Output'

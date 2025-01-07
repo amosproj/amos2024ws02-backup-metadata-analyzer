@@ -26,31 +26,27 @@ class Database:
 
 
     def get_data(self):
-        session = Session(self.engine)
-        stmt = select(BackupData)
-
-        result = session.scalars(stmt)
+        with Session(self.engine, future=True) as session:
+            stmt = select(BackupData)
+            result = session.scalars(stmt)
         return result
 
     def get_results(self):
-        session = Session(self.engine)
-        stmt = select(Result)
-
-        result = session.scalars(stmt)
+        with Session(self.engine, future=True) as session:
+            stmt = select(Result)
+            result = session.scalars(stmt)
         return result
 
     def get_tasks(self):
-        session = Session(self.engine)
-        stmt = select(Tasks)
-
-        result = session.scalars(stmt)
+        with Session(self.engine, future=True) as session:
+            stmt = select(Tasks)
+            result = session.scalars(stmt)
         return result
 
     def get_data_stores(self):
-        session = Session(self.engine)
-        stmt = select(DataStore)
-
-        result = session.scalars(stmt)
+        with Session(self.engine, future=True) as session:
+            stmt = select(DataStore)
+            result = session.scalars(stmt)
         return result
 
     def get_schedules(self):

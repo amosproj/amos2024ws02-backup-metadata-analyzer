@@ -98,7 +98,7 @@ export class ChartService {
   ) {
     const yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(root, {
-        numberFormat: "#.#'MB'",
+        numberFormat: '#,##0.00 b',
         renderer: am5xy.AxisRendererY.new(root, {
           pan: 'none',
           minGridDistance: 30,
@@ -144,6 +144,7 @@ export class ChartService {
           }),
         })
       );
+
       const columnTemplate = series.columns.template;
       columnTemplate.setAll({
         cornerRadiusTL: 3,
@@ -206,9 +207,10 @@ export class ChartService {
     backups = backups.map((backup) => {
       return {
         ...backup,
-        sizeMB: Math.floor(backup.sizeMB),
+        sizeMB: Math.floor(backup.sizeMB) * 1_000_000,
       };
     });
+
     const sortedBackups = [...backups].sort(
       (a, b) =>
         new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()
@@ -275,9 +277,9 @@ export class ChartService {
     switch (timeRange) {
       case 'week':
       case 'month':
-        return "[bold]{valueY}[/] MB\n{valueX.formatDate('MMM dd')}";
+        return "[bold]{valueY.formatNumber('#,##0.00 b')}[/]\n{valueX.formatDate('MMM dd')}";
       case 'year':
-        return "[bold]{valueY}[/] MB\nWeek {valueX.formatDate('w')}";
+        return "[bold]{valueY.formatNumber('#,##0.00 b')}[/]\nWeek {valueX.formatDate('w')}";
       default:
         return 'Size: {valueY} MB';
     }

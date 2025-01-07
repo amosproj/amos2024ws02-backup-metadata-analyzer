@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy.orm import mapped_column, Mapped, declarative_base
+from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import DeclarativeBase
 
-Base = declarative_base()
-
+class Base(DeclarativeBase):
+    pass
 
 class BackupData(Base):
     __tablename__ = "BackupData"

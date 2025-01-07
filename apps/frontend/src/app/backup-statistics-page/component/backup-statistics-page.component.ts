@@ -1,9 +1,8 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { ChartInformation } from '../../shared/types/chartInformation';
 import { ChartType } from '../../shared/enums/chartType';
 import { SidePanelComponent } from '../../shared/components/filter-side-panel/side-panel.component';
-import { BehaviorSubject } from 'rxjs';
-import { BackupTask } from '../../shared/types/backup.task';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-backup-statistics-page',
@@ -12,7 +11,7 @@ import { BackupTask } from '../../shared/types/backup.task';
 })
 export class BackupStatisticsPageComponent implements AfterViewInit {
   @ViewChild(SidePanelComponent) sidePanelComponent!: SidePanelComponent;
-  backupTaskSubject$: BehaviorSubject<BackupTask[]> | undefined;
+  filterCount$: Observable<number> = of(0);
   protected filterPanel = false;
 
   readonly charts: ChartInformation[] = [
@@ -27,7 +26,7 @@ export class BackupStatisticsPageComponent implements AfterViewInit {
   ];
 
   ngAfterViewInit(): void {
-    this.backupTaskSubject$ = this.sidePanelComponent.backupTaskSubject$;
+    this.filterCount$ = this.sidePanelComponent.filterCount$;
   }
 
   /**

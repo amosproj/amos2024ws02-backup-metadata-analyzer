@@ -163,7 +163,7 @@
     <clr-dg-placeholder>We couldn't find any backups!</clr-dg-placeholder>
     <clr-dg-row *ngFor="let backup of backups.data" [clrDgItem]="backup">
       <clr-dg-cell>{{ backup.saveset }}</clr-dg-cell>
-      <clr-dg-cell>{{ backup.sizeMB }}</clr-dg-cell>
+      <clr-dg-cell>{{ shortenBytes(backup.sizeMB * 1000000) }}</clr-dg-cell>
       <clr-dg-cell>{{ backup.taskId?.displayName ?? '' }}</clr-dg-cell>
       <clr-dg-cell>{{ backup.type }}</clr-dg-cell>
       <clr-dg-cell>{{ formatDate(backup.creationDate) }}</clr-dg-cell>
