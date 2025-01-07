@@ -18,7 +18,6 @@ path = app.root_path
 
 
 @app.route("/")
-@swag_from(os.path.join(path,'swagger','root.yaml'), validation=True)
 def hello_world():
     return "Hello, world!"
 
