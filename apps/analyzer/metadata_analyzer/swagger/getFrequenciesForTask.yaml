@@ -1,0 +1,50 @@
+Gets frequencies for a specific task, variable and backup type.
+    ---
+    parameters:
+      - name: input
+        in: body
+        type: object
+        required: true
+        properties:
+            variable:
+                type: string
+                example: 'data_size'
+            task_id:
+                type: string
+                example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+            backup_type:
+                type: string
+                example: 'F'
+    definitions:
+        Frequencies:
+            type: object
+            properties:
+                count:
+                    type: object
+                    properties:
+                        0:
+                            type: int
+                            example: 20
+                        1:
+                            type: int
+                            example: 17
+                        2:
+                            type: int
+                            example: 5
+                sbc_start:
+                    type: object
+                    properties:
+                        0:
+                            type: int
+                            example: 86400
+                        1:
+                            type: int
+                            example: 86401
+                        2:
+                            type: int
+                            example: 86399
+    responses:
+      200:
+        description: All backup frequencies found that meet the conditions, ranked by times appeared
+        schema:
+          $ref: '#/definitions/Frequencies'
