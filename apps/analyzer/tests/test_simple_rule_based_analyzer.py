@@ -1,13 +1,13 @@
 from datetime import datetime
 
 from metadata_analyzer.analyzer import Analyzer
-from metadata_analyzer.models import Result, DataStore
+from metadata_analyzer.models import Result, DataStore, Schedule
 from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
 from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
 
 
-def _create_mock_result(task, uuid, fdi_type, data_size, start_time):
+def _create_mock_result(task, uuid, fdi_type, data_size, start_time, schedule=""):
     mock_result = Result()
     mock_result.task = task
     mock_result.uuid = uuid
@@ -15,6 +15,7 @@ def _create_mock_result(task, uuid, fdi_type, data_size, start_time):
     mock_result.data_size = data_size
     mock_result.start_time = start_time
     mock_result.subtask_flag = "0"
+    mock_result.schedule = schedule
     return mock_result
 
 def _create_mock_data_store(name, capacity, high_water_mark, filled):
@@ -24,6 +25,21 @@ def _create_mock_data_store(name, capacity, high_water_mark, filled):
     mock_data_store.high_water_mark = high_water_mark
     mock_data_store.filled = filled
     return mock_data_store
+
+def _create_mock_schedule(name, p_base, p_count, start_time = None, days = []):
+    mock_schedule = Schedule()
+    mock_schedule.name = name
+    mock_schedule.p_base = p_base
+    mock_schedule.p_count = p_count
+    mock_schedule.start_time = start_time
+    mock_schedule.mo = "1" if "mo" in days else "0"
+    mock_schedule.tu = "1" if "tu" in days else "0"
+    mock_schedule.we = "1" if "we" in days else "0"
+    mock_schedule.th = "1" if "th" in days else "0"
+    mock_schedule.fr = "1" if "fr" in days else "0"
+    mock_schedule.sa = "1" if "sa" in days else "0"
+    mock_schedule.su = "1" if "su" in days else "0"
+    return mock_schedule
 
 
 def test_alert():
@@ -572,14 +588,27 @@ def test_alert_backup_size_irregularSize_inc():
 
 # Tests for the creation time alerts
 
-# Same exact time each day
-def test_alert_exact_time():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T03:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T03:00:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-03T03:00:00"))
-    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-04T03:00:00"))
+# Backups created according to the schedule should not generate alerts
+def test_creation_time_alert_correct_schedule():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T15:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-01T18:00:00"), "bar",
+    )
+    mock_result4 = _create_mock_result(
+        "foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-01T21:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "HOU", 3
+    )
 
-    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3, mock_result4], [], [], [mock_schedule]
+    )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
@@ -587,15 +616,27 @@ def test_alert_exact_time():
 
     assert backend.creation_date_alerts == []
 
-# Deviations up to 15 mins from the first backup
-def test_alert_small_time_deviation():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-02-01T12:05:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-03-01T12:15:00"))
-    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-04-01T11:55:00"))
-    mock_result5 = _create_mock_result("foo", "5", "F", 100_000_000, datetime.fromisoformat("2000-05-01T11:45:00"))
+# Backups with a deviation of exactly one hour from the schedule should generate alerts
+def test_creation_time_alert_correct_schedule_one_hour_diff():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T07:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T11:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-01T15:00:00"), "bar",
+    )
+    mock_result4 = _create_mock_result(
+        "foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-01T20:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "HOU", 4
+    )
 
-    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4, mock_result5])
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3, mock_result4], [], [], [mock_schedule]
+    )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
@@ -603,12 +644,27 @@ def test_alert_small_time_deviation():
 
     assert backend.creation_date_alerts == []
 
-# Backups with a diff of exactly one hour trigger no alert
-def test_alert_time_on_the_limit():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T13:00:00"))
+# Diffs should be calculated to the last backup made
+def test_creation_time_alert_correct_schedule_last_backup_as_reference():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T07:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T11:30:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-01T16:15:00"), "bar",
+    )
+    mock_result4 = _create_mock_result(
+        "foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-01T20:15:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "HOU", 4
+    )
 
-    database = MockDatabase([mock_result1, mock_result2])
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3, mock_result4], [], [], [mock_schedule]
+    )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
@@ -616,46 +672,27 @@ def test_alert_time_on_the_limit():
 
     assert backend.creation_date_alerts == []
 
-# Check if all past backups are considered as a reference
-def test_alert_moving_schedule():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-02-01T13:00:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-03-01T14:00:00"))
-    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-04-01T14:30:00"))
-    mock_result5 = _create_mock_result("foo", "5", "F", 100_000_000, datetime.fromisoformat("2000-05-01T15:30:00"))
+# Backups with a deviation larger than one hour from the schedule should generate alerts
+def test_creation_time_alert_correct_schedule():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T15:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-01T18:00:00"), "bar",
+    )
+    mock_result4 = _create_mock_result(
+        "foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-01T22:00:01"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "HOU", 3
+    )
 
-    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4, mock_result5])
-    backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
-    Analyzer.simple_rule_based_analysis_creation_dates(-1)
-
-    assert backend.creation_date_alerts == []
-
-# Check behaviour around midnight
-def test_alert_time_midnight_no_alert():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T00:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T23:30:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-02-02T00:30:00"))
-    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-02T23:00:00"))
-    mock_result5 = _create_mock_result("foo", "5", "F", 100_000_000, datetime.fromisoformat("2000-01-03T01:00:00"))
-
-    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4, mock_result5])
-    backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
-    Analyzer.simple_rule_based_analysis_creation_dates(-1)
-
-    assert backend.creation_date_alerts == []
-
-# Alerts should be triggered when the diff is greater than one hour
-def test_alert_unusual_time():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T12:00:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-03T12:00:00"))
-    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-04T18:00:00"))
-
-    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3, mock_result4], [], [], [mock_schedule]
+    )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
@@ -663,31 +700,98 @@ def test_alert_unusual_time():
 
     assert backend.creation_date_alerts == [{
         "date": mock_result4.start_time.isoformat(),
-        "referenceDate": "2000-01-04T12:00:00",
+        "referenceDate": "2000-01-01T21:00:00",
         "backupId": mock_result4.uuid
     }]
 
-def test_alert_creation_date_no_subtasks():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T18:00:00"))
-    mock_result2.subtask_flag = "1"
+# Different tasks same schedules
+def test_creation_time_alert_different_tasks_same_schedules():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T15:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "other", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-02T12:00:00"), "bar",
+    )
+    mock_result4 = _create_mock_result(
+        "other", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-02T15:00:00"), "bar",
+    )
+    mock_result5 = _create_mock_result(
+        "other", "5", "F", 100_000_000, datetime.fromisoformat("2000-01-02T20:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "HOU", 3
+    )
 
-    database = MockDatabase([mock_result1, mock_result2])
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3, mock_result4, mock_result5], [], [], [mock_schedule]
+    )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_creation_dates(-1)
 
-    assert backend.creation_date_alerts == []
+    assert backend.creation_date_alerts == [{
+        "date": mock_result5.start_time.isoformat(),
+        "referenceDate": "2000-01-02T18:00:00",
+        "backupId": mock_result5.uuid
+    }]
 
-# Two different schedules should trigger one alert for the first backup of the second schedule
-def test_alert_two_different_schedules_same_task():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2020-12-24T18:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2020-12-25T06:00:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2020-12-26T18:00:00"))
-    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2020-12-27T06:00:00"))
+# Same tasks different schedules
+def test_creation_time_alert_same_tasks_different_schedules():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "other",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-01T15:00:00"), "bar",
+    )
+    mock_result4 = _create_mock_result(
+        "foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-01T20:00:00"), "other",
+    )
+    mock_result5 = _create_mock_result(
+        "foo", "5", "F", 100_000_000, datetime.fromisoformat("2000-01-01T21:00:00"), "bar",
+    )
+    mock_schedule1 = _create_mock_schedule(
+        "bar", "HOU", 3
+    )
+    mock_schedule2 = _create_mock_schedule(
+        "other", "HOU", 8
+    )
 
-    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3, mock_result4, mock_result5], [], [], [mock_schedule1, mock_schedule2]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result5.start_time.isoformat(),
+        "referenceDate": "2000-01-01T18:00:00",
+        "backupId": mock_result5.uuid
+    }]
+
+# Schedule with minutes as the unit
+def test_creation_time_alert_schedule_minutes():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T10:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-01T15:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "MIN", 90
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2], [], [], [mock_schedule]
+    )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
@@ -695,17 +799,25 @@ def test_alert_two_different_schedules_same_task():
 
     assert backend.creation_date_alerts == [{
         "date": mock_result2.start_time.isoformat(),
-        "referenceDate": "2020-12-25T18:00:00",
+        "referenceDate": "2000-01-01T11:30:00",
         "backupId": mock_result2.uuid
     }]
 
-# Check behaviour around midnight
-def test_alert_time_midnight_alerts():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T00:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T02:00:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-03T22:59:00"))
+# Schedule with days as the unit
+def test_creation_time_alert_schedule_days():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-05T12:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "DAY", 3, "12:00"
+    )
 
-    database = MockDatabase([mock_result1, mock_result2, mock_result3])
+    database = MockDatabase(
+        [mock_result1, mock_result2], [], [], [mock_schedule]
+    )
     backend = MockBackend()
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
@@ -713,75 +825,184 @@ def test_alert_time_midnight_alerts():
 
     assert backend.creation_date_alerts == [{
         "date": mock_result2.start_time.isoformat(),
-        "referenceDate": "2000-01-02T00:00:00",
+        "referenceDate": "2000-01-04T12:00:00",
         "backupId": mock_result2.uuid
-    }, {
+    }]
+
+# Schedule with weeks as the unit
+def test_creation_time_alert_schedule_weeks():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-15T18:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "WEE", 2, "12:00", ["mo", "tu", "we", "th", "fr", "sa", "su"]
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-15T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Schedule with months as the unit
+def test_creation_time_alert_schedule_months():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-02T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-02-01T18:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "MON", 1, "12:00", ["mo", "tu", "we", "th", "fr", "sa", "su"]
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-02-01T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Check if the start time of the schedule is used
+def test_creation_time_alert_start_time_schedule():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-10T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-11T18:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-12T12:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "DAY", 1, "12:00"
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-11T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Check if a given specific day is used
+def test_creation_time_alert_with_specific_day():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-07T12:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-15T12:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "WEE", 1, "12:00", ["sa"]
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-08T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Check if the given specific days are used
+def test_creation_time_alert_with_specific_days():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-20T12:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-02-04T12:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "WEE", 2, "12:00", ["fr", "sa"]
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-15T12:00:00",
+        "backupId": mock_result2.uuid
+    }]
+
+# Check if the given specific days are not used when the base is not weeks or months
+def test_creation_time_alert_with_specific_days_but_base_is_days():
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-07T12:00:00"), "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-15T12:00:00"), "bar",
+    )
+    mock_schedule = _create_mock_schedule(
+        "bar", "DAY", 7, "12:00", ["sa"]
+    )
+
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3], [], [], [mock_schedule]
+    )
+    backend = MockBackend()
+    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
+    Analyzer.simple_rule_based_analysis_creation_dates(-1)
+
+    assert backend.creation_date_alerts == [{
+        "date": mock_result2.start_time.isoformat(),
+        "referenceDate": "2000-01-08T12:00:00",
+        "backupId": mock_result2.uuid
+    },
+    {   
         "date": mock_result3.start_time.isoformat(),
-        "referenceDate": "2000-01-03T00:00:00",
+        "referenceDate": "2000-01-14T12:00:00",
         "backupId": mock_result3.uuid
     }]
 
-# Test unordered results
-def test_alert_creation_date_unordered():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2020-01-01T18:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2020-01-02T13:30:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2020-01-03T18:30:00"))
-    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2020-01-04T19:31:00"))
 
-    database = MockDatabase([mock_result4, mock_result2, mock_result3, mock_result1])
-    backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
-    Analyzer.simple_rule_based_analysis_creation_dates(-1)
-
-    assert backend.creation_date_alerts == [{
-        "date": mock_result2.start_time.isoformat(),
-        "referenceDate": "2020-01-02T18:00:00",
-        "backupId": mock_result2.uuid
-    }, {
-        "date": mock_result4.start_time.isoformat(),
-        "referenceDate": "2020-01-04T18:30:00",
-        "backupId": mock_result4.uuid
-    }]
-
-# Test different tasks
-def test_alert_creation_date_different_tasks():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2020-01-01T14:00:00"))
-    mock_result2 = _create_mock_result("bar", "2", "F", 100_000_000, datetime.fromisoformat("2020-01-01T19:00:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2020-01-02T14:30:00"))
-    mock_result4 = _create_mock_result("bar", "4", "F", 100_000_000, datetime.fromisoformat("2020-01-02T20:01:00"))
-
-    database = MockDatabase([mock_result4, mock_result2, mock_result3, mock_result1])
-    backend = MockBackend()
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
-    Analyzer.simple_rule_based_analysis_creation_dates(-1)
-
-    assert backend.creation_date_alerts == [{
-        "date": mock_result4.start_time.isoformat(),
-        "referenceDate": "2020-01-02T19:00:00",
-        "backupId": mock_result4.uuid
-    }]
-
-# Alerts should be triggered when the diff is greater than one hour
-def test_alert_latest_creation_date():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 100_000_000, datetime.fromisoformat("2000-01-02T14:00:00"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 100_000_000, datetime.fromisoformat("2000-01-03T16:00:00"))
-    mock_result4 = _create_mock_result("foo", "4", "F", 100_000_000, datetime.fromisoformat("2000-01-04T18:00:00"))
-
-    database = MockDatabase([mock_result1, mock_result2, mock_result3, mock_result4])
-    backend = MockBackend()
-    backend.set_latest_alert_id("CREATION_DATE_ALERT", None, "3")
-    simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
-    Analyzer.simple_rule_based_analysis_creation_dates(-1)
-
-    assert backend.creation_date_alerts == [{
-        "date": mock_result4.start_time.isoformat(),
-        "referenceDate": "2000-01-04T16:00:00",
-        "backupId": mock_result4.uuid
-    }]
 
 # Tests for the storage fill alerts
 

@@ -34,6 +34,7 @@ class Result(Base):
     is_backup: Mapped[int]
     state: Mapped[int]
     subtask_flag: Mapped[str]
+    schedule: Mapped[str]
 
     start_time: Mapped[datetime]
     stop_time: Mapped[datetime]
@@ -77,6 +78,33 @@ class DataStore(Base):
 
     def __repr__(self):
         return f"""DataStore(name={self.name})"""
+
+    def __str__(self):
+        return repr(self)
+
+
+class Schedule(Base):
+    __tablename__ = "schedules"
+
+    # For now I only added the most relevant columns
+    name: Mapped[str] = mapped_column(primary_key=True)
+    uuid: Mapped[str]
+
+    p_base: Mapped[str]
+    p_count: Mapped[int]
+
+    start_time: Mapped[str]
+
+    mo: Mapped[str]
+    tu: Mapped[str]
+    we: Mapped[str]
+    th: Mapped[str]
+    fr: Mapped[str]
+    sa: Mapped[str]
+    su: Mapped[str]
+
+    def __repr__(self):
+        return f"""Schedule(name={self.name})"""
 
     def __str__(self):
         return repr(self)

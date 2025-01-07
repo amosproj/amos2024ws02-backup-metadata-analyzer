@@ -5,6 +5,7 @@ import {
   combineLatest,
   map,
   Observable,
+  of,
   startWith,
   Subject,
   switchMap,
@@ -50,7 +51,11 @@ export class BackupTableComponent implements OnInit, OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
 
-  readonly backups$: Observable<APIResponse<Backup>>;
+  backups$: Observable<APIResponse<Backup>> = of({
+    data: [],
+    total: 0,
+    paginationData: { limit: 0, offset: 0, total: 0 },
+  });
 
   constructor(
     private readonly backupService: BackupService,
@@ -63,15 +68,18 @@ export class BackupTableComponent implements OnInit, OnDestroy {
     this.taskFilter = new CustomFilter('taskName');
     this.typeFilter = new CustomFilter('type');
     this.scheduledTimeFilter = new CustomFilter('scheduledTime');
-
-    //Load all backups and filter them based on the filter options for table
-    this.backups$ = this.filterOptions$.pipe(
-      switchMap((params) => this.backupService.getAllBackups(params)),
-      takeUntil(this.destroy$)
-    );
   }
 
   ngOnInit(): void {
+    this.loadBackups();
+
+    this.backupService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadBackups();
+      });
+
     combineLatest([
       this.backupDateFilter.changes.pipe(startWith(null)),
       this.backupSizeFilter.changes.pipe(startWith(null)),
@@ -90,6 +98,14 @@ export class BackupTableComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  loadBackups(): void {
+    //Load all backups and filter them based on the filter options for table
+    this.backups$ = this.filterOptions$.pipe(
+      switchMap((params) => this.backupService.getAllBackups(params)),
+      takeUntil(this.destroy$)
+    );
   }
 
   /**
