@@ -41,20 +41,32 @@ describe('AnalyzerServiceService', () => {
 
   it('should trigger all analyzers', async () => {
     jest.spyOn(service, 'updateBasicBackupData').mockResolvedValue();
-    jest.spyOn(service, 'triggerSizeAnalysis').mockImplementation();
+    jest
+      .spyOn(service, 'triggerSizeAnalysisForFullBackups')
+      .mockImplementation();
+    jest
+      .spyOn(service, 'triggerSizeAnalysisForDiffBackups')
+      .mockImplementation();
+    jest
+      .spyOn(service, 'triggerSizeAnalysisForIncBackups')
+      .mockImplementation();
     jest.spyOn(service, 'triggerCreationDateAnalysis').mockImplementation();
     jest.spyOn(service, 'triggerStorageFillAnalysis').mockImplementation();
 
     await service.triggerAll();
 
     expect(service.updateBasicBackupData).toHaveBeenCalled();
-    expect(service.triggerSizeAnalysis).toHaveBeenCalled();
+    expect(service.triggerSizeAnalysisForFullBackups).toHaveBeenCalled();
+    expect(service.triggerSizeAnalysisForDiffBackups).toHaveBeenCalled();
+    expect(service.triggerSizeAnalysisForIncBackups).toHaveBeenCalled();
     expect(service.triggerCreationDateAnalysis).toHaveBeenCalled();
     expect(service.triggerStorageFillAnalysis).toHaveBeenCalled();
   });
 
   it('should update basic backup data', async () => {
-    jest.spyOn(httpService, 'post').mockReturnValue(of({} as AxiosResponse<any>));
+    jest
+      .spyOn(httpService, 'post')
+      .mockReturnValue(of({} as AxiosResponse<any>));
 
     await service.updateBasicBackupData();
 
@@ -87,19 +99,37 @@ describe('AnalyzerServiceService', () => {
     );
   });
 
-  it('should trigger size analysis', async () => {
+  it('should trigger size analysis for full backups', async () => {
     jest
       .spyOn(httpService, 'post')
       .mockReturnValue(of({ data: { count: 5 } } as AxiosResponse<any>));
 
-    service.triggerSizeAnalysis();
+    await service.triggerSizeAnalysisForFullBackups();
 
     expect(httpService.post).toHaveBeenCalledWith(
       'http://localhost:8000/simpleRuleBasedAnalysis?alertLimit=-1'
     );
+  });
+
+  it('should trigger size analysis for diff backups', async () => {
+    jest
+      .spyOn(httpService, 'post')
+      .mockReturnValue(of({ data: { count: 5 } } as AxiosResponse<any>));
+
+    await service.triggerSizeAnalysisForDiffBackups();
+
     expect(httpService.post).toHaveBeenCalledWith(
       'http://localhost:8000/simpleRuleBasedAnalysisDiff?alertLimit=-1'
     );
+  });
+
+  it('should trigger size analysis for inc backups', async () => {
+    jest
+      .spyOn(httpService, 'post')
+      .mockReturnValue(of({ data: { count: 5 } } as AxiosResponse<any>));
+
+    await service.triggerSizeAnalysisForIncBackups();
+
     expect(httpService.post).toHaveBeenCalledWith(
       'http://localhost:8000/simpleRuleBasedAnalysisInc?alertLimit=-1'
     );

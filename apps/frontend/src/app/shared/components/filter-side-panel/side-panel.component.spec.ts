@@ -40,6 +40,7 @@ describe('SidePanelComponent', () => {
     mockBackupService = {
       getAllBackups: vi.fn().mockReturnValue(of(mockBackups)),
       getAllBackupTasks: vi.fn().mockReturnValue(of([])),
+      getRefreshObservable: vi.fn().mockReturnValue(of({})),
     };
 
     mockChartService = {
@@ -122,7 +123,7 @@ describe('SidePanelComponent', () => {
       component.ngAfterViewInit();
       vi.advanceTimersByTime(200);
 
-      expect(mockChartService.createChart).toHaveBeenCalledTimes(2);
+      expect(mockChartService.createChart).toHaveBeenCalledTimes(4);
       vi.useRealTimers();
     });
   });
@@ -193,6 +194,8 @@ describe('SidePanelComponent', () => {
       };
 
       mockBackupService.getAllBackups.mockReturnValue(of(mockResponse));
+
+      component.loadData();
 
       component.chartBackups$.subscribe(() => {
         expect(mockChartService.prepareColumnData).toHaveBeenCalled();

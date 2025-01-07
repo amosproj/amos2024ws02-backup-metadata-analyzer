@@ -23,9 +23,13 @@ export class AnalyzerServiceService {
   async triggerAll(): Promise<void> {
     this.logger.debug(`Triggering all analyzers`);
     await this.updateBasicBackupData();
-    this.triggerSizeAnalysis();
-    this.triggerCreationDateAnalysis();
-    this.triggerStorageFillAnalysis();
+    await Promise.all([
+      this.triggerSizeAnalysisForFullBackups(),
+      this.triggerSizeAnalysisForDiffBackups(),
+      this.triggerSizeAnalysisForIncBackups(),
+      this.triggerCreationDateAnalysis(),
+      this.triggerStorageFillAnalysis(),
+    ]);
   }
 
   async updateBasicBackupData(): Promise<void> {
@@ -39,8 +43,8 @@ export class AnalyzerServiceService {
   /**
    * Trigger the storage fill analysis.
    */
-  triggerStorageFillAnalysis() {
-    firstValueFrom(
+  async triggerStorageFillAnalysis() {
+    await firstValueFrom(
       this.httpService.post(
         `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisStorageCapacity?alertLimit=-1`
       )
@@ -58,8 +62,8 @@ export class AnalyzerServiceService {
   /**
    * Trigger the creationDateAnalysis
    */
-  triggerCreationDateAnalysis() {
-    firstValueFrom(
+  async triggerCreationDateAnalysis() {
+    await firstValueFrom(
       this.httpService.post(
         `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisCreationDates?alertLimit=-1`
       )
@@ -75,52 +79,59 @@ export class AnalyzerServiceService {
   }
 
   /**
-   * Trigger the size analysis.
+   * Trigger the size analysis for full backups.
    */
-  triggerSizeAnalysis() {
-    // Analysis for full backups
-    firstValueFrom(
+  async triggerSizeAnalysisForFullBackups() {
+    await firstValueFrom(
       this.httpService.post(
         `${this.analyzerServiceUrl}/simpleRuleBasedAnalysis?alertLimit=-1`
       )
     )
       .then((response) => {
         this.logger.log(
-          `Size Analysis done. Triggered ${response.data.count} Alerts`
+          `Size Analysis done for full backups. Triggered ${response.data.count} Alerts`
         );
       })
       .catch((error) => {
-        this.logger.error(`Error on Size Analysis: ${error}`);
+        this.logger.error(`Error on Size Analysis for full backups: ${error}`);
       });
+  }
 
-    // Analysis for differential backups
-    firstValueFrom(
+  /**
+   * Trigger the size analysis for diff backups.
+   */
+  async triggerSizeAnalysisForDiffBackups() {
+    await firstValueFrom(
       this.httpService.post(
         `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisDiff?alertLimit=-1`
       )
     )
       .then((response) => {
         this.logger.log(
-          `Size Analysis done. Triggered ${response.data.count} Alerts`
+          `Size Analysis done for diff backups. Triggered ${response.data.count} Alerts`
         );
       })
       .catch((error) => {
-        this.logger.error(`Error on Size Analysis: ${error}`);
+        this.logger.error(`Error on Size Analysis for diff backups: ${error}`);
       });
+  }
 
-    // Analysis for incremental backups
-    firstValueFrom(
+  /**
+   * Trigger the size analysis for inc backups.
+   */
+  async triggerSizeAnalysisForIncBackups() {
+    await firstValueFrom(
       this.httpService.post(
         `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisInc?alertLimit=-1`
       )
     )
       .then((response) => {
         this.logger.log(
-          `Size Analysis done. Triggered ${response.data.count} Alerts`
+          `Size Analysis done for inc backups. Triggered ${response.data.count} Alerts`
         );
       })
       .catch((error) => {
-        this.logger.error(`Error on Size Analysis: ${error}`);
+        this.logger.error(`Error on Size Analysis for inc backups: ${error}`);
       });
   }
 

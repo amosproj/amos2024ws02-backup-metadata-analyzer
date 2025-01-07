@@ -39,6 +39,8 @@ describe('DataStoresComponent', () => {
     it('should load data stores correctly', (done) => {
       mockDataStoresService.getAllDataStores.mockReturnValue(of(dataStores));
 
+      component.loadDataStores();
+
       component.dataStores$.subscribe((result) => {
         expect(result).toEqual(dataStores);
       });
