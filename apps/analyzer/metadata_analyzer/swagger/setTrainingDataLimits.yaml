@@ -1,0 +1,31 @@
+Sets start and end index of the values to be used as a training set.
+    ---
+    parameters:
+      - name: Input
+        in: body
+        type: object
+        required: true
+        properties:
+            body:
+                type: object
+                items: '#/definitions/LimitBody'
+                properties:
+                    training_series_start:
+                        type: int
+                        example: 4
+                    training_series_end:
+                        type: int
+                        example: 329
+    definitions:
+        LimitBody:
+            type: object
+            properties:
+                training_series_start:
+                        type: int
+                        example: 4
+                training_series_end:
+                        type: int
+                        example: 329
+    responses:
+        200:
+            description: Values set succesfully
