@@ -39,8 +39,8 @@ class Database:
 
         schedule_dict = SimpleRuleBasedAnalyzer.extract_schedule_dict(schedules)
         results = session.scalars(stmt)
-        for result in results:
-            result.scheduledTime = SimpleRuleBasedAnalyzer.compute_expected_date(result.)
+        start_date = Analyzer._get_start_date(results, "SIZE_ALERT")
+        SimpleRuleBasedAnalyzer.analyze_creation_dates(results, schedule_dict, None, start_date)
         return results
 
     def get_tasks(self):
