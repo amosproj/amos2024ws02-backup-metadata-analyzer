@@ -224,7 +224,7 @@ class SimpleRuleBasedAnalyzer:
             schedule_dict[schedule.name] = schedule
         return schedule_dict
 
-    def analyze_creation_dates(self, data, schedules, alert_limit, start_date, mode = "only_alerts"):
+    def analyze_creation_dates(self, data, schedules, alert_limit, start_date):
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
@@ -241,20 +241,11 @@ class SimpleRuleBasedAnalyzer:
 
         # Create a dictionary from schedule name to the schedule object
         schedule_dict = self.extract_schedule_dict(schedules)
-
-        if(mode == "only_alerts"):
             alerts = []
             # Iterate through each group to find unusual creation times
             for task, unordered_results in groups.items():
                 results = sorted(unordered_results, key=lambda result: result.start_time)
                 alerts += self._analyze_creation_dates_of_one_task(
-                    results, schedule_dict, start_date
-                )
-        else:
-            all_results = []
-            for task, unordered_results in groups.items():
-                results = sorted(unordered_results, key=lambda result: result.start_time)
-                all_results += self._analyze_creation_dates_of_one_task(
                     results, schedule_dict, start_date
                 )
 
@@ -313,6 +304,9 @@ class SimpleRuleBasedAnalyzer:
                 expected_date = self.compute_expected_date(
                     result1.start_time, expected_delta, schedule
                 )
+
+                # Set the scheduledTime field
+                result2.scheduledTime = expected_date
 
                 diff = abs(expected_date - result2.start_time)
                 if diff.total_seconds() > 60 * 60:  # Diff greater than an hour => alert
