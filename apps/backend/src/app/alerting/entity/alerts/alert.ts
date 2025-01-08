@@ -31,10 +31,6 @@ export abstract class Alert {
   backup?: BackupDataEntity;
 
   @ApiProperty({
-    description: 'Creation date of the alert',
-    required: true,
-  })
-  @ApiProperty({
     description: 'Auto generated creation date of the alert',
     required: true,
   })
