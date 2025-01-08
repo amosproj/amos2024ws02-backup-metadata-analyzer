@@ -241,13 +241,13 @@ class SimpleRuleBasedAnalyzer:
 
         # Create a dictionary from schedule name to the schedule object
         schedule_dict = self.extract_schedule_dict(schedules)
-            alerts = []
-            # Iterate through each group to find unusual creation times
-            for task, unordered_results in groups.items():
-                results = sorted(unordered_results, key=lambda result: result.start_time)
-                alerts += self._analyze_creation_dates_of_one_task(
-                    results, schedule_dict, start_date
-                )
+        alerts = []
+        # Iterate through each group to find unusual creation times
+        for task, unordered_results in groups.items():
+            results = sorted(unordered_results, key=lambda result: result.start_time)
+            alerts += self._analyze_creation_dates_of_one_task(
+                results, schedule_dict, start_date
+            )
 
         # Because we ignore alerts which would be created earlier than the current latest alert,
         # we have to sort the alerts to not miss any alerts in the future
