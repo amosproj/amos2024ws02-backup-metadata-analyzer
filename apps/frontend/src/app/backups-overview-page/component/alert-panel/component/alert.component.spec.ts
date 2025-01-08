@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { AlertComponent } from './alert.component';
 import { of } from 'rxjs';
-import { Alert, SizeAlert } from '../../../../shared/types/alert';
+import {
+  Alert,
+  SizeAlert,
+  StorageFillAlert,
+} from '../../../../shared/types/alert';
 import { randomUUID } from 'crypto';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { BackupType } from '../../../../shared/enums/backup.types';
@@ -297,6 +301,113 @@ describe('AlertComponent', () => {
       expect(formattedDate).toBe('');
     });
   });
+
+  describe('filterAlerts', () => {
+    it('should filter and sort alerts correctly', () => {
+      const alerts: Alert[] = [
+        {
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(),
+            name: 'STORAGE_FILL_ALERT',
+            severity: SeverityType.CRITICAL,
+            user_active: true,
+            master_active: true,
+          },
+          creationDate: new Date('2023-01-01T12:00:00'),
+          dataStoreName: 'DataStore1',
+          filled: 90,
+          highWaterMark: 80,
+          capacity: 100,
+        } as StorageFillAlert,
+        {
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(),
+            name: 'STORAGE_FILL_ALERT',
+            severity: SeverityType.WARNING,
+            user_active: true,
+            master_active: true,
+          },
+          creationDate: new Date('2023-01-02T12:00:00'),
+          dataStoreName: 'DataStore1',
+          filled: 85,
+          highWaterMark: 80,
+          capacity: 100,
+        } as StorageFillAlert,
+        {
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(),
+            name: 'SIZE_ALERT',
+            severity: SeverityType.INFO,
+            user_active: true,
+            master_active: true,
+          },
+          backup: {
+            id: randomUUID().toString(),
+            sizeMB: 0,
+            creationDate: new Date('2023-01-03T12:00:00'),
+            saveset: 'saveset',
+            type: BackupType.DIFFERENTIAL,
+          },
+          creationDate: new Date('2023-01-03T12:00:00'),
+          size: 100,
+          referenceSize: 80,
+        } as SizeAlert,
+      ];
+
+      const filteredAlerts = component.filterAlerts(alerts);
+
+      expect(filteredAlerts.length).toBe(2);
+      expect(filteredAlerts[0].creationDate).toEqual(
+        new Date('2023-01-03T12:00:00')
+      );
+      expect(filteredAlerts[1].creationDate).toEqual(
+        new Date('2023-01-02T12:00:00')
+      );
+    });
+
+    it('should only keep the latest STORAGE_FILL_ALERT per data store', () => {
+      const alerts: Alert[] = [
+        {
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(),
+            name: 'STORAGE_FILL_ALERT',
+            severity: SeverityType.CRITICAL,
+            user_active: true,
+            master_active: true,
+          },
+          creationDate: new Date('2023-01-01T12:00:00'),
+          dataStoreName: 'DataStore1',
+          filled: 90,
+          highWaterMark: 80,
+          capacity: 100,
+        } as StorageFillAlert,
+        {
+          id: randomUUID().toString(),
+          alertType: {
+            id: randomUUID().toString(),
+            name: 'STORAGE_FILL_ALERT',
+            severity: SeverityType.WARNING,
+            user_active: true,
+            master_active: true,
+          },
+          creationDate: new Date('2023-01-02T12:00:00'),
+          dataStoreName: 'DataStore1',
+          filled: 85,
+          highWaterMark: 80,
+          capacity: 100,
+        } as StorageFillAlert,
+      ];
+
+      const filteredAlerts = component.filterAlerts(alerts);
+
+      expect(filteredAlerts.length).toBe(1);
+      expect(filteredAlerts[0].creationDate).toEqual(
+        new Date('2023-01-02T12:00:00')
+      );
+    });
+  });
 });
-
-
