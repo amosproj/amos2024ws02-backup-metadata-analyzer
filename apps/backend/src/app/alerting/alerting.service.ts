@@ -101,8 +101,8 @@ export class AlertingService {
     if (backupId) {
       where.backup = { id: backupId };
     }
+    const date = new Date();
     if (days) {
-      const date = new Date();
       date.setDate(date.getDate() - days);
       where.backup = { creationDate: MoreThanOrEqual(date) };
     }
@@ -117,6 +117,7 @@ export class AlertingService {
                 user_active: true,
                 master_active: true,
               },
+              creationDate: days ? MoreThanOrEqual(date) : undefined,
             },
           }))
         );

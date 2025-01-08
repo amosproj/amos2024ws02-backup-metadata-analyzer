@@ -7,6 +7,7 @@ import {
   StorageFillAlert,
 } from '../../../../shared/types/alert';
 import { DatePipe } from '@angular/common';
+import { shortenBytes } from '../../../../shared/utils/shortenBytes';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
 
@@ -142,11 +143,9 @@ export class AlertComponent implements OnInit, OnDestroy {
           break;
         }
       case 'CREATION_DATE_ALERT':
-        const creationDateAlert = alert as CreationDateAlert;
         reason = `Backup was started at an unusual time`;
         break;
       case 'STORAGE_FILL_ALERT':
-        const storageFillAlert = alert as StorageFillAlert;
         reason = `Less available storage space than expected`;
         break;
     }
@@ -175,12 +174,21 @@ export class AlertComponent implements OnInit, OnDestroy {
       case 'CREATION_DATE_ALERT':
         const creationDateAlert = alert as CreationDateAlert;
 
-        description = `Backup was started at ${creationDateAlert.date.toString()}, but based on the defined schedule, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
+        description = `Backup was started at ${this.formatDate(
+          creationDateAlert.date
+        )}, but based on the defined schedule, it should have been started at around ${this.formatDate(
+          creationDateAlert.referenceDate
+        )}`;
         break;
       case 'STORAGE_FILL_ALERT':
         const storageFillAlert = alert as StorageFillAlert;
-        description = `The current storage fill is ${storageFillAlert.filled.toString()} GiB, which is above the threshold of ${storageFillAlert.highWaterMark.toString()}
-         GiB. This indicates insufficient available storage space. Maximum capacity is ${storageFillAlert.capacity.toString()} GiB`;
+        description = `The current storage fill is ${shortenBytes(
+          storageFillAlert.filled * 1_000_000_000
+        )}, which is above the threshold of ${shortenBytes(
+          storageFillAlert.highWaterMark * 1_000_000_000
+        )}. This indicates insufficient available storage space. Maximum capacity is ${shortenBytes(
+          storageFillAlert.capacity * 1_000_000_000
+        )}`;
         break;
     }
     return description;

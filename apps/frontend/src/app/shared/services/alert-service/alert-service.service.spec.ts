@@ -6,11 +6,10 @@ import {
 import { AlertServiceService } from './alert-service.service';
 import { BASE_URL } from '../../types/configuration';
 import { Alert } from '../../types/alert';
-import { describe, it, expect, beforeEach } from 'vitest';
-import { AlertType } from '../../types/alertType';
-import { BackupService } from '../backup-service/backup-service.service';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { SeverityType } from '../../enums/severityType';
+import { BackupType } from '../../enums/backup.types';
 
 describe('AlertServiceService', () => {
   let service: AlertServiceService;
@@ -43,23 +42,39 @@ describe('AlertServiceService', () => {
       {
         id: randomUUID().toString(),
         alertType: {
-          id: randomUUID().toString(), name: 'test',
+          id: randomUUID().toString(),
+          name: 'test',
           severity: SeverityType.INFO,
           user_active: false,
-          master_active: false
+          master_active: false,
         },
-        backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+        backup: {
+          id: randomUUID().toString(),
+          sizeMB: 0,
+          creationDate: new Date(),
+          saveset: '',
+          type: BackupType.DIFFERENTIAL,
+        },
+        creationDate: new Date(),
       },
       {
         id: randomUUID().toString(),
         alertType: {
-          id: randomUUID().toString(), name: 'test',
+          id: randomUUID().toString(),
+          name: 'test',
           severity: SeverityType.INFO,
           user_active: false,
-          master_active: false
+          master_active: false,
         },
-        backup: { id: randomUUID().toString(), sizeMB: 10, creationDate: new Date() },
-      }
+        backup: {
+          id: randomUUID().toString(),
+          sizeMB: 10,
+          creationDate: new Date(),
+          saveset: '',
+          type: BackupType.DIFFERENTIAL,
+        },
+        creationDate: new Date(),
+      },
     ];
 
     service.getAllAlerts().subscribe((alerts) => {
@@ -76,23 +91,39 @@ describe('AlertServiceService', () => {
       {
         id: randomUUID().toString(),
         alertType: {
-          id: randomUUID().toString(), name: 'test',
+          id: randomUUID().toString(),
+          name: 'test',
           severity: SeverityType.INFO,
           user_active: false,
-          master_active: false
+          master_active: false,
         },
-        backup: { id: randomUUID().toString(), sizeMB: 0, creationDate: new Date() },
+        backup: {
+          id: randomUUID().toString(),
+          sizeMB: 0,
+          creationDate: new Date(),
+          saveset: '',
+          type: BackupType.DIFFERENTIAL,
+        },
+        creationDate: new Date(),
       },
       {
         id: randomUUID().toString(),
         alertType: {
-          id: randomUUID().toString(), name: 'test',
+          id: randomUUID().toString(),
+          name: 'test',
           severity: SeverityType.INFO,
           user_active: false,
-          master_active: false
+          master_active: false,
         },
-        backup: { id: randomUUID().toString(), sizeMB: 10, creationDate: new Date() },
-      }
+        backup: {
+          id: randomUUID().toString(),
+          sizeMB: 10,
+          creationDate: new Date(),
+          saveset: '',
+          type: BackupType.DIFFERENTIAL,
+        },
+        creationDate: new Date(),
+      },
     ];
     const days = 7;
 

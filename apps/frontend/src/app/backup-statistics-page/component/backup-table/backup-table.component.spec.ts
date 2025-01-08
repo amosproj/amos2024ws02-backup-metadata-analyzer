@@ -228,6 +228,7 @@ describe('BackupTableComponent', () => {
   describe('Data Fetching and Filtering Integration', () => {
     it('should fetch backups with initial filter', async () => {
       const getAllBackupsSpy = vi.spyOn(mockBackupService, 'getAllBackups');
+      component.loadBackups();
 
       component.backups$.subscribe((response) => {
         expect(response.data.length).toBe(2);
