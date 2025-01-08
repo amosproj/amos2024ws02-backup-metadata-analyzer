@@ -3,6 +3,9 @@
     <img src="../../../../public/team_logo.png" alt="Team Logo" width="50" />
     <span class="title">Metadata Analyzer</span>
     <div class="header-actions">
+      <button class="refresh" (click)="refresh()" title="Refresh Data">
+        <cds-icon [class.spin]="isRefreshing" shape="refresh" class="refresh-icon"></cds-icon>
+      </button>
       <clr-dropdown>
         <button class="nav-icon" clrDropdownTrigger>
           <cds-icon shape="cog"></cds-icon>

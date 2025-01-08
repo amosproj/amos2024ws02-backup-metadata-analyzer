@@ -1,0 +1,13 @@
+Runs a simple rule based analysis on full backups searching for unusual creation times
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    responses:
+        200:
+            description: Number of created alerts
+        400:
+            description: The value set for the alert limit was not valid

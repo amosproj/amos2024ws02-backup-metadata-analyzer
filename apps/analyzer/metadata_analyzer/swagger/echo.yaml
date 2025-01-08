@@ -1,0 +1,33 @@
+Example endpoint that echoes an inverted version of the string that was passed to it.
+    ---
+    parameters:
+      - name: Input
+        in: body
+        type: object
+        required: true
+        properties:
+            body:
+                type: object
+                items: '#/definitions/TextBody'
+                properties:
+                    text:
+                        type: string
+                        example: 'inverted'
+    definitions:
+        TextBody:
+            type: object
+            properties:
+                text:
+                    type: string
+                    example: 'detrevni'
+        BodyBody:
+            type: object
+            properties:
+                body:
+                    type: object
+                    items: '#/definitions/TextBody'
+    responses:
+        200:
+            description: The inverted string
+            schema:
+                $ref: '#/definitions/TextBody'

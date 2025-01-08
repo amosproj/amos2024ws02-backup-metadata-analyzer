@@ -1,7 +1,7 @@
 import sys
 from collections import defaultdict
 import metadata_analyzer.backend
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from metadata_analyzer.size_alert import SizeAlert
 from metadata_analyzer.creation_date_alert import CreationDateAlert
 from metadata_analyzer.storage_fill_alert import StorageFillAlert
@@ -213,29 +213,41 @@ class SimpleRuleBasedAnalyzer:
         # Send the alerts to the backend
         for alert in alerts[:count]:
             self.backend.create_size_alert(alert.as_json())
-            
+
         return {"count": count}
 
     # Search for unusual creation times of 'full' backups made after start_date
-    def analyze_creation_dates(self, data, alert_limit, start_date):
+    def extract_schedule_dict(self, schedules):
+        schedule_dict = dict()
+        for schedule in schedules:
+            schedule_dict[schedule.name] = schedule
+        return schedule_dict
+
+    def analyze_creation_dates(self, data, schedules, alert_limit, start_date):
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
-            if (result.task == ""
-                or result.fdi_type != 'F'
+            if (
+                result.task == ""
+                or result.fdi_type != "F"
                 or result.data_size is None
                 or result.start_time is None
                 or result.subtask_flag != "0"
+
             ):
                 continue
             groups[result.task].append(result)
 
+        # Create a dictionary from schedule name to the schedule object
+        schedule_dict = self.extract_schedule_dict(schedules)
+
         alerts = []
-        # Iterate through each group to find drastic size changes
+        # Iterate through each group to find unusual creation times
         for task, unordered_results in groups.items():
             results = sorted(unordered_results, key=lambda result: result.start_time)
-            alerts += self._analyze_creation_dates_of_one_task(results, start_date)
-    
+            alerts += self._analyze_creation_dates_of_one_task(
+                results, schedule_dict, start_date
+            )
 
         # Because we ignore alerts which would be created earlier than the current latest alert,
         # we have to sort the alerts to not miss any alerts in the future
@@ -252,45 +264,83 @@ class SimpleRuleBasedAnalyzer:
             self.backend.create_creation_date_alert(alert.as_json())
 
         return {"count": count}
-    
 
     # Analyzes the creation times of a group of results from one task.
-    def _analyze_creation_dates_of_one_task(self, results, start_date):
-        SECONDS_PER_DAY = 24 * 60 * 60
+    def _analyze_creation_dates_of_one_task(self, results, schedule_dict, start_date):
+        base_to_seconds = {
+            "MIN": 60,
+            "HOU": 60 * 60,
+            "DAY": 24 * 60 * 60,
+            "WEE": 7 * 24 * 60 * 60,
+            "MON": 30 * 24 * 60 * 60,
+        }
+
+        # Group all results by their schedule
+        schedule_groups = defaultdict(list)
+        for result in results:
+            schedule_groups[result.schedule].append(result)
 
         alerts = []
-        # Array that holds the previous creation dates as references times
-        times = [results[0].start_time]
-        # Skip the first result
-        for result in results[1:]:
-            # Don't generate alerts for results older than the start_date
-            if result.start_time > start_date:
-                # The smallest diff in seconds to the time of a previous backup
-                smallest_diff = SECONDS_PER_DAY
-                reference_time = None
-                for ref_time in times:
-                    diff = (result.start_time - ref_time).seconds
-                    # Considers the wrap around on midnight
-                    if diff > SECONDS_PER_DAY / 2:
-                        diff = SECONDS_PER_DAY - diff
-                    if diff < smallest_diff:
-                        smallest_diff = diff
-                        reference_time = ref_time.time()
+        for schedule_name, schedule_group in schedule_groups.items():
+            # Skip backups with schedules which are not in the schedule table
+            if schedule_name not in schedule_dict.keys():
+                continue
+            # Get the schedule for this schedule group
+            schedule = schedule_dict[schedule_name]
+            if schedule.p_base not in base_to_seconds.keys():
+                continue
+            # Calculate the expected timedelta between two backups for this schedule
+            multiplier = base_to_seconds[schedule.p_base]
+            expected_delta_seconds = schedule.p_count * multiplier
+            expected_delta = timedelta(seconds=expected_delta_seconds)
 
-                    # Early abort if the diff is already small enough
-                    if diff < 60 * 60:
-                        break
+            # Skip the first backup in a schedule group
+            for result1, result2 in zip(schedule_group[:-1], schedule_group[1:]):
+                # Don't generate alerts for results older than the start_date
+                if result2.start_time <= start_date:
+                    continue
 
-                # Reference date consists of the time of the nearest backup in the past and
-                # the date of the actual backup
-                reference_date = datetime.combine(result.start_time, reference_time)
-                if smallest_diff > 60 * 60:
-                    alerts.append(CreationDateAlert(result, reference_date))
+                # Calculate the expected date for result2
+                expected_date = self.compute_expected_date(
+                    result1.start_time, expected_delta, schedule
+                )
 
-            # Put the current backup time into the reference times
-            times.append(result.start_time)
+                diff = abs(expected_date - result2.start_time)
+                if diff.total_seconds() > 60 * 60:  # Diff greater than an hour => alert
+                    alerts.append(CreationDateAlert(result2, expected_date))
 
         return alerts
+
+    def compute_expected_date(self, start_time, expected_delta, schedule):
+        expected_date = start_time + expected_delta
+
+        # Use the start_time of the schedule if the base is in days, weeks or months
+        if schedule.p_base in ["DAY", "WEE", "MON"]:
+            schedule_start_time = schedule.start_time  # Has format "hh:mm"
+            try:
+                expected_time = time.fromisoformat(schedule_start_time)
+                expected_date = datetime.combine(expected_date, expected_time)
+            except ValueError:
+                print(f"start_time with invalid format: {schedule_start_time}")
+
+        # Check for the weekday of the expected_date if the base is in weeks or months
+        if schedule.p_base in ["WEE", "MON"]:
+            day_mask = [
+                schedule.mo,
+                schedule.tu,
+                schedule.we,
+                schedule.th,
+                schedule.fr,
+                schedule.sa,
+                schedule.su,
+            ]
+            accepted_days = [i for i in range(7) if day_mask[i] == "1"]
+            assert accepted_days != []  # Should have at least one accepted day
+
+            while expected_date.weekday() not in accepted_days:
+                expected_date += timedelta(days=1)
+
+        return expected_date
 
     # Search for data stores that are almost full
     def analyze_storage_capacity(self, data, alert_limit):

@@ -13,6 +13,7 @@ import {
   distinctUntilChanged,
   map,
   Observable,
+  of,
   shareReplay,
   startWith,
   Subject,
@@ -20,13 +21,13 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
+import { ChartType } from '../../enums/chartType';
 import { BackupTask } from '../../types/backup.task';
+import { ChartInformation } from '../../types/chartInformation';
+import { APIResponse } from '../../types/api-response';
+import { Backup } from '../../types/backup';
 import { BackupService } from '../../services/backup-service/backup-service.service';
 import { ChartService } from '../../services/chart-service/chart-service.service';
-import { Backup } from '../../types/backup';
-import { APIResponse } from '../../types/api-response';
-import { ChartInformation } from '../../types/chartInformation';
-import { ChartType } from '../../enums/chartType';
 
 interface TimeRangeConfig {
   fromDate: Date;
@@ -55,6 +56,8 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loading = false;
 
+  filterCount$: Observable<number> = of(0);
+
   // Filters for Charts
   // Backup types for the filter
   backupEnumTypes = Object.keys(BackupType).filter((item) => {
@@ -82,14 +85,36 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   //Observables
-  readonly chartBackups$: Observable<APIResponse<Backup>>;
-  allBackupTasks$: Observable<BackupTask[]>;
-  protected selectedbackupTasks$: Observable<BackupTask[]>;
+  chartBackups$: Observable<APIResponse<Backup>> = of({
+    data: [],
+    total: 0,
+    paginationData: { limit: 0, offset: 0, total: 0 },
+  });
+  allBackupTasks$: Observable<BackupTask[]> = of([]);
+  protected selectedbackupTasks$: Observable<BackupTask[]> = of([]);
 
   constructor(
     private readonly backupService: BackupService,
     private readonly chartService: ChartService
-  ) {
+  ) {}
+
+  ngOnInit(): void {
+    this.loadData();
+    this.backupService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadData();
+      });
+    this.setTimeRange('month');
+
+    this.filterCount$ = combineLatest([
+      this.backupTaskSubject$,
+      this.backupTypesSubject$,
+    ]).pipe(map(([tasks, types]) => tasks.length + types.length));
+  }
+
+  loadData(): void {
     /**
      * Load all backups and filter them based on the filter options for charts
      */
@@ -190,14 +215,26 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  ngOnInit(): void {
-    this.setTimeRange('month');
-  }
-
   /**
    * Initialize the charts
    */
   ngAfterViewInit(): void {
+    this.createCharts();
+    this.backupService
+      .getRefreshObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.createCharts();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.chartService.dispose();
+  }
+
+  createCharts(): void {
     setTimeout(() => {
       // Create charts
       for (const chart of this.charts) {
@@ -239,12 +276,6 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }, 100);
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.chartService.dispose();
   }
 
   /**
