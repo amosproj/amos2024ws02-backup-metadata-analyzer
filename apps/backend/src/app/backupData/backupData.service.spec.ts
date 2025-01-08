@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Between, ILike, In, Repository } from 'typeorm';
+import { Between, ILike, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { BackupDataService } from './backupData.service';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
@@ -171,6 +171,54 @@ describe('BackupDataService', () => {
       expect(where).toEqual({
         taskId: [{ id: 'task-1' }, { id: 'task-2' }],
       });
+    });
+    it('should create a where clause for scheduled date range search', () => {
+      const filterDto: BackupDataFilterDto = {
+        fromScheduledDate: '2023-01-01',
+        toScheduledDate: '2023-12-31',
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        scheduledTime: Between(expect.any(Date), expect.any(Date)),
+      });
+    });
+
+    it('should create a where clause for fromScheduledDate search', () => {
+      const filterDto: BackupDataFilterDto = {
+        fromScheduledDate: '2023-01-01',
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        scheduledTime: MoreThanOrEqual(expect.any(Date)),
+      });
+    });
+
+    it('should create a where clause for toScheduledDate search', () => {
+      const filterDto: BackupDataFilterDto = {
+        toScheduledDate: '2023-12-31',
+      };
+      const where = service.createWhereClause(filterDto);
+      expect(where).toEqual({
+        scheduledTime: LessThanOrEqual(expect.any(Date)),
+      });
+    });
+
+    it('should throw an error for invalid fromScheduledDate', () => {
+      const filterDto: BackupDataFilterDto = {
+        fromScheduledDate: 'invalid-date',
+      };
+      expect(() => service.createWhereClause(filterDto)).toThrow(
+        BadRequestException
+      );
+    });
+
+    it('should throw an error for invalid toScheduledDate', () => {
+      const filterDto: BackupDataFilterDto = {
+        toScheduledDate: 'invalid-date',
+      };
+      expect(() => service.createWhereClause(filterDto)).toThrow(
+        BadRequestException
+      );
     });
   });
 

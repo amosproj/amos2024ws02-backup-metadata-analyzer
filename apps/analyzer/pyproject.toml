@@ -21,7 +21,7 @@ readme = 'README.md'
   include = "metadata_analyzer"
 
   [tool.poetry.dependencies]
-  python = ">=3.9,<3.12"
+  python = ">=3.10,<3.12"
   flask = "^3.0.3"
   python-dotenv = "^1.0.1"
   sqlalchemy = {extras = ["mypy"], version = "^2.0.36"}
@@ -32,6 +32,8 @@ readme = 'README.md'
   mypy = "^1.13.0"
   torch = "2.2.2"
   darts = "^0.31.0"
+  types-requests = "^2.32.0.20241016"
+  pandas-stubs = "^2.2.3.241126"
 
   [tool.poetry.group.dev.dependencies]
   autopep8 = "2.0.2"

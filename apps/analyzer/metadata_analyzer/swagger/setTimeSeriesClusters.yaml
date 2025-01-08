@@ -1,0 +1,13 @@
+Sets a new cluster value for the time series analysis
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: clusters
+        schema:
+            type: integer
+    responses:
+        200:
+            description: Clusters number set
+        400:
+            description: The value set for the clusters was not valid

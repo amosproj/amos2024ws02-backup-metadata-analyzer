@@ -3,15 +3,21 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ClarityModule } from '@clr/angular';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { AppComponent } from './app.component';
 import { By } from '@angular/platform-browser';
+import { AnalyzerService } from './shared/services/analyzer-service/analyzer-service';
+import { of } from 'rxjs';
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
+  let mockAnalyzerService: any;
 
   beforeEach(async () => {
+    mockAnalyzerService = {
+      refresh: vi.fn(),
+    };
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -19,6 +25,7 @@ describe('AppComponent', () => {
         BrowserAnimationsModule,
         HttpClientTestingModule,
       ],
+      providers: [{ provide: AnalyzerService, useValue: mockAnalyzerService }],
       declarations: [AppComponent],
     }).compileComponents();
 
@@ -52,7 +59,13 @@ describe('AppComponent', () => {
 
   it('should have navigation items', () => {
     const navItems = fixture.debugElement.queryAll(By.css('.nav-text'));
-    const expectedNavItems = ['Dashboard', 'Overview', 'Upload', 'Find Data'];
+    const expectedNavItems = [
+      'Dashboard',
+      'Overview',
+      'Backup Statistics',
+      'Upload',
+      'Find Data',
+    ];
 
     // Use a Set to get unique nav item texts
     const uniqueNavItems = [
@@ -67,7 +80,13 @@ describe('AppComponent', () => {
 
   it('should have router links configured', () => {
     const routerLinks = fixture.debugElement.queryAll(By.css('[routerLink]'));
-    const expectedRoutes = ['/', '/', '/upload', '/findData'];
+    const expectedRoutes = [
+      '/',
+      '/',
+      '/backup-statistics',
+      '/upload',
+      '/findData',
+    ];
 
     routerLinks.forEach((link, index) => {
       expect(link.nativeElement.getAttribute('routerLink')).toBe(
@@ -79,5 +98,17 @@ describe('AppComponent', () => {
   it('should have router outlet', () => {
     const routerOutlet = fixture.debugElement.query(By.css('router-outlet'));
     expect(routerOutlet).toBeTruthy();
+  });
+
+  it('should call analyzerService.refresh when refresh is called', () => {
+    mockAnalyzerService.refresh.mockReturnValue(of({}));
+    component.refresh();
+    expect(mockAnalyzerService.refresh).toHaveBeenCalled();
+  });
+
+  it('should set isRefreshing to false if refresh fails', () => {
+    mockAnalyzerService.refresh.mockReturnValue(of(new Error('Error')));
+    component.refresh();
+    expect(component.isRefreshing).toBe(false);
   });
 });

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from metadata_analyzer.analyzer import Analyzer
-from metadata_analyzer.models import Result, Tasks
+from metadata_analyzer.models import Result, Tasks, DataStore
 from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
 
@@ -26,6 +26,16 @@ def _create_mock_task(uuid, task):
 	mock_task.task = task
 	return mock_task
 
+def _create_mock_storage(uuid, display_name, capacity, high_water_mark, filled, stored):
+	mock_storage = DataStore()
+	mock_storage.uuid = uuid
+	mock_storage.name = display_name
+	mock_storage.capacity = capacity
+	mock_storage.high_water_mark = high_water_mark
+	mock_storage.filled = filled
+	mock_storage.stored = stored
+
+	return mock_storage
 
 def test_update_data_all_types():
 	mock_result1 = _create_mock_result("foo", "1", "saveset1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"))
@@ -38,7 +48,11 @@ def test_update_data_all_types():
 	mock_task2 = _create_mock_task("123", "task123")
 	mock_tasks = [mock_task1, mock_task2]
 
-	database = MockDatabase(mock_results, mock_tasks)
+	mock_storage1 = _create_mock_storage("1", "storage1", 100_000_000, 90, 10, 10)
+	mock_storage2 = _create_mock_storage("123", "storage123", 200_000_000, 80, 20, 20)
+	mock_storages = [mock_storage1, mock_storage2]
+
+	database = MockDatabase(mock_results, mock_tasks, mock_storages)
 	backend = MockBackend()
 	Analyzer.init(database, backend, None, None, None)
 	Analyzer.update_data()
@@ -81,6 +95,23 @@ def test_update_data_all_types():
 		{
 			"id": "123",
 			"displayName": "task123"
+		}
+	]
+
+	assert backend.storages == [
+		{
+			"id": "1",
+			"displayName": "storage1",
+			"capacity": 100_000_000,
+			"highWaterMark": 90,
+			"filled": 10,
+		},
+		{
+			"id": "123",
+			"displayName": "storage123",
+			"capacity": 200_000_000,
+			"highWaterMark": 80,
+			"filled": 20,
 		}
 	]
 
