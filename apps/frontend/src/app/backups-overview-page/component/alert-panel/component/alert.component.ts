@@ -69,10 +69,15 @@ export class AlertComponent implements OnInit, OnDestroy {
 
     const filteredAlerts: Alert[] = [];
 
+    // sort alerts by creationDate
+    alerts.sort((a, b) => {
+      return (
+        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+      );
+    });
     alerts.forEach((alert) => {
       // If alert is from type STORAGE_FILL_ALERT, only one is shown per data store
       if (alert.alertType.name === 'STORAGE_FILL_ALERT') {
-        //TODO: Take latest alert as soon as we store the date of the alert
         const storageFillAlert = alert as StorageFillAlert;
         if (!alertMap.has(storageFillAlert.dataStoreName)) {
           alertMap.set(storageFillAlert.dataStoreName, storageFillAlert);
