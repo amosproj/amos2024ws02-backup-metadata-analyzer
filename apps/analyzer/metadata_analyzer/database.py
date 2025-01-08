@@ -33,11 +33,15 @@ class Database:
         return result
 
     def get_results(self):
+        schedules = Analyzer. list(this.get_schedules())
         session = Session(self.engine)
         stmt = select(Result)
 
-        result = session.scalars(stmt)
-        return result
+        schedule_dict = SimpleRuleBasedAnalyzer.extract_schedule_dict(schedules)
+        results = session.scalars(stmt)
+        for result in results:
+            result.scheduledTime = SimpleRuleBasedAnalyzer.compute_expected_date(result.)
+        return results
 
     def get_tasks(self):
         session = Session(self.engine)
