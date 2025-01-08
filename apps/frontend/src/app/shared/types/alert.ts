@@ -5,6 +5,7 @@ export interface Alert {
   id: string;
   alertType: AlertType;
   backup?: Backup;
+  creationDate: Date;
 }
 
 export interface SizeAlert extends Alert {
