@@ -90,6 +90,7 @@ describe('MailService', () => {
         creationDate: new Date(),
         saveset: 'saveset1',
       },
+      creationDate: new Date(),
     };
 
     await service.sendAlertMail(alert);

@@ -62,6 +62,7 @@ const sizeAlert: SizeAlertEntity = {
   referenceSize: 200,
   backup: mockedBackupDataEntity,
   alertType: mockedSizeAlertTypeEntity,
+  creationDate: new Date(),
 };
 
 const mockSizeAlertRepository = {
@@ -165,6 +166,7 @@ describe('AlertingController (e2e)', () => {
         ...alert.backup,
         creationDate: new Date(alert.backup?.creationDate ?? ''),
       },
+      creationDate: new Date(alert.creationDate),
     }));
 
     expect(receivedAlerts).toEqual([sizeAlert]);
@@ -205,6 +207,7 @@ describe('AlertingController (e2e)', () => {
         ...alert.backup,
         creationDate: new Date(alert.backup?.creationDate ?? ''),
       },
+      creationDate: new Date(alert.creationDate),
     }));
 
     expect(receivedAlerts).toEqual([sizeAlert]);
@@ -233,6 +236,7 @@ describe('AlertingController (e2e)', () => {
         ...alert.backup,
         creationDate: new Date(alert.backup?.creationDate ?? ''),
       },
+      creationDate: new Date(alert.creationDate),
     }));
 
     expect(receivedAlerts).toEqual([sizeAlert]);
