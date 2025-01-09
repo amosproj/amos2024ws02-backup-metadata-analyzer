@@ -4,6 +4,8 @@ FROM python:3.11-slim-buster
 
 WORKDIR /app
 
+COPY . .
+
 COPY pyproject.toml poetry.lock ./
 
 #Install Python and Pipx
@@ -19,7 +21,7 @@ ENV PATH="/root/.local/bin:$PATH"
 
 #Install dependencies outside of the venv
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-interaction --no-ansi --verbose
+RUN poetry install --no-interaction --no-ansi --verbose --no-root
 
 #Copy the remaining code
 COPY . .

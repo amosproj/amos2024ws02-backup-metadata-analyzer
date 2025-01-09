@@ -71,12 +71,15 @@ services:
       - FLASK_RUN_HOST=${ANALYZER_FLASK_RUN_HOST}
       - FLASK_RUN_PORT=${ANALYZER_FLASK_RUN_PORT}
       - BACKEND_URL=${BACKEND_URL}
+      - ANOMALY_THRESHOLD=${ANALYZER_DATABASE_ANOMALY_THRESHOLD}
+      - CLUSTER_NUMBER=${ANALYZER_DATABASE_CLUSTER_NUMBER}
       # Analyzer Database
       - DATABASE_HOST=${ANALYZER_DATABASE_HOST}
       - DATABASE_PORT=${ANALYZER_DATABASE_PORT}
       - DATABASE_USER=${ANALYZER_DATABASE_USER}
       - DATABASE_PASSWORD=${ANALYZER_DATABASE_PASSWORD}
       - DATABASE_DATABASE=${ANALYZER_DATABASE_DATABASE}
+
     env_file:
       - .env.docker
 
@@ -120,4 +123,7 @@ services:
       - ./00-init-roles.sql:/docker-entrypoint-initdb.d/00-init-roles.sql
 
 volumes:
-  mono-node-modules: null
+  #   mono-node-modules: null
+
+  mono-node-modules:
+    driver: local
