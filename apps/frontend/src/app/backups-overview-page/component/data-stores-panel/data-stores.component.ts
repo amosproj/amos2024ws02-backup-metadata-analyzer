@@ -46,9 +46,10 @@ export class DataStoresComponent implements OnDestroy, OnInit {
   }
 
   getHighWaterMarkPercentage(dataStore: DataStore): number {
-    return parseFloat(
+    const percentage = parseFloat(
       ((dataStore.highWaterMark / dataStore.capacity) * 100).toFixed(2)
     );
+    return percentage > 100 ? 100 : percentage;
   }
 
   toggleShowAll(): void {
