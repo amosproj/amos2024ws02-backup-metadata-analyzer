@@ -55,6 +55,7 @@ describe('AlertServiceService', () => {
           saveset: '',
           type: BackupType.DIFFERENTIAL,
         },
+        creationDate: new Date(),
       },
       {
         id: randomUUID().toString(),
@@ -72,6 +73,7 @@ describe('AlertServiceService', () => {
           saveset: '',
           type: BackupType.DIFFERENTIAL,
         },
+        creationDate: new Date(),
       },
     ];
 
@@ -102,6 +104,7 @@ describe('AlertServiceService', () => {
           saveset: '',
           type: BackupType.DIFFERENTIAL,
         },
+        creationDate: new Date(),
       },
       {
         id: randomUUID().toString(),
@@ -119,6 +122,7 @@ describe('AlertServiceService', () => {
           saveset: '',
           type: BackupType.DIFFERENTIAL,
         },
+        creationDate: new Date(),
       },
     ];
     const days = 7;

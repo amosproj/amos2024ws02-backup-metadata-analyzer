@@ -1,0 +1,20 @@
+Gets task ids of current dataset, necessary for time series analysis.
+    ---
+    definitions:
+        task_ids:
+            type: object
+            properties:
+                1:
+                    type: string
+                    example: 'd6f0d862-ef51-4f01-8d34-5503a58c6421'
+                2:
+                    type: string
+                    example: '67de754c-b953-4098-83cd-6d34ca2960c3'
+                3:
+                    type: string
+                    example: '8cc9efbc-d392-430d-8844-af04da35e7d6'
+    responses:
+      200:
+        description: All possible task ids
+        schema:
+          $ref: '#/definitions/task_ids'

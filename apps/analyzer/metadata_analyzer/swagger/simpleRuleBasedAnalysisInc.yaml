@@ -1,0 +1,36 @@
+Fulfills a simple rule based analysis on inc backups.
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: alertLimit
+        schema:
+            type: integer
+    definitions:
+        Alerts:
+            type: object
+            properties:
+                type:
+                    type: int
+                    example: 1
+                value:
+                    type: int
+                    example: 12345
+                referenceValue:
+                    type: int
+                    example: 12300
+                backupId:
+                    type: string
+        AlertLimit:
+            type: object
+            properties:
+                alertLimit:
+                    type: int
+                    example: 1
+    responses:
+        200:
+            description: Alerts for the analyzed data
+            schema:
+                $ref: '#/definitions/Alerts'
+        400:
+            description: The value set for the alert limit was not valid

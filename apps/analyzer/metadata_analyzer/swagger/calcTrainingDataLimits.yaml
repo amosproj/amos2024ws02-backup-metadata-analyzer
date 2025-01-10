@@ -1,0 +1,7 @@
+Triggers automatic calculation of the indices for training data in basic time series analysis. Only possible when at least one analysis already done.
+    ---
+    responses:
+      200:
+        description: Calculation was succesful
+      500:
+        description: Calculation could not be completed

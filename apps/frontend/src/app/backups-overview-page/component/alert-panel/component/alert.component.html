@@ -46,8 +46,13 @@
               <b>Creation Date:</b>
               {{ formatDate(alert.backup.creationDate) }}
               <br />
-              <br />
             </div>
+            <div *ngIf="alert.alertType.name === 'STORAGE_FILL_ALERT'">
+              <b>Creation Date:</b>
+              {{ formatDate(alert.creationDate) }}
+              <br>
+            </div>
+            <br />
             {{ getAlertDetails(alert) }}
           </clr-tooltip-content>
         </clr-tooltip>
@@ -56,7 +61,7 @@
     </div>
   </div>
   <div class="card-footer">
-    {{ alerts.length }} Alerts have been triggered for backups in the last
+    {{ alerts.length }} Alerts have been triggered in the last
     {{ DAYS }} days.
   </div>
 </div>

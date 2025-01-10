@@ -233,6 +233,7 @@ class SimpleRuleBasedAnalyzer:
                 or result.data_size is None
                 or result.start_time is None
                 or result.subtask_flag != "0"
+
             ):
                 continue
             groups[result.task].append(result)

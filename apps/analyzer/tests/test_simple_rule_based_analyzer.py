@@ -18,6 +18,7 @@ def _create_mock_result(task, uuid, fdi_type, data_size, start_time, schedule=""
     mock_result.schedule = schedule
     return mock_result
 
+
 def _create_mock_data_store(name, capacity, high_water_mark, filled):
     mock_data_store = DataStore()
     mock_data_store.name = name
@@ -55,13 +56,14 @@ def test_alert():
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis(-1)
-    
-    assert backend.size_alerts == [{
-        "size": mock_result2.data_size / 1_000_000,
-        "referenceSize": mock_result1.data_size / 1_000_000,
-        "backupId": mock_result2.uuid
-    }]
 
+    assert backend.size_alerts == [
+        {
+            "size": mock_result2.data_size / 1_000_000,
+            "referenceSize": mock_result1.data_size / 1_000_000,
+            "backupId": mock_result2.uuid,
+        }
+    ]
 
 def test_no_size_alert_sub_tasks():
     mock_result1 = _create_mock_result(
@@ -101,16 +103,18 @@ def test_alerts_different_tasks():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis(-1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result2.data_size / 1_000_000,
-        "referenceSize": mock_result1.data_size / 1_000_000,
-        "backupId": mock_result2.uuid
-    }, {
-        "size": mock_result4.data_size / 1_000_000,
-        "referenceSize": mock_result3.data_size / 1_000_000,
-        "backupId": mock_result4.uuid
-    }]
-
+    assert backend.size_alerts == [
+        {
+            "size": mock_result2.data_size / 1_000_000,
+            "referenceSize": mock_result1.data_size / 1_000_000,
+            "backupId": mock_result2.uuid,
+        },
+        {
+            "size": mock_result4.data_size / 1_000_000,
+            "referenceSize": mock_result3.data_size / 1_000_000,
+            "backupId": mock_result4.uuid,
+        },
+    ]
 
 
 def test_alert_backup_size_zero():
@@ -127,12 +131,13 @@ def test_alert_backup_size_zero():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis(-1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result2.data_size / 1_000_000,
-        "referenceSize": mock_result1.data_size / 1_000_000,
-        "backupId": mock_result2.uuid
-    }]
-
+    assert backend.size_alerts == [
+        {
+            "size": mock_result2.data_size / 1_000_000,
+            "referenceSize": mock_result1.data_size / 1_000_000,
+            "backupId": mock_result2.uuid,
+        }
+    ]
 
 
 def test_no_alert_size_diff_too_small():
@@ -205,11 +210,18 @@ def test_alert_limit():
 
     assert len(backend.size_alerts) == 1
 
+
 # Tests if the analysis skips alerts already created
 def test_alert_full_start_date():
-    mock_result1 = _create_mock_result("foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"))
-    mock_result2 = _create_mock_result("foo", "2", "F", 150_000_000, datetime.fromisoformat("2000-01-02"))
-    mock_result3 = _create_mock_result("foo", "3", "F", 200_000_000, datetime.fromisoformat("2000-01-03"))
+    mock_result1 = _create_mock_result(
+        "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01")
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "F", 150_000_000, datetime.fromisoformat("2000-01-02")
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "F", 200_000_000, datetime.fromisoformat("2000-01-03")
+    )
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3])
     backend = MockBackend()
@@ -218,11 +230,14 @@ def test_alert_full_start_date():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis(-1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result3.data_size / 1_000_000,
-        "referenceSize": mock_result2.data_size / 1_000_000,
-        "backupId": mock_result3.uuid
-    }]
+    assert backend.size_alerts == [
+        {
+            "size": mock_result3.data_size / 1_000_000,
+            "referenceSize": mock_result2.data_size / 1_000_000,
+            "backupId": mock_result3.uuid,
+        }
+    ]
+
 
 # extremely large difference
 def test_alert_backup_size_zero_diff():
@@ -239,18 +254,26 @@ def test_alert_backup_size_zero_diff():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_diff(1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result2.data_size / 1_000_000,
-        "referenceSize": mock_result1.data_size / 1_000_000,
-        "backupId": mock_result2.uuid
-    }]
+    assert backend.size_alerts == [
+        {
+            "size": mock_result2.data_size / 1_000_000,
+            "referenceSize": mock_result1.data_size / 1_000_000,
+            "backupId": mock_result2.uuid,
+        }
+    ]
 
 
 # Tests if the diff analysis skips alerts already created
 def test_alert_diff_start_date():
-    mock_result1 = _create_mock_result("foo", "1", "D", 100_000_000, datetime.fromisoformat("2000-01-01"))
-    mock_result2 = _create_mock_result("foo", "2", "D", 150_000_000, datetime.fromisoformat("2000-01-02"))
-    mock_result3 = _create_mock_result("foo", "3", "D", 200_000_000, datetime.fromisoformat("2000-01-03"))
+    mock_result1 = _create_mock_result(
+        "foo", "1", "D", 100_000_000, datetime.fromisoformat("2000-01-01")
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "D", 150_000_000, datetime.fromisoformat("2000-01-02")
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "D", 200_000_000, datetime.fromisoformat("2000-01-03")
+    )
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3])
     backend = MockBackend()
@@ -259,11 +282,14 @@ def test_alert_diff_start_date():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_diff(-1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result3.data_size / 1_000_000,
-        "referenceSize": mock_result2.data_size / 1_000_000,
-        "backupId": mock_result3.uuid
-    }]
+    assert backend.size_alerts == [
+        {
+            "size": mock_result3.data_size / 1_000_000,
+            "referenceSize": mock_result2.data_size / 1_000_000,
+            "backupId": mock_result3.uuid,
+        }
+    ]
+
 
 # two decreasing diff backups (in the accepted range) with different full backups as base
 def test_alert_backup_size_decrease_ok_diff():
@@ -301,13 +327,13 @@ def test_alert_backup_size_decrease_nok_diff():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_diff(1)
 
-    
-    assert backend.size_alerts == [{
-        "size": mock_result2.data_size / 1_000_000,
-        "referenceSize": mock_result1.data_size / 1_000_000,
-        "backupId": mock_result2.uuid
-    }]
-
+    assert backend.size_alerts == [
+        {
+            "size": mock_result2.data_size / 1_000_000,
+            "referenceSize": mock_result1.data_size / 1_000_000,
+            "backupId": mock_result2.uuid,
+        }
+    ]
 
 def test_alert_backup_size_no_subtasks_diff():
     mock_result1 = _create_mock_result(
@@ -342,12 +368,13 @@ def test_alert_backup_size_decrease_large_nok_diff():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_diff(1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result2.data_size / 1_000_000,
-        "referenceSize": mock_result1.data_size / 1_000_000,
-        "backupId": mock_result2.uuid
-    }]
-
+    assert backend.size_alerts == [
+        {
+            "size": mock_result2.data_size / 1_000_000,
+            "referenceSize": mock_result1.data_size / 1_000_000,
+            "backupId": mock_result2.uuid,
+        }
+    ]
 
 
 # two decreasing diff backups (not in the accepted range) with different full backups as base
@@ -392,12 +419,13 @@ def test_alert_backup_size_increase_large_nok_diff():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_diff(1)
 
-
-    assert backend.size_alerts == [{
-        "size": mock_result3.data_size / 1_000_000,
-        "referenceSize": mock_result2.data_size / 1_000_000,
-        "backupId": mock_result3.uuid
-    }]
+    assert backend.size_alerts == [
+        {
+            "size": mock_result3.data_size / 1_000_000,
+            "referenceSize": mock_result2.data_size / 1_000_000,
+            "backupId": mock_result3.uuid,
+        }
+    ]
 
 
 # two increasing diff backups (not in the accepted range) with different full backups as base
@@ -465,11 +493,13 @@ def test_alert_backup_size_complex_nok_diff():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_diff(1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result7.data_size / 1_000_000,
-        "referenceSize": mock_result6.data_size / 1_000_000,
-        "backupId": mock_result7.uuid
-    }]
+    assert backend.size_alerts == [
+        {
+            "size": mock_result7.data_size / 1_000_000,
+            "referenceSize": mock_result6.data_size / 1_000_000,
+            "backupId": mock_result7.uuid,
+        }
+    ]
 
 
 # large increase of inc size
@@ -487,11 +517,14 @@ def test_alert_backup_size_zero_inc():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_inc(1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result2.data_size / 1_000_000,
-        "referenceSize": mock_result1.data_size / 1_000_000,
-        "backupId": mock_result2.uuid
-    }]
+    assert backend.size_alerts == [
+        {
+            "size": mock_result2.data_size / 1_000_000,
+            "referenceSize": mock_result1.data_size / 1_000_000,
+            "backupId": mock_result2.uuid,
+        }
+    ]
+
 
 def test_alert_backup_size_no_subtasks_inc():
     mock_result1 = _create_mock_result(
@@ -512,9 +545,15 @@ def test_alert_backup_size_no_subtasks_inc():
 
 # Tests if the inc analysis skips alerts already created
 def test_alert_diff_start_date():
-    mock_result1 = _create_mock_result("foo", "1", "I", 100_000_000, datetime.fromisoformat("2000-01-01"))
-    mock_result2 = _create_mock_result("foo", "2", "I", 150_000_000, datetime.fromisoformat("2000-01-02"))
-    mock_result3 = _create_mock_result("foo", "3", "I", 200_000_000, datetime.fromisoformat("2000-01-03"))
+    mock_result1 = _create_mock_result(
+        "foo", "1", "I", 100_000_000, datetime.fromisoformat("2000-01-01")
+    )
+    mock_result2 = _create_mock_result(
+        "foo", "2", "I", 150_000_000, datetime.fromisoformat("2000-01-02")
+    )
+    mock_result3 = _create_mock_result(
+        "foo", "3", "I", 200_000_000, datetime.fromisoformat("2000-01-03")
+    )
 
     database = MockDatabase([mock_result1, mock_result2, mock_result3])
     backend = MockBackend()
@@ -523,11 +562,14 @@ def test_alert_diff_start_date():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_inc(-1)
 
-    assert backend.size_alerts == [{
-        "size": mock_result3.data_size / 1_000_000,
-        "referenceSize": mock_result2.data_size / 1_000_000,
-        "backupId": mock_result3.uuid
-    }]
+    assert backend.size_alerts == [
+        {
+            "size": mock_result3.data_size / 1_000_000,
+            "referenceSize": mock_result2.data_size / 1_000_000,
+            "backupId": mock_result3.uuid,
+        }
+    ]
+
 
 # irregular backup times that should not be alerted
 def test_alert_backup_size_irregular_inc():
@@ -580,13 +622,13 @@ def test_alert_backup_size_irregularSize_inc():
     Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
     Analyzer.simple_rule_based_analysis_inc(1)
 
-    assert backend.size_alerts == [{
-        "size": 72,
-        "referenceSize": avg / 1_000_000,
-        "backupId": mock_result3.uuid
-    }]
+    assert backend.size_alerts == [
+        {"size": 72, "referenceSize": avg / 1_000_000, "backupId": mock_result3.uuid}
+    ]
+
 
 # Tests for the creation time alerts
+
 
 # Backups created according to the schedule should not generate alerts
 def test_creation_time_alert_correct_schedule():

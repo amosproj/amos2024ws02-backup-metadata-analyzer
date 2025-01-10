@@ -21,7 +21,6 @@ import {
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
-import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -62,6 +61,7 @@ const sizeAlertEntities: SizeAlertEntity[] = [
     referenceSize: 200,
     backup: mockedBackupDataEntity,
     alertType: mockedSizeAlertTypeEntity,
+    creationDate: new Date(),
   },
 ];
 
@@ -72,6 +72,7 @@ const creationDateAlertEntities: CreationDateAlertEntity[] = [
     referenceDate: new Date(),
     backup: mockedBackupDataEntity,
     alertType: mockedCreationDateAlertTypeEntity,
+    creationDate: new Date(),
   },
 ];
 

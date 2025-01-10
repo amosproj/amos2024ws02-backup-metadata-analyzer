@@ -21,13 +21,13 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
+import { ChartType } from '../../enums/chartType';
 import { BackupTask } from '../../types/backup.task';
+import { ChartInformation } from '../../types/chartInformation';
+import { APIResponse } from '../../types/api-response';
+import { Backup } from '../../types/backup';
 import { BackupService } from '../../services/backup-service/backup-service.service';
 import { ChartService } from '../../services/chart-service/chart-service.service';
-import { Backup } from '../../types/backup';
-import { APIResponse } from '../../types/api-response';
-import { ChartInformation } from '../../types/chartInformation';
-import { ChartType } from '../../enums/chartType';
 
 interface TimeRangeConfig {
   fromDate: Date;
@@ -55,6 +55,8 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   loading = false;
+
+  filterCount$: Observable<number> = of(0);
 
   // Filters for Charts
   // Backup types for the filter
@@ -105,6 +107,11 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loadData();
       });
     this.setTimeRange('month');
+
+    this.filterCount$ = combineLatest([
+      this.backupTaskSubject$,
+      this.backupTypesSubject$,
+    ]).pipe(map(([tasks, types]) => tasks.length + types.length));
   }
 
   loadData(): void {

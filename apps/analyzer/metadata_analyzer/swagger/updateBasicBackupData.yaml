@@ -1,0 +1,28 @@
+Updates the backend database with values taken from the analyzer database.
+    ---
+    parameters:
+      - name: Input
+        in: body
+        type: object
+        required: true
+        properties:
+            content:
+                type: object
+                items: '#/definitions/BackendRequest'
+    definitions:
+        BackendRequest:
+            type: object
+            properties:
+                content:
+                    type: object
+        BackendResponse:
+            type: object
+            properties:
+                count:
+                    type: int
+                    example: 54767
+    responses:
+        200:
+            description: The number of entries that were updated
+            schema:
+                $ref: '#/definitions/BackendResponse'
