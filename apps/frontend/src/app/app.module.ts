@@ -11,6 +11,7 @@ import { ClarityModule } from '@clr/angular';
 import {
   angleIcon,
   bellIcon,
+  bookIcon,
   ClarityIcons,
   cogIcon,
   dataClusterIcon,
@@ -19,6 +20,7 @@ import {
   filterIcon,
   helpIcon,
   homeIcon,
+  lineChartIcon,
   lockIcon,
   plusIcon,
   refreshIcon,
@@ -43,6 +45,7 @@ import { InformationPanelComponent } from './backups-overview-page/component/inf
 import { BackupTableComponent } from './backup-statistics-page/component/backup-table/backup-table.component';
 import { SidePanelComponent } from './shared/components/filter-side-panel/side-panel.component';
 import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
+import { UserManualComponent } from './management/components/user-manual/user-manual/user-manual.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +62,7 @@ import { BackupStatisticsPageComponent } from './backup-statistics-page/componen
     BackupTableComponent,
     SidePanelComponent,
     BackupStatisticsPageComponent,
+    UserManualComponent
   ],
   imports: [
     BrowserModule,
@@ -93,8 +97,10 @@ export class AppModule {
       plusIcon,
       lockIcon,
       trashIcon,
+      refreshIcon,
       helpIcon,
-      refreshIcon
+      bookIcon,
+      lineChartIcon,
     );
   }
 }

@@ -48,3 +48,45 @@
     transform: rotate(360deg);
   }
 }
+
+.nav-footer {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding-bottom: 20px;
+  border-top: 1px solid #ccc;
+
+  img {
+    align-self: center;
+  }
+}
+
+.hover-item {
+  cursor: pointer;
+  padding-bottom: 10px;
+}
+
+.nav-content {
+  padding-bottom: 4rem;
+}
+
+.page-footer {
+  flex: 0;
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+  background-color: var(--clr-header-bg-color);
+
+  p {
+    color: #ddd;
+  }
+}
+.content-container .content-area {
+  padding: 0 !important;
+}
+
+.main-content {
+  padding: 1rem 1rem 1rem 1rem;
+  height: 100vh;
+}

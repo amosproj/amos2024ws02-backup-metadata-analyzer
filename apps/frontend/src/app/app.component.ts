@@ -9,6 +9,7 @@ import { AnalyzerService } from './shared/services/analyzer-service/analyzer-ser
 })
 export class AppComponent {
   title = 'metadata-analyzer-frontend';
+  collapsed = true;
   @ViewChild(NotificationSettingsComponent)
   private notificationSettings!: NotificationSettingsComponent;
 
