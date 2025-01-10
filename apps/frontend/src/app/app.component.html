@@ -1,6 +1,6 @@
 <clr-main-container>
   <app-loading-overlay
-    [isLoading]="isLoading$ | async"
+    [isLoading]="(isLoading$ | async) ?? false"
     title="Synchronizing Metadata"
     subtitle="Please wait while we refresh the data..."
   >

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-loading-overlay',
@@ -6,5 +6,7 @@ import { Component } from '@angular/core';
   styleUrl: './loading-overlay.component.css'
 })
 export class LoadingOverlayComponent {
-
+  @Input() isLoading: boolean = false;
+  @Input() title = 'Synchronizing Data';
+  @Input() subtitle?: string;
 }
