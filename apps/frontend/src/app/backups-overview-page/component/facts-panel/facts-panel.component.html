@@ -1,0 +1,10 @@
+<div class="card facts-card">
+  <div class="facts-item">
+    <div class="facts-title">Total Size of All Backups</div>
+    <div class="facts-value">{{ shortenBytes(((basicInformations$ | async)?.totalBackupSize ?? 0) * 1000000) }}</div>
+  </div>
+  <div class="facts-item">
+    <div class="facts-title">Number of Backups</div>
+    <div class="facts-value">{{ (basicInformations$ | async)?.numberOfBackups }}</div>
+  </div>
+</div>

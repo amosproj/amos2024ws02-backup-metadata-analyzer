@@ -42,19 +42,19 @@ export class BackupDataService extends PaginationService {
 
   async getTotalBackupInformation(): Promise<BackupInformationDto> {
     // Sum the size of all backups
-    const totalSize: number | undefined = await this.backupDataRepository
+    const totalSize = await this.backupDataRepository
       .createQueryBuilder('backup')
       .select('SUM(backup.sizeMB)', 'total')
       .getRawOne();
 
     //Get number of all backups
-    const numberOfBackups: number | undefined = await this.backupDataRepository
+    const numberOfBackups = await this.backupDataRepository
       .createQueryBuilder('backup')
       .select('COUNT(backup.id)', 'total')
       .getRawOne();
     return {
-      totalBackupSize: totalSize ?? 0,
-      numberOfBackups: numberOfBackups ?? 0,
+      totalBackupSize: totalSize?.total ?? 0,
+      numberOfBackups: numberOfBackups?.total ?? 0,
     };
   }
 

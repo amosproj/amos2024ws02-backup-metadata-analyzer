@@ -43,6 +43,7 @@ import { InformationPanelComponent } from './backups-overview-page/component/inf
 import { BackupTableComponent } from './backup-statistics-page/component/backup-table/backup-table.component';
 import { SidePanelComponent } from './shared/components/filter-side-panel/side-panel.component';
 import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
+import { FactsPanelComponent } from './backups-overview-page/component/facts-panel/facts-panel.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +60,7 @@ import { BackupStatisticsPageComponent } from './backup-statistics-page/componen
     BackupTableComponent,
     SidePanelComponent,
     BackupStatisticsPageComponent,
+    FactsPanelComponent,
   ],
   imports: [
     BrowserModule,
