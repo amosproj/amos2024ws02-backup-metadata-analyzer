@@ -71,6 +71,7 @@
 }
 
 .page-footer {
+  flex: 0;
   text-align: center;
   margin-top: 1rem;
   padding-top: 0.5rem;
@@ -80,4 +81,12 @@
   p {
     color: #ddd;
   }
+}
+.content-container .content-area {
+  padding: 0 !important;
+}
+
+.main-content {
+  padding: 1rem 1rem 1rem 1rem;
+  height: 100vh;
 }
