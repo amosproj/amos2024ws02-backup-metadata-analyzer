@@ -1,0 +1,140 @@
+.header {
+  background-color: white;
+  justify-content: space-around;
+  position: relative;
+}
+
+.alert-summary {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-item cds-icon.critical {
+  color: #c92100;
+}
+
+.summary-item cds-icon.warning {
+  color: #f57600;
+}
+
+.summary-item cds-icon.info {
+  color: #0072a3;
+}
+
+.card {
+  margin-bottom: 1rem;
+}
+
+.repeated-alerts {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+
+.repeated-alerts ul {
+  margin-top: 0.5rem;
+}
+
+.label {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.4rem;
+}
+
+.alert-danger {
+  background-color: #c92100;
+  color: white;
+}
+
+.alert-warning {
+  background-color: #f57600;
+  color: white;
+}
+
+.alert-info {
+  background-color: #0072a3;
+  color: white;
+}
+
+clr-datagrid {
+  margin-top: 1rem;
+}
+
+clr-tooltip {
+  cursor: help;
+}
+
+clr-datagrid {
+  margin-top: 1rem;
+  /* height: calc(100vh - 250px); */
+}
+
+/* Severity Badge Styles */
+.severity-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.2rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  white-space: nowrap;
+  width: 180px;
+}
+
+.severity-badge cds-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Critical Severity */
+.severity-critical {
+  background-color: #fee8e8;
+  color: #c92100;
+  border: 1px solid #fac5c5;
+}
+
+.severity-critical cds-icon {
+  color: #c92100;
+}
+
+/* Warning Severity */
+.severity-warning {
+  background-color: #fef3e3;
+  color: #f57600;
+  border: 1px solid #fcdba2;
+}
+
+.severity-warning cds-icon {
+  color: #f57600;
+}
+
+/* Info Severity */
+.severity-info {
+  background-color: #e8f5ff;
+  color: #0072a3;
+  border: 1px solid #b3dcff;
+}
+
+.severity-info cds-icon {
+  color: #0072a3;
+}
+
+/* Row highlighting based on severity */
+.row-critical {
+  background-color: rgba(201, 33, 0, 0.05);
+}
+
+.row-warning {
+  background-color: rgba(245, 118, 0, 0.05);
+}
+
+.row-info {
+  background-color: rgba(0, 114, 163, 0.05);
+}

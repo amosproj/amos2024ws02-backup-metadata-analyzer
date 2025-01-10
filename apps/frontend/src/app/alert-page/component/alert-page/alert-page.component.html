@@ -1,1 +1,179 @@
-<p>alert-page works!</p>
+<h1 class="header">Analysis and Warn ings</h1>
+
+<ng-container *ngIf="alertSummary$ | async as summary">
+  <!-- Summary Cards -->
+  <div class="clr-row">
+    <!-- Alert Statistics Card -->
+    <div class="clr-col-12 clr-col-md-6">
+      <div class="card">
+        <div class="card-block">
+          <div class="card-title">Alert Statistics</div>
+          <div class="card-text">
+            <div class="alert-summary">
+              <div class="summary-item">
+                <cds-icon
+                  shape="error-standard"
+                  class="is-solid critical"
+                ></cds-icon>
+                <span>{{ summary.criticalCount }} Critical</span>
+              </div>
+              <div class="summary-item">
+                <cds-icon
+                  shape="warning-standard"
+                  class="is-solid warning"
+                ></cds-icon>
+                <span>{{ summary.warningCount }} Warnings</span>
+              </div>
+              <div class="summary-item">
+                <cds-icon
+                  shape="info-standard"
+                  class="is-solid info"
+                ></cds-icon>
+                <span>{{ summary.infoCount }} Information</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Frequent Alerts Card -->
+    <div class="clr-col-12 clr-col-md-6">
+      <div class="card" *ngIf="summary.mostFrequentAlert">
+        <div class="card-block">
+          <div class="card-title">Most Frequent Alert</div>
+          <div class="card-text">
+            <p>
+              <strong>"{{ summary.mostFrequentAlert.type }}"</strong> occurred
+              <strong>{{ summary.mostFrequentAlert.count }} times</strong> in
+              the last {{ DAYS }} days.
+            </p>
+            <div
+              *ngIf="summary.repeatedAlerts.length > 1"
+              class="repeated-alerts"
+            >
+              <small>Other repeated alerts:</small>
+              <ul class="list-unstyled">
+                <li *ngFor="let alert of summary.repeatedAlerts.slice(1, 4)">
+                  {{ alert.type }}: {{ alert.count }} times
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <clr-alert *ngIf="error" class="alert-danger">
+    <clr-alert-item>
+      <span class="alert-text">{{ error }}</span>
+    </clr-alert-item>
+  </clr-alert>
+
+  <!-- Alert Grid -->
+  <clr-datagrid
+    [(clrDgSelected)]="selected"
+    [clrDgLoading]="loading"
+    (clrDgRefresh)="refresh($event)"
+  >
+    <clr-dg-column [clrDgField]="'alertType.severity'">Severity</clr-dg-column>
+    <clr-dg-column [clrDgField]="'creationDate'">Date</clr-dg-column>
+    <clr-dg-column [clrDgField]="'alertType.name'">Type</clr-dg-column>
+    <clr-dg-column>Details</clr-dg-column>
+
+    <clr-dg-row *ngFor="let alert of alerts$ | async" [clrDgItem]="alert">
+      <clr-dg-cell>
+        <div
+          class="severity-badge"
+          [ngClass]="{
+            'severity-critical':
+              alert.alertType.severity === SeverityType.CRITICAL,
+            'severity-warning':
+              alert.alertType.severity === SeverityType.WARNING,
+            'severity-info': alert.alertType.severity === SeverityType.INFO
+          }"
+        >
+          <cds-icon
+            [attr.shape]="
+              alert.alertType.severity === SeverityType.CRITICAL
+                ? 'error-standard'
+                : alert.alertType.severity === SeverityType.WARNING
+                ? 'warning-standard'
+                : 'info-standard'
+            "
+            class="is-solid"
+          >
+          </cds-icon>
+          {{ alert.alertType.severity }}
+        </div>
+      </clr-dg-cell>
+      <clr-dg-cell>{{ formatDate(alert.creationDate) }}</clr-dg-cell>
+      <clr-dg-cell>{{ alert.alertType.name }}</clr-dg-cell>
+      <clr-dg-cell>
+        <clr-tooltip>
+          <span clrTooltipTrigger style=" font-weight: bold;">{{ getAlertReason(alert) }}</span>
+          <ng-container [ngSwitch]="alert.alertType.name">
+            <div *ngSwitchCase="'SIZE_ALERT'">
+              <div *ngIf="hasBackup(alert)">
+                <strong>Backup Saveset:</strong> {{ alert.backup.saveset
+                }}<br />
+                <strong>Creation Date:</strong>
+                {{ formatDate(alert.backup.creationDate) }}
+              </div>
+              {{ getAlertDetails(alert) }}
+            </div>
+
+            <div *ngSwitchCase="'STORAGE_FILL_ALERT'">
+              <ng-container *ngIf="isStorageFillAlert(alert)">
+                <strong>Storage Fill:</strong> {{ alert.filled }}GB /
+                {{ alert.capacity }}GB<br />
+                <strong>High Water Mark:</strong> {{ alert.highWaterMark }}GB
+              </ng-container>
+            </div>
+
+            <div *ngSwitchDefault>
+              {{ getAlertDetails(alert) }}
+            </div>
+          </ng-container>
+          <clr-tooltip-content clrPosition="left" clrSize="lg" *clrIfOpen>
+            <ng-container [ngSwitch]="alert.alertType.name">
+              <div *ngSwitchCase="'SIZE_ALERT'">
+                <div *ngIf="hasBackup(alert)">
+                  <strong>Backup Saveset:</strong> {{ alert.backup.saveset
+                  }}<br />
+                  <strong>Creation Date:</strong>
+                  {{ formatDate(alert.backup.creationDate) }}
+                </div>
+                {{ getAlertDetails(alert) }}
+              </div>
+
+              <div *ngSwitchCase="'STORAGE_FILL_ALERT'">
+                <ng-container *ngIf="isStorageFillAlert(alert)">
+                  <strong>Storage Fill:</strong> {{ alert.filled }}GB /
+                  {{ alert.capacity }}GB<br />
+                  <strong>High Water Mark:</strong> {{ alert.highWaterMark }}GB
+                </ng-container>
+              </div>
+
+              <div *ngSwitchDefault>
+                {{ getAlertDetails(alert) }}
+              </div>
+            </ng-container>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>
+      <clr-dg-pagination #pagination [clrDgTotalItems]="summary.totalCount">
+        <clr-dg-page-size [clrPageSizeOptions]="PAGE_SIZES"
+          >Alerts per page</clr-dg-page-size
+        >
+        {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
+        {{ summary.totalCount }} alerts
+      </clr-dg-pagination>
+    </clr-dg-footer>
+  </clr-datagrid>
+</ng-container>
