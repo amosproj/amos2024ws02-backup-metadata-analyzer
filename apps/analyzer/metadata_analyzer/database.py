@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from metadata_analyzer.models import BackupData, Result, Tasks, DataStore, Schedule
@@ -32,9 +34,13 @@ class Database:
         result = session.scalars(stmt)
         return result
 
-    def get_results(self):
+    def get_results(self, latest_backup_date = None):
         session = Session(self.engine)
         stmt = select(Result)
+        # Select all results since the latest backup date
+        if latest_backup_date is not None:
+            timestamp = datetime.strptime(latest_backup_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+            stmt = select(Result).where(Result.start_time > timestamp)
 
         result = session.scalars(stmt)
         return result
