@@ -1,4 +1,11 @@
 <clr-main-container>
+  <app-loading-overlay
+    [isLoading]="isLoading$ | async"
+    title="Synchronizing Metadata"
+    subtitle="Please wait while we refresh the data..."
+  >
+  </app-loading-overlay>
+
   <clr-header class="header">
     <div class="header-hamburger-trigger" (click)="collapsed = !collapsed">
       <button type="button" class="header-hamburger">
@@ -10,7 +17,11 @@
     <span class="title">Metadata Analyzer</span>
     <div class="header-actions">
       <button class="refresh" (click)="refresh()" title="Refresh Data">
-        <cds-icon [class.spin]="isRefreshing" shape="refresh" class="refresh-icon"></cds-icon>
+        <cds-icon
+          [class.spin]="isRefreshing"
+          shape="refresh"
+          class="refresh-icon"
+        ></cds-icon>
       </button>
       <clr-dropdown>
         <button class="nav-icon" clrDropdownTrigger>
@@ -69,13 +80,13 @@
         </clr-vertical-nav-item>
 
         <clr-vertical-nav-item
-        routerLink="/alert"
-        routerLinkActive="active"
-        class="hover-item nav-link"
-      >
-        <cds-icon clrVerticalNavIcon shape="info-standard"></cds-icon>
-        <span class="nav-text">Analysis</span>
-      </clr-vertical-nav-item>
+          routerLink="/alert"
+          routerLinkActive="active"
+          class="hover-item nav-link"
+        >
+          <cds-icon clrVerticalNavIcon shape="info-standard"></cds-icon>
+          <span class="nav-text">Analysis</span>
+        </clr-vertical-nav-item>
 
         <clr-vertical-nav-item
           routerLink="/findData"
@@ -98,7 +109,6 @@
           routerLink="/user-manual"
           routerLinkActive="active"
           class="hover-item nav-link"
-          
         >
           <cds-icon clrVerticalNavIcon shape="book"></cds-icon>
           <span class="nav-text">How to get started?</span>
@@ -110,7 +120,7 @@
       <div class="main-content">
         <router-outlet></router-outlet>
       </div>
-      
+
       <footer class="page-footer">
         <div>
           <p>&copy; 2025 Metadata Analyzer. All rights reserved.</p>

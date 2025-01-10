@@ -49,6 +49,7 @@ import { BackupStatisticsPageComponent } from './backup-statistics-page/componen
 import { UserManualComponent } from './management/components/user-manual/user-manual/user-manual.component';
 import { AlertPageComponent } from './alert-page/component/alert-page/alert-page.component';
 import { DatePipe } from '@angular/common';
+import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay/loading-overlay.component';
 
 @NgModule({
   declarations: [
@@ -67,6 +68,7 @@ import { DatePipe } from '@angular/common';
     BackupStatisticsPageComponent,
     UserManualComponent,
     AlertPageComponent,
+    LoadingOverlayComponent,
   ],
   imports: [
     BrowserModule,
