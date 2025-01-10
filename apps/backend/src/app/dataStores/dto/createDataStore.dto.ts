@@ -36,4 +36,11 @@ export class CreateDataStoreDto {
   })
   @IsNumber()
   filled!: number;
+
+  @ApiProperty({
+    description: 'Time until storage overflow',
+    required: false,
+  })
+  @IsNumber()
+  overflowTime?: number;
 }
