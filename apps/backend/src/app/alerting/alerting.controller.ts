@@ -99,7 +99,7 @@ export class AlertingController {
   })
   @ApiQuery({
     name: 'days',
-    description: 'Filter alerts by backups of the last x days',
+    description: 'Filter alerts by backups (or creation Date if not linked with Backup) of the last x days',
     required: false,
     type: Number,
   })
