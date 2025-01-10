@@ -35,17 +35,17 @@ export class AlertingService {
 
   constructor(
     @InjectRepository(AlertTypeEntity)
-    private alertTypeRepository: Repository<AlertTypeEntity>,
+    private readonly alertTypeRepository: Repository<AlertTypeEntity>,
     //Alert Repositories
     @InjectRepository(SizeAlertEntity)
-    private sizeAlertRepository: Repository<SizeAlertEntity>,
+    private readonly sizeAlertRepository: Repository<SizeAlertEntity>,
     @InjectRepository(CreationDateAlertEntity)
-    private creationDateRepository: Repository<CreationDateAlertEntity>,
+    private readonly creationDateRepository: Repository<CreationDateAlertEntity>,
     @InjectRepository(StorageFillAlertEntity)
     private storageFillRepository: Repository<StorageFillAlertEntity>,
     //Services
-    private mailService: MailService,
-    private backupDataService: BackupDataService
+    private readonly mailService: MailService,
+    private readonly backupDataService: BackupDataService
   ) {
     this.alertRepositories.push(this.sizeAlertRepository);
     this.alertRepositories.push(this.creationDateRepository);
@@ -101,17 +101,14 @@ export class AlertingService {
     if (backupId) {
       where.backup = { id: backupId };
     }
+    const date = new Date();
     if (days) {
-      const date = new Date();
       date.setDate(date.getDate() - days);
       where.backup = { creationDate: MoreThanOrEqual(date) };
     }
 
     const alerts: Alert[] = [];
     for (const alertRepository of this.alertRepositories) {
-      // if(alertRepository.target.name===STORAGE_FILL_ALERT){
-
-      // }
       if (alertRepository === this.storageFillRepository) {
         alerts.push(
           ...(await alertRepository.find({
@@ -120,6 +117,7 @@ export class AlertingService {
                 user_active: true,
                 master_active: true,
               },
+              creationDate: days ? MoreThanOrEqual(date) : undefined,
             },
           }))
         );
