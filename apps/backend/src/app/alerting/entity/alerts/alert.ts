@@ -1,7 +1,12 @@
 import { BackupDataEntity } from '../../../backupData/entity/backupData.entity';
 import { AlertTypeEntity } from '../alertType.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 export abstract class Alert {
   @ApiProperty({
@@ -24,4 +29,11 @@ export abstract class Alert {
   })
   @JoinColumn({ name: 'backupId', referencedColumnName: 'id' })
   backup?: BackupDataEntity;
+
+  @ApiProperty({
+    description: 'Auto generated creation date of the alert',
+    required: true,
+  })
+  @CreateDateColumn()
+  creationDate!: Date;
 }
