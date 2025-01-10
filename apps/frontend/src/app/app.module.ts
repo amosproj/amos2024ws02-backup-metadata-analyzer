@@ -20,6 +20,7 @@ import {
   filterIcon,
   helpIcon,
   homeIcon,
+  infoStandardIcon,
   lineChartIcon,
   lockIcon,
   plusIcon,
@@ -63,7 +64,7 @@ import { AlertPageComponent } from './alert-page/component/alert-page/alert-page
     BackupTableComponent,
     SidePanelComponent,
     BackupStatisticsPageComponent,
-    UserManualComponent
+    UserManualComponent,
     AlertPageComponent,
   ],
   imports: [
@@ -103,6 +104,7 @@ export class AppModule {
       helpIcon,
       bookIcon,
       lineChartIcon,
+      infoStandardIcon
     );
   }
 }
