@@ -64,7 +64,6 @@ services:
       context: ./apps/analyzer
       dockerfile: Dockerfile
 
-    # command: ['python3.11', 'main.py', '--host', '0.0.0.0']
     command: >
       sh -c "
       export PGPASSWORD=${ANALYZER_DATABASE_PASSWORD};
@@ -75,7 +74,7 @@ services:
       echo Data import complete. Starting analyzer;      
       ./.venv/bin/python3.11 main.py --host 0.0.0.0
       "
-    # python3.11 main.py --host 0.0.0.0
+
     environment:
       # Flask
       - FLASK_RUN_HOST=${ANALYZER_FLASK_RUN_HOST}
@@ -97,7 +96,7 @@ services:
       - 8000:8000
     depends_on:
       # - analyzerDatabase
-      analyzerDatabase: # Wartet, bis die Datenbank gesund ist
+      analyzerDatabase:
         condition: service_healthy
 
     networks:
@@ -133,7 +132,7 @@ services:
     volumes:
       - ./db_dump.sql:/docker-entrypoint-initdb.d/db_dump.sql
       - ./00-init-roles.sql:/docker-entrypoint-initdb.d/00-init-roles.sql
-    healthcheck: # Fügt einen Healthcheck hinzu, um sicherzustellen, dass die Datenbank betriebsbereit ist
+    healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
