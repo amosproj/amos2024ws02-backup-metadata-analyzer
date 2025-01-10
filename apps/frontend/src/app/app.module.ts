@@ -48,6 +48,7 @@ import { SidePanelComponent } from './shared/components/filter-side-panel/side-p
 import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
 import { UserManualComponent } from './management/components/user-manual/user-manual/user-manual.component';
 import { AlertPageComponent } from './alert-page/component/alert-page/alert-page.component';
+import { DatePipe } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -77,7 +78,7 @@ import { AlertPageComponent } from './alert-page/component/alert-page/alert-page
     HttpClientModule,
     RouterModule.forRoot(appRoutes),
   ],
-  providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }],
+  providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }, DatePipe],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
