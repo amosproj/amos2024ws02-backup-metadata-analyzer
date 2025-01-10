@@ -1,5 +1,11 @@
 <clr-main-container>
   <clr-header class="header">
+    <div class="header-hamburger-trigger" (click)="collapsed = !collapsed">
+      <button type="button" class="header-hamburger">
+        <cds-icon shape="bars"></cds-icon>
+      </button>
+    </div>
+
     <img src="../../../../public/team_logo.png" alt="Team Logo" width="50" />
     <span class="title">Metadata Analyzer</span>
     <div class="header-actions">
@@ -21,7 +27,7 @@
               routerLinkActive="active"
               routerLink="email-receiver"
               class="nav-text"
-            >Email Receiver</span
+              >Email Receiver</span
             >
           </button>
         </clr-dropdown-menu>
@@ -31,56 +37,76 @@
   </clr-header>
 
   <div class="content-container">
-    <clr-vertical-nav class="clr-vertical-nav has-nav-groups clr-nav-level-1">
+    <clr-vertical-nav
+      class="clr-vertical-nav has-nav-groups clr-nav-level-1 custom-nav"
+      [clrVerticalNavCollapsible]="true"
+      [clrVerticalNavCollapsed]="collapsed"
+      (clrVerticalNavCollapsedChange)="collapsed = $event"
+    >
       <div class="nav-content">
-        <clr-vertical-nav-group class="nav-group">
-          <clr-vertical-nav-item routerLink="/" routerLinkActive="active">
-            <cds-icon shape="home"></cds-icon>
-            <span class="nav-text">Dashboard</span>
-          </clr-vertical-nav-item>
+        <clr-vertical-nav-item
+          clrVerticalNavLink
+          clrAriaCurrentLink
+          routerLink="/"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="active"
+          class="hover-item nav-link"
+        >
+          <cds-icon clrVerticalNavIcon shape="home"></cds-icon>
+          <span class="nav-text">Dashboard</span>
+        </clr-vertical-nav-item>
 
-          <clr-vertical-nav-group-children>
-            <a
-              clrVerticalNavLink
-              clrAriaCurrentLink
-              routerLink="/"
-              [routerLinkActiveOptions]="{ exact: true }"
-              routerLinkActive="active"
-              class="nav-link"
-            ><span class="nav-text">Overview</span></a>
-            <a
-              clrVerticalNavLink
-              clrAriaCurrentLink
-              routerLink="/backup-statistics"
-              [routerLinkActiveOptions]="{ exact: true }"
-              routerLinkActive="active"
-              class="nav-link"
-            ><span class="nav-text">Backup Statistics</span>
-            </a>
-          </clr-vertical-nav-group-children>
-        </clr-vertical-nav-group>
+        <clr-vertical-nav-item
+          clrVerticalNavLink
+          clrAriaCurrentLink
+          routerLink="/backup-statistics"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="active"
+          class="nav-link hover-item"
+        >
+          <cds-icon clrVerticalNavIcon shape="line-chart"></cds-icon>
+          <span class="nav-text">Backup Statistics</span>
+        </clr-vertical-nav-item>
 
-        <clr-vertical-nav-group class="nav-group">
-          <clr-vertical-nav-item routerLink="/upload" routerLinkActive="active">
-            <cds-icon shape="upload-cloud"></cds-icon>
-            <span class="nav-text">Upload</span>
-          </clr-vertical-nav-item>
-        </clr-vertical-nav-group>
+        <clr-vertical-nav-item
+          routerLink="/findData"
+          routerLinkActive="active"
+          class="hover-item nav-link"
+        >
+          <cds-icon clrVerticalNavIcon shape="search"></cds-icon>
+          <span class="nav-text">Find Data</span>
+        </clr-vertical-nav-item>
+      </div>
 
-        <clr-vertical-nav-group class="nav-group">
-          <clr-vertical-nav-item
-            routerLink="/findData"
-            routerLinkActive="active"
-          >
-            <cds-icon shape="search"></cds-icon>
-            <span class="nav-text">Find Data</span>
-          </clr-vertical-nav-item>
-        </clr-vertical-nav-group>
+      <div class="nav-footer">
+        <img
+          src="../../../../public/team_logo.png"
+          alt="Team Logo"
+          width="50"
+          *ngIf="collapsed === false"
+        />
+        <clr-vertical-nav-item
+          routerLink="/user-manual"
+          routerLinkActive="active"
+          class="hover-item nav-link"
+          
+        >
+          <cds-icon clrVerticalNavIcon shape="book"></cds-icon>
+          <span class="nav-text">How to get started?</span>
+        </clr-vertical-nav-item>
       </div>
     </clr-vertical-nav>
 
     <main class="content-area">
-      <router-outlet></router-outlet>
+      <div class="main-content">
+        <router-outlet></router-outlet>
+      </div>
+      
+      <footer class="page-footer">
+        <div>
+          <p>&copy; 2025 Metadata Analyzer. All rights reserved.</p>
+        </div>
+      </footer>
     </main>
   </div>
 </clr-main-container>
