@@ -5,7 +5,7 @@ class MockDatabase:
         self.data_stores = data_stores
         self.schedules = schedules
 
-    def get_results(self):
+    def get_results(self, latest_backup_date=None):
         return iter(self.results)
 
     def get_tasks(self):

@@ -34,3 +34,9 @@ class MockBackend:
 			return self.latest_alert_ids[(alert_type, backup_type)]
 		else:
 			return ""
+
+	def get_latest_backup_date(self):
+		if len(self.backups) == 0:
+			return None
+		else:
+			return self.backups[-1]
