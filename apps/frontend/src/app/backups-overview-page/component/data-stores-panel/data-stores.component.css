@@ -10,9 +10,14 @@
 }
 
 .progress-bar-container {
+    display: flex;
+    align-items: center;
+}
+
+.progress-bar {
     position: relative;
+    height: 12px;
     width: 100%;
-    display: inline-block;
     vertical-align: middle;
     --clr-progress-bg-color: #C6DCF2;
     --clr-progress-default-color: #0D233A;
@@ -24,6 +29,14 @@
     background-color: #f44336;
     position: absolute;
     top: 0;
+    bottom: 0;
+    margin: auto 0;
+}
+
+.percentage {
+    margin-left: 10px;
+    display: inline-block;
+    width: 5%;
 }
 
 .card {
