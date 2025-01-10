@@ -67,7 +67,7 @@ services:
     command: >
       sh -c "
       export PGPASSWORD=${ANALYZER_DATABASE_PASSWORD};
-      until psql -h ${ANALYZER_DATABASE_HOST} -U ${ANALYZER_DATABASE_USER} -d ${ANALYZER_DATABASE_DATABASE} -c 'SELECT 1'; do
+      until psql -h ${ANALYZER_DATABASE_HOST} -U ${ANALYZER_DATABASE_USER} -d ${ANALYZER_DATABASE_DATABASE} -tAq -c 'SELECT 1'; do
         echo Waiting for data import...
         sleep 2;
       done;
