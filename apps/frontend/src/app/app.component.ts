@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NotificationSettingsComponent } from './management/components/settings/notification-settings/notification-settings.component';
 import { AnalyzerService } from './shared/services/analyzer-service/analyzer-service';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -9,11 +10,13 @@ import { AnalyzerService } from './shared/services/analyzer-service/analyzer-ser
 })
 export class AppComponent {
   title = 'metadata-analyzer-frontend';
-  collapsed = true;
+  protected collapsed: boolean = true;
   @ViewChild(NotificationSettingsComponent)
   private notificationSettings!: NotificationSettingsComponent;
 
   isRefreshing = false;
+  private readonly loadingSubject = new BehaviorSubject<boolean>(false);
+  readonly isLoading$ = this.loadingSubject.asObservable();
 
   constructor(private readonly analyzerService: AnalyzerService) {}
 
@@ -24,16 +27,20 @@ export class AppComponent {
   /**
    * Refresh the data and spin until it is done.
    */
-  refresh() {
+  refresh(): void {
     this.isRefreshing = true;
+    this.loadingSubject.next(true);
+
     this.analyzerService.refresh().subscribe({
       next: () => {
-        console.log('Refresh initiated');
+        console.log('Refresh completed');
         this.isRefreshing = false;
+        this.loadingSubject.next(false);
       },
       error: (error) => {
         console.error('Failed to refresh', error);
         this.isRefreshing = false;
+        this.loadingSubject.next(false);
       },
     });
   }

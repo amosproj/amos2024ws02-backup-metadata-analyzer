@@ -26,6 +26,7 @@
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 10px;
+    cursor: help;
 }
 
 .alert-yellow {
