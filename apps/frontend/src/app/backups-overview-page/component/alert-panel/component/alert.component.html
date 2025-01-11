@@ -1,5 +1,5 @@
 <div class="card" [ngClass]="getStatusClass()">
-  <div class="card-header">
+  <div class="card-header" routerLink="/alert" style="cursor: pointer;">
     <span>Status: {{ status }}</span>
     <span class="alert-counts">
       <span *ngIf="criticalAlertsCount > 0" class="alert-count">
