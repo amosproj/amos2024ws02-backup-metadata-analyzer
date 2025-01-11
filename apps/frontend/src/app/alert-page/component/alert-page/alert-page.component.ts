@@ -18,6 +18,7 @@ import {
 import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
 import { AlertServiceService } from '../../../shared/services/alert-service/alert-service.service';
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
+import { shortenBytes } from '../../../shared/utils/shortenBytes';
 
 interface AlertSummary {
   criticalCount: number;
@@ -41,6 +42,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   selected: Alert[] = [];
   hasBackupInfo = false;
   error: string | null = null;
+  shortenBytes = shortenBytes;
 
   // Statistics for summary
   criticalAlertsCount = 0;

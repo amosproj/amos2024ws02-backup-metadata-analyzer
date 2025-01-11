@@ -84,12 +84,12 @@ export class AlertUtilsService {
         break;
       case 'STORAGE_FILL_ALERT':
         const storageFillAlert = alert as StorageFillAlert;
-        description = `The current storage fill is ${shortenBytes(
+        description = `The current storage fill of storage with name "${
+          storageFillAlert.dataStoreName
+        }" is ${shortenBytes(
           storageFillAlert.filled * 1_000_000_000
         )}, which is above the threshold of ${shortenBytes(
           storageFillAlert.highWaterMark * 1_000_000_000
-        )}. This indicates insufficient available storage space. Maximum capacity is ${shortenBytes(
-          storageFillAlert.capacity * 1_000_000_000
         )}`;
         break;
     }

@@ -1,4 +1,4 @@
-<h1 class="header">Analysis and Warn ings</h1>
+<h1 class="header">Analysis and Warnings</h1>
 
 <ng-container *ngIf="alertSummary$ | async as summary">
   <!-- Summary Cards -->
@@ -113,7 +113,9 @@
       <clr-dg-cell>{{ alert.alertType.name }}</clr-dg-cell>
       <clr-dg-cell>
         <clr-tooltip>
-          <span clrTooltipTrigger style=" font-weight: bold;">{{ getAlertReason(alert) }}</span>
+          <span clrTooltipTrigger style="font-weight: bold">{{
+            getAlertReason(alert)
+          }}</span>
           <ng-container [ngSwitch]="alert.alertType.name">
             <div *ngSwitchCase="'SIZE_ALERT'">
               <div *ngIf="hasBackup(alert)">
@@ -127,9 +129,11 @@
 
             <div *ngSwitchCase="'STORAGE_FILL_ALERT'">
               <ng-container *ngIf="isStorageFillAlert(alert)">
-                <strong>Storage Fill:</strong> {{ alert.filled }}GB /
-                {{ alert.capacity }}GB<br />
-                <strong>High Water Mark:</strong> {{ alert.highWaterMark }}GB
+                <strong>Storage Fill:</strong>
+                {{ shortenBytes(alert.filled * 1024 * 1024 * 1024) }} /
+                {{ shortenBytes(alert.capacity * 1024 * 1024 * 1024) }}<br />
+                <strong>High Water Mark:</strong>
+                {{ shortenBytes(alert.highWaterMark * 1024 * 1024 * 1024) }}
               </ng-container>
             </div>
 
@@ -137,7 +141,7 @@
               {{ getAlertDetails(alert) }}
             </div>
           </ng-container>
-          <clr-tooltip-content clrPosition="left" clrSize="lg" *clrIfOpen>
+          <!-- <clr-tooltip-content clrPosition="left" clrSize="lg" *clrIfOpen>
             <ng-container [ngSwitch]="alert.alertType.name">
               <div *ngSwitchCase="'SIZE_ALERT'">
                 <div *ngIf="hasBackup(alert)">
@@ -161,7 +165,7 @@
                 {{ getAlertDetails(alert) }}
               </div>
             </ng-container>
-          </clr-tooltip-content>
+          </clr-tooltip-content> -->
         </clr-tooltip>
       </clr-dg-cell>
     </clr-dg-row>

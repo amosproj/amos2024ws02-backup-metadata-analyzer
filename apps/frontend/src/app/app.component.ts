@@ -27,7 +27,7 @@ export class AppComponent {
   /**
    * Refresh the data and spin until it is done.
    */
-  refresh() {
+  refresh(): void {
     this.isRefreshing = true;
     this.loadingSubject.next(true);
     
