@@ -24,10 +24,13 @@ import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.d
 import { BackupType } from '../backupData/dto/backupType';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { MissingBackupAlertEntity } from './entity/alerts/missingBackupAlert.entity';
+import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAlert.dto';
 import {
   CREATION_DATE_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
+  MISSING_BACKUP_ALERT,
 } from '../utils/constants';
 import { SeverityType } from './dto/severityType';
 
@@ -45,6 +48,8 @@ export class AlertingService implements OnModuleInit {
     private readonly creationDateRepository: Repository<CreationDateAlertEntity>,
     @InjectRepository(StorageFillAlertEntity)
     private storageFillRepository: Repository<StorageFillAlertEntity>,
+    @InjectRepository(MissingBackupAlertEntity)
+    private missingBackupRepository: Repository<MissingBackupAlertEntity>,
     //Services
     private readonly mailService: MailService,
     private readonly backupDataService: BackupDataService
@@ -52,6 +57,7 @@ export class AlertingService implements OnModuleInit {
     this.alertRepositories.push(this.sizeAlertRepository);
     this.alertRepositories.push(this.creationDateRepository);
     this.alertRepositories.push(this.storageFillRepository);
+    this.alertRepositories.push(this.missingBackupRepository);
   }
 
   async onModuleInit() {
@@ -75,6 +81,11 @@ export class AlertingService implements OnModuleInit {
       },
       {
         name: STORAGE_FILL_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
+      {
+        name: MISSING_BACKUP_ALERT,
         master_active: true,
         severity: SeverityType.WARNING,
       },
@@ -285,6 +296,37 @@ export class AlertingService implements OnModuleInit {
     }
   }
 
+  async createMissingBackupAlert(
+    createMissingBackupAlertDto: CreateMissingBackupAlertDto
+  ) {
+    // Check if alert already exists
+    const existingAlertEntity = await this.missingBackupRepository.findOneBy({
+      referenceDate: createMissingBackupAlertDto.referenceDate,
+    });
+
+    if (existingAlertEntity) {
+      console.log('Alert already exists -> ignoring it');
+      return;
+    }
+
+    const alert = new MissingBackupAlertEntity();
+    alert.referenceDate = createMissingBackupAlertDto.referenceDate;
+
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: MISSING_BACKUP_ALERT,
+    });
+    if (!alertType) {
+      throw new NotFoundException(`Alert type ${MISSING_BACKUP_ALERT} not found`);
+    }
+    alert.alertType = alertType;
+
+    await this.missingBackupRepository.save(alert);
+
+    if (alert.alertType.user_active && alert.alertType.master_active) {
+      await this.triggerAlertMail(alert);
+    }
+  }
+
   private async findAlertTypeByIdOrThrow(id: string): Promise<AlertTypeEntity> {
     const entity = await this.alertTypeRepository.findOneBy({ id });
     if (!entity) {
@@ -327,6 +369,11 @@ export class AlertingService implements OnModuleInit {
       case 'STORAGE_FILL_ALERT': {
         throw new BadRequestException(
           'Method not supported for alert type STORAGE_FILL_ALERT'
+        );
+      }
+      case 'MISSING_BACKUP_ALERT': {
+        throw new BadRequestException(
+          'Method not supported for alert type MISSING_BACKUP_ALERT'
         );
       }
     }

@@ -25,6 +25,7 @@ import { BackupType } from '../backupData/dto/backupType';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { AlertStatusDto } from './dto/alertStatus.dto';
 import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
+import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAlert.dto';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -141,6 +142,18 @@ export class AlertingController {
   ): Promise<void> {
     await this.alertingService.createStorageFillAlert(
       createStorageFillAlertDto
+    );
+  }
+
+  @Post('missingBackup')
+  @ApiOperation({ summary: 'Create a new missing backup alert.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateMissingBackupAlertDto })
+  async missingBackupAlert(
+    @Body() createMissingBackupAlertDto: CreateMissingBackupAlertDto
+  ): Promise<void> {
+    await this.alertingService.createMissingBackupAlert(
+      createMissingBackupAlertDto
     );
   }
 

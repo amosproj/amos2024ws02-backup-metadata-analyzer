@@ -8,6 +8,7 @@ import { AlertTypeEntity } from './entity/alertType.entity';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
+import { MissingBackupAlertEntity } from './entity/alerts/missingBackupAlert.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity'
       SizeAlertEntity,
       CreationDateAlertEntity,
       StorageFillAlertEntity,
+      MissingBackupAlertEntity,
     ]),
   ],
   providers: [AlertingService],
