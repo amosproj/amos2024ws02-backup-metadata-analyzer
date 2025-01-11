@@ -125,3 +125,19 @@ class Schedule(Base):
 
     def __str__(self):
         return repr(self)
+
+
+class TaskEvent(Base):
+    __tablename__ = "task_events"
+
+    # For now I only added the most relevant columns
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    object: Mapped[str]
+    schedule: Mapped[str]
+
+    def __repr__(self):
+        return f"""TaskEvent(id={self.id})"""
+
+    def __str__(self):
+        return repr(self)
