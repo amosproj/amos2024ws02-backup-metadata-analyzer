@@ -169,6 +169,39 @@ describe('AlertingService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('ensureAlertTypesExist', () => {
+    it('should add default alert types if they do not exist', async () => {
+      jest.spyOn(alertTypeRepository, 'findOneBy').mockResolvedValue(null);
+
+      await service.ensureAlertTypesExist();
+
+      expect(alertTypeRepository.save).toHaveBeenCalledTimes(3);
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: SIZE_ALERT })
+      );
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: CREATION_DATE_ALERT })
+      );
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: STORAGE_FILL_ALERT })
+      );
+    });
+
+    it('should not add alert types if they already exist', async () => {
+      jest.spyOn(alertTypeRepository, 'findOneBy').mockResolvedValue({
+        id: 'a',
+        name: SIZE_ALERT,
+        severity: SeverityType.WARNING,
+        user_active: true,
+        master_active: true,
+      });
+
+      await service.ensureAlertTypesExist();
+
+      expect(alertTypeRepository.save).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createSizeAlert', () => {
     it('should create and save a size alert', async () => {
       const createSizeAlertDto: CreateSizeAlertDto = {

@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -28,9 +29,10 @@ import {
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
 } from '../utils/constants';
+import { SeverityType } from './dto/severityType';
 
 @Injectable()
-export class AlertingService {
+export class AlertingService implements OnModuleInit {
   alertRepositories: Repository<any>[] = [];
 
   constructor(
@@ -50,6 +52,42 @@ export class AlertingService {
     this.alertRepositories.push(this.sizeAlertRepository);
     this.alertRepositories.push(this.creationDateRepository);
     this.alertRepositories.push(this.storageFillRepository);
+  }
+
+  async onModuleInit() {
+    await this.ensureAlertTypesExist();
+  }
+
+  /**
+   * Init database table alert types with default values if not already present
+   */
+  async ensureAlertTypesExist() {
+    const alertTypes: CreateAlertTypeDto[] = [
+      {
+        name: SIZE_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
+      {
+        name: CREATION_DATE_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
+      {
+        name: STORAGE_FILL_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
+    ];
+
+    for (const alertType of alertTypes) {
+      const existingAlertType = await this.alertTypeRepository.findOneBy({
+        name: alertType.name,
+      });
+      if (!existingAlertType) {
+        await this.alertTypeRepository.save(alertType);
+      }
+    }
   }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
