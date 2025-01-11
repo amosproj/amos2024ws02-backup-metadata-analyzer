@@ -24,3 +24,11 @@ export interface StorageFillAlert extends Alert {
   highWaterMark: number;
   capacity: number;
 }
+
+export interface MissingBackupAlert extends Alert {
+  referenceDate: Date;
+}
+
+export interface AdditionalBackupAlert extends Alert {
+  date: Date;
+}
