@@ -3,7 +3,7 @@ import { AlertServiceService } from '../../../../shared/services/alert-service/a
 import { Alert } from '../../../../shared/types/alert';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
-import { AlertUtilsService } from 'apps/frontend/src/app/shared/utils/alertUtils';
+import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
 
 @Component({
   selector: 'app-alert',
@@ -42,18 +42,23 @@ export class AlertComponent implements OnInit, OnDestroy {
     this.alertService
       .getAllAlerts(this.DAYS)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data: Alert[]) => {
-        this.criticalAlertsCount = data.filter(
-          (alert) => alert.alertType.severity === SeverityType.CRITICAL
-        ).length;
-        this.warningAlertsCount = data.filter(
-          (alert) => alert.alertType.severity === SeverityType.WARNING
-        ).length;
-        this.infoAlertsCount = data.filter(
-          (alert) => alert.alertType.severity === SeverityType.INFO
-        ).length;
-        this.alerts = data;
-        this.status = this.getStatus();
+      .subscribe({
+        next: (data: Alert[]) => {
+          this.criticalAlertsCount = data.filter(
+            (alert) => alert.alertType.severity === SeverityType.CRITICAL
+          ).length;
+          this.warningAlertsCount = data.filter(
+            (alert) => alert.alertType.severity === SeverityType.WARNING
+          ).length;
+          this.infoAlertsCount = data.filter(
+            (alert) => alert.alertType.severity === SeverityType.INFO
+          ).length;
+          this.alerts = data;
+          this.status = this.getStatus();
+        },
+        error: (error) => {
+          console.error('Error loading alerts:', error);
+        },
       });
   }
 
