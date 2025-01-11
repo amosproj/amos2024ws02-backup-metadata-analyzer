@@ -165,7 +165,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       }
     }
     return this.paginate<Alert>(
-      this.alertRepositoriy,
+      
     );
   }
 
