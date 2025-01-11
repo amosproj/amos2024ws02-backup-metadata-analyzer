@@ -50,48 +50,45 @@ export class PaginationService {
      */
     protected async paginateMultiple<T>(
         repositories: Repository<any>[],
-        order: FindOptionsOrder<T>,
-        where: FindOptionsWhere<T>,
         paginationOptionsDto: PaginationOptionsDto
     ): Promise<PaginationDto<T>> {
         let unionQuery = '';
 
+        // Define the columns to select and their types
+        const columns = [
+            'id',
+        ];
+
         // Do a query for each repository and combine them with UNION
         for (let i = 0; i < repositories.length; i++) {
             const subQuery = repositories[i].createQueryBuilder(`alias${i}`)
-                .select()
-                .where(where)
+                .select(columns.map(column => `alias${i}.${column}`).join(', '))
                 .getQuery();
 
             unionQuery += (i > 0 ? ' UNION ALL ' : '') + subQuery;
         }
 
-        let queryBuilder = repositories[0].createQueryBuilder()
-            .select('*')
-            .from(`(${unionQuery})`, 'combined');
-
-        // Apply order
-        for (const [key, value] of Object.entries(order)) {
-            queryBuilder = queryBuilder.addOrderBy(`combined.${key}`, value as any);
-        }
-
         // Apply pagination
-        if (paginationOptionsDto.offset) {
-            queryBuilder = queryBuilder.skip(paginationOptionsDto.offset);
-        }
-        if (paginationOptionsDto.limit) {
-            queryBuilder = queryBuilder.take(paginationOptionsDto.limit);
-        }
+        const offset = paginationOptionsDto.offset || 0;
+        const limit = paginationOptionsDto.limit || 10;
 
-        // Execute the query and get the results
-        const [data, total] = await queryBuilder.getManyAndCount() as [T[], number];
+        const paginatedQuery = `
+            SELECT * FROM (${unionQuery}) AS combined
+            OFFSET ${offset} LIMIT ${limit}
+        `;
+
+        // Execute the raw SQL query
+        const [data, total] = await Promise.all([
+            repositories[0].query(paginatedQuery),
+            repositories[0].query(`SELECT COUNT(*) FROM (${unionQuery}) AS combined`)
+        ]);
 
         return {
             data,
             paginationData: {
-                offset: paginationOptionsDto.offset,
-                limit: paginationOptionsDto.limit,
-                total,
+                offset,
+                limit,
+                total: parseInt(total[0].count, 10),
             }
         };
     }

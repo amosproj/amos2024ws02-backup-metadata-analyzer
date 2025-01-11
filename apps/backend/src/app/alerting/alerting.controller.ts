@@ -12,6 +12,7 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -25,6 +26,10 @@ import { BackupType } from '../backupData/dto/backupType';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { AlertStatusDto } from './dto/alertStatus.dto';
 import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
+import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
+import { AlertFilterDto } from './dto/alertFilter.dto';
+import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
+import { PaginationDto } from '../utils/pagination/PaginationDto';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -108,6 +113,20 @@ export class AlertingController {
     @Query('days') days?: number
   ): Promise<Alert[]> {
     return this.alertingService.getAllAlerts(backupId, days);
+  }
+
+  @Post('pages')
+  @ApiOperation({ summary: 'Returns all alert Objects.' })
+  async findAll(
+    @Query() paginationOptionsDto: PaginationOptionsDto,
+    @Query() alertFilterDto: AlertFilterDto,
+    @Query() backupDataOrderOptionsDto: AlertOrderOptionsDto,
+  ): Promise<PaginationDto<Alert>> {
+    return this.alertingService.getAllAlertsPaginated(
+      paginationOptionsDto,
+      backupDataOrderOptionsDto,
+      alertFilterDto,
+    );
   }
 
   @Post('size')

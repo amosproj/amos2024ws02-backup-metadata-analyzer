@@ -143,29 +143,11 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     alertOrderOptionsDto: AlertOrderOptionsDto,
     alertFilterDto: AlertFilterDto,
   ): Promise<PaginationDto<Alert>> {
-    const where: FindOptionsWhere<Alert> = {
-      alertType: { user_active: true, master_active: true },
-    };
-
-    const alerts: Alert[] = [];
-    for (const alertRepository of this.alertRepositories) {
-      if (alertRepository === this.storageFillRepository) {
-        alerts.push(
-          ...(await alertRepository.find({
-            where: {
-              alertType: {
-                user_active: true,
-                master_active: true,
-              },
-            },
-          }))
-        );
-      } else {
-        alerts.push(...(await alertRepository.find({ where })));
-      }
-    }
-    return this.paginate<Alert>(
-      
+    return this.paginateMultiple<Alert>(
+      this.alertRepositories,
+      // this.createOrderClause(alertOrderOptionsDto),
+      // this.createWhereClause(alertFilterDto),
+      paginationOptionsDto
     );
   }
 
