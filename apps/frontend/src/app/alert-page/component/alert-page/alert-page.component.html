@@ -73,13 +73,10 @@
   </clr-alert>
 
   <!-- Alert Grid -->
-  <clr-datagrid
-    [clrDgLoading]="loading"
-    (clrDgRefresh)="refresh($event)"
-  >
-    <clr-dg-column [clrDgField]="'alertType.severity'">Severity</clr-dg-column>
-    <clr-dg-column [clrDgField]="'creationDate'">Date</clr-dg-column>
-    <clr-dg-column [clrDgField]="'alertType.name'">Type</clr-dg-column>
+  <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)">
+    <clr-dg-column>Severity</clr-dg-column>
+    <clr-dg-column>Date</clr-dg-column>
+    <clr-dg-column>Type</clr-dg-column>
     <clr-dg-column>Details</clr-dg-column>
 
     <clr-dg-row *ngFor="let alert of alerts$ | async" [clrDgItem]="alert">
@@ -111,61 +108,31 @@
       <clr-dg-cell>{{ formatDate(alert.creationDate) }}</clr-dg-cell>
       <clr-dg-cell>{{ alert.alertType.name }}</clr-dg-cell>
       <clr-dg-cell>
-        <clr-tooltip>
-          <span clrTooltipTrigger style="font-weight: bold">{{
-            getAlertReason(alert)
-          }}</span>
-          <ng-container [ngSwitch]="alert.alertType.name">
-            <div *ngSwitchCase="'SIZE_ALERT'">
-              <div *ngIf="hasBackup(alert)">
-                <strong>Backup Saveset:</strong> {{ alert.backup.saveset
-                }}<br />
-                <strong>Creation Date:</strong>
-                {{ formatDate(alert.backup.creationDate) }}
-              </div>
-              {{ getAlertDetails(alert) }}
+        <span style="font-weight: bold">{{ getAlertReason(alert) }}</span>
+        <ng-container [ngSwitch]="alert.alertType.name">
+          <div *ngSwitchCase="'SIZE_ALERT'">
+            <div *ngIf="hasBackup(alert)">
+              <strong>Backup Saveset:</strong> {{ alert.backup.saveset }}<br />
+              <strong>Creation Date:</strong>
+              {{ formatDate(alert.backup.creationDate) }}
             </div>
+            {{ getAlertDetails(alert) }}
+          </div>
 
-            <div *ngSwitchCase="'STORAGE_FILL_ALERT'">
-              <ng-container *ngIf="isStorageFillAlert(alert)">
-                <strong>Storage Fill:</strong>
-                {{ shortenBytes(alert.filled * 1024 * 1024 * 1024) }} /
-                {{ shortenBytes(alert.capacity * 1024 * 1024 * 1024) }}<br />
-                <strong>High Water Mark:</strong>
-                {{ shortenBytes(alert.highWaterMark * 1024 * 1024 * 1024) }}
-              </ng-container>
-            </div>
-
-            <div *ngSwitchDefault>
-              {{ getAlertDetails(alert) }}
-            </div>
-          </ng-container>
-          <!-- <clr-tooltip-content clrPosition="left" clrSize="lg" *clrIfOpen>
-            <ng-container [ngSwitch]="alert.alertType.name">
-              <div *ngSwitchCase="'SIZE_ALERT'">
-                <div *ngIf="hasBackup(alert)">
-                  <strong>Backup Saveset:</strong> {{ alert.backup.saveset
-                  }}<br />
-                  <strong>Creation Date:</strong>
-                  {{ formatDate(alert.backup.creationDate) }}
-                </div>
-                {{ getAlertDetails(alert) }}
-              </div>
-
-              <div *ngSwitchCase="'STORAGE_FILL_ALERT'">
-                <ng-container *ngIf="isStorageFillAlert(alert)">
-                  <strong>Storage Fill:</strong> {{ alert.filled }}GB /
-                  {{ alert.capacity }}GB<br />
-                  <strong>High Water Mark:</strong> {{ alert.highWaterMark }}GB
-                </ng-container>
-              </div>
-
-              <div *ngSwitchDefault>
-                {{ getAlertDetails(alert) }}
-              </div>
+          <div *ngSwitchCase="'STORAGE_FILL_ALERT'">
+            <ng-container *ngIf="isStorageFillAlert(alert)">
+              <strong>Storage Fill:</strong>
+              {{ shortenBytes(alert.filled * 1024 * 1024 * 1024) }} /
+              {{ shortenBytes(alert.capacity * 1024 * 1024 * 1024) }}<br />
+              <strong>High Water Mark:</strong>
+              {{ shortenBytes(alert.highWaterMark * 1024 * 1024 * 1024) }}
             </ng-container>
-          </clr-tooltip-content> -->
-        </clr-tooltip>
+          </div>
+
+          <div *ngSwitchDefault>
+            {{ getAlertDetails(alert) }}
+          </div>
+        </ng-container>
       </clr-dg-cell>
     </clr-dg-row>
 

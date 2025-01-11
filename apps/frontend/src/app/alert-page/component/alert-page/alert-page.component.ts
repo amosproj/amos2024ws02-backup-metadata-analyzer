@@ -9,10 +9,8 @@ import {
   BehaviorSubject,
   map,
   Observable,
-  share,
   shareReplay,
   Subject,
-  take,
   takeUntil,
 } from 'rxjs';
 import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
@@ -44,13 +42,9 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   error: string | null = null;
   shortenBytes = shortenBytes;
 
-  // Statistics for summary
   criticalAlertsCount = 0;
   warningAlertsCount = 0;
   infoAlertsCount = 0;
-
-  // Default sort order
-  readonly descSort = ClrDatagridSortOrder.DESC;
 
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   readonly alerts$ = this.alertsSubject.asObservable().pipe(shareReplay(1));
@@ -70,7 +64,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadAlerts();
 
-    // Subscribe to refresh events
     this.alertService
       .getRefreshObservable()
       .pipe(takeUntil(this.destroy$))
@@ -118,7 +111,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       { criticalCount: 0, warningCount: 0, infoCount: 0 }
     );
 
-    // Count repeated alerts
     const alertTypeCounts = alerts.reduce((acc, alert) => {
       const type = alert.alertType.name;
       acc[type] = (acc[type] || 0) + 1;
@@ -138,7 +130,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     };
   }
 
-  // Type guard for StorageFillAlert
   isStorageFillAlert(alert: Alert): alert is StorageFillAlert {
     return alert.alertType.name === 'STORAGE_FILL_ALERT';
   }
