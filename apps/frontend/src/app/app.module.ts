@@ -10,6 +10,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
 import {
   angleIcon,
+  barsIcon,
   bellIcon,
   bookIcon,
   ClarityIcons,
@@ -107,7 +108,8 @@ export class AppModule {
       helpIcon,
       bookIcon,
       lineChartIcon,
-      infoStandardIcon
+      infoStandardIcon,
+      barsIcon
     );
   }
 }

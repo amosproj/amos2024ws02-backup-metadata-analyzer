@@ -7,14 +7,23 @@
   </app-loading-overlay>
 
   <clr-header class="header">
-    <div class="header-hamburger-trigger" (click)="collapsed = !collapsed">
-      <button type="button" class="header-hamburger">
-        <cds-icon shape="bars"></cds-icon>
-      </button>
-    </div>
-
-    <img src="../../../../public/team_logo.png" alt="Team Logo" width="50" />
-    <span class="title">Metadata Analyzer</span>
+    <img
+      src="../../../../public/team_logo.png"
+      alt="Team Logo"
+      width="50"
+      routerLink="/"
+      [routerLinkActiveOptions]="{ exact: true }"
+      routerLinkActive="active"
+      style="cursor: pointer"
+    />
+    <span
+      class="title"
+      routerLink="/"
+      style="cursor: pointer"
+      [routerLinkActiveOptions]="{ exact: true }"
+      routerLinkActive="active"
+      >Metadata Analyzer</span
+    >
     <div class="header-actions">
       <button class="refresh" (click)="refresh()" title="Refresh Data">
         <cds-icon
@@ -35,6 +44,7 @@
           <button clrDropdownItem>
             <cds-icon shape="envelope"></cds-icon>
             <span
+              [routerLinkActiveOptions]="{ exact: true }"
               routerLinkActive="active"
               routerLink="email-receiver"
               class="nav-text"
@@ -49,7 +59,7 @@
 
   <div class="content-container">
     <clr-vertical-nav
-      class="clr-vertical-nav has-nav-groups clr-nav-level-1 custom-nav"
+      class="clr-vertical-nav has-icons"
       [clrVerticalNavCollapsible]="true"
       [clrVerticalNavCollapsed]="collapsed"
       (clrVerticalNavCollapsedChange)="collapsed = $event"

@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class AppComponent {
   title = 'metadata-analyzer-frontend';
-  collapsed = true;
+  protected collapsed: boolean = true;
   @ViewChild(NotificationSettingsComponent)
   private notificationSettings!: NotificationSettingsComponent;
 
@@ -30,7 +30,7 @@ export class AppComponent {
   refresh(): void {
     this.isRefreshing = true;
     this.loadingSubject.next(true);
-    
+
     this.analyzerService.refresh().subscribe({
       next: () => {
         console.log('Refresh completed');
