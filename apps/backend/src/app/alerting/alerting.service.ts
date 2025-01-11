@@ -169,7 +169,7 @@ export class AlertingService implements OnModuleInit {
 
     const alerts: Alert[] = [];
     for (const alertRepository of this.alertRepositories) {
-      if (alertRepository === this.storageFillRepository) {
+      if (alertRepository === this.storageFillRepository || alertRepository === this.missingBackupRepository) {
         alerts.push(
           ...(await alertRepository.find({
             where: {
