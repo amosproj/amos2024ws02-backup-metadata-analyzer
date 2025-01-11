@@ -6,7 +6,7 @@
     <!-- Alert Statistics Card -->
     <div class="clr-col-12 clr-col-md-6">
       <div class="card">
-        <div class="card-block">
+        <div class="card-block" id="alert-summary-card">
           <div class="card-title">Alert Statistics</div>
           <div class="card-text">
             <div class="alert-summary">
@@ -74,7 +74,6 @@
 
   <!-- Alert Grid -->
   <clr-datagrid
-    [(clrDgSelected)]="selected"
     [clrDgLoading]="loading"
     (clrDgRefresh)="refresh($event)"
   >

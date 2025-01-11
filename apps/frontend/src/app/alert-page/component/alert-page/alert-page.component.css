@@ -138,3 +138,8 @@ clr-datagrid {
 .row-info {
   background-color: rgba(0, 114, 163, 0.05);
 }
+
+
+#alert-summary-card {
+  padding-bottom: 24px;
+}
