@@ -30,9 +30,14 @@ import {
   STORAGE_FILL_ALERT,
 } from '../utils/constants';
 import { SeverityType } from './dto/severityType';
+import { PaginationDto } from '../utils/pagination/PaginationDto';
+import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
+import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
+import { AlertFilterDto } from './dto/alertFilter.dto';
+import { PaginationService } from '../utils/pagination/paginationService';
 
 @Injectable()
-export class AlertingService implements OnModuleInit {
+export class AlertingService extends PaginationService implements OnModuleInit {
   alertRepositories: Repository<any>[] = [];
 
   constructor(
@@ -49,6 +54,7 @@ export class AlertingService implements OnModuleInit {
     private readonly mailService: MailService,
     private readonly backupDataService: BackupDataService
   ) {
+    super();
     this.alertRepositories.push(this.sizeAlertRepository);
     this.alertRepositories.push(this.creationDateRepository);
     this.alertRepositories.push(this.storageFillRepository);
@@ -130,6 +136,37 @@ export class AlertingService implements OnModuleInit {
 
   async triggerAlertMail(alert: Alert) {
     await this.mailService.sendAlertMail(alert);
+  }
+
+  async getAllAlertsPaginated(
+    paginationOptionsDto: PaginationOptionsDto,
+    alertOrderOptionsDto: AlertOrderOptionsDto,
+    alertFilterDto: AlertFilterDto,
+  ): Promise<PaginationDto<Alert>> {
+    const where: FindOptionsWhere<Alert> = {
+      alertType: { user_active: true, master_active: true },
+    };
+
+    const alerts: Alert[] = [];
+    for (const alertRepository of this.alertRepositories) {
+      if (alertRepository === this.storageFillRepository) {
+        alerts.push(
+          ...(await alertRepository.find({
+            where: {
+              alertType: {
+                user_active: true,
+                master_active: true,
+              },
+            },
+          }))
+        );
+      } else {
+        alerts.push(...(await alertRepository.find({ where })));
+      }
+    }
+    return this.paginate<Alert>(
+      this.alertRepositoriy,
+    );
   }
 
   async getAllAlerts(backupId?: string, days?: number): Promise<Alert[]> {
