@@ -35,6 +35,8 @@ import { DataStores1734616685846 } from './migrations/1734616685846-DataStores';
 import { AddAlertCreationDate1736344989806 } from './migrations/1736344989806-AddAlertCreationDate';
 import { MissingBackupAlertEntity } from './alerting/entity/alerts/missingBackupAlert.entity';
 import { AddAlertMissingBackup1736620579537 } from './migrations/1736620579537-AddAlertMissingBackup';
+import { AdditionalBackupAlertEntity } from './alerting/entity/alerts/additionalBackupAlert.entity';
+import { AddAlertAdditionalBackup1736630779875 } from './migrations/1736630779875-AddAlertAdditionalBackup';
 
 /**
  * Used by NestJS to reach database.
@@ -65,6 +67,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         MailReceiverEntity,
         DataStoreEntity,
         MissingBackupAlertEntity,
+        AdditionalBackupAlertEntity,
       ],
       migrationsRun: true,
       migrations: [
@@ -89,6 +92,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         DataStores1734616685846,
         AddAlertCreationDate1736344989806,
         AddAlertMissingBackup1736620579537,
+        AddAlertAdditionalBackup1736630779875,
       ],
       logging: true,
       logger: 'debug',
