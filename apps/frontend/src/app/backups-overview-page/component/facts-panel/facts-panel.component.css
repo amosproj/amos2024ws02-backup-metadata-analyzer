@@ -1,0 +1,23 @@
+.facts-card {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    background-color: #f3f8fb;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.facts-title {
+    font-size: 1.2em;
+    margin-bottom: 8px;
+    color: #6c757d;
+}
+
+.facts-value {
+    font-size: 2em;
+    font-weight: bold;
+    color: #343a40;
+}

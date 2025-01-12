@@ -21,7 +21,6 @@ import {
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
-import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -62,6 +61,7 @@ const sizeAlertEntities: SizeAlertEntity[] = [
     referenceSize: 200,
     backup: mockedBackupDataEntity,
     alertType: mockedSizeAlertTypeEntity,
+    creationDate: new Date(),
   },
 ];
 
@@ -72,6 +72,7 @@ const creationDateAlertEntities: CreationDateAlertEntity[] = [
     referenceDate: new Date(),
     backup: mockedBackupDataEntity,
     alertType: mockedCreationDateAlertTypeEntity,
+    creationDate: new Date(),
   },
 ];
 
@@ -166,6 +167,39 @@ describe('AlertingService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('ensureAlertTypesExist', () => {
+    it('should add default alert types if they do not exist', async () => {
+      jest.spyOn(alertTypeRepository, 'findOneBy').mockResolvedValue(null);
+
+      await service.ensureAlertTypesExist();
+
+      expect(alertTypeRepository.save).toHaveBeenCalledTimes(3);
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: SIZE_ALERT })
+      );
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: CREATION_DATE_ALERT })
+      );
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: STORAGE_FILL_ALERT })
+      );
+    });
+
+    it('should not add alert types if they already exist', async () => {
+      jest.spyOn(alertTypeRepository, 'findOneBy').mockResolvedValue({
+        id: 'a',
+        name: SIZE_ALERT,
+        severity: SeverityType.WARNING,
+        user_active: true,
+        master_active: true,
+      });
+
+      await service.ensureAlertTypesExist();
+
+      expect(alertTypeRepository.save).not.toHaveBeenCalled();
+    });
   });
 
   describe('createSizeAlert', () => {
