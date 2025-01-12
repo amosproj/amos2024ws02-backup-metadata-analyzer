@@ -13,7 +13,8 @@
     >
       <span class="data-store-name">{{ dataStore.displayName }}</span>
       <span *ngIf="dataStore.overflowTime !== null" class="overflow-badge">
-        Estimated time to storage overflow: {{ dataStore.overflowTime }} days
+        Estimated time to storage overflow:
+        {{ getOverflowTimeLabel(dataStore.overflowTime) }}
       </span>
       <div class="progress-bar-container">
         <div class="progress-bar">
