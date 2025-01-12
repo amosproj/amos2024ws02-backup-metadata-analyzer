@@ -218,13 +218,13 @@ class SimpleRuleBasedAnalyzer:
 
     # Search for unusual creation times of 'full' backups made after start_date
     @staticmethod
-    def extract_schedule_dict(self, schedules):
+    def extract_schedule_dict(schedules):
         schedule_dict = dict()
         for schedule in schedules:
             schedule_dict[schedule.name] = schedule
         return schedule_dict
 
-    def analyze_creation_dates(self, data, schedules, alert_limit, start_date):
+    def analyze_creation_dates(self, data, schedules, alert_limit, start_date, mode = "DEFAULT"):
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
@@ -248,6 +248,9 @@ class SimpleRuleBasedAnalyzer:
             alerts += self._analyze_creation_dates_of_one_task(
                 results, schedule_dict, start_date
             )
+
+        if(mode == "ONLY_SCHEDULES"):
+            return
 
         # Because we ignore alerts which would be created earlier than the current latest alert,
         # we have to sort the alerts to not miss any alerts in the future

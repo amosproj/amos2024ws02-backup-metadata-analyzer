@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from metadata_analyzer.models import BackupData, Result, Tasks, DataStore, Schedule
+from metadata_analyzer.analyzer import Analyzer
+from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
 import os
 
 
@@ -33,14 +35,11 @@ class Database:
         return result
 
     def get_results(self):
-        schedules = Analyzer. list(this.get_schedules())
         session = Session(self.engine)
         stmt = select(Result)
 
-        schedule_dict = SimpleRuleBasedAnalyzer.extract_schedule_dict(schedules)
         results = session.scalars(stmt)
-        start_date = Analyzer._get_start_date(results, "SIZE_ALERT")
-        SimpleRuleBasedAnalyzer.analyze_creation_dates(results, schedule_dict, None, start_date)
+        
         return results
 
     def get_tasks(self):

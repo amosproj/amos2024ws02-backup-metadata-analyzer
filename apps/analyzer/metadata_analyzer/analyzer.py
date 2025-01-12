@@ -35,7 +35,7 @@ class Analyzer:
 			"I": "INCREMENTAL",
 			"D": "DIFFERENTIAL",
 			"C": "COPY"
-		}[result.fdi_type]
+		}.get(result.fdi_type, "UNKNOWN")  # Use .get() to handle unexpected types
 		return {
 			"id": result.uuid,
 			"saveset": result.saveset,
@@ -43,7 +43,7 @@ class Analyzer:
 			"creationDate": result.start_time.isoformat(),
 			"type": backup_type,
 			"taskId": result.task_uuid,
-			"scheduledTime": result.scheduledTime.isoformat(),
+			"scheduledTime": result.scheduledTime.isoformat() if result.scheduledTime else None,  # Handle None value
 		}
 
 	# Convert a task from the database into the format used by the backend
@@ -66,7 +66,9 @@ class Analyzer:
 
 	def _send_Backups():
 		results = list(Analyzer.database.get_results())
-
+		schedules = list(Analyzer.database.get_schedules())
+		start_date = Analyzer._get_start_date(results, "SIZE_ALERT", "FULL")
+		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, start_date, "ONLY_SCHEDULES")
 		# Batch the api calls to the backend for improved efficiency
 		batch = []
 		count = 0
