@@ -118,7 +118,7 @@ describe('DataStoresController (e2e)', () => {
     expect(repository.save).toHaveBeenCalledWith(createDataStoreDto);
   });
 
-  it('/dataStores/:id/OverflowTime (POST) should update overflowTime from 14 to 28', async () => {
+  it('/dataStores/:id/OverflowTime (PUT) should update overflowTime from 14 to 28', async () => {
     const id = 'ea1a2f52-5cf4-44a6-b266-175ee396a18c';
 
     const initialDataStore = plainToInstance(CreateDataStoreDto, {
@@ -143,7 +143,7 @@ describe('DataStoresController (e2e)', () => {
     jest.spyOn(repository, 'save').mockResolvedValue(updatedDataStore);
 
     const response = await request(app.getHttpServer())
-      .post(`/dataStores/${id}/OverflowTime`)
+      .put(`/dataStores/${id}/OverflowTime`)
       .send(updatedOverflowTimeDto)
       .expect(200);
 
@@ -156,7 +156,7 @@ describe('DataStoresController (e2e)', () => {
     expect(response.body).toEqual(updatedDataStore);
   });
 
-  it('/dataStores/:id/OverflowTime (POST) should update overflowTime from 14 to 0', async () => {
+  it('/dataStores/:id/OverflowTime (PUT) should update overflowTime from 14 to 0', async () => {
     const id = 'ea1a2f52-5cf4-44a6-b266-175ee396a18c';
 
     const initialDataStore = plainToInstance(CreateDataStoreDto, {
@@ -181,7 +181,7 @@ describe('DataStoresController (e2e)', () => {
     jest.spyOn(repository, 'save').mockResolvedValue(updatedDataStore);
 
     const response = await request(app.getHttpServer())
-      .post(`/dataStores/${id}/OverflowTime`)
+      .put(`/dataStores/${id}/OverflowTime`)
       .send(updatedOverflowTimeDto)
       .expect(200);
 
@@ -194,7 +194,7 @@ describe('DataStoresController (e2e)', () => {
     expect(response.body).toEqual(updatedDataStore);
   });
 
-  it('/dataStores/:id/OverflowTime (POST) should fail to update overflowTime from 14 to -1', async () => {
+  it('/dataStores/:id/OverflowTime (PUT) should fail to update overflowTime from 14 to -1', async () => {
     jest.clearAllMocks();
 
     const id = 'ea1a2f52-5cf4-44a6-b266-175ee396a18c';
@@ -219,7 +219,7 @@ describe('DataStoresController (e2e)', () => {
       .mockResolvedValue(initialDataStore);
 
     const response = await request(app.getHttpServer())
-      .post(`/dataStores/${id}/OverflowTime`)
+      .put(`/dataStores/${id}/OverflowTime`)
       .send(invalidOverflowTimeDto)
       .expect(400);
     expect(saveSpy).not.toHaveBeenCalled();
