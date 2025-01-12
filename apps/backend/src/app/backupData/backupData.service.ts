@@ -28,6 +28,7 @@ import { SortOrder } from '../utils/pagination/SortOrder';
 import { TasksService } from '../tasks/tasks.service';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
 import { TaskEntity } from '../tasks/entity/task.entity';
+import { BackupInformationDto } from '../information/dto/backupInformation.dto';
 
 @Injectable()
 export class BackupDataService extends PaginationService {
@@ -37,6 +38,24 @@ export class BackupDataService extends PaginationService {
     private readonly tasksService: TasksService
   ) {
     super();
+  }
+
+  async getTotalBackupInformation(): Promise<BackupInformationDto> {
+    // Sum the size of all backups
+    const totalSize = await this.backupDataRepository
+      .createQueryBuilder('backup')
+      .select('SUM(backup.sizeMB)', 'total')
+      .getRawOne();
+
+    //Get number of all backups
+    const numberOfBackups = await this.backupDataRepository
+      .createQueryBuilder('backup')
+      .select('COUNT(backup.id)', 'total')
+      .getRawOne();
+    return {
+      totalBackupSize: totalSize?.total ?? 0,
+      numberOfBackups: numberOfBackups?.total ?? 0,
+    };
   }
 
   /**
