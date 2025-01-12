@@ -194,7 +194,7 @@ describe('DataStoresController (e2e)', () => {
     expect(response.body).toEqual(updatedDataStore);
   });
 
-  it('/dataStores/:id/setOverflowTime (POST) should fail to update overflowTime from 14 to -1', async () => {
+  it('/dataStores/:id/OverflowTime (POST) should fail to update overflowTime from 14 to -1', async () => {
     jest.clearAllMocks();
 
     const id = 'ea1a2f52-5cf4-44a6-b266-175ee396a18c';
