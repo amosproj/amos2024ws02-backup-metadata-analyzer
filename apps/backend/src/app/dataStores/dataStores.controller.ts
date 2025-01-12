@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  HttpCode,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -51,10 +52,14 @@ export class DataStoresController {
   @ApiOperation({ summary: 'Sets the overflow time for a data store.' })
   @ApiOkResponse({ description: 'Overflow time updated successfully.' })
   @ApiNotFoundResponse({ description: 'Data store with given id not found.' })
+  @HttpCode(200)
   async setOverflowTime(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() payload: SetOverflowTimeDto
   ) {
+    console.log('Received ID:', id);
+    console.log('Received Payload:', payload);
+
     return this.dataStoresService.setOverflowTime(id, payload.overflowTime);
   }
 }
