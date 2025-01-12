@@ -48,7 +48,7 @@ export class DataStoresController {
     return this.dataStoresService.create(createDataStoreDto);
   }
 
-  @Post(':id/setOverflowTime')
+  @Post(':id/OverflowTime')
   @ApiOperation({ summary: 'Sets the overflow time for a data store.' })
   @ApiOkResponse({ description: 'Overflow time updated successfully.' })
   @ApiNotFoundResponse({ description: 'Data store with given id not found.' })
