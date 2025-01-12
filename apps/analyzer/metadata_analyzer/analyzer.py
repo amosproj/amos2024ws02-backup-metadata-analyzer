@@ -67,8 +67,11 @@ class Analyzer:
 	def _send_Backups():
 		results = list(Analyzer.database.get_results())
 		schedules = list(Analyzer.database.get_schedules())
-		start_date = Analyzer._get_start_date(results, "SIZE_ALERT", "FULL")
+		start_date = Analyzer._get_start_date(results, "SIZE_ALERT", None)
 		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, start_date, "ONLY_SCHEDULES")
+		start_date = Analyzer._get_start_date(results, "CREATION_DATE_ALERT", None)
+		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, start_date, "ONLY_SCHEDULES")
+		
 		# Batch the api calls to the backend for improved efficiency
 		batch = []
 		count = 0
