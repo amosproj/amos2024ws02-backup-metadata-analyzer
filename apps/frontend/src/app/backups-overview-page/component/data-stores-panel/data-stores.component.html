@@ -3,9 +3,18 @@
     <span class="data-store-name">Data Stores</span>
   </div>
   <div class="card-body">
-    <div *ngFor="let dataStore of (showAll ? (dataStores$ | async) : (dataStores$ | async)?.slice(0, 5))"
-         class="data-store">
+    <div
+      *ngFor="
+        let dataStore of showAll
+          ? (dataStores$ | async)
+          : (dataStores$ | async)?.slice(0, 5)
+      "
+      class="data-store"
+    >
       <span class="data-store-name">{{ dataStore.displayName }}</span>
+      <span *ngIf="dataStore.overflowTime !== null" class="overflow-badge">
+        Estimated time to storage overflow: {{ dataStore.overflowTime }} days
+      </span>
       <div class="progress-bar-container">
         <div class="progress-bar">
           <clr-progress-bar
@@ -13,14 +22,21 @@
             [clrMax]="100"
           >
           </clr-progress-bar>
-          <div class="high-water-mark" [style.left.%]="getHighWaterMarkPercentage(dataStore)"></div>
+          <div
+            class="high-water-mark"
+            [style.left.%]="getHighWaterMarkPercentage(dataStore)"
+          ></div>
         </div>
         <div class="percentage">
           {{ getFilledPercentage(dataStore) + '%' }}
         </div>
       </div>
     </div>
-    <button *ngIf="((dataStores$ | async)?.length ?? 0) > 5" class="show-more-btn" (click)="toggleShowAll()">
+    <button
+      *ngIf="((dataStores$ | async)?.length ?? 0) > 5"
+      class="show-more-btn"
+      (click)="toggleShowAll()"
+    >
       {{ showAll ? 'Show less' : 'Show all' }}
     </button>
   </div>
