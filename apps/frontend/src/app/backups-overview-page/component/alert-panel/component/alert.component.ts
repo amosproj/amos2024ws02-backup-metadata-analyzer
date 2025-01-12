@@ -50,18 +50,45 @@ export class AlertComponent implements OnInit, OnDestroy {
       .getAllAlerts(this.DAYS)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data: Alert[]) => {
-        this.criticalAlertsCount = data.filter(
+        this.alerts = this.filterAlerts(data);
+        this.criticalAlertsCount = this.alerts.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL
         ).length;
-        this.warningAlertsCount = data.filter(
+        this.warningAlertsCount = this.alerts.filter(
           (alert) => alert.alertType.severity === SeverityType.WARNING
         ).length;
-        this.infoAlertsCount = data.filter(
+        this.infoAlertsCount = this.alerts.filter(
           (alert) => alert.alertType.severity === SeverityType.INFO
         ).length;
-        this.alerts = data;
         this.status = this.getStatus();
       });
+  }
+
+  filterAlerts(alerts: Alert[]): Alert[] {
+    const alertMap = new Map<string, StorageFillAlert>();
+
+    const filteredAlerts: Alert[] = [];
+
+    // sort alerts by creationDate
+    alerts.sort((a, b) => {
+      return (
+        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+      );
+    });
+    alerts.forEach((alert) => {
+      // If alert is from type STORAGE_FILL_ALERT, only one is shown per data store
+      if (alert.alertType.name === 'STORAGE_FILL_ALERT') {
+        const storageFillAlert = alert as StorageFillAlert;
+        if (!alertMap.has(storageFillAlert.dataStoreName)) {
+          alertMap.set(storageFillAlert.dataStoreName, storageFillAlert);
+          filteredAlerts.push(storageFillAlert);
+        }
+      } else {
+        filteredAlerts.push(alert);
+      }
+    });
+
+    return filteredAlerts;
   }
 
   getStatusClass(): string {

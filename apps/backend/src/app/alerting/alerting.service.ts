@@ -44,7 +44,7 @@ export class AlertingService implements OnModuleInit {
     @InjectRepository(CreationDateAlertEntity)
     private readonly creationDateRepository: Repository<CreationDateAlertEntity>,
     @InjectRepository(StorageFillAlertEntity)
-    private storageFillRepository: Repository<StorageFillAlertEntity>,
+    private readonly storageFillRepository: Repository<StorageFillAlertEntity>,
     //Services
     private readonly mailService: MailService,
     private readonly backupDataService: BackupDataService
@@ -253,17 +253,6 @@ export class AlertingService implements OnModuleInit {
   async createStorageFillAlert(
     createStorageFillAlertDto: CreateStorageFillAlertDto
   ) {
-    // Check if alert already exists
-    const existingAlertEntity = await this.storageFillRepository.findOneBy({
-      filled: createStorageFillAlertDto.filled,
-      dataStoreName: createStorageFillAlertDto.dataStoreName,
-    });
-
-    if (existingAlertEntity) {
-      console.log('Alert already exists -> ignoring it');
-      return;
-    }
-
     const alert = new StorageFillAlertEntity();
     alert.filled = createStorageFillAlertDto.filled;
     alert.highWaterMark = createStorageFillAlertDto.highWaterMark;
