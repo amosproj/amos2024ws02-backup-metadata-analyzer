@@ -156,7 +156,7 @@ describe('DataStoresController (e2e)', () => {
     expect(response.body).toEqual(updatedDataStore);
   });
 
-  it('/dataStores/:id/setOverflowTime (POST) should update overflowTime from 14 to 0', async () => {
+  it('/dataStores/:id/OverflowTime (POST) should update overflowTime from 14 to 0', async () => {
     const id = 'ea1a2f52-5cf4-44a6-b266-175ee396a18c';
 
     const initialDataStore = plainToInstance(CreateDataStoreDto, {
