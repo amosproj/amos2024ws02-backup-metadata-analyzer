@@ -15,6 +15,7 @@ describe('DataStoresController (e2e)', () => {
   const mockDataStoresRepository = {
     find: jest.fn(),
     findOneBy: jest.fn(),
+    findOne: jest.fn(),
     save: jest.fn(),
   };
 

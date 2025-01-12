@@ -11,6 +11,7 @@ describe('DataStoresService', () => {
   const mockDataStoresRepository = {
     find: jest.fn(),
     findOneBy: jest.fn(),
+    findOne: jest.fn(),
     save: jest.fn(),
   };
 

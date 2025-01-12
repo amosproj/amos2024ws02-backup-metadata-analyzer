@@ -21,4 +21,24 @@ export class DataStoresService {
   async create(dataStoreEntity: DataStoreEntity): Promise<DataStoreEntity> {
     return this.dataStoreEntityRepository.save(dataStoreEntity);
   }
+
+  async setOverflowTime(
+    id: string,
+    overflowTime: number
+  ): Promise<DataStoreEntity> {
+    if (overflowTime < 0) {
+      throw new Error('Overflow time must be a positive number or 0.');
+    }
+
+    const dataStore = await this.dataStoreEntityRepository.findOne({
+      where: { id },
+    });
+
+    if (!dataStore) {
+      throw new Error(`DataStore with id ${id} not found`);
+    }
+
+    dataStore.overflowTime = overflowTime;
+    return await this.dataStoreEntityRepository.save(dataStore);
+  }
 }
