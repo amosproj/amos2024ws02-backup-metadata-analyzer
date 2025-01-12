@@ -10,10 +10,14 @@ import * as path from 'path';
 import { Alert } from '../../alerting/entity/alerts/alert';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
 import { StorageFillAlertEntity } from '../../alerting/entity/alerts/storageFillAlert.entity';
+import { MissingBackupAlertEntity } from '../../alerting/entity/alerts/missingBackupAlert.entity';
+import { AdditionalBackupAlertEntity } from '../../alerting/entity/alerts/additionalBackupAlert.entity';
 import {
   CREATION_DATE_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
+  MISSING_BACKUP_ALERT,
+  ADDITIONAL_BACKUP_ALERT,
 } from '../constants';
 import { CreationDateAlertEntity } from '../../alerting/entity/alerts/creationDateAlert.entity';
 import { CreateMailReceiverDto } from './dto/createMailReceiver.dto';
@@ -49,13 +53,16 @@ export class MailService {
       .join(',')
       .split(',');
 
+    let template = 'alertMail';
     let reason = '';
     let description = '';
     let valueColumnName = '';
     let referenceValueColumnName = '';
+    let infoColumnName = '';
     let percentage = 'Infinity';
     let value = '-';
     let referenceValue = '-';
+    let info = '-';
     switch (alert.alertType.name) {
       case SIZE_ALERT:
         const sizeAlert = alert as SizeAlertEntity;
@@ -91,7 +98,7 @@ export class MailService {
         valueColumnName = 'Creation Date of Backup';
         referenceValueColumnName = 'Date the backup should have been started';
         reason = `Backup was started at an unusual time`;
-        description = `Backup was started at ${creationDateAlert.date.toString()}%, but based on the defined schedule, it should have been started at around ${creationDateAlert.referenceDate.toString()}%`;
+        description = `Backup was started at ${creationDateAlert.date.toString()}, but based on the defined schedule, it should have been started at around ${creationDateAlert.referenceDate.toString()}`;
         value = creationDateAlert.date.toString();
         referenceValue = creationDateAlert.referenceDate.toString();
         break;
@@ -104,6 +111,22 @@ export class MailService {
         value = storageFillAlert.filled.toString();
         referenceValue = storageFillAlert.highWaterMark.toString();
         break;
+      case MISSING_BACKUP_ALERT:
+        const missingBackupAlert = alert as MissingBackupAlertEntity;
+        infoColumnName = 'Scheduled Date';
+        reason = `Backup was scheduled but not started`;
+        description = `According to the schedule there should have been at backup started at ${missingBackupAlert.referenceDate.toString()}`;
+        info = missingBackupAlert.referenceDate.toString();
+        template = 'alertMailOneInfoRow';
+        break;
+      case ADDITIONAL_BACKUP_ALERT:
+        const additionalBackupAlert = alert as AdditionalBackupAlertEntity;
+        infoColumnName = 'Creation Date';
+        reason = `Backup was started but not scheduled`;
+        description = `A backup was started at ${additionalBackupAlert.date.toString()} without being scheduled`;
+        info = additionalBackupAlert.date.toString();
+        template = 'alertMailOneInfoRow';
+        break;
     }
 
     const context = {
@@ -111,8 +134,10 @@ export class MailService {
       description,
       value,
       referenceValue,
+      info,
       valueColumnName,
       referenceValueColumnName,
+      infoColumnName,
       backupId: alert.backup?.id ?? '-',
       creationDate: alert.backup?.creationDate.toLocaleString() ?? '-',
     };
@@ -130,7 +155,7 @@ export class MailService {
     await this.sendMail(
       receivers,
       'Alert has been triggered',
-      'alertMail',
+      template,
       context,
       attachments
     );
