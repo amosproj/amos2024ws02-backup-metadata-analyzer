@@ -219,7 +219,7 @@ describe('DataStoresController (e2e)', () => {
       .mockResolvedValue(initialDataStore);
 
     const response = await request(app.getHttpServer())
-      .post(`/dataStores/${id}/setOverflowTime`)
+      .post(`/dataStores/${id}/OverflowTime`)
       .send(invalidOverflowTimeDto)
       .expect(400);
     expect(saveSpy).not.toHaveBeenCalled();
