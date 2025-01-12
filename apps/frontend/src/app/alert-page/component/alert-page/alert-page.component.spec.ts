@@ -6,6 +6,8 @@ import { SeverityType } from '../../../shared/enums/severityType';
 import { of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Alert } from '../../../shared/types/alert';
+import { randomUUID } from 'node:crypto';
+import { BackupType } from '../../../shared/enums/backup.types';
 
 describe('AlertPageComponent', () => {
   let component: AlertPageComponent;
@@ -13,26 +15,62 @@ describe('AlertPageComponent', () => {
   let alertService: AlertServiceService;
   let alertUtils: AlertUtilsService;
 
-  const mockAlerts = [
-    {
-      id: '1',
-      timestamp: new Date(),
-      alertType: {
-        name: 'STORAGE_FILL_ALERT',
-        severity: SeverityType.CRITICAL,
+  const mockAlerts: Alert[] = [
+      {
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(),
+          name: 'test',
+          severity: SeverityType.CRITICAL,
+          user_active: false,
+          master_active: false,
+        },
+        backup: {
+          id: randomUUID().toString(),
+          sizeMB: 0,
+          creationDate: new Date(),
+          saveset: 'saveset',
+          type: BackupType.DIFFERENTIAL,
+        },
+        creationDate: new Date(),
       },
-      message: 'Critical storage alert',
-    },
-    {
-      id: '2',
-      timestamp: new Date(),
-      alertType: {
-        name: 'BACKUP_ALERT',
-        severity: SeverityType.WARNING,
+      {
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(),
+          name: 'test',
+          severity: SeverityType.INFO,
+          user_active: false,
+          master_active: false,
+        },
+        backup: {
+          id: randomUUID().toString(),
+          sizeMB: 0,
+          creationDate: new Date(),
+          saveset: 'saveset',
+          type: BackupType.DIFFERENTIAL,
+        },
+        creationDate: new Date(),
       },
-      message: 'Warning backup alert',
-    },
-  ];
+      {
+        id: randomUUID().toString(),
+        alertType: {
+          id: randomUUID().toString(),
+          name: 'test',
+          severity: SeverityType.WARNING,
+          user_active: false,
+          master_active: false,
+        },
+        backup: {
+          id: randomUUID().toString(),
+          sizeMB: 0,
+          creationDate: new Date(),
+          saveset: 'saveset',
+          type: BackupType.DIFFERENTIAL,
+        },
+        creationDate: new Date(),
+      },
+    ];
 
   const mockAlertService = {
     getAllAlerts: vi.fn(),
@@ -70,7 +108,7 @@ describe('AlertPageComponent', () => {
   });
 
   it('should load alerts on init', () => {
-    expect(mockAlertService.getAllAlerts).toHaveBeenCalledWith(30);
+    expect(mockAlertService.getAllAlerts).toHaveBeenCalledWith();
     expect(component.loading).toBe(false);
   });
 
@@ -93,22 +131,9 @@ describe('AlertPageComponent', () => {
     component.alertSummary$.subscribe((summary) => {
       expect(summary.criticalCount).toBe(1);
       expect(summary.warningCount).toBe(1);
-      expect(summary.totalCount).toBe(2);
+      expect(summary.infoCount).toBe(1);
+      expect(summary.totalCount).toBe(3);
     });
-  });
-
-  it('should identify StorageFillAlert correctly', () => {
-    const storageFillAlert: Alert = {
-      ...mockAlerts[0],
-      creationDate: new Date(),
-      alertType: {
-        ...mockAlerts[0].alertType,
-        id: 'someId',
-        user_active: true,
-        master_active: true,
-      },
-    };
-    expect(component.isStorageFillAlert(storageFillAlert)).toBe(true);
   });
 
   it('should format severity label correctly', () => {
