@@ -1,9 +1,10 @@
 class MockDatabase:
-    def __init__(self, results, tasks=[], data_stores=[], schedules=[]):
+    def __init__(self, results, tasks=[], data_stores=[], schedules=[], task_events=[]):
         self.results = results
         self.tasks = tasks
         self.data_stores = data_stores
         self.schedules = schedules
+        self.task_events = task_events
 
     def get_results(self):
         return iter(self.results)
@@ -16,3 +17,6 @@ class MockDatabase:
 
     def get_schedules(self):
         return iter(self.schedules)
+
+    def get_task_events(self):
+        return iter(self.task_events)

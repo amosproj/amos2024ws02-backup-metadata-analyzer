@@ -208,12 +208,12 @@ class Analyzer:
 		Analyzer.time_series_analyzer.preload_data(data)
 		Analyzer.series_loaded = True
 
-	def simple_rule_based_analysis_creation_dates(alert_limit):
-		data = list(Analyzer.database.get_results())
+	def schedule_based_analysis(alert_limit):
+		results = list(Analyzer.database.get_results())
 		schedules = list(Analyzer.database.get_schedules())
-		start_date = Analyzer._get_start_date(data, "CREATION_DATE_ALERT", None)
-		result = Analyzer.simple_rule_based_analyzer.analyze_creation_dates(data, schedules, alert_limit, start_date)
-		return result
+		task_events = list(Analyzer.database.get_task_events())
+		start_date = Analyzer._get_start_date(results, "CREATION_DATE_ALERT", None) # TODO: change
+		return Analyzer.schedule_based_analyzer.analyze(results, schedules, task_events, alert_limit, start_date)
 
 	def simple_rule_based_analysis_storage_capacity(alert_limit):
 		data = list(Analyzer.database.get_data_stores())
