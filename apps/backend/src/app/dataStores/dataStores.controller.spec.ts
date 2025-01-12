@@ -181,7 +181,7 @@ describe('DataStoresController (e2e)', () => {
     jest.spyOn(repository, 'save').mockResolvedValue(updatedDataStore);
 
     const response = await request(app.getHttpServer())
-      .post(`/dataStores/${id}/setOverflowTime`)
+      .post(`/dataStores/${id}/OverflowTime`)
       .send(updatedOverflowTimeDto)
       .expect(200);
 
