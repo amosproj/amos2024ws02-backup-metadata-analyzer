@@ -62,7 +62,7 @@ describe('AppComponent', () => {
     const expectedNavItems = [
       'Dashboard',
       'Backup Statistics',
-      'Analysis',
+      'Analysis Overview',
       'Find Data',
       'How to get started?',
       

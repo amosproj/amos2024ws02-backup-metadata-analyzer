@@ -1,10 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SeverityType } from '../../../shared/enums/severityType';
-import {
-  Alert,
-  AlertWithBackup,
-  StorageFillAlert,
-} from '../../../shared/types/alert';
+import { Alert, StorageFillAlert } from '../../../shared/types/alert';
 import {
   BehaviorSubject,
   map,
@@ -13,7 +9,6 @@ import {
   Subject,
   takeUntil,
 } from 'rxjs';
-import { ClrDatagridSortOrder, ClrDatagridStateInterface } from '@clr/angular';
 import { AlertServiceService } from '../../../shared/services/alert-service/alert-service.service';
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
 import { shortenBytes } from '../../../shared/utils/shortenBytes';
@@ -34,17 +29,9 @@ interface AlertSummary {
 })
 export class AlertPageComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
-  readonly DAYS = 30;
   readonly PAGE_SIZES = [10, 20, 50, 100];
   loading = false;
-  selected: Alert[] = [];
-  hasBackupInfo = false;
   error: string | null = null;
-  shortenBytes = shortenBytes;
-
-  criticalAlertsCount = 0;
-  warningAlertsCount = 0;
-  infoAlertsCount = 0;
 
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   readonly alerts$ = this.alertsSubject.asObservable().pipe(shareReplay(1));
@@ -77,7 +64,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     this.error = null;
 
     this.alertService
-      .getAllAlerts(this.DAYS)
+      .getAllAlerts()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (alerts: Alert[]) => {
@@ -134,20 +121,13 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     return alert.alertType.name === 'STORAGE_FILL_ALERT';
   }
 
-  hasBackup(alert: Alert): alert is AlertWithBackup {
+  hasBackup(alert: Alert): alert is Alert {
     return 'backup' in alert && alert.backup !== null;
   }
 
   getSeverityLabel(severity: SeverityType): string {
     return SeverityType[severity];
   }
-
-  refresh(state: ClrDatagridStateInterface): void {
-    this.loadAlerts();
-  }
-
-  getAlertClass = (alert: Alert): string =>
-    this.alertUtils.getAlertClass(alert);
 
   formatDate = (date: Date): string => this.alertUtils.formatDate(date);
 
@@ -156,6 +136,8 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
   getAlertDetails = (alert: Alert): string =>
     this.alertUtils.getAlertDetails(alert);
+
+  protected shortenBytes = shortenBytes;
 
   ngOnDestroy(): void {
     this.destroy$.next();
