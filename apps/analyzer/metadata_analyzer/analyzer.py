@@ -8,12 +8,14 @@ class Analyzer:
 			simple_analyzer,
 			simple_rule_based_analyzer,
 			time_series_analyzer,
+			schedule_based_analyzer,
 	):
 		Analyzer.database = database
 		Analyzer.backend = backend
 		Analyzer.simple_analyzer = simple_analyzer
 		Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
 		Analyzer.time_series_analyzer = time_series_analyzer
+		Analyzer.schedule_based_analyzer = schedule_based_analyzer
 		Analyzer.series_loaded = False
 
 	def analyze():
