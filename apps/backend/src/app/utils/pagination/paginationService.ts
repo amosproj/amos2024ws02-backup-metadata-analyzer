@@ -58,6 +58,7 @@ export class PaginationService {
     protected async paginateAlerts<T>(
         repositories: Repository<any>[],
         alertTypeRepository: Repository<AlertTypeEntity>,
+        whereClause: any,
         paginationOptionsDto: PaginationOptionsDto
     ): Promise<PaginationDto<T>> {
         let unionQuery = '';
@@ -65,13 +66,38 @@ export class PaginationService {
         // Define the columns to select and their types
         const columns = [
             'id',
-            'alertTypeId'
+            'alertTypeId',
+            'backupId',
         ];
+
+        // Manually construct the where clause
+
 
         // Do a query for each repository and combine them with UNION
         for (let i = 0; i < repositories.length; i++) {
+
+            const whereConditions = [];
+            if (whereClause.id) {
+                whereConditions.push(`alias${i}.id ILIKE '${whereClause.id}%'`);
+            }
+            if (whereClause.backupId) {
+                whereConditions.push(`alias${i}.backupId = '${whereClause.backupId}'`);
+            }
+            if (whereClause.creationDate) {
+                if (whereClause.creationDate.from && whereClause.creationDate.to) {
+                    whereConditions.push(`alias${i}.creationDate BETWEEN '${whereClause.creationDate.from.toISOString()}' AND '${whereClause.creationDate.to.toISOString()}'`);
+                } else if (whereClause.creationDate.from) {
+                    whereConditions.push(`alias${i}.creationDate >= '${whereClause.creationDate.from.toISOString()}'`);
+                } else if (whereClause.creationDate.to) {
+                    whereConditions.push(`alias${i}.creationDate <= '${whereClause.creationDate.to.toISOString()}'`);
+                }
+            }
+            const whereClauseString = whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
+            console.log('whereClauseString', whereClauseString);
             const subQuery = repositories[i].createQueryBuilder(`alias${i}`)
                 .select(columns.map(column => `alias${i}.${column}`).join(', '))
+                .leftJoinAndSelect(`alias${i}.alertType`, 'alertType')
+                .where(whereClauseString)
                 .getQuery();
 
             unionQuery += (i > 0 ? ' UNION ALL ' : '') + subQuery;
@@ -105,7 +131,6 @@ export class PaginationService {
         }
 
         // get full alert objects from the repositories
-
         const alerts: Alert[] = [];
 
         for (const alertId of alertTypeIds.keys()) {
@@ -127,10 +152,8 @@ export class PaginationService {
                 limit,
                 total: parseInt(total[0].count, 10),
             }
-        }
+        };
     }
-
-
 
     private async getAlertFromRepository(repositories: Repository<any>[], alertId: string, type: string): Promise<Alert | undefined> {
         switch (type) {

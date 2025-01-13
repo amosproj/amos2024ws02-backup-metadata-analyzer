@@ -8,8 +8,12 @@ import {
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  Between,
   FindOneOptions,
   FindOptionsWhere,
+  ILike,
+  In,
+  LessThanOrEqual,
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
@@ -35,6 +39,7 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
+import { TaskEntity } from '../tasks/entity/task.entity';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
@@ -147,7 +152,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       this.alertRepositories,
       this.alertTypeRepository,
       // this.createOrderClause(alertOrderOptionsDto),
-      // this.createWhereClause(alertFilterDto),
+      alertFilterDto,
       paginationOptionsDto
     );
   }
@@ -360,4 +365,70 @@ export class AlertingService extends PaginationService implements OnModuleInit {
 
     return alert.backup.id;
   }
+
+    createWhereClause(
+      alertFilterDto: AlertFilterDto,
+    ) {
+      const where: FindOptionsWhere<Alert> = {};
+  
+      //ID search
+      if (alertFilterDto.id) {
+        //like search
+        where.id = ILike(`%${alertFilterDto.id}%`);
+      }
+  
+      // backupId search
+      if (alertFilterDto.backupId) {
+        where.backup = { id: alertFilterDto.backupId };
+      }
+
+      // Check if params from and to are valid dates
+  
+      let from: Date | null = null;
+      let to: Date | null = null;
+      if (alertFilterDto.fromDate) {
+        from = new Date(alertFilterDto.fromDate);
+        if (Number.isNaN(from.getTime())) {
+          throw new BadRequestException('parameter fromDate is not a valid date');
+        }
+        //Set time to first millisecond of the day
+        from.setHours(0);
+        from.setMinutes(0);
+        from.setSeconds(0);
+        from.setMilliseconds(0);
+      }
+      if (alertFilterDto.toDate) {
+        to = new Date(alertFilterDto.toDate);
+        if (Number.isNaN(to.getTime())) {
+          throw new BadRequestException('parameter toDate is not a valid date');
+        }
+        //Set time to last millisecond of the day
+        to.setHours(0);
+        to.setMinutes(0);
+        to.setSeconds(0);
+        to.setDate(to.getDate() + 1);
+        to.setMilliseconds(-1);
+      }
+  
+      //Creation date search
+      if (alertFilterDto.fromDate && alertFilterDto.toDate) {
+        where.creationDate = Between(from!, to!);
+      } else if (alertFilterDto.fromDate) {
+        where.creationDate = MoreThanOrEqual(from!);
+      } else if (alertFilterDto.toDate) {
+        where.creationDate = LessThanOrEqual(to!);
+      }
+
+      // severity search
+      if (alertFilterDto.severity) {
+        where.alertType = { severity: alertFilterDto.severity as SeverityType };
+      }
+
+      // alertType search
+      if (alertFilterDto.alertType) {
+        where.alertType = { name: alertFilterDto.alertType };
+      }
+
+      return where;
+    }
 }
