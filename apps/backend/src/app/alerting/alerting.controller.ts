@@ -115,7 +115,7 @@ export class AlertingController {
     return this.alertingService.getAllAlerts(backupId, days);
   }
 
-  @Post('pages')
+  @Get('pages')
   @ApiOperation({ summary: 'Returns all alert Objects.' })
   async findAll(
     @Query() paginationOptionsDto: PaginationOptionsDto,
