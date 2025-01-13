@@ -120,6 +120,6 @@ clr-progress-bar {
 }
 
 .overflow-badge-critical {
-  background-color: #dc3545; /* Rot für kritische Warnung */
+  background-color: #dc3545;
   color: white;
 }
