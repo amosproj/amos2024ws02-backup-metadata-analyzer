@@ -42,4 +42,12 @@ export class AlertFilterDto {
   @IsOptional()
   @IsString()
   toDate?: string;
+
+  @ApiProperty({
+    description: 'Alert Type',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  alertType?: string;
 }
