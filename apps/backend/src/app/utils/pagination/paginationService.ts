@@ -70,38 +70,47 @@ export class PaginationService {
             'backupId',
         ];
 
-        // Manually construct the where clause
-
+        const parameters = [];
 
         // Do a query for each repository and combine them with UNION
         for (let i = 0; i < repositories.length; i++) {
 
             const whereConditions = [];
+            if (whereClause.severity) {
+                whereConditions.push(`alertType.severity = $${parameters.length + 1}`);
+                parameters.push(whereClause.severity);
+            }
             if (whereClause.id) {
-                whereConditions.push(`alias${i}.id ILIKE '${whereClause.id}%'`);
+                whereConditions.push(`alias${i}.id = $${parameters.length + 1}`); // Use = for uuid type
+                parameters.push(whereClause.id);
             }
             if (whereClause.backupId) {
-                whereConditions.push(`alias${i}.backupId = '${whereClause.backupId}'`);
+                whereConditions.push(`alias${i}.backupId = $${parameters.length + 1}`); // Use = for uuid type
+                parameters.push(whereClause.backupId);
             }
-            if (whereClause.creationDate) {
-                if (whereClause.creationDate.from && whereClause.creationDate.to) {
-                    whereConditions.push(`alias${i}.creationDate BETWEEN '${whereClause.creationDate.from.toISOString()}' AND '${whereClause.creationDate.to.toISOString()}'`);
-                } else if (whereClause.creationDate.from) {
-                    whereConditions.push(`alias${i}.creationDate >= '${whereClause.creationDate.from.toISOString()}'`);
-                } else if (whereClause.creationDate.to) {
-                    whereConditions.push(`alias${i}.creationDate <= '${whereClause.creationDate.to.toISOString()}'`);
-                }
+            if (whereClause.fromDate && whereClause.toDate) {
+                whereConditions.push(`alias${i}.creationDate BETWEEN $${parameters.length + 1} AND $${parameters.length + 2}`);
+                parameters.push(whereClause.fromDate.toISOString(), whereClause.toDate.toISOString());
+            } else if (whereClause.fromDate) {
+                whereConditions.push(`alias${i}.creationDate >= $${parameters.length + 1}`);
+                parameters.push(whereClause.fromDate.toISOString());
+            } else if (whereClause.toDate) {
+                whereConditions.push(`alias${i}.creationDate <= $${parameters.length + 1}`);
+                parameters.push(whereClause.toDate.toISOString());
             }
+
             const whereClauseString = whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
-            console.log('whereClauseString', whereClauseString);
+
             const subQuery = repositories[i].createQueryBuilder(`alias${i}`)
                 .select(columns.map(column => `alias${i}.${column}`).join(', '))
                 .leftJoinAndSelect(`alias${i}.alertType`, 'alertType')
-                .where(whereClauseString)
+                .where(whereClauseString, parameters)
                 .getQuery();
 
             unionQuery += (i > 0 ? ' UNION ALL ' : '') + subQuery;
         }
+
+
 
         // Apply pagination
         const offset = paginationOptionsDto.offset || 0;
@@ -114,8 +123,8 @@ export class PaginationService {
 
         // Execute the raw SQL query
         let [data, total] = await Promise.all([
-            repositories[0].query(paginatedQuery),
-            repositories[0].query(`SELECT COUNT(*) FROM (${unionQuery}) AS combined`)
+            repositories[0].query(paginatedQuery, parameters),
+            repositories[0].query(`SELECT COUNT(*) FROM (${unionQuery}) AS combined`, parameters)
         ]);
 
         const alertTypeIds: Map<string, string> = new Map<string, string>();
