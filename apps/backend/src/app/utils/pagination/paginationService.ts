@@ -1,7 +1,14 @@
-import {PaginationOptionsDto} from "./PaginationOptionsDto";
-import {FindManyOptions, FindOptionsOrder, FindOptionsWhere, Repository, SelectQueryBuilder} from "typeorm";
-import {PaginationDto} from "./PaginationDto";
+import { PaginationOptionsDto } from "./PaginationOptionsDto";
+import { FindManyOptions, FindOptionsOrder, FindOptionsWhere, Repository, SelectQueryBuilder } from "typeorm";
+import { PaginationDto } from "./PaginationDto";
+import { SIZE_ALERT, CREATION_DATE_ALERT, STORAGE_FILL_ALERT } from "../constants";
 import { of } from "rxjs";
+import { AlertTypeEntity } from "../../alerting/entity/alertType.entity";
+import { Alert } from "../../alerting/entity/alerts/alert";
+import { SizeAlertEntity } from "../../alerting/entity/alerts/sizeAlert.entity";
+import { CreationDateAlertEntity } from "../../alerting/entity/alerts/creationDateAlert.entity";
+import { StorageFillAlertEntity } from "../../alerting/entity/alerts/storageFillAlert.entity";
+import { get } from "http";
 
 export class PaginationService {
 
@@ -24,10 +31,10 @@ export class PaginationService {
         }
 
         if (paginationOptionsDto.offset) {
-            options = {skip: paginationOptionsDto.offset, ...options};
+            options = { skip: paginationOptionsDto.offset, ...options };
         }
         if (paginationOptionsDto.limit) {
-            options = {take: paginationOptionsDto.limit, ...options};
+            options = { take: paginationOptionsDto.limit, ...options };
         }
 
         const [data, total] = await repository.findAndCount(options);
@@ -48,8 +55,9 @@ export class PaginationService {
      * @param where
      * @param paginationOptionsDto
      */
-    protected async paginateMultiple<T>(
+    protected async paginateAlerts<T>(
         repositories: Repository<any>[],
+        alertTypeRepository: Repository<AlertTypeEntity>,
         paginationOptionsDto: PaginationOptionsDto
     ): Promise<PaginationDto<T>> {
         let unionQuery = '';
@@ -57,6 +65,7 @@ export class PaginationService {
         // Define the columns to select and their types
         const columns = [
             'id',
+            'alertTypeId'
         ];
 
         // Do a query for each repository and combine them with UNION
@@ -78,10 +87,38 @@ export class PaginationService {
         `;
 
         // Execute the raw SQL query
-        const [data, total] = await Promise.all([
+        let [data, total] = await Promise.all([
             repositories[0].query(paginatedQuery),
             repositories[0].query(`SELECT COUNT(*) FROM (${unionQuery}) AS combined`)
         ]);
+
+        const alertTypeIds: Map<string, string> = new Map<string, string>();
+        for (const alert of data) {
+            if (alert.alertTypeId) {
+                const alertType = await alertTypeRepository.findOne({
+                    where: { id: alert.alertTypeId }  // Provide the where clause
+                });
+                if (alertType) {
+                    alertTypeIds.set(alert.id, alertType.name);
+                }
+            }
+        }
+
+        // get full alert objects from the repositories
+
+        const alerts: Alert[] = [];
+
+        for (const alertId of alertTypeIds.keys()) {
+            const alertType = alertTypeIds.get(alertId);
+            if (alertType) {
+                const alert = await this.getAlertFromRepository(repositories, alertId, alertType);
+                if (alert) {
+                    alerts.push(alert);
+                }
+            }
+        }
+
+        data = alerts;
 
         return {
             data,
@@ -90,7 +127,22 @@ export class PaginationService {
                 limit,
                 total: parseInt(total[0].count, 10),
             }
-        };
+        }
     }
-}
 
+
+
+    private async getAlertFromRepository(repositories: Repository<any>[], alertId: string, type: string): Promise<Alert | undefined> {
+        switch (type) {
+            case SIZE_ALERT:
+                return await repositories[0].findOne({ where: { id: alertId } }) as SizeAlertEntity;
+            case CREATION_DATE_ALERT:
+                return await repositories[1].findOne({ where: { id: alertId } }) as CreationDateAlertEntity;
+            case STORAGE_FILL_ALERT:
+                return await repositories[2].findOne({ where: { id: alertId } }) as StorageFillAlertEntity;
+            default:
+                return undefined;
+        }
+    }
+
+}
