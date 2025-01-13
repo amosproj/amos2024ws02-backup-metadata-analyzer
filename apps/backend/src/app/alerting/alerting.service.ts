@@ -151,7 +151,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return this.paginateAlerts<Alert>(
       this.alertRepositories,
       this.alertTypeRepository,
-      // this.createOrderClause(alertOrderOptionsDto),
+      alertOrderOptionsDto,
       alertFilterDto,
       paginationOptionsDto
     );
