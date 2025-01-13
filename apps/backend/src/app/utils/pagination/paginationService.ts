@@ -70,7 +70,8 @@ export class PaginationService {
             'id',
             'alertTypeId',
             'backupId',
-            'severity'
+            'severity',
+            'creationDate'
         ];
 
         const parameters = [];
@@ -80,39 +81,42 @@ export class PaginationService {
 
             const whereConditions = [];
             if (whereClause.severity) {
-                whereConditions.push(`alertType.severity = $${parameters.length + 1}`);
-                parameters.push(whereClause.severity);
+            whereConditions.push(`alertType.severity = $${parameters.length + 1}`);
+            parameters.push(whereClause.severity);
             }
             if (whereClause.id) {
-                whereConditions.push(`alias${i}.id = $${parameters.length + 1}`); // Use = for uuid type
-                parameters.push(whereClause.id);
+            whereConditions.push(`alias${i}.id = $${parameters.length + 1}`); // Use = for uuid type
+            parameters.push(whereClause.id);
             }
             if (whereClause.backupId) {
-                whereConditions.push(`alias${i}.backupId = $${parameters.length + 1}`); // Use = for uuid type
-                parameters.push(whereClause.backupId);
+            whereConditions.push(`alias${i}.backupId = $${parameters.length + 1}`); // Use = for uuid type
+            parameters.push(whereClause.backupId);
             }
             if (whereClause.fromDate && whereClause.toDate) {
-                whereConditions.push(`alias${i}.creationDate BETWEEN $${parameters.length + 1} AND $${parameters.length + 2}`);
-                parameters.push(whereClause.fromDate.toISOString(), whereClause.toDate.toISOString());
+            whereConditions.push(`alias${i}.creationDate BETWEEN $${parameters.length + 1} AND $${parameters.length + 2}`);
+            parameters.push(whereClause.fromDate, whereClause.toDate);
             } else if (whereClause.fromDate) {
-                whereConditions.push(`alias${i}.creationDate >= $${parameters.length + 1}`);
-                parameters.push(whereClause.fromDate.toISOString());
+            whereConditions.push(`alias${i}.creationDate >= $${parameters.length + 1}`);
+            parameters.push(whereClause.fromDate);
             } else if (whereClause.toDate) {
-                whereConditions.push(`alias${i}.creationDate <= $${parameters.length + 1}`);
-                parameters.push(whereClause.toDate.toISOString());
+            whereConditions.push(`alias${i}.creationDate <= $${parameters.length + 1}`);
+            parameters.push(whereClause.toDate);
             }
 
             const whereClauseString = whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
 
             const subQuery = repositories[i].createQueryBuilder(`alias${i}`)
-                .select(columns.map(column => {
-                    if(column === 'severity') {
-                        return `alertType.${column} AS ${column}`;
-                    }
-                    return `alias${i}.${column}`}).join(', '))
-                .leftJoinAndSelect(`alias${i}.alertType`, 'alertType')
-                .where(whereClauseString, parameters)
-                .getQuery();
+            .select(columns.map(column => {
+                if(column === 'severity') {
+                    return `alertType.${column} AS ${column}`;
+                }
+                if(column === 'creationDate') {
+                    return `alias${i}.${column} AS ${column}`;
+                }
+                return `alias${i}.${column}`}).join(', '))
+            .leftJoinAndSelect(`alias${i}.alertType`, 'alertType')
+            .where(whereClauseString, parameters)
+            .getQuery();
 
             unionQuery += (i > 0 ? ' UNION ALL ' : '') + subQuery;
         }
@@ -122,12 +126,14 @@ export class PaginationService {
         if (orderInfo.orderBy === 'severity') {
             orderClause = `
             ORDER BY CASE 
-                WHEN severity = 'CRITICAL' THEN 1
-                WHEN severity = 'WARNING' THEN 2
-                WHEN severity = 'INFO' THEN 3
-                ELSE 4
+            WHEN severity = 'CRITICAL' THEN 1
+            WHEN severity = 'WARNING' THEN 2
+            WHEN severity = 'INFO' THEN 3
+            ELSE 4
             END ${orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'}
             `;
+        } else if (orderInfo.orderBy === 'date') {
+            orderClause = `ORDER BY creationDate ${orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'}`;
         }
 
         // Apply pagination

@@ -4,6 +4,7 @@ import { SortOrder } from '../../utils/pagination/SortOrder';
 
 export enum AlertOrderByOptions {
   SEVERITY = 'severity',
+  DATE = 'date',
 }
 
 export class AlertOrderOptionsDto {
