@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from metadata_analyzer.database import Database
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
+from metadata_analyzer.enhanced_storage_analyzer import EnhancedStorageAnalyzer
 from metadata_analyzer.analyzer import Analyzer
 from metadata_analyzer.time_series_analyzer import Time_series_analyzer
 from metadata_analyzer.backend import Backend
@@ -254,6 +255,18 @@ def calculate_training_indices():
         )
     return "Calculation of training series was succesful", 200
 
+@app.route("/enhancedAnalysisStorageCapacity", methods=["POST"])
+@swag_from(os.path.join(path,'swagger','enhancedAnalysisStorageCapacity.yaml'), validation=False)
+def enhanced_analysis_storage_capacity():
+    alert_limit = request.args.get("alertLimit")
+
+    try:
+        int(alert_limit)
+        return jsonify(
+            Analyzer.enhanced_analysis_storage_capacity(int(alert_limit))
+        )
+    except ValueError:
+        return "Invalid value for alert limit", 400
 
 def main():
     database = Database()
@@ -264,12 +277,14 @@ def main():
     parameters.append(os.getenv("CLUSTER_NUMBER"))
     time_series_analyzer = Time_series_analyzer(parameters)
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    enhanced_storage_analyzer = EnhancedStorageAnalyzer()
     Analyzer.init(
         database,
         backend,
         simple_analyzer,
         simple_rule_based_analyzer,
         time_series_analyzer,
+        enhanced_storage_analyzer,
     )
 
     print(f"FLASK_RUN_HOST: {os.getenv('FLASK_RUN_HOST')}")

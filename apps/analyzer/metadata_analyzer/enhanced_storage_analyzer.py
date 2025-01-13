@@ -5,6 +5,8 @@ class EnhancedStorageAnalyzer:
     # Analyzes if storage capacity will be reached within confines of forecast
     def analyze_future_storage_capacity(self, data, alert_limit):
         alerts = []
+        count = 0
+        print("Whoop we got into the forecasting method")
         for data_store in data:
             # Skip data stores with missing data
             if (
@@ -13,8 +15,8 @@ class EnhancedStorageAnalyzer:
                 or data_store.high_water_mark is None
             ):
                 continue
-            if data_store.filled > data_store.high_water_mark:
-                alerts.append(ForecastStorageFillAlert(data_store))
+            #if data_store.filled > data_store.high_water_mark:
+            #    alerts.append(ForecastStorageFillAlert(data_store))
 
         if alert_limit is None:
             alert_limit = 10
@@ -23,6 +25,7 @@ class EnhancedStorageAnalyzer:
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
         # Send the alerts to the backend
         for alert in alerts[:count]:
-            self.backend.create_storage_fill_alert(alert.as_json())
+            #self.backend.create_forecast_storage_fill_alert(alert.as_json())
+            print(alert)
 
         return {"count": count}

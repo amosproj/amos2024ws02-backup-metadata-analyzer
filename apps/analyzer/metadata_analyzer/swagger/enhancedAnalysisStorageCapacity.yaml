@@ -1,4 +1,4 @@
-Runs a simple rule based analysis on data stores searching for ones that are almost full
+Runs an enhanced, forecast based analysis on data stores searching for ones that will soon be full
     ---
     parameters:
       - name: Input

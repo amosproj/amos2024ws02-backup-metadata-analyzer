@@ -8,6 +8,7 @@ class Analyzer:
 			simple_analyzer,
 			simple_rule_based_analyzer,
 			time_series_analyzer,
+			enhanced_storage_analyzer
 	):
 		Analyzer.database = database
 		Analyzer.backend = backend
@@ -15,6 +16,7 @@ class Analyzer:
 		Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
 		Analyzer.time_series_analyzer = time_series_analyzer
 		Analyzer.series_loaded = False
+		Analyzer.enhanced_storage_analyzer = enhanced_storage_analyzer
 
 	def analyze():
 		data = list(Analyzer.database.get_results())
@@ -216,6 +218,13 @@ class Analyzer:
 	def simple_rule_based_analysis_storage_capacity(alert_limit):
 		data = list(Analyzer.database.get_data_stores())
 		result = Analyzer.simple_rule_based_analyzer.analyze_storage_capacity(
+			data, alert_limit
+		)
+		return result
+	
+	def enhanced_analysis_storage_capacity(alert_limit):
+		data = list(Analyzer.database.get_data_stores())
+		result = Analyzer.enhanced_storage_analyzer.analyze_future_storage_capacity(
 			data, alert_limit
 		)
 		return result
