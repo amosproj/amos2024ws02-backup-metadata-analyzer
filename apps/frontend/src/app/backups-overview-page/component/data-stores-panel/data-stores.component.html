@@ -12,7 +12,14 @@
       class="data-store"
     >
       <span class="data-store-name">{{ dataStore.displayName }}</span>
-      <span *ngIf="dataStore.overflowTime !== null" class="overflow-badge">
+      <span
+        *ngIf="dataStore.overflowTime !== null"
+        [ngClass]="{
+          'overflow-badge': true,
+          'overflow-badge-critical':
+            dataStore.overflowTime !== undefined && dataStore.overflowTime < 14
+        }"
+      >
         Estimated time to storage overflow:
         {{ getOverflowTimeLabel(dataStore.overflowTime) }}
       </span>

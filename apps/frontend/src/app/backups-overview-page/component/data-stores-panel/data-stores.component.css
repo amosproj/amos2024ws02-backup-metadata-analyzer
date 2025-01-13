@@ -114,4 +114,12 @@ clr-progress-bar {
   border-radius: 10px;
   margin-left: 1rem;
   display: inline-block;
+  width: 300px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.overflow-badge-critical {
+  background-color: #dc3545; /* Rot für kritische Warnung */
+  color: white;
 }
