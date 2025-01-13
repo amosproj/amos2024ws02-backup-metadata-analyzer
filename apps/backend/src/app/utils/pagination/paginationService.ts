@@ -9,6 +9,7 @@ import { SizeAlertEntity } from "../../alerting/entity/alerts/sizeAlert.entity";
 import { CreationDateAlertEntity } from "../../alerting/entity/alerts/creationDateAlert.entity";
 import { StorageFillAlertEntity } from "../../alerting/entity/alerts/storageFillAlert.entity";
 import { get } from "http";
+import { AlertOrderByOptions, AlertOrderOptionsDto } from "../../alerting/dto/alertOrderOptions.dto";
 
 export class PaginationService {
 
@@ -58,6 +59,7 @@ export class PaginationService {
     protected async paginateAlerts<T>(
         repositories: Repository<any>[],
         alertTypeRepository: Repository<AlertTypeEntity>,
+        orderInfo: AlertOrderOptionsDto,
         whereClause: any,
         paginationOptionsDto: PaginationOptionsDto
     ): Promise<PaginationDto<T>> {
@@ -68,6 +70,7 @@ export class PaginationService {
             'id',
             'alertTypeId',
             'backupId',
+            'severity'
         ];
 
         const parameters = [];
@@ -102,7 +105,11 @@ export class PaginationService {
             const whereClauseString = whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
 
             const subQuery = repositories[i].createQueryBuilder(`alias${i}`)
-                .select(columns.map(column => `alias${i}.${column}`).join(', '))
+                .select(columns.map(column => {
+                    if(column === 'severity') {
+                        return `alertType.${column} AS ${column}`;
+                    }
+                    return `alias${i}.${column}`}).join(', '))
                 .leftJoinAndSelect(`alias${i}.alertType`, 'alertType')
                 .where(whereClauseString, parameters)
                 .getQuery();
@@ -110,7 +117,18 @@ export class PaginationService {
             unionQuery += (i > 0 ? ' UNION ALL ' : '') + subQuery;
         }
 
-
+        // Apply order by clause
+        let orderClause = '';
+        if (orderInfo.orderBy === 'severity') {
+            orderClause = `
+            ORDER BY CASE 
+                WHEN severity = 'CRITICAL' THEN 1
+                WHEN severity = 'WARNING' THEN 2
+                WHEN severity = 'INFO' THEN 3
+                ELSE 4
+            END ${orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'}
+            `;
+        }
 
         // Apply pagination
         const offset = paginationOptionsDto.offset || 0;
@@ -118,6 +136,7 @@ export class PaginationService {
 
         const paginatedQuery = `
             SELECT * FROM (${unionQuery}) AS combined
+            ${orderClause}
             OFFSET ${offset} LIMIT ${limit}
         `;
 
