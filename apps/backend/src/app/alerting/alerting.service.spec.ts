@@ -17,10 +17,14 @@ import {
   CREATION_DATE_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
+  MISSING_BACKUP_ALERT,
+  ADDITIONAL_BACKUP_ALERT,
 } from '../utils/constants';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
+import { MissingBackupAlertEntity } from './entity/alerts/missingBackupAlert.entity';
+import { AdditionalBackupAlertEntity } from './entity/alerts/additionalBackupAlert.entity';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -129,6 +133,22 @@ describe('AlertingService', () => {
         },
         {
           provide: getRepositoryToken(StorageFillAlertEntity),
+          useValue: {
+            find: jest.fn().mockResolvedValue([]),
+            findOneBy: jest.fn().mockResolvedValue(null),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(MissingBackupAlertEntity),
+          useValue: {
+            find: jest.fn().mockResolvedValue([]),
+            findOneBy: jest.fn().mockResolvedValue(null),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(AdditionalBackupAlertEntity),
           useValue: {
             find: jest.fn().mockResolvedValue([]),
             findOneBy: jest.fn().mockResolvedValue(null),
