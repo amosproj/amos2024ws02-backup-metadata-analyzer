@@ -1,4 +1,4 @@
-<h1 class="header">Analysis and Warnings</h1>
+<h1 class="header">Analysis Overview</h1>
 
 <ng-container *ngIf="alertSummary$ | async as summary">
   <!-- Summary Cards -->
@@ -10,21 +10,21 @@
           <div class="card-title">Alert Statistics</div>
           <div class="card-text">
             <div class="alert-summary">
-              <div class="summary-item">
+              <div class="summary-item" *ngIf="summary.criticalCount > 0">
                 <cds-icon
                   shape="error-standard"
                   class="is-solid critical"
                 ></cds-icon>
                 <span>{{ summary.criticalCount }} Critical</span>
               </div>
-              <div class="summary-item">
+              <div class="summary-item" *ngIf="summary.warningCount > 0">
                 <cds-icon
                   shape="warning-standard"
                   class="is-solid warning"
                 ></cds-icon>
                 <span>{{ summary.warningCount }} Warnings</span>
               </div>
-              <div class="summary-item">
+              <div class="summary-item" *ngIf="summary.infoCount > 0">
                 <cds-icon
                   shape="info-standard"
                   class="is-solid info"
@@ -46,7 +46,7 @@
             <p>
               <strong>"{{ summary.mostFrequentAlert.type }}"</strong> occurred
               <strong>{{ summary.mostFrequentAlert.count }} times</strong> in
-              the last {{ DAYS }} days.
+              history.
             </p>
             <div
               *ngIf="summary.repeatedAlerts.length > 1"
@@ -73,7 +73,7 @@
   </clr-alert>
 
   <!-- Alert Grid -->
-  <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)">
+  <clr-datagrid [clrDgLoading]="loading">
     <clr-dg-column>Severity</clr-dg-column>
     <clr-dg-column>Date</clr-dg-column>
     <clr-dg-column>Type</clr-dg-column>
@@ -112,9 +112,9 @@
         <ng-container [ngSwitch]="alert.alertType.name">
           <div *ngSwitchCase="'SIZE_ALERT'">
             <div *ngIf="hasBackup(alert)">
-              <strong>Backup Saveset:</strong> {{ alert.backup.saveset }}<br />
+              <strong>Backup Saveset:</strong> {{ alert.backup!.saveset }}<br />
               <strong>Creation Date:</strong>
-              {{ formatDate(alert.backup.creationDate) }}
+              {{ formatDate(alert.backup!.creationDate) }}
             </div>
             {{ getAlertDetails(alert) }}
           </div>
@@ -122,10 +122,10 @@
           <div *ngSwitchCase="'STORAGE_FILL_ALERT'">
             <ng-container *ngIf="isStorageFillAlert(alert)">
               <strong>Storage Fill:</strong>
-              {{ shortenBytes(alert.filled * 1024 * 1024 * 1024) }} /
-              {{ shortenBytes(alert.capacity * 1024 * 1024 * 1024) }}<br />
+              {{ shortenBytes(alert.filled * 1000 * 1000 * 1000) }} /
+              {{ shortenBytes(alert.capacity * 1000 * 1000 * 1000) }}<br />
               <strong>High Water Mark:</strong>
-              {{ shortenBytes(alert.highWaterMark * 1024 * 1024 * 1024) }}
+              {{ shortenBytes(alert.highWaterMark * 1000 * 1000 * 1000) }}
             </ng-container>
           </div>
 

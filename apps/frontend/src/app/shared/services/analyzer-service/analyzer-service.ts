@@ -21,7 +21,7 @@ export class AnalyzerService {
 
   refresh(signal?: AbortSignal): Observable<void> {
     return this.http
-      .post<void>(`${this.baseUrl}/analyzer/refresh`, {signnal: signal})
+      .post<void>(`${this.baseUrl}/analyzer/refresh`, { signal: signal })
       .pipe(takeUntil(this.destroy$))
       .pipe(
         tap(() => {
