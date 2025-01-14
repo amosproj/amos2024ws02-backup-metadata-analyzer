@@ -16,35 +16,20 @@ Runs an enhanced, forecast based analysis on data stores searching for ones that
                 type: string
                 example: '1024.0'
     definitions:
-        Frequencies:
+        forecasted_times:
             type: object
             properties:
-                count:
-                  
-                  properties:
-                      time_to_high_water_mark:
-                            type: int
-                            example: 4056
-                      time_to_capacity:
-                            type: int
-                            example: 5000
-                        unit:
-                            type: String
-                            example: "s"
-                sbc_start:
-                    type: object
-                    properties:
-                        0:
-                            type: int
-                            example: 86400
-                        1:
-                            type: int
-                            example: 86401
-                        2:
-                            type: int
-                            example: 86399
+                time_to_high_water_mark:
+                    type: int
+                    example: 4056
+                time_to_capacity:
+                    type: int
+                    example: 5000
+                unit:
+                    type: String
+                    example: "s"
     responses:
       200:
         description: The steps or time until high watermark is reached, followed by the steps or time until the capacity is reached
         schema:
-          $ref: '#/definitions/Frequencies'
+          $ref: '#/definitions/forecasted_times'

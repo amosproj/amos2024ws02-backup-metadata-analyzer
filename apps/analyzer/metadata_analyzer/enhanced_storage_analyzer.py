@@ -5,10 +5,8 @@ class EnhancedStorageAnalyzer:
 
     # Analyzes if storage capacity will be reached within confines of forecast
     def analyze_future_storage_capacity(self, data_stores, data, alert_limit):
-        print("top of the method", flush=True)
         alerts = []
         forecasted_overflows = []
-        print("Whoop we got into the forecasting method",flush=True)
         for data_store in data_stores:
             # Skip data stores with missing data
             if (
