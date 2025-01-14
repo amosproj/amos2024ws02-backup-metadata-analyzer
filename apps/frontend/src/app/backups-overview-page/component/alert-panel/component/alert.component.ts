@@ -20,6 +20,7 @@ import { SeverityType } from '../../../../shared/enums/severityType';
 export class AlertComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
+  private readonly fromDate = new Date(Date.now() - this.DAYS * 24 * 60 * 60 * 1000);
 
   alerts: Alert[] = [];
   criticalAlertsCount = 0;
@@ -47,9 +48,10 @@ export class AlertComponent implements OnInit, OnDestroy {
 
   loadAlerts(): void {
     this.alertService
-      .getAllAlerts(this.DAYS)
+      .getAllAlerts(this.fromDate.toISOString())
       .pipe(takeUntil(this.destroy$))
       .subscribe((data: Alert[]) => {
+        console.log("Data: " + data);
         this.alerts = this.filterAlerts(data);
         this.criticalAlertsCount = this.alerts.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL

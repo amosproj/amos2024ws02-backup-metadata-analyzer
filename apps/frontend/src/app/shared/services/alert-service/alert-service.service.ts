@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { BASE_URL } from '../../types/configuration';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Alert } from '../../types/alert';
 
 @Injectable({
@@ -14,9 +15,11 @@ export class AlertServiceService {
     private readonly http: HttpClient
   ) {}
 
-  getAllAlerts(days?: number): Observable<Alert[]> {
-    if (days) {
-      return this.http.get<Alert[]>(`${this.baseUrl}/alerting?days=${days}`);
+  getAllAlerts(fromDate?: string, offset?: number): Observable<Alert[]> {
+    if (fromDate) {
+      return this.http.get<{ data: Alert[], paginationInfo: any }>(`${this.baseUrl}/alerting?offset=0&limit=10&fromDate=${fromDate}`).pipe(
+        map(response => response.data)
+      );
     }
     return this.http.get<Alert[]>(`${this.baseUrl}/alerting`);
   }
