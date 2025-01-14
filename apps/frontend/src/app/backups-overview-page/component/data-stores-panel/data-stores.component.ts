@@ -70,8 +70,6 @@ export class DataStoresComponent implements OnDestroy, OnInit {
     if (overflowTime === 1) {
       return `${overflowTime} day`;
     } else if (overflowTime > 365) {
-      // const years = (overflowTime / 365).toFixed(1);
-      // return `${years} years`;
       return `> 1 year`;
     } else if (overflowTime == 0) {
       return `Now`;
