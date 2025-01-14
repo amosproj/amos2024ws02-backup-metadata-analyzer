@@ -70,8 +70,6 @@ export class PaginationService {
     whereClause: any,
     paginationOptionsDto: PaginationOptionsDto
   ): Promise<PaginationDto<T>> {
-    console.log(whereClause);
-
     let unionQuery = '';
 
     // Define the columns to select and their types
