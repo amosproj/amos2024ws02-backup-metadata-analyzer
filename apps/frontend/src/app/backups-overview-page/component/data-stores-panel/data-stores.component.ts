@@ -61,4 +61,19 @@ export class DataStoresComponent implements OnDestroy, OnInit {
       (a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a)
     );
   }
+
+  getOverflowTimeLabel(overflowTime?: number): string {
+    if (overflowTime === undefined) {
+      return 'N/A';
+    }
+
+    if (overflowTime === 1) {
+      return `${overflowTime} day`;
+    } else if (overflowTime > 365) {
+      return `> 1 year`;
+    } else if (overflowTime === 0) {
+      return `Now`;
+    }
+    return `${overflowTime} days`;
+  }
 }
