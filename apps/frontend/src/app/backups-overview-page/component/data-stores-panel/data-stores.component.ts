@@ -63,7 +63,7 @@ export class DataStoresComponent implements OnDestroy, OnInit {
   }
 
   getOverflowTimeLabel(overflowTime?: number): string {
-    if (overflowTime === undefined) {
+    if (!overflowTime) {
       return 'N/A';
     }
 
