@@ -223,8 +223,9 @@ class Analyzer:
 		return result
 	
 	def enhanced_analysis_storage_capacity(alert_limit):
-		data = list(Analyzer.database.get_data_stores())
+		data_stores = list(Analyzer.database.get_data_stores())
+		data = list(Analyzer.database.get_results())
 		result = Analyzer.enhanced_storage_analyzer.analyze_future_storage_capacity(
-			data, alert_limit
+			data_stores, data, alert_limit
 		)
 		return result
