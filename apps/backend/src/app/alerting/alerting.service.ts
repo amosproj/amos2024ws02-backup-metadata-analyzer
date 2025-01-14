@@ -157,39 +157,6 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     );
   }
 
-  async getAllAlerts(backupId?: string, days?: number): Promise<Alert[]> {
-    const where: FindOptionsWhere<Alert> = {
-      alertType: { user_active: true, master_active: true },
-    };
-    if (backupId) {
-      where.backup = { id: backupId };
-    }
-    const date = new Date();
-    if (days) {
-      date.setDate(date.getDate() - days);
-      where.backup = { creationDate: MoreThanOrEqual(date) };
-    }
-
-    const alerts: Alert[] = [];
-    for (const alertRepository of this.alertRepositories) {
-      if (alertRepository === this.storageFillRepository) {
-        alerts.push(
-          ...(await alertRepository.find({
-            where: {
-              alertType: {
-                user_active: true,
-                master_active: true,
-              },
-              creationDate: days ? MoreThanOrEqual(date) : undefined,
-            },
-          }))
-        );
-      } else {
-        alerts.push(...(await alertRepository.find({ where })));
-      }
-    }
-    return alerts;
-  }
 
   async createSizeAlert(createSizeAlertDto: CreateSizeAlertDto) {
     // Check if alert already exists
