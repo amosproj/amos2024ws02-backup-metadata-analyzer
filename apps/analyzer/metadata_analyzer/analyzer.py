@@ -64,7 +64,17 @@ class Analyzer:
 			assert len(latest_alerts) == 1
 			return latest_alerts[0]
 
+	def _get_latest_backup_date_from_backend():
+		latest_backup = Analyzer.backend.get_latest_backup_date()
+		if latest_backup is None:
+			return datetime.datetime.min
+		else:
+			return latest_backup['creationDate']
+
 	def _send_Backups():
+		latest_backup_date = Analyzer._get_latest_backup_date_from_backend()
+		results = list(Analyzer.database.get_results(latest_backup_date))
+
 		results = list(Analyzer.database.get_results())
 		schedules = list(Analyzer.database.get_schedules())
 		start_date = Analyzer._get_start_date(results, "SIZE_ALERT", None)

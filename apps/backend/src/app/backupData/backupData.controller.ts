@@ -31,6 +31,13 @@ export class BackupDataController {
 
   constructor(private readonly backupDataService: BackupDataService) {}
 
+  @Get('latest')
+  @ApiOperation({ summary: 'Returns the latest backupData Object.' })
+  @ApiOkResponse({ type: BackupDataEntity })
+  async getLatest(): Promise<BackupDataEntity | null> {
+    return this.backupDataService.findLatest();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Returns the backupData Object with the given id.' })
   @ApiOkResponse({ type: BackupDataEntity })
