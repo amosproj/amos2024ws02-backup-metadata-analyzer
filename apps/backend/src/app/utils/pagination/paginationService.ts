@@ -70,6 +70,8 @@ export class PaginationService {
     whereClause: any,
     paginationOptionsDto: PaginationOptionsDto
   ): Promise<PaginationDto<T>> {
+    console.log(whereClause);
+
     let unionQuery = '';
 
     // Define the columns to select and their types
@@ -115,6 +117,9 @@ export class PaginationService {
           `alias${i}.creationDate <= $${parameters.length + 1}`
         );
         parameters.push(whereClause.toDate);
+      } else if (whereClause.alertType){
+        whereConditions.push(`alertType.name = $${parameters.length + 1}`);
+        parameters.push(whereClause.alertType);
       }
 
       const whereClauseString =
@@ -175,7 +180,7 @@ export class PaginationService {
       repositories[0].query(paginatedQuery, parameters),
       repositories[0].query(
         `SELECT COUNT(*)
-                             FROM (${unionQuery}) AS combined`,
+         FROM (${unionQuery}) AS combined`,
         parameters
       ),
     ]);
