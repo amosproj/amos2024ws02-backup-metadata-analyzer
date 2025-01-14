@@ -96,27 +96,7 @@ export class AlertingController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all alerts.' })
-  @ApiQuery({
-    name: 'backupId',
-    description: 'Filter alerts by backup id',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'days',
-    description: 'Filter alerts by backups (or creation Date if not linked with Backup) of the last x days',
-    required: false,
-    type: Number,
-  })
-  async getAllAlerts(
-    @Query('backupId') backupId?: string,
-    @Query('days') days?: number
-  ): Promise<Alert[]> {
-    return this.alertingService.getAllAlerts(backupId, days);
-  }
-
-  @Get('pages')
-  @ApiOperation({ summary: 'Returns all alert Objects.' })
+  @ApiOperation({ summary: 'Returns all alert Objects paginated.' })
   async findAll(
     @Query() paginationOptionsDto: PaginationOptionsDto,
     @Query() alertFilterDto: AlertFilterDto,
