@@ -224,7 +224,9 @@ class SimpleRuleBasedAnalyzer:
             schedule_dict[schedule.name] = schedule
         return schedule_dict
 
-    def analyze_creation_dates(self, data, schedules, alert_limit, start_date, mode = "DEFAULT"):
+    def analyze_creation_dates(
+        self, data, schedules, alert_limit, start_date, mode="DEFAULT"
+    ):
         # Group the 'full' results by their task
         groups = defaultdict(list)
         for result in data:
@@ -234,7 +236,6 @@ class SimpleRuleBasedAnalyzer:
                 or result.data_size is None
                 or result.start_time is None
                 or result.subtask_flag != "0"
-
             ):
                 continue
             groups[result.task].append(result)
@@ -249,7 +250,7 @@ class SimpleRuleBasedAnalyzer:
                 results, schedule_dict, start_date
             )
 
-        if(mode == "ONLY_SCHEDULES"):
+        if mode == "ONLY_SCHEDULES":
             return
 
         # Because we ignore alerts which would be created earlier than the current latest alert,
@@ -300,8 +301,15 @@ class SimpleRuleBasedAnalyzer:
             # Skip the first backup in a schedule group
             for result1, result2 in zip(schedule_group[:-1], schedule_group[1:]):
                 # Don't generate alerts for results older than the start_date
-                if result2.start_time <= start_date:
-                    continue
+                
+                
+
+                if start_date is not None and result2.start_time is not None:
+                    
+                    if isinstance(start_date, str):
+                        start_date = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+                    if result2.start_time <= start_date:
+                        continue
 
                 # Calculate the expected date for result2
                 expected_date = self.compute_expected_date(

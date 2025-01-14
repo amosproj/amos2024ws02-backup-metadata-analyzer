@@ -67,20 +67,20 @@ class Analyzer:
 	def _get_latest_backup_date_from_backend():
 		latest_backup = Analyzer.backend.get_latest_backup_date()
 		if latest_backup is None:
-			return datetime.datetime.min
+			return None
 		else:
 			return latest_backup['creationDate']
 
 	def _send_Backups():
-		latest_backup_date = Analyzer._get_latest_backup_date_from_backend()
+		try:
+			latest_backup_date = Analyzer._get_latest_backup_date_from_backend()
+		except Exception as e:
+			print(f"Error getting latest backup date: {e}")
+			latest_backup_date = None
 		results = list(Analyzer.database.get_results(latest_backup_date))
 
-		results = list(Analyzer.database.get_results())
 		schedules = list(Analyzer.database.get_schedules())
-		start_date = Analyzer._get_start_date(results, "SIZE_ALERT", None)
-		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, start_date, "ONLY_SCHEDULES")
-		start_date = Analyzer._get_start_date(results, "CREATION_DATE_ALERT", None)
-		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, start_date, "ONLY_SCHEDULES")
+		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, latest_backup_date, "ONLY_SCHEDULES")
 		
 		# Batch the api calls to the backend for improved efficiency
 		batch = []

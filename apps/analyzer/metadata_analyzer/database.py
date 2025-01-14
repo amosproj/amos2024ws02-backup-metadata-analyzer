@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
@@ -41,8 +41,10 @@ class Database:
         stmt = select(Result)
         # Select all results since the latest backup date
         if latest_backup_date is not None:
-            timestamp = datetime.strptime(latest_backup_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+            timestamp = datetime.datetime.strptime(latest_backup_date, "%Y-%m-%dT%H:%M:%S.%fZ")
             stmt = select(Result).where(Result.start_time > timestamp)
+        else:
+            stmt = select(Result).where(Result.start_time > datetime.datetime.min)
 
         results = session.scalars(stmt)
         
