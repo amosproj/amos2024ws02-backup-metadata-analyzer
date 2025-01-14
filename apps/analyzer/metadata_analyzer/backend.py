@@ -41,3 +41,9 @@ class Backend:
         r = requests.get(url)
         r.raise_for_status()
         return r.text
+
+    def get_latest_backup_date(self):
+        url = self.backend_url + "backupData/latest"
+        r = requests.get(url)
+        r.raise_for_status()
+        return r.json()

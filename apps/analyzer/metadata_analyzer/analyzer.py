@@ -63,8 +63,16 @@ class Analyzer:
 			assert len(latest_alerts) == 1
 			return latest_alerts[0]
 
+	def _get_latest_backup_date_from_backend():
+		latest_backup = Analyzer.backend.get_latest_backup_date()
+		if latest_backup is None:
+			return datetime.datetime.min
+		else:
+			return latest_backup['creationDate']
+
 	def _send_Backups():
-		results = list(Analyzer.database.get_results())
+		latest_backup_date = Analyzer._get_latest_backup_date_from_backend()
+		results = list(Analyzer.database.get_results(latest_backup_date))
 
 		# Batch the api calls to the backend for improved efficiency
 		batch = []

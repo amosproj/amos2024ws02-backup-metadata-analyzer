@@ -66,6 +66,13 @@ export class BackupDataService extends PaginationService {
     return this.backupDataRepository.findOne({ where: { id: id } });
   }
 
+  async findLatest(): Promise<BackupDataEntity | null> {
+    return this.backupDataRepository.findOne({
+      where: {},
+      order: { creationDate: 'DESC' },
+    });
+  }
+
   /**
    * Find all backups with pagination.
    */
