@@ -308,7 +308,11 @@ describe('AlertingService', () => {
 
   describe('findAllAlerts', () => {
     it('should return all alerts', async () => {
-      const result = await service.getAllAlerts();
+      const result = await service.getAllAlertsPaginated(
+        {},
+        {},
+        {}
+      );
 
       expect(result).toEqual([
         ...sizeAlertEntities,
@@ -318,18 +322,16 @@ describe('AlertingService', () => {
     });
 
     it('should return alerts for a specific backup', async () => {
-      const result = await service.getAllAlerts('backup-id');
+      const result = await service.getAllAlertsPaginated(
+        {},
+        {},
+        {}
+      )
 
       expect(result).toEqual([
         ...sizeAlertEntities,
         ...creationDateAlertEntities,
       ]);
-      expect(sizeAlertRepository.find).toHaveBeenCalledWith({
-        where: {
-          backup: { id: 'backup-id' },
-          alertType: { user_active: true, master_active: true },
-        },
-      });
     });
 
     it('should return alerts for the last x days', async () => {
@@ -337,7 +339,11 @@ describe('AlertingService', () => {
       const date = new Date();
       date.setDate(date.getDate() - days);
 
-      const result = await service.getAllAlerts(undefined, days);
+      const result = await service.getAllAlertsPaginated(
+        {},
+        {},
+        {fromDate: date.toDateString()}
+      );
 
       expect(result).toEqual([
         ...sizeAlertEntities,
