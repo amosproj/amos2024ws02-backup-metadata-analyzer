@@ -14,10 +14,11 @@ export class AlertFilterDto {
   @ApiProperty({
     description: 'Severity',
     required: false,
+    enum: SeverityType,
   })
   @IsOptional()
   @IsString()
-  severity?: string;
+  severity?: SeverityType;
 
   @ApiProperty({
     description: 'Backup ID',
