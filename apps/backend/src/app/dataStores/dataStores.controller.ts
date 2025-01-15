@@ -6,6 +6,8 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  HttpCode,
+  Put,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -16,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { DataStoresService } from './dataStores.service';
 import { CreateDataStoreDto } from './dto/createDataStore.dto';
+import { SetOverflowTimeDto } from './dto/setOverflowTime.dto';
 
 @ApiTags('DataStores')
 @Controller('dataStores')
@@ -44,5 +47,20 @@ export class DataStoresController {
   @ApiCreatedResponse()
   async create(@Body() createDataStoreDto: CreateDataStoreDto) {
     return this.dataStoresService.create(createDataStoreDto);
+  }
+
+  @Put(':id/OverflowTime')
+  @ApiOperation({ summary: 'Sets the overflow time for a data store.' })
+  @ApiOkResponse({ description: 'Overflow time updated successfully.' })
+  @ApiNotFoundResponse({ description: 'Data store with given id not found.' })
+  @HttpCode(200)
+  async setOverflowTime(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() payload: SetOverflowTimeDto
+  ) {
+    console.log('Received ID:', id);
+    console.log('Received Payload:', payload);
+
+    return this.dataStoresService.setOverflowTime(id, payload.overflowTime);
   }
 }

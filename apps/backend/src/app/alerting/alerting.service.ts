@@ -3,12 +3,17 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { MailService } from '../utils/mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  Between,
   FindOneOptions,
   FindOptionsWhere,
+  ILike,
+  In,
+  LessThanOrEqual,
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
@@ -28,28 +33,72 @@ import {
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
 } from '../utils/constants';
+import { SeverityType } from './dto/severityType';
+import { PaginationDto } from '../utils/pagination/PaginationDto';
+import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
+import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
+import { AlertFilterDto } from './dto/alertFilter.dto';
+import { PaginationService } from '../utils/pagination/paginationService';
+import { TaskEntity } from '../tasks/entity/task.entity';
 
 @Injectable()
-export class AlertingService {
+export class AlertingService extends PaginationService implements OnModuleInit {
   alertRepositories: Repository<any>[] = [];
 
   constructor(
     @InjectRepository(AlertTypeEntity)
-    private alertTypeRepository: Repository<AlertTypeEntity>,
+    private readonly alertTypeRepository: Repository<AlertTypeEntity>,
     //Alert Repositories
     @InjectRepository(SizeAlertEntity)
-    private sizeAlertRepository: Repository<SizeAlertEntity>,
+    private readonly sizeAlertRepository: Repository<SizeAlertEntity>,
     @InjectRepository(CreationDateAlertEntity)
-    private creationDateRepository: Repository<CreationDateAlertEntity>,
+    private readonly creationDateRepository: Repository<CreationDateAlertEntity>,
     @InjectRepository(StorageFillAlertEntity)
-    private storageFillRepository: Repository<StorageFillAlertEntity>,
+    private readonly storageFillRepository: Repository<StorageFillAlertEntity>,
     //Services
-    private mailService: MailService,
-    private backupDataService: BackupDataService
+    private readonly mailService: MailService,
+    private readonly backupDataService: BackupDataService
   ) {
+    super();
     this.alertRepositories.push(this.sizeAlertRepository);
     this.alertRepositories.push(this.creationDateRepository);
     this.alertRepositories.push(this.storageFillRepository);
+  }
+
+  async onModuleInit() {
+    await this.ensureAlertTypesExist();
+  }
+
+  /**
+   * Init database table alert types with default values if not already present
+   */
+  async ensureAlertTypesExist() {
+    const alertTypes: CreateAlertTypeDto[] = [
+      {
+        name: SIZE_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
+      {
+        name: CREATION_DATE_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
+      {
+        name: STORAGE_FILL_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
+    ];
+
+    for (const alertType of alertTypes) {
+      const existingAlertType = await this.alertTypeRepository.findOneBy({
+        name: alertType.name,
+      });
+      if (!existingAlertType) {
+        await this.alertTypeRepository.save(alertType);
+      }
+    }
   }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
@@ -94,41 +143,20 @@ export class AlertingService {
     await this.mailService.sendAlertMail(alert);
   }
 
-  async getAllAlerts(backupId?: string, days?: number): Promise<Alert[]> {
-    const where: FindOptionsWhere<Alert> = {
-      alertType: { user_active: true, master_active: true },
-    };
-    if (backupId) {
-      where.backup = { id: backupId };
-    }
-    if (days) {
-      const date = new Date();
-      date.setDate(date.getDate() - days);
-      where.backup = { creationDate: MoreThanOrEqual(date) };
-    }
-
-    const alerts: Alert[] = [];
-    for (const alertRepository of this.alertRepositories) {
-      // if(alertRepository.target.name===STORAGE_FILL_ALERT){
-
-      // }
-      if (alertRepository === this.storageFillRepository) {
-        alerts.push(
-          ...(await alertRepository.find({
-            where: {
-              alertType: {
-                user_active: true,
-                master_active: true,
-              },
-            },
-          }))
-        );
-      } else {
-        alerts.push(...(await alertRepository.find({ where })));
-      }
-    }
-    return alerts;
+  async getAllAlertsPaginated(
+    paginationOptionsDto: PaginationOptionsDto,
+    alertOrderOptionsDto: AlertOrderOptionsDto,
+    alertFilterDto: AlertFilterDto,
+  ): Promise<PaginationDto<Alert>> {
+    return this.paginateAlerts<Alert>(
+      this.alertRepositories,
+      this.alertTypeRepository,
+      alertOrderOptionsDto,
+      alertFilterDto,
+      paginationOptionsDto
+    );
   }
+
 
   async createSizeAlert(createSizeAlertDto: CreateSizeAlertDto) {
     // Check if alert already exists
@@ -217,17 +245,6 @@ export class AlertingService {
   async createStorageFillAlert(
     createStorageFillAlertDto: CreateStorageFillAlertDto
   ) {
-    // Check if alert already exists
-    const existingAlertEntity = await this.storageFillRepository.findOneBy({
-      filled: createStorageFillAlertDto.filled,
-      dataStoreName: createStorageFillAlertDto.dataStoreName,
-    });
-
-    if (existingAlertEntity) {
-      console.log('Alert already exists -> ignoring it');
-      return;
-    }
-
     const alert = new StorageFillAlertEntity();
     alert.filled = createStorageFillAlertDto.filled;
     alert.highWaterMark = createStorageFillAlertDto.highWaterMark;
@@ -304,4 +321,70 @@ export class AlertingService {
 
     return alert.backup.id;
   }
+
+    createWhereClause(
+      alertFilterDto: AlertFilterDto,
+    ) {
+      const where: FindOptionsWhere<Alert> = {};
+  
+      //ID search
+      if (alertFilterDto.id) {
+        //like search
+        where.id = ILike(`%${alertFilterDto.id}%`);
+      }
+  
+      // backupId search
+      if (alertFilterDto.backupId) {
+        where.backup = { id: alertFilterDto.backupId };
+      }
+
+      // Check if params from and to are valid dates
+  
+      let from: Date | null = null;
+      let to: Date | null = null;
+      if (alertFilterDto.fromDate) {
+        from = new Date(alertFilterDto.fromDate);
+        if (Number.isNaN(from.getTime())) {
+          throw new BadRequestException('parameter fromDate is not a valid date');
+        }
+        //Set time to first millisecond of the day
+        from.setHours(0);
+        from.setMinutes(0);
+        from.setSeconds(0);
+        from.setMilliseconds(0);
+      }
+      if (alertFilterDto.toDate) {
+        to = new Date(alertFilterDto.toDate);
+        if (Number.isNaN(to.getTime())) {
+          throw new BadRequestException('parameter toDate is not a valid date');
+        }
+        //Set time to last millisecond of the day
+        to.setHours(0);
+        to.setMinutes(0);
+        to.setSeconds(0);
+        to.setDate(to.getDate() + 1);
+        to.setMilliseconds(-1);
+      }
+  
+      //Creation date search
+      if (alertFilterDto.fromDate && alertFilterDto.toDate) {
+        where.creationDate = Between(from!, to!);
+      } else if (alertFilterDto.fromDate) {
+        where.creationDate = MoreThanOrEqual(from!);
+      } else if (alertFilterDto.toDate) {
+        where.creationDate = LessThanOrEqual(to!);
+      }
+
+      // severity search
+      if (alertFilterDto.severity) {
+        where.alertType = { severity: alertFilterDto.severity as SeverityType };
+      }
+
+      // alertType search
+      if (alertFilterDto.alertType) {
+        where.alertType = { name: alertFilterDto.alertType };
+      }
+
+      return where;
+    }
 }

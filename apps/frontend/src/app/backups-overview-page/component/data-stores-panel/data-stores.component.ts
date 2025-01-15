@@ -46,9 +46,10 @@ export class DataStoresComponent implements OnDestroy, OnInit {
   }
 
   getHighWaterMarkPercentage(dataStore: DataStore): number {
-    return parseFloat(
+    const percentage = parseFloat(
       ((dataStore.highWaterMark / dataStore.capacity) * 100).toFixed(2)
     );
+    return percentage > 100 ? 100 : percentage;
   }
 
   toggleShowAll(): void {
@@ -59,5 +60,20 @@ export class DataStoresComponent implements OnDestroy, OnInit {
     return dataStores.sort(
       (a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a)
     );
+  }
+
+  getOverflowTimeLabel(overflowTime?: number): string {
+    if (overflowTime === undefined) {
+      return 'N/A';
+    }
+
+    if (overflowTime === 1) {
+      return `${overflowTime} day`;
+    } else if (overflowTime > 365) {
+      return `> 1 year`;
+    } else if (overflowTime === 0) {
+      return `Now`;
+    }
+    return `${overflowTime} days`;
   }
 }

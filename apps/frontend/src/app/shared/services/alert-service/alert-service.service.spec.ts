@@ -55,6 +55,7 @@ describe('AlertServiceService', () => {
           saveset: '',
           type: BackupType.DIFFERENTIAL,
         },
+        creationDate: new Date(),
       },
       {
         id: randomUUID().toString(),
@@ -72,28 +73,29 @@ describe('AlertServiceService', () => {
           saveset: '',
           type: BackupType.DIFFERENTIAL,
         },
+        creationDate: new Date(),
       },
     ];
 
     service.getAllAlerts().subscribe((alerts) => {
-      expect(alerts).toEqual(mockAlerts);
+      expect(alerts).toEqual({ alerts: mockAlerts, total: 2 });
     });
 
     const req = httpMock.expectOne(`${baseUrl}/alerting`);
     expect(req.request.method).toBe('GET');
-    req.flush(mockAlerts);
+    req.flush({ data: mockAlerts, paginationData: { total: 2 } });
   });
 
   it('should fetch alerts with days parameter', () => {
-    const mockAlerts: Alert[] = [
+    const mockAlerts = [
       {
         id: randomUUID().toString(),
         alertType: {
           id: randomUUID().toString(),
           name: 'test',
           severity: SeverityType.INFO,
-          user_active: false,
-          master_active: false,
+          user_active: true,
+          master_active: true,
         },
         backup: {
           id: randomUUID().toString(),
@@ -102,6 +104,7 @@ describe('AlertServiceService', () => {
           saveset: '',
           type: BackupType.DIFFERENTIAL,
         },
+        creationDate: new Date(),
       },
       {
         id: randomUUID().toString(),
@@ -119,16 +122,21 @@ describe('AlertServiceService', () => {
           saveset: '',
           type: BackupType.DIFFERENTIAL,
         },
+        creationDate: new Date(),
       },
     ];
     const days = 7;
+    const fromDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-    service.getAllAlerts(days).subscribe((alerts) => {
-      expect(alerts).toEqual(mockAlerts);
+    service.getAllAlerts(fromDate).subscribe((alerts) => {
+      expect(alerts).toEqual({
+        alerts: mockAlerts,
+        total: 2,
+      });
     });
 
-    const req = httpMock.expectOne(`${baseUrl}/alerting?days=${days}`);
+    const req = httpMock.expectOne(`${baseUrl}/alerting?offset=0&limit=10&fromDate=${fromDate}`);
     expect(req.request.method).toBe('GET');
-    req.flush(mockAlerts);
+    req.flush({ data: mockAlerts, paginationData: { total: 2 } });
   });
 });

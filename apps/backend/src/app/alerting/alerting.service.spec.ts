@@ -21,7 +21,9 @@ import {
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
-import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
+import { AlertFilterDto } from './dto/alertFilter.dto';
+import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
+import { PaginationDataDto } from '../utils/pagination/PaginationDto';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -62,8 +64,18 @@ const sizeAlertEntities: SizeAlertEntity[] = [
     referenceSize: 200,
     backup: mockedBackupDataEntity,
     alertType: mockedSizeAlertTypeEntity,
+    creationDate: new Date(),
   },
 ];
+
+const sizeAlert: SizeAlertEntity = {
+  id: 'alert-id',
+  size: 100,
+  referenceSize: 200,
+  backup: mockedBackupDataEntity,
+  alertType: mockedSizeAlertTypeEntity,
+  creationDate: new Date(),
+};
 
 const creationDateAlertEntities: CreationDateAlertEntity[] = [
   {
@@ -72,6 +84,7 @@ const creationDateAlertEntities: CreationDateAlertEntity[] = [
     referenceDate: new Date(),
     backup: mockedBackupDataEntity,
     alertType: mockedCreationDateAlertTypeEntity,
+    creationDate: new Date(),
   },
 ];
 
@@ -87,70 +100,103 @@ describe('AlertingService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        AlertingService,
-        {
-          provide: getRepositoryToken(SizeAlertEntity),
-          useValue: {
-            find: jest.fn().mockResolvedValue(sizeAlertEntities),
-            findOneBy: jest.fn().mockResolvedValue(null),
-            save: jest.fn(),
+      AlertingService,
+      {
+        provide: getRepositoryToken(SizeAlertEntity),
+        useValue: {
+        save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+        find: jest.fn().mockImplementation(() => Promise.resolve(sizeAlertEntities)),
+        findOne: jest.fn().mockImplementation(({ where: { id } }) => {
+          if (id === 'alert-id') {
+            return sizeAlert;
+          }
+            return sizeAlert;
+          }),
+          findOneBy: jest.fn().mockResolvedValue(null),
+          createQueryBuilder: jest.fn(() => ({
+            select: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            where: jest.fn().mockReturnThis(),
+            getQuery: jest.fn().mockReturnThis(),
+            getManyAndCount: jest.fn().mockResolvedValue([sizeAlertEntities, sizeAlertEntities.length]),
+          })),
+          query: jest.fn()
+            .mockResolvedValueOnce([{alertTypeId: sizeAlert.alertType.id, backupId: sizeAlert.backup?.id, severity: sizeAlert.alertType.severity, creationDate: sizeAlert.creationDate }])
+            .mockResolvedValue([{count: 1}]),
           },
-        },
-        {
+          },
+          {
           provide: getRepositoryToken(CreationDateAlertEntity),
           useValue: {
-            find: jest.fn().mockResolvedValue(creationDateAlertEntities),
-            findOneBy: jest.fn().mockResolvedValue(null),
-            save: jest.fn(),
+          save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+          find: jest.fn().mockImplementation(() => Promise.resolve(creationDateAlertEntities)),
+          createQueryBuilder: jest.fn(() => ({
+            select: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            where: jest.fn().mockReturnThis(),
+            getQuery: jest.fn().mockReturnThis(),
+            getManyAndCount: jest.fn().mockResolvedValue([creationDateAlertEntities, creationDateAlertEntities.length]),
+          })),
+          query: jest.fn().mockResolvedValue([creationDateAlertEntities, [{ count: creationDateAlertEntities.length.toString() }]]),
+          findOneBy: jest.fn().mockResolvedValue(null),
           },
-        },
-        {
+          },
+          {
           provide: getRepositoryToken(AlertTypeEntity),
           useValue: {
-            findOneBy: jest.fn().mockImplementation(({ name, id }) => {
-              if (name === 'SIZE_ALERT' || id === 'active-id') {
-                return mockedSizeAlertTypeEntity;
-              } else if (id === 'not-active-id') {
-                return {
-                  ...mockedSizeAlertTypeEntity,
-                  user_active: false,
-                  master_active: false,
-                };
-              } else if (name === CREATION_DATE_ALERT) {
-                return mockedCreationDateAlertTypeEntity;
-              } else {
-                return null;
-              }
-            }),
-            save: jest.fn(),
-            find: jest.fn().mockResolvedValue([]),
-          },
+          findOneBy: jest.fn().mockImplementation(({ name, id }) => {
+          if (name === SIZE_ALERT || id === 'active-id') {
+          return mockedSizeAlertTypeEntity;
+          } else if (id === 'not-active-id') {
+          return {
+            ...mockedSizeAlertTypeEntity,
+            user_active: false,
+            master_active: false,
+          };
+          } else if (name === CREATION_DATE_ALERT) {
+          return mockedCreationDateAlertTypeEntity;
+          } else {
+          return null;
+          }
+        }),
+        save: jest.fn(),
+        find: jest.fn().mockResolvedValue([]),
+        findOne: jest.fn().mockResolvedValue(mockedSizeAlertTypeEntity),
         },
-        {
-          provide: getRepositoryToken(StorageFillAlertEntity),
-          useValue: {
-            find: jest.fn().mockResolvedValue([]),
-            findOneBy: jest.fn().mockResolvedValue(null),
-            save: jest.fn(),
-          },
+      },
+      {
+        provide: getRepositoryToken(StorageFillAlertEntity),
+        useValue: {
+        save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+        find: jest.fn().mockImplementation(() => Promise.resolve([])),
+        createQueryBuilder: jest.fn(() => ({
+          select: jest.fn().mockReturnThis(),
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          getQuery: jest.fn().mockReturnThis(),
+          getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+        })),
+        query: jest.fn().mockResolvedValue([creationDateAlertEntities, [{ count: creationDateAlertEntities.length.toString() }]]),
+        findOneBy: jest.fn().mockResolvedValue(null),
         },
-        {
-          provide: MailService,
-          useValue: {
-            sendAlertMail: jest.fn(),
-          },
+      },
+      {
+        provide: MailService,
+        useValue: {
+        sendAlertMail: jest.fn(),
         },
-        {
-          provide: BackupDataService,
-          useValue: {
-            findOneById: jest.fn().mockImplementation((id: string) => {
-              if (id === 'backup-id') {
-                return mockedBackupDataEntity;
-              }
-              return null;
-            }),
-          },
+      },
+      {
+        provide: BackupDataService,
+        useValue: {
+        findOneById: jest.fn().mockImplementation((id: string) => {
+          if (id === 'backup-id') {
+          return mockedBackupDataEntity;
+          }
+          return null;
+        }),
         },
+      },
       ],
     }).compile();
 
@@ -166,6 +212,39 @@ describe('AlertingService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('ensureAlertTypesExist', () => {
+    it('should add default alert types if they do not exist', async () => {
+      jest.spyOn(alertTypeRepository, 'findOneBy').mockResolvedValue(null);
+
+      await service.ensureAlertTypesExist();
+
+      expect(alertTypeRepository.save).toHaveBeenCalledTimes(3);
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: SIZE_ALERT })
+      );
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: CREATION_DATE_ALERT })
+      );
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: STORAGE_FILL_ALERT })
+      );
+    });
+
+    it('should not add alert types if they already exist', async () => {
+      jest.spyOn(alertTypeRepository, 'findOneBy').mockResolvedValue({
+        id: 'a',
+        name: SIZE_ALERT,
+        severity: SeverityType.WARNING,
+        user_active: true,
+        master_active: true,
+      });
+
+      await service.ensureAlertTypesExist();
+
+      expect(alertTypeRepository.save).not.toHaveBeenCalled();
+    });
   });
 
   describe('createSizeAlert', () => {
@@ -274,27 +353,29 @@ describe('AlertingService', () => {
 
   describe('findAllAlerts', () => {
     it('should return all alerts', async () => {
-      const result = await service.getAllAlerts();
+      const result = await service.getAllAlertsPaginated(
+        {limit: 10, offset: 0},
+        new AlertOrderOptionsDto(),
+        {}
+      );
 
-      expect(result).toEqual([
-        ...sizeAlertEntities,
-        ...creationDateAlertEntities,
-      ]);
-      expect(sizeAlertRepository.find).toHaveBeenCalled();
+      expect(result).toEqual(
+        {
+        data: [sizeAlert],
+        paginationData: {limit: 10, offset: 0, total: 1}
+      });
     });
 
     it('should return alerts for a specific backup', async () => {
-      const result = await service.getAllAlerts('backup-id');
+      const result = await service.getAllAlertsPaginated(
+        {limit: 10, offset: 0},
+        new AlertOrderOptionsDto(),
+        {id: 'alert-id'}
+      )
 
-      expect(result).toEqual([
-        ...sizeAlertEntities,
-        ...creationDateAlertEntities,
-      ]);
-      expect(sizeAlertRepository.find).toHaveBeenCalledWith({
-        where: {
-          backup: { id: 'backup-id' },
-          alertType: { user_active: true, master_active: true },
-        },
+      expect(result).toEqual(        {
+        data: [sizeAlert],
+        paginationData: {limit: 10, offset: 0, total: 1}
       });
     });
 
@@ -303,18 +384,18 @@ describe('AlertingService', () => {
       const date = new Date();
       date.setDate(date.getDate() - days);
 
-      const result = await service.getAllAlerts(undefined, days);
+      const result = await service.getAllAlertsPaginated(
+        {},
+        {},
+        { fromDate: date.toDateString() }
+      );
 
-      expect(result).toEqual([
-        ...sizeAlertEntities,
-        ...creationDateAlertEntities,
-      ]);
-      expect(sizeAlertRepository.find).toHaveBeenCalledWith({
-        where: {
-          backup: { creationDate: MoreThanOrEqual(expect.any(Date)) },
-          alertType: { user_active: true, master_active: true },
-        },
-      });
+      expect(result).toEqual(
+        {
+          data: [sizeAlert],
+          paginationData: {limit: 10, offset: 0, total: 1}
+        }
+      );
     });
   });
 

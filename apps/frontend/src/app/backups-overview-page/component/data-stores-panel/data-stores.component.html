@@ -3,20 +3,48 @@
     <span class="data-store-name">Data Stores</span>
   </div>
   <div class="card-body">
-    <div *ngFor="let dataStore of (showAll ? (dataStores$ | async) : (dataStores$ | async)?.slice(0, 5))"
-         class="data-store">
+    <div
+      *ngFor="
+        let dataStore of showAll
+          ? (dataStores$ | async)
+          : (dataStores$ | async)?.slice(0, 5)
+      "
+      class="data-store"
+    >
       <span class="data-store-name">{{ dataStore.displayName }}</span>
+      <span
+        *ngIf="dataStore.overflowTime !== null"
+        [ngClass]="{
+          'overflow-badge': true,
+          'overflow-badge-critical':
+            dataStore.overflowTime !== undefined && dataStore.overflowTime < 14
+        }"
+      >
+        Estimated time to storage overflow:
+        {{ getOverflowTimeLabel(dataStore.overflowTime) }}
+      </span>
       <div class="progress-bar-container">
-        <clr-progress-bar
-          [clrValue]="getFilledPercentage(dataStore)"
-          [clrMax]="100"
-          [clrLabeled]="true"
-          [clrDisplayval]="getFilledPercentage(dataStore) + '%'">
-        </clr-progress-bar>
-        <div class="high-water-mark" [style.left.%]="getHighWaterMarkPercentage(dataStore)"></div>
+        <div class="progress-bar">
+          <clr-progress-bar
+            [clrValue]="getFilledPercentage(dataStore)"
+            [clrMax]="100"
+          >
+          </clr-progress-bar>
+          <div
+            class="high-water-mark"
+            [style.left.%]="getHighWaterMarkPercentage(dataStore)"
+          ></div>
+        </div>
+        <div class="percentage">
+          {{ getFilledPercentage(dataStore) + '%' }}
+        </div>
       </div>
     </div>
-    <button *ngIf="((dataStores$ | async)?.length ?? 0) > 5" class="show-more-btn" (click)="toggleShowAll()">
+    <button
+      *ngIf="((dataStores$ | async)?.length ?? 0) > 5"
+      class="show-more-btn"
+      (click)="toggleShowAll()"
+    >
       {{ showAll ? 'Show less' : 'Show all' }}
     </button>
   </div>
