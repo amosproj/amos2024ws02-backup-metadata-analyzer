@@ -78,12 +78,12 @@ describe('AlertServiceService', () => {
     ];
 
     service.getAllAlerts().subscribe((alerts) => {
-      expect(alerts).toEqual(mockAlerts);
+      expect(alerts).toEqual({ alerts: mockAlerts, total: 2 });
     });
 
     const req = httpMock.expectOne(`${baseUrl}/alerting`);
     expect(req.request.method).toBe('GET');
-    req.flush(mockAlerts);
+    req.flush({ data: mockAlerts, paginationData: { total: 2 } });
   });
 
   it('should fetch alerts with days parameter', () => {
@@ -129,11 +129,14 @@ describe('AlertServiceService', () => {
     const fromDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
     service.getAllAlerts(fromDate).subscribe((alerts) => {
-      expect(alerts).toEqual(mockAlerts);
+      expect(alerts).toEqual({
+        alerts: mockAlerts,
+        total: 2,
+      });
     });
 
     const req = httpMock.expectOne(`${baseUrl}/alerting?offset=0&limit=10&fromDate=${fromDate}`);
     expect(req.request.method).toBe('GET');
-    req.flush({ data: mockAlerts, paginationInfo: {} });
+    req.flush({ data: mockAlerts, paginationData: { total: 2 } });
   });
 });

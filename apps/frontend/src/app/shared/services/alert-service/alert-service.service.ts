@@ -15,13 +15,21 @@ export class AlertServiceService {
     private readonly http: HttpClient
   ) {}
 
-  getAllAlerts(fromDate?: string, offset?: number): Observable<Alert[]> {
+  getAllAlerts(fromDate?: string, offset?: number): Observable<{ alerts: Alert[], total: number }> {
     if (fromDate) {
-      return this.http.get<{ data: Alert[], paginationInfo: any }>(`${this.baseUrl}/alerting?offset=0&limit=10&fromDate=${fromDate}`).pipe(
-        map(response => response.data)
+      return this.http.get<{ data: Alert[], paginationData: { total: number } }>(`${this.baseUrl}/alerting?offset=0&limit=10&fromDate=${fromDate}`).pipe(
+        map(response => ({
+          alerts: response.data,
+          total: response.paginationData.total
+        }))
       );
     }
-    return this.http.get<Alert[]>(`${this.baseUrl}/alerting`);
+    return this.http.get<{ data: Alert[], paginationData: { total: number } }>(`${this.baseUrl}/alerting`).pipe(
+      map(response => ({
+        alerts: response.data,
+        total: response.paginationData.total
+      }))
+    );
   }
 
   refresh() {
