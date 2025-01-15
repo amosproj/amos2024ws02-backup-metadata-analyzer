@@ -93,7 +93,12 @@ describe('AlertComponent', () => {
         },
       ];
 
-      mockAlertService.getAllAlerts.mockReturnValue(of(mockAlerts));
+      const mockReturnValue = {
+        alerts: mockAlerts,
+        count: 1,
+      };
+      mockAlertService.getAllAlerts.mockReturnValue(of(mockReturnValue));
+
 
       component.loadAlerts();
 
@@ -104,7 +109,11 @@ describe('AlertComponent', () => {
     });
 
     it('should set status to OK when no alerts', () => {
-      mockAlertService.getAllAlerts.mockReturnValue(of([]));
+      const mockReturnValue = {
+        alerts: [],
+        count: 0,
+      };
+      mockAlertService.getAllAlerts.mockReturnValue(of(mockReturnValue));
 
       component.loadAlerts();
 
