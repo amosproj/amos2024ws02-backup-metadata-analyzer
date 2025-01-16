@@ -255,27 +255,28 @@ def calculate_training_indices():
         )
     return "Calculation of training series was succesful", 200
 
-# TODO adjust yaml
+# TODO refactor this to match logic
 @app.route("/enhancedAnalysisStorageCapacity", methods=["POST"])
 @swag_from(os.path.join(path,'swagger','enhancedAnalysisStorageCapacity.yaml'), validation=False)
 def enhanced_analysis_storage_capacity():
     json = request.get_json()
     field = "None"
     try:
-        field = "steps"
-        steps = json["steps"]
-        field = "high_watermark"
+        field = "time"
+        time = json["time"]
+        # TODO remove this variable when mapping to data_stores works
+        field = "high_water_mark"
         high_water_mark = json["high_water_mark"]
+        # TODO remove these variables when mapping to data_stores works
         field = "capacity"
         capacity = json["capacity"]
-        # TODO insert variables
         return jsonify(
-            Analyzer.enhanced_analysis_storage_capacity(int(5))
+            Analyzer.enhanced_analysis_storage_capacity(time,high_water_mark,capacity)
         )
     except KeyError:
         return "Missing field of type " + field, 400
-    #except ValueError:
-    #    return "Invalid value for alert limit", 400
+    except ValueError:
+        return "Invalid value for alert limit", 400
 
 def main():
     database = Database()

@@ -1,4 +1,4 @@
-Runs an enhanced, forecast based analysis on data stores searching for ones that will soon be full
+Runs an enhanced, forecast based analysis on data stores searching for ones that will soon be full. Time should be passed in seconds.
         ---
     parameters:
       - name: input
@@ -6,7 +6,7 @@ Runs an enhanced, forecast based analysis on data stores searching for ones that
         type: object
         required: true
         properties:
-            steps:
+            time:
                 type: string
                 example: '128'
             high_water_mark:

@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from metadata_analyzer.models import BackupData, Result, Tasks, DataStore, Schedule
+from metadata_analyzer.models import BackupData, Result, Tasks, DataStore, Schedule, ResultLabel
 import os
 
 
@@ -59,3 +59,16 @@ class Database:
 
         result = session.scalars(stmt)
         return result
+
+    def get_result_labels(self):
+        session = Session(self.engine)
+        stmt = select(ResultLabel)
+
+        labels = session.scalars(stmt)
+        return labels
+    
+    def get_labeled_data_store(self):
+        session = Session(self.engine)
+        stmt = select(DataStore.name,DataStore.high_water_mark,DataStore.capacity,DataStore.uuid, ResultLabel.saveset).select_from(DataStore).join(ResultLabel, DataStore.name == ResultLabel.pool) 
+        joined = session.execute(stmt).mappings().all()
+        return joined

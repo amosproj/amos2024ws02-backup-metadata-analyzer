@@ -125,3 +125,27 @@ class Schedule(Base):
 
     def __str__(self):
         return repr(self)
+
+class ResultLabel(Base):
+    __tablename__ = "result_lbls"
+
+    saveset: Mapped[str] = mapped_column(primary_key=True)
+    uuid: Mapped[str]
+    pool: Mapped[str]
+    backup_id: Mapped[str]
+    id: Mapped[str]
+
+    def __repr__(self):
+        return f"""ResultLabel(saveset={self.saveset})"""
+
+    def __str__(self):
+        return repr(self)
+    
+    def as_dict(self):
+        return {
+            "saveset": self.saveset,
+            "uuid": self.uuid,
+            "pool": self.pool,
+            "backup_id": self.backup_id,
+            "id": self.id
+        }

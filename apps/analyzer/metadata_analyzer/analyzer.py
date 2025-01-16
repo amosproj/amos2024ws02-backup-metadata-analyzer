@@ -222,10 +222,12 @@ class Analyzer:
 		)
 		return result
 	
-	def enhanced_analysis_storage_capacity(alert_limit):
+	def enhanced_analysis_storage_capacity(time,high_water_mark,capacity):
 		data_stores = list(Analyzer.database.get_data_stores())
 		data = list(Analyzer.database.get_results())
+		labels = list(Analyzer.database.get_result_labels())
+		labeled = list(Analyzer.database.get_labeled_data_store())
 		result = Analyzer.enhanced_storage_analyzer.analyze_future_storage_capacity(
-			data_stores, data, alert_limit
+			data, labeled, time, high_water_mark, capacity
 		)
 		return result
