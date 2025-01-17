@@ -1,16 +1,36 @@
 <clr-main-container>
-  <clr-header class="header">
-    <div class="header-hamburger-trigger" (click)="collapsed = !collapsed">
-      <button type="button" class="header-hamburger">
-        <cds-icon shape="bars"></cds-icon>
-      </button>
-    </div>
+  <app-loading-overlay
+    [isLoading]="(isLoading$ | async) ?? false"
+    title="Synchronizing Metadata"
+    subtitle="Please wait while we refresh the data..."
+  >
+  </app-loading-overlay>
 
-    <img src="../../../../public/team_logo.png" alt="Team Logo" width="50" />
-    <span class="title">Metadata Analyzer</span>
+  <clr-header class="header">
+    <img
+      src="../../../../public/team_logo.png"
+      alt="Team Logo"
+      width="50"
+      routerLink="/"
+      [routerLinkActiveOptions]="{ exact: true }"
+      routerLinkActive="active"
+      style="cursor: pointer"
+    />
+    <span
+      class="title"
+      routerLink="/"
+      style="cursor: pointer"
+      [routerLinkActiveOptions]="{ exact: true }"
+      routerLinkActive="active"
+      >Metadata Analyzer</span
+    >
     <div class="header-actions">
       <button class="refresh" (click)="refresh()" title="Refresh Data">
-        <cds-icon [class.spin]="isRefreshing" shape="refresh" class="refresh-icon"></cds-icon>
+        <cds-icon
+          [class.spin]="isRefreshing"
+          shape="refresh"
+          class="refresh-icon"
+        ></cds-icon>
       </button>
       <clr-dropdown>
         <button class="nav-icon" clrDropdownTrigger>
@@ -24,6 +44,7 @@
           <button clrDropdownItem>
             <cds-icon shape="envelope"></cds-icon>
             <span
+              [routerLinkActiveOptions]="{ exact: true }"
               routerLinkActive="active"
               routerLink="email-receiver"
               class="nav-text"
@@ -38,7 +59,7 @@
 
   <div class="content-container">
     <clr-vertical-nav
-      class="clr-vertical-nav has-nav-groups clr-nav-level-1 custom-nav"
+      class="clr-vertical-nav has-icons"
       [clrVerticalNavCollapsible]="true"
       [clrVerticalNavCollapsed]="collapsed"
       (clrVerticalNavCollapsedChange)="collapsed = $event"
@@ -69,6 +90,15 @@
         </clr-vertical-nav-item>
 
         <clr-vertical-nav-item
+          routerLink="/alert"
+          routerLinkActive="active"
+          class="hover-item nav-link"
+        >
+          <cds-icon clrVerticalNavIcon shape="info-standard"></cds-icon>
+          <span class="nav-text">Analysis Overview</span>
+        </clr-vertical-nav-item>
+
+        <clr-vertical-nav-item
           routerLink="/findData"
           routerLinkActive="active"
           class="hover-item nav-link"
@@ -89,7 +119,6 @@
           routerLink="/user-manual"
           routerLinkActive="active"
           class="hover-item nav-link"
-          
         >
           <cds-icon clrVerticalNavIcon shape="book"></cds-icon>
           <span class="nav-text">How to get started?</span>
@@ -101,7 +130,7 @@
       <div class="main-content">
         <router-outlet></router-outlet>
       </div>
-      
+
       <footer class="page-footer">
         <div>
           <p>&copy; 2025 Metadata Analyzer. All rights reserved.</p>
