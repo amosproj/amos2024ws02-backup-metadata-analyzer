@@ -137,8 +137,8 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return await this.alertTypeRepository.find({ where });
   }
 
-  async triggerAlertMail(alert: Alert) {
-    await this.mailService.sendAlertMail(alert);
+  triggerAlertMail(alert: Alert) {
+    this.mailService.sendAlertMail(alert);
   }
 
   async getAllAlertsPaginated(
@@ -191,7 +191,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     await this.sizeAlertRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
-      await this.triggerAlertMail(alert);
+      this.triggerAlertMail(alert);
     }
   }
 
@@ -235,7 +235,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     await this.creationDateRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
-      await this.triggerAlertMail(alert);
+      this.triggerAlertMail(alert);
     }
   }
 
@@ -271,8 +271,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         );
         continue;
       }
-      //Do not wait for the alert to have been created
-      this.createStorageFillAlert(alertDto);
+      await this.createStorageFillAlert(alertDto);
     }
   }
 
