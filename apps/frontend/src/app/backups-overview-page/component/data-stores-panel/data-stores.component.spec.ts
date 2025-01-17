@@ -92,8 +92,9 @@ describe('DataStoresComponent', () => {
   describe('changeSortBy', () => {
     it('should change sortBy correctly and reload data stores', () => {
       const loadDataStoresSpy = vi.spyOn(component, 'loadDataStores');
+      const event = { target: { value: 'overflowTime' } } as unknown as Event;
 
-      component.changeSortBy('overflowTime');
+      component.changeSortBy(event);
 
       expect(component.sortBy).toBe('overflowTime');
       expect(loadDataStoresSpy).toHaveBeenCalled();
