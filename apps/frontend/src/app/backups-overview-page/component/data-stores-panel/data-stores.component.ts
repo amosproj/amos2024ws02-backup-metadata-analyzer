@@ -82,8 +82,9 @@ export class DataStoresComponent implements OnDestroy, OnInit {
     return `${overflowTime} days`;
   }
 
-  changeSortBy(sortBy: 'filled' | 'overflowTime') {
-    this.sortBy = sortBy;
+  changeSortBy(event: Event) {
+    const element = event.target as HTMLSelectElement;
+    this.sortBy = element.value as 'filled' | 'overflowTime';
     this.loadDataStores();
   }
 }

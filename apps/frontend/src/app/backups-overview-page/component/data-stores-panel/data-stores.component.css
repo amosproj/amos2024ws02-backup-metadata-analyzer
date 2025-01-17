@@ -1,115 +1,115 @@
 data-stores.coponent.css .data-store-card {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .data-store-name {
-  font-weight: bold;
-  margin-right: 10px;
-  display: inline-block;
-  width: 30%;
+    font-weight: bold;
+    margin-right: 10px;
+    display: inline-block;
+    width: 30%;
 }
 
 .progress-bar-container {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .progress-bar {
-  position: relative;
-  height: 12px;
-  width: 100%;
-  vertical-align: middle;
-  --clr-progress-bg-color: #c6dcf2;
-  --clr-progress-default-color: #0d233a;
+    position: relative;
+    height: 12px;
+    width: 100%;
+    vertical-align: middle;
+    --clr-progress-bg-color: #c6dcf2;
+    --clr-progress-default-color: #0d233a;
 }
 
 .high-water-mark {
-  height: 100%;
-  width: 2px;
-  background-color: #f44336;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: auto 0;
+    height: 100%;
+    width: 2px;
+    background-color: #f44336;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
 }
 
 .percentage {
-  margin-left: 10px;
-  display: inline-block;
-  width: 5%;
+    margin-left: 10px;
+    display: inline-block;
+    width: 5%;
 }
 
 .card {
-  border: 1px solid #dcdcdc;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .card-header {
-  background-color: #f3f8fb;
-  padding: 10px;
-  border-bottom: 1px solid #dcdcdc;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+    background-color: #f3f8fb;
+    padding: 10px;
+    border-bottom: 1px solid #dcdcdc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 .card-body {
-  padding: 15px;
-  background-color: #ffffff;
+    padding: 15px;
+    background-color: #ffffff;
 }
 
 .card-footer {
-  background-color: #f3f8fb;
-  border-top: 1px solid #dcdcdc;
-  text-align: right;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+    background-color: #f3f8fb;
+    border-top: 1px solid #dcdcdc;
+    text-align: right;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
 .show-more-btn {
-  display: block;
-  width: auto;
-  padding: 5px 10px;
-  margin-top: 10px;
-  background-color: transparent;
-  color: #0d233a;
-  border: 1px solid #0d233a;
-  border-radius: 5px;
-  cursor: pointer;
-  text-align: center;
-  font-size: 14px;
+    display: block;
+    width: auto;
+    padding: 5px 10px;
+    margin-top: 10px;
+    background-color: transparent;
+    color: #0d233a;
+    border: 1px solid #0d233a;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 14px;
 }
 
 .show-more-btn:hover {
-  background-color: #0d233a;
-  color: #ffffff;
+    background-color: #0d233a;
+    color: #ffffff;
 }
 
 clr-progress-bar {
-  --clr-progress-bar-color: #0d233a;
+    --clr-progress-bar-color: #0d233a;
 }
 
 
 .overflow-badge {
-  background-color: #87bbf3;
-  color: black;
-  font-size: 0.8em;
-  font-weight: bold;
-  padding: 0.2rem 0.5rem;
-  border-radius: 10px;
-  margin-left: 1rem;
-  display: inline-block;
-  width: 300px;
-  text-align: center;
-  white-space: nowrap;
+    background-color: #87bbf3;
+    color: black;
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    margin-left: 1rem;
+    display: inline-block;
+    width: 300px;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .overflow-badge-critical {
-  background-color: #dc3545;
-  color: white;
+    background-color: #dc3545;
+    color: white;
 }
