@@ -118,6 +118,16 @@ export class AlertingController {
     await this.alertingService.createSizeAlert(createSizeAlertDto);
   }
 
+  @Post('size/batched')
+  @ApiOperation({ summary: 'Creates multiple new size alerts batched.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateSizeAlertDto })
+  async createSizeAlertsBatched(
+    @Body() createSizeAlertDtos: CreateSizeAlertDto[]
+  ): Promise<void> {
+    await this.alertingService.createSizeAlertsBatched(createSizeAlertDtos);
+  }
+
   @Post('creationDate')
   @ApiOperation({ summary: 'Create a new creation Date alert.' })
   @ApiNotFoundResponse({ description: 'Backup not found' })
@@ -127,6 +137,20 @@ export class AlertingController {
   ): Promise<void> {
     await this.alertingService.createCreationDateAlert(
       createCreationDateAlertDto
+    );
+  }
+
+  @Post('creationDate/batched')
+  @ApiOperation({
+    summary: 'Create multiple new creation Date alerts batched.',
+  })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateCreationDateAlertDto })
+  async createCreationDateAlertsBatched(
+    @Body() createCreationDateAlertDtos: CreateCreationDateAlertDto[]
+  ): Promise<void> {
+    await this.alertingService.createCreationDateAlertsBatched(
+      createCreationDateAlertDtos
     );
   }
 
