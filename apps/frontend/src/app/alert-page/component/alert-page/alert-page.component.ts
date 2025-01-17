@@ -45,7 +45,7 @@ interface AlertSummary {
 export class AlertPageComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
   readonly PAGE_SIZES = [10, 20, 50, 100];
-  pageSize = 10;
+  readonly pageSize = 10;
   loading = false;
   error: string | null = null;
 
@@ -55,7 +55,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   protected alertSeveverityFilter: CustomAlertFilter;
   protected alertTypeFilter: CustomAlertFilter;
 
-  alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
+  readonly alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   alerts$: Observable<APIResponse<Alert>> = of({
     data: [],
@@ -107,7 +107,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   }
 
   private loadAlerts(): void {
-    this.loading = true;
     this.error = null;
 
     this.alerts$ = this.filterOptions$.pipe(
