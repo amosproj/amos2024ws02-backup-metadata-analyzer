@@ -4,6 +4,8 @@ import { Alert, StorageFillAlert } from '../../../../shared/types/alert';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
+import { AlertFilterParams } from '../../../../shared/types/alert-filter-type';
+import { APIResponse } from '../../../../shared/types/api-response';
 
 @Component({
   selector: 'app-alert',
@@ -43,13 +45,13 @@ export class AlertComponent implements OnInit, OnDestroy {
   }
 
   loadAlerts(): void {
+    let params: AlertFilterParams = { fromDate: this.fromDate.toISOString() };
     this.alertService
-      .getAllAlerts(this.fromDate.toISOString())
+      .getAllAlerts(params)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data: { alerts: Alert[]; total: number }) => {
-        console.log('Data: ', data);
-        this.alerts = this.filterAlerts(data.alerts);
-        this.total = data.total;
+      .subscribe((response: APIResponse<Alert>) => {
+        this.alerts = this.filterAlerts(response.data);
+        this.total = response.paginationData.total;
         this.criticalAlertsCount = this.alerts.filter(
           (alert) => alert.alertType.severity === SeverityType.CRITICAL
         ).length;
