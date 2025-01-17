@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { SeverityType } from './severityType';
 
@@ -51,4 +51,13 @@ export class AlertFilterDto {
   @IsOptional()
   @IsString()
   alertType?: string;
+
+  @ApiProperty({
+    description: 'Include Deprecated',
+    required: false,
+    default: false,
+    type: Boolean,
+  })
+  @IsOptional()
+  includeDeprecated?: boolean;
 }

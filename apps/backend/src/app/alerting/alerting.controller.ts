@@ -12,7 +12,6 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiNotFoundResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -100,12 +99,12 @@ export class AlertingController {
   async findAll(
     @Query() paginationOptionsDto: PaginationOptionsDto,
     @Query() alertFilterDto: AlertFilterDto,
-    @Query() backupDataOrderOptionsDto: AlertOrderOptionsDto,
+    @Query() backupDataOrderOptionsDto: AlertOrderOptionsDto
   ): Promise<PaginationDto<Alert>> {
     return this.alertingService.getAllAlertsPaginated(
       paginationOptionsDto,
       backupDataOrderOptionsDto,
-      alertFilterDto,
+      alertFilterDto
     );
   }
 
@@ -132,14 +131,16 @@ export class AlertingController {
   }
 
   @Post('storageFill')
-  @ApiOperation({ summary: 'Create a new storage fill alert.' })
-  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiOperation({
+    summary:
+      'Creates new storage fill alerts. (All alerts have to be sent at once)',
+  })
   @ApiBody({ type: CreateStorageFillAlertDto })
   async storageFillAlert(
-    @Body() createStorageFillAlertDto: CreateStorageFillAlertDto
+    @Body() createStorageFillAlertDtos: CreateStorageFillAlertDto[]
   ): Promise<void> {
-    await this.alertingService.createStorageFillAlert(
-      createStorageFillAlertDto
+    await this.alertingService.createStorageFillAlerts(
+      createStorageFillAlertDtos
     );
   }
 

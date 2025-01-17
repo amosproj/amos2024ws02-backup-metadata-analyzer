@@ -2,6 +2,7 @@ import { BackupDataEntity } from '../../../backupData/entity/backupData.entity';
 import { AlertTypeEntity } from '../alertType.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  Column,
   CreateDateColumn,
   JoinColumn,
   ManyToOne,
@@ -36,4 +37,12 @@ export abstract class Alert {
   })
   @CreateDateColumn()
   creationDate!: Date;
+
+  @ApiProperty({
+    description: 'Defines, if the alert is deprecated',
+    required: true,
+    default: false,
+  })
+  @Column({ default: false, nullable: false })
+  deprecated!: boolean;
 }
