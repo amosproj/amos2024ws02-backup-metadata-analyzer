@@ -67,8 +67,8 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       .getAllAlerts()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (alerts: Alert[]) => {
-          this.alertsSubject.next(alerts);
+        next: (response: { alerts: Alert[]; total: number }) => {
+          this.alertsSubject.next(response.alerts);
           this.loading = false;
         },
         error: (error) => {
@@ -78,7 +78,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
         },
       });
   }
-
   private calculateAlertSummary(alerts: Alert[]): AlertSummary {
     const severityCounts = alerts.reduce(
       (acc, alert) => {

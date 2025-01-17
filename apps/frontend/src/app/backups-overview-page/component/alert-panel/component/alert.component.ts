@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../../../../shared/services/alert-service/alert-service.service';
-import { Alert } from '../../../../shared/types/alert';
+import { Alert, StorageFillAlert } from '../../../../shared/types/alert';
 import { Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
@@ -13,7 +13,9 @@ import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
 export class AlertComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
-  private readonly fromDate = new Date(Date.now() - this.DAYS * 24 * 60 * 60 * 1000);
+  private readonly fromDate = new Date(
+    Date.now() - this.DAYS * 24 * 60 * 60 * 1000
+  );
 
   alerts: Alert[] = [];
   total: number = 0;
@@ -44,20 +46,20 @@ export class AlertComponent implements OnInit, OnDestroy {
     this.alertService
       .getAllAlerts(this.fromDate.toISOString())
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data: { alerts: Alert[], total: number }) => {
-      console.log("Data: ", data);
-      this.alerts = this.filterAlerts(data.alerts);
-      this.total = data.total;
-      this.criticalAlertsCount = this.alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.CRITICAL
-      ).length;
-      this.warningAlertsCount = this.alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.WARNING
-      ).length;
-      this.infoAlertsCount = this.alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.INFO
-      ).length;
-      this.status = this.getStatus();
+      .subscribe((data: { alerts: Alert[]; total: number }) => {
+        console.log('Data: ', data);
+        this.alerts = this.filterAlerts(data.alerts);
+        this.total = data.total;
+        this.criticalAlertsCount = this.alerts.filter(
+          (alert) => alert.alertType.severity === SeverityType.CRITICAL
+        ).length;
+        this.warningAlertsCount = this.alerts.filter(
+          (alert) => alert.alertType.severity === SeverityType.WARNING
+        ).length;
+        this.infoAlertsCount = this.alerts.filter(
+          (alert) => alert.alertType.severity === SeverityType.INFO
+        ).length;
+        this.status = this.getStatus();
       });
   }
 
