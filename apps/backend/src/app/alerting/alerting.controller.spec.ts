@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AlertingModule } from './alerting.module';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,19 +11,15 @@ import { BackupType } from '../backupData/dto/backupType';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { SeverityType } from './dto/severityType';
-import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import {
   CREATION_DATE_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
 } from '../utils/constants';
-import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { TaskEntity } from '../tasks/entity/task.entity';
 import { MailReceiverEntity } from '../utils/mail/entity/MailReceiver.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
-import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
-import { find } from 'rxjs';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -64,6 +60,7 @@ const sizeAlert: SizeAlertEntity = {
   backup: mockedBackupDataEntity,
   alertType: mockedSizeAlertTypeEntity,
   creationDate: new Date(),
+  deprecated: false,
 };
 
 const mockSizeAlertRepository = {
