@@ -2,6 +2,14 @@ data-stores.coponent.css .data-store-card {
     margin-bottom: 20px;
 }
 
+.card-header {
+    padding: 0.5rem;
+}
+
+.clr-form-control {
+    margin: 0;
+}
+
 .data-store-name {
     font-weight: bold;
     margin-right: 10px;

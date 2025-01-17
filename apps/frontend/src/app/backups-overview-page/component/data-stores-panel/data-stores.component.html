@@ -3,12 +3,12 @@
     <span class="data-store-name">Data Stores</span>
 
     <div class="clr-form-control">
-      <label for="select-full" class="clr-control-label">Basic select</label>
+      <label for="select-full" class="clr-control-label">Sort by</label>
       <div class="clr-control-container">
         <div class="clr-select-wrapper">
           <select id="select-full" class="clr-select" (change)="changeSortBy($event)" [value]="sortBy">
-            <option value="filled">Sort by Filled Percentage</option>
-            <option value="overflowTime">Sort by Overflow Time</option>
+            <option value="filled">Filled Percentage</option>
+            <option value="overflowTime">Overflow Time</option>
           </select>
         </div>
       </div>
