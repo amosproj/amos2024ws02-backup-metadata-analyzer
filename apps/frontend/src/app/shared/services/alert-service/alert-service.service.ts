@@ -32,6 +32,20 @@ export class AlertServiceService {
         | readonly (string | number | boolean)[];
     };
 
+    // If we want to add multi select for severity and alert types
+    
+    // if (filterParams.alertType && filterParams.alertType.length > 0) {
+    //   filterParams.alertType.forEach((type) => {
+    //     cleanParams[`alertType`] = filterParams.alertType!;
+    //   });
+    // }
+
+    // if (filterParams.severity && filterParams.severity.length > 0) {
+    //   filterParams.severity.forEach((type) => {
+    //     cleanParams[`severity`] = filterParams.severity!;
+    //   });
+    // }
+
     const params = new HttpParams({ fromObject: cleanParams });
 
     return this.http
