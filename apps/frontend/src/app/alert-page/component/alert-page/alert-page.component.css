@@ -157,3 +157,37 @@ clr-datagrid {
 .clr-form-control {
   margin-top: 0.5rem;
 }
+
+
+.alert-history {
+  max-width: 300px;
+  padding: 0.5rem;
+}
+
+.history-item {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.history-date {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.history-severity {
+  font-weight: bold;
+  margin: 0.2rem 0;
+}
+
+.history-severity.critical { color: #e12200; }
+.history-severity.warning { color: #f57600; }
+.history-severity.info { color: #0072a3; }
+
+.history-details {
+  font-size: 0.9rem;
+}
+
+.alert-info {
+  cursor: pointer;
+}
