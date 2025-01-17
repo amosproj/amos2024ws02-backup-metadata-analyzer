@@ -79,6 +79,7 @@ export class PaginationService {
       'backupId',
       'severity',
       'creationDate',
+      'deprecated',
     ];
 
     const parameters = [];
@@ -115,9 +116,16 @@ export class PaginationService {
           `alias${i}.creationDate <= $${parameters.length + 1}`
         );
         parameters.push(whereClause.toDate);
-      } else if (whereClause.alertType){
+      } else if (whereClause.alertType) {
         whereConditions.push(`alertType.name = $${parameters.length + 1}`);
         parameters.push(whereClause.alertType);
+      }
+      if (
+        whereClause.includeDeprecated === 'false' ||
+        whereClause.includeDeprecated === false ||
+        whereClause.includeDeprecated === undefined
+      ) {
+        whereConditions.push(`alias${i}.deprecated = FALSE`);
       }
 
       const whereClauseString =

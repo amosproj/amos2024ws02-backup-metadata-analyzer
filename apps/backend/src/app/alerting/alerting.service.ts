@@ -12,7 +12,6 @@ import {
   FindOneOptions,
   FindOptionsWhere,
   ILike,
-  In,
   LessThanOrEqual,
   MoreThanOrEqual,
   Repository,
@@ -39,7 +38,6 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
-import { TaskEntity } from '../tasks/entity/task.entity';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
@@ -139,14 +137,14 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return await this.alertTypeRepository.find({ where });
   }
 
-  async triggerAlertMail(alert: Alert) {
-    await this.mailService.sendAlertMail(alert);
+  triggerAlertMail(alert: Alert) {
+    this.mailService.sendAlertMail(alert);
   }
 
   async getAllAlertsPaginated(
     paginationOptionsDto: PaginationOptionsDto,
     alertOrderOptionsDto: AlertOrderOptionsDto,
-    alertFilterDto: AlertFilterDto,
+    alertFilterDto: AlertFilterDto
   ): Promise<PaginationDto<Alert>> {
     return this.paginateAlerts<Alert>(
       this.alertRepositories,
@@ -156,7 +154,6 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       paginationOptionsDto
     );
   }
-
 
   async createSizeAlert(createSizeAlertDto: CreateSizeAlertDto) {
     // Check if alert already exists
@@ -194,7 +191,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     await this.sizeAlertRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
-      await this.triggerAlertMail(alert);
+      this.triggerAlertMail(alert);
     }
   }
 
@@ -238,11 +235,55 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     await this.creationDateRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
-      await this.triggerAlertMail(alert);
+      this.triggerAlertMail(alert);
     }
   }
 
-  async createStorageFillAlert(
+  async createStorageFillAlerts(
+    createStorageFillAlertDtos: CreateStorageFillAlertDto[]
+  ) {
+    const existingStorageFillAlerts = await this.storageFillRepository.findBy({
+      deprecated: false,
+    });
+    // Analyzer has analyzed all data stores. So if there is an existing alert that is not in the new list of alerts, it is deprecated
+    const deprecatedAlerts = existingStorageFillAlerts.filter(
+      (alert) =>
+        !createStorageFillAlertDtos.find(
+          (dto) => dto.dataStoreName === alert.dataStoreName
+        )
+    );
+
+    for (const alert of deprecatedAlerts) {
+      alert.deprecated = true;
+      await this.storageFillRepository.save(alert);
+    }
+
+    for (const alertDto of createStorageFillAlertDtos) {
+      //If alert already exists with same values, ignore new one
+      const existingAlert = await this.storageFillRepository.findOneBy({
+        dataStoreName: alertDto.dataStoreName,
+        deprecated: false,
+      });
+      if (existingAlert) {
+        if (
+          Math.floor(existingAlert.filled) === alertDto.filled &&
+          Math.floor(existingAlert.highWaterMark) === alertDto.highWaterMark &&
+          Math.floor(existingAlert.capacity) === alertDto.capacity
+        ) {
+          console.log(
+            'Storage Fill alert already exists, with no values changed -> ignoring it'
+          );
+          continue;
+        } else {
+          existingAlert.deprecated = true;
+          await this.storageFillRepository.save(existingAlert);
+        }
+      }
+      await this.createStorageFillAlert(alertDto);
+    }
+  }
+
+  private async createStorageFillAlert(
     createStorageFillAlertDto: CreateStorageFillAlertDto
   ) {
     const alert = new StorageFillAlertEntity();
@@ -262,7 +303,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     await this.storageFillRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
-      await this.triggerAlertMail(alert);
+      this.triggerAlertMail(alert);
     }
   }
 
@@ -322,69 +363,67 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return alert.backup.id;
   }
 
-    createWhereClause(
-      alertFilterDto: AlertFilterDto,
-    ) {
-      const where: FindOptionsWhere<Alert> = {};
-  
-      //ID search
-      if (alertFilterDto.id) {
-        //like search
-        where.id = ILike(`%${alertFilterDto.id}%`);
-      }
-  
-      // backupId search
-      if (alertFilterDto.backupId) {
-        where.backup = { id: alertFilterDto.backupId };
-      }
+  createWhereClause(alertFilterDto: AlertFilterDto) {
+    const where: FindOptionsWhere<Alert> = {};
 
-      // Check if params from and to are valid dates
-  
-      let from: Date | null = null;
-      let to: Date | null = null;
-      if (alertFilterDto.fromDate) {
-        from = new Date(alertFilterDto.fromDate);
-        if (Number.isNaN(from.getTime())) {
-          throw new BadRequestException('parameter fromDate is not a valid date');
-        }
-        //Set time to first millisecond of the day
-        from.setHours(0);
-        from.setMinutes(0);
-        from.setSeconds(0);
-        from.setMilliseconds(0);
-      }
-      if (alertFilterDto.toDate) {
-        to = new Date(alertFilterDto.toDate);
-        if (Number.isNaN(to.getTime())) {
-          throw new BadRequestException('parameter toDate is not a valid date');
-        }
-        //Set time to last millisecond of the day
-        to.setHours(0);
-        to.setMinutes(0);
-        to.setSeconds(0);
-        to.setDate(to.getDate() + 1);
-        to.setMilliseconds(-1);
-      }
-  
-      //Creation date search
-      if (alertFilterDto.fromDate && alertFilterDto.toDate) {
-        where.creationDate = Between(from!, to!);
-      } else if (alertFilterDto.fromDate) {
-        where.creationDate = MoreThanOrEqual(from!);
-      } else if (alertFilterDto.toDate) {
-        where.creationDate = LessThanOrEqual(to!);
-      }
-
-      // severity search
-      if (alertFilterDto.severity) {
-        where.alertType = { severity: alertFilterDto.severity as SeverityType };
-      }
-
-      // alertType search
-      if (alertFilterDto.alertType) {
-        where.alertType = { name: alertFilterDto.alertType };
-      }
-
-      return where;
+    //ID search
+    if (alertFilterDto.id) {
+      //like search
+      where.id = ILike(`%${alertFilterDto.id}%`);
     }
+
+    // backupId search
+    if (alertFilterDto.backupId) {
+      where.backup = { id: alertFilterDto.backupId };
+    }
+
+    // Check if params from and to are valid dates
+
+    let from: Date | null = null;
+    let to: Date | null = null;
+    if (alertFilterDto.fromDate) {
+      from = new Date(alertFilterDto.fromDate);
+      if (Number.isNaN(from.getTime())) {
+        throw new BadRequestException('parameter fromDate is not a valid date');
+      }
+      //Set time to first millisecond of the day
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+    }
+    if (alertFilterDto.toDate) {
+      to = new Date(alertFilterDto.toDate);
+      if (Number.isNaN(to.getTime())) {
+        throw new BadRequestException('parameter toDate is not a valid date');
+      }
+      //Set time to last millisecond of the day
+      to.setHours(0);
+      to.setMinutes(0);
+      to.setSeconds(0);
+      to.setDate(to.getDate() + 1);
+      to.setMilliseconds(-1);
+    }
+
+    //Creation date search
+    if (alertFilterDto.fromDate && alertFilterDto.toDate) {
+      where.creationDate = Between(from!, to!);
+    } else if (alertFilterDto.fromDate) {
+      where.creationDate = MoreThanOrEqual(from!);
+    } else if (alertFilterDto.toDate) {
+      where.creationDate = LessThanOrEqual(to!);
+    }
+
+    // severity search
+    if (alertFilterDto.severity) {
+      where.alertType = { severity: alertFilterDto.severity as SeverityType };
+    }
+
+    // alertType search
+    if (alertFilterDto.alertType) {
+      where.alertType = { name: alertFilterDto.alertType };
+    }
+
+    return where;
+  }
 }
