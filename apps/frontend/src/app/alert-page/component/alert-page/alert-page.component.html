@@ -42,12 +42,46 @@
       <div class="card" *ngIf="summary.mostFrequentAlert">
         <div class="card-block">
           <div class="card-title">Most Frequent Alert</div>
-          <div class="card-text">
-            <p>
-              <strong>"{{ summary.mostFrequentAlert.type }}"</strong> occurred
-              <strong>{{ summary.mostFrequentAlert.count }} times</strong> in
-              history.
-            </p>
+          <div
+            class="card-text"
+            *ngIf="summary.repeatedAlerts.length > 0; else noAlerts"
+          >
+            <clr-tooltip>
+              <div class="alert-info" clrTooltipTrigger>
+                <p>
+                  <strong>"{{ summary.mostFrequentAlert.type }}"</strong>
+                  occurred
+                  <strong>{{ summary.mostFrequentAlert.count }} times</strong>
+                </p>
+                <p *ngIf="summary.mostFrequentAlert.taskId">
+                  Task ID: {{ summary.mostFrequentAlert.taskId }}
+                </p>
+                <p *ngIf="summary.mostFrequentAlert.storageId">
+                  Storage ID: {{ summary.mostFrequentAlert.storageId }}
+                </p>
+              </div>
+              <clr-tooltip-content clrPosition="right" clrSize="lg" *clrIfOpen>
+                <div class="alert-history">
+                  <h6>Alert History</h6>
+                  <div
+                    *ngFor="let occurrence of summary.mostFrequentAlert.history"
+                    class="history-item"
+                  >
+                    <div class="history-date">
+                      {{ formatDate(occurrence.date) }}
+                    </div>
+                    <div
+                      class="history-severity"
+                      [ngClass]="occurrence.severity.toLowerCase()"
+                    >
+                      {{ occurrence.severity }}
+                    </div>
+                    <div class="history-details">{{ occurrence.details }}</div>
+                  </div>
+                </div>
+              </clr-tooltip-content>
+            </clr-tooltip>
+
             <div
               *ngIf="summary.repeatedAlerts.length > 1"
               class="repeated-alerts"
@@ -55,11 +89,44 @@
               <small>Other repeated alerts:</small>
               <ul class="list-unstyled">
                 <li *ngFor="let alert of summary.repeatedAlerts.slice(1, 4)">
-                  {{ alert.type }}: {{ alert.count }} times
+                  <clr-tooltip>
+                    <span clrTooltipTrigger>
+                      {{ alert.type }}: {{ alert.count }} times
+                    </span>
+                    <clr-tooltip-content
+                      clrPosition="right"
+                      clrSize="lg"
+                      *clrIfOpen
+                    >
+                      <div class="alert-history">
+                        <h6>Alert History</h6>
+                        <div
+                          *ngFor="let occurrence of alert.history"
+                          class="history-item"
+                        >
+                          <div class="history-date">
+                            {{ formatDate(occurrence.date) }}
+                          </div>
+                          <div
+                            class="history-severity"
+                            [ngClass]="occurrence.severity.toLowerCase()"
+                          >
+                            {{ occurrence.severity }}
+                          </div>
+                          <div class="history-details">
+                            {{ occurrence.details }}
+                          </div>
+                        </div>
+                      </div>
+                    </clr-tooltip-content>
+                  </clr-tooltip>
                 </li>
               </ul>
             </div>
           </div>
+          <ng-template #noAlerts>
+            <p>No alerts found</p>
+          </ng-template>
         </div>
       </div>
     </div>
