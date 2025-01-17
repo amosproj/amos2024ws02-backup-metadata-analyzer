@@ -57,7 +57,7 @@ export class DataStoresComponent implements OnDestroy, OnInit {
     this.showAll = !this.showAll;
   }
 
-  private sortDataStores(dataStores: DataStore[]): DataStore[] {
+  sortDataStores(dataStores: DataStore[]): DataStore[] {
     return dataStores.sort((a, b) => {
       if (this.sortBy === 'filled') {
         return this.getFilledPercentage(b) - this.getFilledPercentage(a);
