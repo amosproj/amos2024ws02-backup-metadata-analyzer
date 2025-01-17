@@ -62,7 +62,6 @@ describe('AppComponent', () => {
     const expectedNavItems = [
       'Dashboard',
       'Backup Statistics',
-      'Find Data',
       'How to get started?',
     ];
 
@@ -82,7 +81,6 @@ describe('AppComponent', () => {
     const expectedRoutes = [
       '/',
       '/backup-statistics',
-      '/findData',
       '/user-manual',
     ];
 

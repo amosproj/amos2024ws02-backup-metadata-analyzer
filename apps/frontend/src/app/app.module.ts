@@ -32,8 +32,6 @@ import {
   warningStandardIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
-import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
-import { FindTestDataComponent } from './test-upload/component/find-test-data/find-test-data.component';
 import { OverviewPageComponent } from './backups-overview-page/component/overview-page.component';
 import { BASE_URL } from './shared/types/configuration';
 import { AlertComponent } from './backups-overview-page/component/alert-panel/component/alert.component';
@@ -48,12 +46,9 @@ import { BackupStatisticsPageComponent } from './backup-statistics-page/componen
 import { FactsPanelComponent } from './backups-overview-page/component/facts-panel/facts-panel.component';
 import { UserManualComponent } from './management/components/user-manual/user-manual/user-manual.component';
 
-
 @NgModule({
   declarations: [
     AppComponent,
-    TestUploadComponent,
-    FindTestDataComponent,
     OverviewPageComponent,
     AlertComponent,
     NotificationSettingsComponent,
@@ -103,7 +98,7 @@ export class AppModule {
       refreshIcon,
       helpIcon,
       bookIcon,
-      lineChartIcon,
+      lineChartIcon
     );
   }
 }
