@@ -4,25 +4,25 @@ import { Subject } from 'rxjs';
 import { Alert } from '../../../shared/types/alert';
 import { SeverityType } from '../../../shared/enums/severityType';
 
-export class CustomFilter implements ClrDatagridFilterInterface<Alert> {
+export class CustomAlertFilter implements ClrDatagridFilterInterface<Alert> {
   public ranges: {
     fromDate: string | null;
     toDate: string | null;
     severity: SeverityType | null;
-    type: string | null;
+    alertType: string[] | null;
     id: string | null;
   } = {
     fromDate: null,
     toDate: null,
     severity: null,
-    type: null,
+    alertType: null,
     id: null,
   };
 
   public changes = new Subject<any>();
-  public filterType: 'date' | 'severity' | 'id' | 'type';
+  public filterType: 'date' | 'severity' | 'id' | 'alertType';
 
-  constructor(filterType: 'date' | 'severity' | 'id' | 'type') {
+  constructor(filterType: 'date' | 'severity' | 'id' | 'alertType') {
     this.filterType = filterType;
   }
 
@@ -31,8 +31,8 @@ export class CustomFilter implements ClrDatagridFilterInterface<Alert> {
       return !!(this.ranges.fromDate || this.ranges.toDate);
     } else if (this.filterType === 'severity') {
       return !!this.ranges.severity;
-    } else if (this.filterType === 'type') {
-      return !!this.ranges.type;
+    } else if (this.filterType === 'alertType') {
+      return !!this.ranges.alertType;
     } else {
       return !!this.ranges.id;
     }

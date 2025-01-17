@@ -1,9 +1,11 @@
 import { Inject, Injectable } from '@angular/core';
 import { BASE_URL } from '../../types/configuration';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, share, shareReplay } from 'rxjs/operators';
 import { Alert } from '../../types/alert';
+import { AlertFilterParams } from '../../types/alert-filter-type';
+import { APIResponse } from '../../types/api-response';
 
 @Injectable({
   providedIn: 'root',
@@ -15,21 +17,28 @@ export class AlertServiceService {
     private readonly http: HttpClient
   ) {}
 
-  getAllAlerts(fromDate?: string, offset?: number): Observable<{ alerts: Alert[], total: number }> {
-    if (fromDate) {
-      return this.http.get<{ data: Alert[], paginationData: { total: number } }>(`${this.baseUrl}/alerting?offset=0&limit=10&fromDate=${fromDate}`).pipe(
-        map(response => ({
-          alerts: response.data,
-          total: response.paginationData.total
-        }))
-      );
-    }
-    return this.http.get<{ data: Alert[], paginationData: { total: number } }>(`${this.baseUrl}/alerting`).pipe(
-      map(response => ({
-        alerts: response.data,
-        total: response.paginationData.total
-      }))
-    );
+  getAllAlerts(
+    filterParams: AlertFilterParams
+  ): Observable<APIResponse<Alert>> {
+    const cleanParams = Object.fromEntries(
+      Object.entries(filterParams).filter(
+        ([_, value]) => value != null && value !== undefined
+      )
+    ) as {
+      [param: string]:
+        | string
+        | number
+        | boolean
+        | readonly (string | number | boolean)[];
+    };
+
+    const params = new HttpParams({ fromObject: cleanParams });
+
+    return this.http
+      .get<APIResponse<Alert>>(`${this.baseUrl}/alerting`, {
+        params: params,
+      })
+      .pipe(shareReplay(1));
   }
 
   refresh() {
