@@ -252,6 +252,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
           (dto) => dto.dataStoreName === alert.dataStoreName
         )
     );
+
     for (const alert of deprecatedAlerts) {
       alert.deprecated = true;
       await this.storageFillRepository.save(alert);
@@ -259,17 +260,24 @@ export class AlertingService extends PaginationService implements OnModuleInit {
 
     for (const alertDto of createStorageFillAlertDtos) {
       //If alert already exists with same values, ignore new one
-      const existingAlertDto = await this.storageFillRepository.findOneBy({
+      const existingAlert = await this.storageFillRepository.findOneBy({
         dataStoreName: alertDto.dataStoreName,
-        capacity: alertDto.capacity,
-        highWaterMark: alertDto.highWaterMark,
-        filled: alertDto.filled,
+        deprecated: false,
       });
-      if (existingAlertDto) {
-        console.log(
-          'Storage Fill alert already exists, with no values changed -> ignoring it'
-        );
-        continue;
+      if (existingAlert) {
+        if (
+          Math.floor(existingAlert.filled) === alertDto.filled &&
+          Math.floor(existingAlert.highWaterMark) === alertDto.highWaterMark &&
+          Math.floor(existingAlert.capacity) === alertDto.capacity
+        ) {
+          console.log(
+            'Storage Fill alert already exists, with no values changed -> ignoring it'
+          );
+          continue;
+        } else {
+          existingAlert.deprecated = true;
+          await this.storageFillRepository.save(existingAlert);
+        }
       }
       await this.createStorageFillAlert(alertDto);
     }
