@@ -3,15 +3,29 @@ import { SeverityType } from '../../../shared/enums/severityType';
 import { Alert, StorageFillAlert } from '../../../shared/types/alert';
 import {
   BehaviorSubject,
+  combineLatest,
   map,
   Observable,
+  of,
   shareReplay,
+  startWith,
   Subject,
+  switchMap,
   takeUntil,
 } from 'rxjs';
 import { AlertServiceService } from '../../../shared/services/alert-service/alert-service.service';
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
 import { shortenBytes } from '../../../shared/utils/shortenBytes';
+import { CustomAlertFilter } from './alertfilter';
+import { FormControl } from '@angular/forms';
+import { ClrDatagridStateInterface } from '@clr/angular';
+import { AlertFilterParams } from '../../../shared/types/alert-filter-type';
+import { APIResponse } from '../../../shared/types/api-response';
+import { AlertType } from '../../../shared/types/alertType';
+
+const INITIAL_FILTER: AlertFilterParams = {
+  limit: 10,
+};
 
 interface AlertSummary {
   criticalCount: number;
@@ -30,14 +44,31 @@ interface AlertSummary {
 export class AlertPageComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
   readonly PAGE_SIZES = [10, 20, 50, 100];
+  pageSize = 10;
   loading = false;
   error: string | null = null;
 
+  severityTypes = Object.values(SeverityType);
+    // backupEnumTypes = Object.keys(BackupType).filter((item) => {
+    //   return isNaN(Number(item));
+    // });
+  selectedAlertTypes: string[] = [];
+  protected alertDateFilter: CustomAlertFilter;
+  protected alertSeveverityFilter: CustomAlertFilter;
+  protected alertTypeFilter: CustomAlertFilter;
+
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
-  readonly alerts$ = this.alertsSubject.asObservable().pipe(shareReplay(1));
+  alerts$: Observable<APIResponse<Alert>> = of({
+    data: [],
+    total: 0,
+    paginationData: { limit: 0, offset: 0, total: 0 },
+  });
+  private readonly filterOptions$ = new BehaviorSubject<AlertFilterParams>(
+    INITIAL_FILTER
+  );
 
   readonly alertSummary$: Observable<AlertSummary> = this.alerts$.pipe(
-    map(this.calculateAlertSummary),
+    map((response) => this.calculateAlertSummary(response.data)),
     shareReplay(1)
   );
 
@@ -46,7 +77,11 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   constructor(
     private readonly alertService: AlertServiceService,
     private readonly alertUtils: AlertUtilsService
-  ) {}
+  ) {
+    this.alertSeveverityFilter = new CustomAlertFilter('severity');
+    this.alertDateFilter = new CustomAlertFilter('date');
+    this.alertTypeFilter = new CustomAlertFilter('alertType');
+  }
 
   ngOnInit(): void {
     this.loadAlerts();
@@ -57,27 +92,29 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.loadAlerts();
       });
+
+    combineLatest([
+      this.alertDateFilter.changes.pipe(startWith(null)),
+      this.alertSeveverityFilter.changes.pipe(startWith(null)),
+      this.alertTypeFilter.changes.pipe(startWith(null)),
+    ])
+      .pipe(
+        map(() => this.buildFilterParams()),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((params) => this.filterOptions$.next(params));
   }
 
   private loadAlerts(): void {
     this.loading = true;
     this.error = null;
 
-    this.alertService
-      .getAllAlerts()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: { alerts: Alert[]; total: number }) => {
-          this.alertsSubject.next(response.alerts);
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error loading alerts:', error);
-          this.error = 'Failed to load alerts. Please try again later.';
-          this.loading = false;
-        },
-      });
+    this.alerts$ = this.filterOptions$.pipe(
+      switchMap((params) => this.alertService.getAllAlerts(params)),
+      takeUntil(this.destroy$)
+    );
   }
+
   private calculateAlertSummary(alerts: Alert[]): AlertSummary {
     const severityCounts = alerts.reduce(
       (acc, alert) => {
@@ -114,6 +151,61 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       repeatedAlerts,
       mostFrequentAlert: repeatedAlerts[0],
     };
+  }
+
+    setBackupTypes(types: string[]): void {
+      this.selectedAlertTypes = types;
+      this.alertTypeFilter.updateRanges({ alertType: types });
+    }
+
+  /**
+   * Set filter options for the backup table
+   * @returns Filter options
+   */
+  private buildFilterParams(): AlertFilterParams {
+    const params: AlertFilterParams = { ...INITIAL_FILTER };
+
+    if (this.alertDateFilter.isActive()) {
+      params.fromDate = this.alertDateFilter.ranges.fromDate;
+      params.toDate = this.alertDateFilter.ranges.toDate;
+    }
+
+    if (this.alertSeveverityFilter.isActive()) {
+      params.severity = this.alertSeveverityFilter.ranges.severity;
+    }
+
+    if (this.alertTypeFilter.isActive()) {
+      params.alertType = this.alertTypeFilter.ranges.alertType;
+    }
+
+    params.includeDeprecated = true;
+
+    return params;
+  }
+
+  /**
+   * Check the filter states and add new filter values to the filterOptions$ subject
+   * @param state filter values
+   */
+  refresh(state: ClrDatagridStateInterface<any>): void {
+    this.loading = true;
+
+    const params: AlertFilterParams = {
+      ...INITIAL_FILTER,
+      limit: state.page?.size ?? this.pageSize,
+      offset: state.page?.current
+        ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
+        : 0,
+      sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
+      //orderBy: state.sort?.by ? state.sort.by.toString() : 'date',
+    };
+
+    if (state.filters) {
+      Object.assign(params, this.buildFilterParams());
+    }
+
+    this.filterOptions$.next(params);
+    this.loading = false;
   }
 
   isStorageFillAlert(alert: Alert): alert is StorageFillAlert {
