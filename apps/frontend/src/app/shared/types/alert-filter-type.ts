@@ -9,6 +9,6 @@ export type AlertFilterParams = {
   fromDate?: string | null;
   toDate?: string | null;
   id?: string | null;
-  alertType?: string[] | null;
+  alertType?: string | null;
   includeDeprecated?: boolean | null
 };  

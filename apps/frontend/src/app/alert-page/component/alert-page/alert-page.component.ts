@@ -20,9 +20,12 @@ import { CustomAlertFilter } from './alertfilter';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { AlertFilterParams } from '../../../shared/types/alert-filter-type';
 import { APIResponse } from '../../../shared/types/api-response';
+import { NotificationService } from '../../../management/services/alert-notification/notification.service';
+import { AlertType } from '../../../shared/types/alertType';
 
 const INITIAL_FILTER: AlertFilterParams = {
   limit: 10,
+  includeDeprecated: true,
 };
 
 interface AlertSummary {
@@ -52,6 +55,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   protected alertSeveverityFilter: CustomAlertFilter;
   protected alertTypeFilter: CustomAlertFilter;
 
+  alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   alerts$: Observable<APIResponse<Alert>> = of({
     data: [],
@@ -71,7 +75,8 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly alertService: AlertServiceService,
-    private readonly alertUtils: AlertUtilsService
+    private readonly alertUtils: AlertUtilsService,
+    private readonly alertTypeService: NotificationService
   ) {
     this.alertSeveverityFilter = new CustomAlertFilter('severity');
     this.alertDateFilter = new CustomAlertFilter('date');
@@ -80,6 +85,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadAlerts();
+    this.loadAlertTypes();
 
     this.alertService
       .getRefreshObservable()
@@ -108,6 +114,12 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       switchMap((params) => this.alertService.getAllAlerts(params)),
       takeUntil(this.destroy$)
     );
+  }
+
+  private loadAlertTypes(): void {
+    this.alertTypeService.getNotificationSettings().subscribe((response) => {
+      this.alertTypeSubject.next(response);
+    });
   }
 
   private calculateAlertSummary(alerts: Alert[]): AlertSummary {
@@ -148,11 +160,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     };
   }
 
-  // setAlertSeverityTypes(types: SeverityType[]): void {
-  //   this.selectedAlertSeverityTypes = types;
-  //   this.alertSeveverityFilter.updateRanges({ severity: types });
-  // }
-
   /**
    * Set filter options for the backup table
    * @returns Filter options
@@ -192,8 +199,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
         ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
         : 0,
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
-      includeDeprecated: true,
-      //orderBy: state.sort?.by ? state.sort.by.toString() : 'date',
     };
 
     if (state.filters) {

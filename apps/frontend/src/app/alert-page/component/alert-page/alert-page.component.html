@@ -135,17 +135,28 @@
       <ng-container *clrDgHideableColumn>
         Type
         <clr-dg-filter [clrDgFilter]="alertTypeFilter">
-          <clr-input-container>
-            <label>Type:</label>
-            <input
-              clrInput
-              type="string"
-              [(ngModel)]="alertTypeFilter.ranges.alertType"
-              (ngModelChange)="
-                alertTypeFilter.updateRanges({ alertType: $event })
-              "
-            />
-          </clr-input-container>
+          <div class="clr-form-control">
+            <label class="clr-control-label">Type:</label>
+            <div class="clr-control-container">
+              <div class="clr-select-wrapper">
+                <select
+                  class="clr-select"
+                  [(ngModel)]="alertTypeFilter.ranges.severity"
+                  (ngModelChange)="
+                    alertTypeFilter.updateRanges({ alertType: $event })
+                  "
+                >
+                  <option value="">All</option>
+                  <option
+                    *ngFor="let type of alertTypeSubject | async"
+                    [value]="type.name"
+                  >
+                    {{ type.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
         </clr-dg-filter>
       </ng-container>
     </clr-dg-column>
