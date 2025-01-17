@@ -1,11 +1,10 @@
 import datetime
+import os
 
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from metadata_analyzer.models import BackupData, Result, Tasks, DataStore, Schedule
-from metadata_analyzer.analyzer import Analyzer
-from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
-import os
+
+from metadata_analyzer.models import Result, Tasks, DataStore, Schedule
 
 
 class Database:
@@ -27,14 +26,6 @@ class Database:
             + "/"
             + db_name
         )
-
-
-    def get_data(self):
-        session = Session(self.engine)
-        stmt = select(BackupData)
-
-        result = session.scalars(stmt)
-        return result
 
     def get_results(self, latest_backup_date = None):
         session = Session(self.engine)

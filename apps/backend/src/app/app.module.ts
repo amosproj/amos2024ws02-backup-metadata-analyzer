@@ -10,6 +10,7 @@ import { AlertingModule } from './alerting/alerting.module';
 import { TasksModule } from './tasks/tasks.module';
 import { DataStoresModule } from './dataStores/dataStores.module';
 import { InformationModule } from './information/information.module';
+import { AnalyzerServiceModule } from './analyzerService/analyzer-service.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { InformationModule } from './information/information.module';
     TasksModule,
     DataStoresModule,
     InformationModule,
+    AnalyzerServiceModule
   ],
   controllers: [AppController],
   providers: [AppService],
