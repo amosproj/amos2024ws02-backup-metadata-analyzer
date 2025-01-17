@@ -24,7 +24,9 @@ import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
 import { MissingBackupAlertEntity } from './entity/alerts/missingBackupAlert.entity';
+import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAlert.dto';
 import { AdditionalBackupAlertEntity } from './entity/alerts/additionalBackupAlert.entity';
+import { CreateAdditionalBackupAlertDto } from './dto/alerts/createAdditionalBackupAlert.dto';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -53,6 +55,22 @@ const mockedCreationDateAlertTypeEntity: AlertTypeEntity = {
 const mockedStorageFillAlertTypeEntity: AlertTypeEntity = {
   id: 'storage-fill-alert1',
   name: STORAGE_FILL_ALERT,
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const mockedMissingBackupAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id3',
+  name: MISSING_BACKUP_ALERT,
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const mockedAdditionalBackupAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id4',
+  name: ADDITIONAL_BACKUP_ALERT,
   severity: SeverityType.WARNING,
   user_active: true,
   master_active: true,
@@ -88,6 +106,8 @@ describe('AlertingService', () => {
   let mailService: MailService;
   let backupDataService: BackupDataService;
   let storageFillAlertEntityRepsitory: Repository<StorageFillAlertEntity>;
+  let missingBackupAlertEntityRepository: Repository<MissingBackupAlertEntity>;
+  let additionalBackupAlertEntityRepository: Repository<AdditionalBackupAlertEntity>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -123,6 +143,10 @@ describe('AlertingService', () => {
                 };
               } else if (name === CREATION_DATE_ALERT) {
                 return mockedCreationDateAlertTypeEntity;
+              } else if (name == MISSING_BACKUP_ALERT) {
+                return mockedMissingBackupAlertTypeEntity;
+              } else if (name == ADDITIONAL_BACKUP_ALERT) {
+                return mockedAdditionalBackupAlertTypeEntity;
               } else {
                 return null;
               }
@@ -180,6 +204,12 @@ describe('AlertingService', () => {
     creationDateAlertEntityRepository = module.get(
       getRepositoryToken(CreationDateAlertEntity)
     );
+    missingBackupAlertEntityRepository = module.get(
+      getRepositoryToken(MissingBackupAlertEntity)
+    );
+    additionalBackupAlertEntityRepository = module.get(
+      getRepositoryToken(AdditionalBackupAlertEntity)
+    );
     alertTypeRepository = module.get(getRepositoryToken(AlertTypeEntity));
     mailService = module.get(MailService);
     backupDataService = module.get(BackupDataService);
@@ -195,7 +225,7 @@ describe('AlertingService', () => {
 
       await service.ensureAlertTypesExist();
 
-      expect(alertTypeRepository.save).toHaveBeenCalledTimes(3);
+      expect(alertTypeRepository.save).toHaveBeenCalledTimes(5);
       expect(alertTypeRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ name: SIZE_ALERT })
       );
@@ -204,6 +234,12 @@ describe('AlertingService', () => {
       );
       expect(alertTypeRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ name: STORAGE_FILL_ALERT })
+      );
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: MISSING_BACKUP_ALERT })
+      );
+      expect(alertTypeRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: ADDITIONAL_BACKUP_ALERT })
       );
     });
 
@@ -276,6 +312,24 @@ describe('AlertingService', () => {
       await expect(
         service.createCreationDateAlert(createCreationDateAlertDto)
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('createMissingBackupAlert', () => {
+    it('should create and save a missing backup alert', async () => {
+      const createMissingBackupAlertDto: CreateMissingBackupAlertDto = {
+        referenceDate: new Date('2021-01-01'),
+      };
+
+      await service.createMissingBackupAlert(createMissingBackupAlertDto);
+
+      expect(missingBackupAlertEntityRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          referenceDate: new Date('2021-01-01'),
+          alertType: mockedMissingBackupAlertTypeEntity,
+        })
+      );
+      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
     });
   });
 
