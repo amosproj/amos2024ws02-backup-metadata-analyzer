@@ -12,6 +12,7 @@ import {
   Subject,
   switchMap,
   takeUntil,
+  tap,
 } from 'rxjs';
 import { AlertServiceService } from '../../../shared/services/alert-service/alert-service.service';
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
@@ -22,20 +23,12 @@ import { AlertFilterParams } from '../../../shared/types/alert-filter-type';
 import { APIResponse } from '../../../shared/types/api-response';
 import { NotificationService } from '../../../management/services/alert-notification/notification.service';
 import { AlertType } from '../../../shared/types/alertType';
+import { AlertSummary } from '../../../shared/types/alert-summary';
 
 const INITIAL_FILTER: AlertFilterParams = {
   limit: 10,
   includeDeprecated: true,
 };
-
-interface AlertSummary {
-  criticalCount: number;
-  warningCount: number;
-  infoCount: number;
-  totalCount: number;
-  repeatedAlerts: { type: string; count: number }[];
-  mostFrequentAlert?: { type: string; count: number };
-}
 
 @Component({
   selector: 'app-alert-page',
@@ -66,8 +59,20 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     INITIAL_FILTER
   );
 
-  readonly alertSummary$: Observable<AlertSummary> = this.alerts$.pipe(
-    map((response) => this.calculateAlertSummary(response.data)),
+  readonly alertSummary$: Observable<AlertSummary> = this.alertsSubject.pipe(
+    map((alerts) => {
+      if (!alerts || alerts.length === 0) {
+        return {
+          criticalCount: 0,
+          warningCount: 0,
+          infoCount: 0,
+          totalCount: 0,
+          repeatedAlerts: [],
+          mostFrequentAlert: undefined,
+        };
+      }
+      return this.calculateAlertSummary(alerts);
+    }),
     shareReplay(1)
   );
 
@@ -111,6 +116,9 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
     this.alerts$ = this.filterOptions$.pipe(
       switchMap((params) => this.alertService.getAllAlerts(params)),
+      tap((response) => {
+        this.alertsSubject.next(response.data);
+      }),
       takeUntil(this.destroy$)
     );
   }
@@ -140,15 +148,58 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       { criticalCount: 0, warningCount: 0, infoCount: 0 }
     );
 
-    const alertTypeCounts = alerts.reduce((acc, alert) => {
-      const type = alert.alertType.name;
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    // Group alerts by their matching criteria
+    const alertGroups = alerts.reduce((groups, alert) => {
+      let groupKey: string;
 
-    const repeatedAlerts = Object.entries(alertTypeCounts)
-      .filter(([_, count]) => count > 1)
-      .map(([type, count]) => ({ type, count }))
+      switch (alert.alertType.name) {
+        case 'STORAGE_FILL_ALERT':
+          // Group by storage medium
+          groupKey = `storage_${(alert as StorageFillAlert).id}`;
+          break;
+        case 'SIZE_ALERT':
+        case 'MISSING_BACKUP':
+          // Group by task
+          groupKey = `task_${alert.backup?.taskId || 'unknown'}`;
+          break;
+        default:
+          // Group by type only
+          groupKey = alert.alertType.name;
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(alert);
+      return groups;
+    }, {} as Record<string, Alert[]>);
+
+    // Convert groups to RepeatedAlert format
+    const repeatedAlerts = Object.entries(alertGroups)
+      .map(([key, groupAlerts]) => {
+        // Sort alerts by date descending
+        const sortedAlerts = groupAlerts.sort(
+          (a, b) =>
+            new Date(b.creationDate).getTime() -
+            new Date(a.creationDate).getTime()
+        );
+
+        const latestAlert = sortedAlerts[0];
+        const history = sortedAlerts.slice(0, 5).map((alert) => ({
+          date: new Date(alert.creationDate),
+          details: this.getAlertDetails(alert),
+          severity: alert.alertType.severity,
+        }));
+
+        return {
+          type: latestAlert.alertType.name,
+          count: groupAlerts.length,
+          latestAlert,
+          history,
+          taskId: latestAlert.backup?.taskId?.toString(),
+          storageId: (latestAlert as StorageFillAlert).id?.toString(),
+        };
+      })
       .sort((a, b) => b.count - a.count);
 
     return {
