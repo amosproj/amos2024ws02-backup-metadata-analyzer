@@ -333,6 +333,25 @@ describe('AlertingService', () => {
     });
   });
 
+  describe('createAdditionalBackupAlert', () => {
+    it('should create and save an additional backup alert', async () => {
+      const createAdditionalBackupAlertDto: CreateAdditionalBackupAlertDto = {
+        backupId: 'backup-id',
+        date: new Date('2021-01-01'),
+      };
+
+      await service.createAdditionalBackupAlert(createAdditionalBackupAlertDto);
+
+      expect(additionalBackupAlertEntityRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          backup: mockedBackupDataEntity,
+          date: new Date('2021-01-01'),
+        })
+      );
+      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('createAlertType', () => {
     it('should create and save an alert type', async () => {
       const createAlertTypeDto: CreateAlertTypeDto = {
