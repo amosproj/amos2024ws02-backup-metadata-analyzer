@@ -20,6 +20,9 @@ import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entit
 import { TaskEntity } from '../tasks/entity/task.entity';
 import { MailReceiverEntity } from '../utils/mail/entity/MailReceiver.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
+import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
+import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -123,6 +126,7 @@ const mockStorageFillAlertRepository = {
     getQuery: jest.fn().mockReturnThis(),
     getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
   })),
+  findBy: jest.fn().mockResolvedValue([]),
   query: jest.fn().mockResolvedValue([[], [{ count: '1' }]]),
   findOneBy: jest.fn().mockResolvedValue(null),
 };
@@ -176,14 +180,132 @@ describe('AlertingController (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .get('/alerting')
-      .query({ 
+      .query({
         offset: offset,
         limit: limit,
       })
       .expect(200);
 
-    expect(response.body).toEqual({"data": [], "paginationData": {"limit": "10", "offset": "0", "total": null}});
+    expect(response.body).toEqual({
+      data: [],
+      paginationData: { limit: '10', offset: '0', total: null },
+    });
   });
 
-  // Add more tests as needed
+  it('POST /alerting/type - should create a new alert type', async () => {
+    const createAlertTypeDto = {
+      severity: SeverityType.WARNING,
+      name: 'TEST_ALERT',
+      master_active: true,
+    };
+
+    await request(app.getHttpServer())
+      .post('/alerting/type')
+      .send(createAlertTypeDto)
+      .expect(201);
+
+    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining(createAlertTypeDto)
+    );
+  });
+
+  it('POST /alerting/size - should create a new size alert', async () => {
+    const createAlertDto: CreateSizeAlertDto = {
+      size: 100,
+      referenceSize: 200,
+      backupId: 'backup-id',
+    };
+
+    await request(app.getHttpServer())
+      .post('/alerting/size')
+      .send(createAlertDto)
+      .expect(201);
+
+    expect(mockSizeAlertRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        size: createAlertDto.size,
+        referenceSize: createAlertDto.referenceSize,
+        backup: expect.objectContaining({ id: createAlertDto.backupId }),
+        alertType: expect.objectContaining({ name: SIZE_ALERT }),
+      })
+    );
+  });
+
+  it('POST /alerting/creationDate - should create a new creation date alert', async () => {
+    const createCreationDateAlertDto: CreateCreationDateAlertDto = {
+      date: new Date('2024-12-01T17:53:33.239Z'),
+      backupId: 'backup-id',
+      referenceDate: new Date('2024-12-01T17:53:33.239Z'),
+    };
+
+    await request(app.getHttpServer())
+      .post('/alerting/creationDate')
+      .send(createCreationDateAlertDto)
+      .expect(201);
+
+    expect(mockCreationDateAlertRepository.save).toHaveBeenCalledWith({
+      date: new Date('2024-12-01T17:53:33.239Z').toISOString(),
+      referenceDate: new Date('2024-12-01T17:53:33.239Z').toISOString(),
+      backup: mockedBackupDataEntity,
+      alertType: mockedCreationDateAlertTypeEntity,
+    });
+  });
+
+  it('POST /alerting/storageFill - should create new storage fill alerts', async () => {
+    const createStorageFillAlertDtos: CreateStorageFillAlertDto[] = [
+      {
+        dataStoreName: 'dataStore1',
+        filled: 80,
+        highWaterMark: 70,
+        capacity: 100,
+      },
+    ];
+
+    await request(app.getHttpServer())
+      .post('/alerting/storageFill')
+      .send(createStorageFillAlertDtos)
+      .expect(201);
+
+    expect(mockStorageFillAlertRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataStoreName: 'dataStore1',
+        filled: 80,
+        highWaterMark: 70,
+        capacity: 100,
+        alertType: expect.objectContaining({ name: STORAGE_FILL_ALERT }),
+      })
+    );
+  });
+
+  it('PATCH /alerting/type/:alertTypeId/admin - should activate alert type by admin', async () => {
+    const alertTypeId = 'not-active-id';
+    const alertStatusDto = { status: true };
+
+    await request(app.getHttpServer())
+      .patch(`/alerting/type/${alertTypeId}/admin`)
+      .send(alertStatusDto)
+      .expect(200);
+
+    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
+      ...mockedSizeAlertTypeEntity,
+      master_active: true,
+      user_active: false,
+    });
+  });
+
+  it('PATCH /alerting/type/:alertTypeId/user - should activate alert type by user', async () => {
+    const alertTypeId = 'not-active-id';
+    const alertStatusDto = { status: true };
+
+    await request(app.getHttpServer())
+      .patch(`/alerting/type/${alertTypeId}/user`)
+      .send(alertStatusDto)
+      .expect(200);
+
+    expect(mockAlertTypeRepository.save).toHaveBeenCalledWith({
+      ...mockedSizeAlertTypeEntity,
+      master_active: false,
+      user_active: true,
+    });
+  });
 });
