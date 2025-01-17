@@ -26,12 +26,15 @@ import { MailReceiver1733580333590 } from './migrations/1733580333590-MailReceiv
 import { AddSaveset1733760846109 } from './migrations/1733760846109-AddSaveset';
 import { StorageFillAlert1733739256545 } from './migrations/1733739256545-StorageFillAlert';
 import { StorageFillAlertChangedColumns1733765217660 } from './migrations/1733765217660-StorageFillAlertChangedColumns';
-import { StorageFillAlertChangedColumnsDecimal1733768959317 } from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
+import {
+  StorageFillAlertChangedColumnsDecimal1733768959317
+} from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
 import { AddScheduledTimeToBackup1734538152155 } from './migrations/1734538152155-AddScheduledTimeToBackup';
 import { DataStoreEntity } from './dataStores/entity/dataStore.entity';
 import { DataStores1734616685846 } from './migrations/1734616685846-DataStores';
 import { AddAlertCreationDate1736344989806 } from './migrations/1736344989806-AddAlertCreationDate';
 import { StorageOverflowTime1736550460789 } from './migrations/1736550460789-StorageOverflowTime';
+import { DeprecatedFlag1737107214086 } from './migrations/1737107214086-DeprecatedFlag';
 
 /**
  * Used by NestJS to reach database.
@@ -85,6 +88,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         DataStores1734616685846,
         AddAlertCreationDate1736344989806,
         StorageOverflowTime1736550460789,
+        DeprecatedFlag1737107214086,
       ],
       logging: true,
       logger: 'debug',
