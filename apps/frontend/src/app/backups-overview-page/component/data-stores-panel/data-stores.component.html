@@ -1,6 +1,28 @@
 <div class="card data-store-card">
   <div class="card-header">
     <span class="data-store-name">Data Stores</span>
+    <div class="sort-options">
+      <label>
+        <input
+          type="radio"
+          name="sortBy"
+          value="filled"
+          [checked]="sortBy === 'filled'"
+          (change)="changeSortBy('filled')"
+        />
+        Sort by Filled Percentage
+      </label>
+      <label>
+        <input
+          type="radio"
+          name="sortBy"
+          value="overflowTime"
+          [checked]="sortBy === 'overflowTime'"
+          (change)="changeSortBy('overflowTime')"
+        />
+        Sort by Overflow Time
+      </label>
+    </div>
   </div>
   <div class="card-body">
     <div
