@@ -80,28 +80,27 @@
   >
     <clr-dg-column [clrDgField]="'severity'">
       <ng-container *clrDgHideableColumn>
-        Type
-        <clr-dg-filter [clrDgFilter]="alertTypeFilter">
-          <clr-combobox-container>
-            <clr-combobox
-              [(ngModel)]="selectedAlertTypes"
-              [clrMulti]="true"
-              (ngModelChange)="setBackupTypes($event)"
-              placeholder="Select severity types"
-            >
-              <ng-container *clrOptionSelected="let value">
-                {{ value }}
-              </ng-container>
-              <clr-options>
-                <clr-option
-                  *ngFor="let option of severityTypes"
-                  [clrValue]="option"
+        Severity
+        <clr-dg-filter [clrDgFilter]="alertSeveverityFilter">
+          <div class="clr-form-control">
+            <label class="clr-control-label">Severity:</label>
+            <div class="clr-control-container">
+              <div class="clr-select-wrapper">
+                <select
+                  class="clr-select"
+                  [(ngModel)]="alertSeveverityFilter.ranges.severity"
+                  (ngModelChange)="
+                    alertSeveverityFilter.updateRanges({ severity: $event })
+                  "
                 >
-                  {{ option }}
-                </clr-option>
-              </clr-options>
-            </clr-combobox>
-          </clr-combobox-container>
+                  <option value="">All</option>
+                  <option *ngFor="let type of severityTypes" [value]="type">
+                    {{ type }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
         </clr-dg-filter>
       </ng-container>
     </clr-dg-column>

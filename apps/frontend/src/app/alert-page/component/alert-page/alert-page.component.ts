@@ -17,11 +17,9 @@ import { AlertServiceService } from '../../../shared/services/alert-service/aler
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
 import { shortenBytes } from '../../../shared/utils/shortenBytes';
 import { CustomAlertFilter } from './alertfilter';
-import { FormControl } from '@angular/forms';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { AlertFilterParams } from '../../../shared/types/alert-filter-type';
 import { APIResponse } from '../../../shared/types/api-response';
-import { AlertType } from '../../../shared/types/alertType';
 
 const INITIAL_FILTER: AlertFilterParams = {
   limit: 10,
@@ -49,10 +47,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   severityTypes = Object.values(SeverityType);
-    // backupEnumTypes = Object.keys(BackupType).filter((item) => {
-    //   return isNaN(Number(item));
-    // });
-  selectedAlertTypes: string[] = [];
+
   protected alertDateFilter: CustomAlertFilter;
   protected alertSeveverityFilter: CustomAlertFilter;
   protected alertTypeFilter: CustomAlertFilter;
@@ -153,10 +148,10 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     };
   }
 
-    setBackupTypes(types: string[]): void {
-      this.selectedAlertTypes = types;
-      this.alertTypeFilter.updateRanges({ alertType: types });
-    }
+  // setAlertSeverityTypes(types: SeverityType[]): void {
+  //   this.selectedAlertSeverityTypes = types;
+  //   this.alertSeveverityFilter.updateRanges({ severity: types });
+  // }
 
   /**
    * Set filter options for the backup table
@@ -197,6 +192,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
         ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
         : 0,
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
+      includeDeprecated: true,
       //orderBy: state.sort?.by ? state.sort.by.toString() : 'date',
     };
 

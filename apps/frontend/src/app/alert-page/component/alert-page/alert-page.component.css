@@ -143,3 +143,17 @@ clr-datagrid {
 #alert-summary-card {
   padding-bottom: 24px;
 }
+
+
+.clr-select-wrapper {
+  min-width: 150px;
+  margin-top: 0.25rem;
+}
+
+.clr-select {
+  width: 100%;
+}
+
+.clr-form-control {
+  margin-top: 0.5rem;
+}

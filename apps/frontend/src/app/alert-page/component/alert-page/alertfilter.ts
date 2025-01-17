@@ -9,7 +9,7 @@ export class CustomAlertFilter implements ClrDatagridFilterInterface<Alert> {
     fromDate: string | null;
     toDate: string | null;
     severity: SeverityType | null;
-    alertType: string[] | null;
+    alertType: string | null;
     id: string | null;
   } = {
     fromDate: null,
