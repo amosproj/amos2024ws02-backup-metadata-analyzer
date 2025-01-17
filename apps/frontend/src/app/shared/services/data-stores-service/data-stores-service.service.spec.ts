@@ -6,7 +6,7 @@ import { fail } from 'assert';
 import { DataStoresService } from './data-stores-service.service';
 import { DataStore } from '../../types/data-store';
 
-describe('BackupService', () => {
+describe('DataStoreService', () => {
   let service: DataStoresService;
   let httpClientMock: {
     get: ReturnType<typeof vi.fn>;

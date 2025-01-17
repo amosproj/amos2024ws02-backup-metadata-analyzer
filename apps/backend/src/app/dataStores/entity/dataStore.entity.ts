@@ -37,4 +37,11 @@ export class DataStoreEntity {
   })
   @Column({ nullable: false })
   filled!: number;
+
+  @ApiProperty({
+    description: 'Time until storage overflow',
+    required: false,
+  })
+  @Column({ nullable: true })
+  overflowTime?: number;
 }

@@ -1,5 +1,13 @@
-.data-store-card {
+data-stores.coponent.css .data-store-card {
     margin-bottom: 20px;
+}
+
+.card-header {
+    padding: 0.5rem;
+}
+
+.clr-form-control {
+    margin: 0;
 }
 
 .data-store-name {
@@ -19,8 +27,8 @@
     height: 12px;
     width: 100%;
     vertical-align: middle;
-    --clr-progress-bg-color: #C6DCF2;
-    --clr-progress-default-color: #0D233A;
+    --clr-progress-bg-color: #c6dcf2;
+    --clr-progress-default-color: #0d233a;
 }
 
 .high-water-mark {
@@ -76,8 +84,8 @@
     padding: 5px 10px;
     margin-top: 10px;
     background-color: transparent;
-    color: #0D233A;
-    border: 1px solid #0D233A;
+    color: #0d233a;
+    border: 1px solid #0d233a;
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
@@ -85,10 +93,30 @@
 }
 
 .show-more-btn:hover {
-    background-color: #0D233A;
+    background-color: #0d233a;
     color: #ffffff;
 }
 
 clr-progress-bar {
-    --clr-progress-bar-color: #0D233A;
+    --clr-progress-bar-color: #0d233a;
+}
+
+
+.overflow-badge {
+    background-color: #87bbf3;
+    color: black;
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    margin-left: 1rem;
+    display: inline-block;
+    width: 300px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.overflow-badge-critical {
+    background-color: #dc3545;
+    color: white;
 }

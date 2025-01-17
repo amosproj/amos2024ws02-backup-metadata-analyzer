@@ -34,8 +34,8 @@ class Analyzer:
 			"F": "FULL",
 			"I": "INCREMENTAL",
 			"D": "DIFFERENTIAL",
-			"C": "COPY",
-		}[result.fdi_type]
+			"C": "COPY"
+		}.get(result.fdi_type, "UNKNOWN")  # Use .get() to handle unexpected types
 		return {
 			"id": result.uuid,
 			"saveset": result.saveset,
@@ -43,6 +43,7 @@ class Analyzer:
 			"creationDate": result.start_time.isoformat(),
 			"type": backup_type,
 			"taskId": result.task_uuid,
+			"scheduledTime": result.scheduledTime.isoformat() if result.scheduledTime else None,  # Handle None value
 		}
 
 	# Convert a task from the database into the format used by the backend
@@ -63,9 +64,24 @@ class Analyzer:
 			assert len(latest_alerts) == 1
 			return latest_alerts[0]
 
-	def _send_Backups():
-		results = list(Analyzer.database.get_results())
+	def _get_latest_backup_date_from_backend():
+		latest_backup = Analyzer.backend.get_latest_backup_date()
+		if latest_backup is None:
+			return None
+		else:
+			return latest_backup['creationDate']
 
+	def _send_Backups():
+		try:
+			latest_backup_date = Analyzer._get_latest_backup_date_from_backend()
+		except Exception as e:
+			print(f"Error getting latest backup date: {e}")
+			latest_backup_date = None
+		results = list(Analyzer.database.get_results(latest_backup_date))
+
+		schedules = list(Analyzer.database.get_schedules())
+		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, latest_backup_date, "ONLY_SCHEDULES")
+		
 		# Batch the api calls to the backend for improved efficiency
 		batch = []
 		count = 0

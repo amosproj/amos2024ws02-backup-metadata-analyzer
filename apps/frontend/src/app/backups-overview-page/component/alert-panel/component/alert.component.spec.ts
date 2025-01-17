@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { AlertComponent } from './alert.component';
 import { of } from 'rxjs';
-import { Alert, SizeAlert } from '../../../../shared/types/alert';
+import {
+  Alert,
+  SizeAlert,
+  StorageFillAlert,
+} from '../../../../shared/types/alert';
 import { randomUUID } from 'crypto';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { BackupType } from '../../../../shared/enums/backup.types';
@@ -162,4 +166,3 @@ describe('AlertComponent', () => {
       expect(component.status).toBe('OK');
     });
   });
-});

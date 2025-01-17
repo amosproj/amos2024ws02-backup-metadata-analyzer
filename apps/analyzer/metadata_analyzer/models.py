@@ -2,6 +2,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.orm import DeclarativeBase
+from typing import ClassVar, Optional
 
 class Base(DeclarativeBase):
     pass
@@ -43,6 +44,7 @@ class Result(Base):
     data_size: Mapped[int]
     throughput: Mapped[str]
     duration: Mapped[int]
+    scheduledTime: ClassVar[Optional[datetime]] = None
 
     def __repr__(self):
         return f"""Result(uuid={self.uuid})"""
@@ -65,6 +67,7 @@ class Result(Base):
             "data_size": self.data_size,
             "throughput": self.throughput,
             "duration": self.duration,
+            "scheduledTime": self.scheduledTime,
         }
 
 

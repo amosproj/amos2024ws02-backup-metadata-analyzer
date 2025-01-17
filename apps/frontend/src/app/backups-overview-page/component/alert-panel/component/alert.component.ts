@@ -13,8 +13,10 @@ import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
 export class AlertComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
+  private readonly fromDate = new Date(Date.now() - this.DAYS * 24 * 60 * 60 * 1000);
 
   alerts: Alert[] = [];
+  total: number = 0;
   criticalAlertsCount = 0;
   warningAlertsCount = 0;
   infoAlertsCount = 0;
@@ -40,26 +42,50 @@ export class AlertComponent implements OnInit, OnDestroy {
 
   loadAlerts(): void {
     this.alertService
-      .getAllAlerts(this.DAYS)
+      .getAllAlerts(this.fromDate.toISOString())
       .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: Alert[]) => {
-          this.criticalAlertsCount = data.filter(
-            (alert) => alert.alertType.severity === SeverityType.CRITICAL
-          ).length;
-          this.warningAlertsCount = data.filter(
-            (alert) => alert.alertType.severity === SeverityType.WARNING
-          ).length;
-          this.infoAlertsCount = data.filter(
-            (alert) => alert.alertType.severity === SeverityType.INFO
-          ).length;
-          this.alerts = data;
-          this.status = this.getStatus();
-        },
-        error: (error) => {
-          console.error('Error loading alerts:', error);
-        },
+      .subscribe((data: { alerts: Alert[], total: number }) => {
+      console.log("Data: ", data);
+      this.alerts = this.filterAlerts(data.alerts);
+      this.total = data.total;
+      this.criticalAlertsCount = this.alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.CRITICAL
+      ).length;
+      this.warningAlertsCount = this.alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.WARNING
+      ).length;
+      this.infoAlertsCount = this.alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.INFO
+      ).length;
+      this.status = this.getStatus();
       });
+  }
+
+  filterAlerts(alerts: Alert[]): Alert[] {
+    const alertMap = new Map<string, StorageFillAlert>();
+
+    const filteredAlerts: Alert[] = [];
+
+    // sort alerts by creationDate
+    alerts.sort((a, b) => {
+      return (
+        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+      );
+    });
+    alerts.forEach((alert) => {
+      // If alert is from type STORAGE_FILL_ALERT, only one is shown per data store
+      if (alert.alertType.name === 'STORAGE_FILL_ALERT') {
+        const storageFillAlert = alert as StorageFillAlert;
+        if (!alertMap.has(storageFillAlert.dataStoreName)) {
+          alertMap.set(storageFillAlert.dataStoreName, storageFillAlert);
+          filteredAlerts.push(storageFillAlert);
+        }
+      } else {
+        filteredAlerts.push(alert);
+      }
+    });
+
+    return filteredAlerts;
   }
 
   getStatusClass(): string {
