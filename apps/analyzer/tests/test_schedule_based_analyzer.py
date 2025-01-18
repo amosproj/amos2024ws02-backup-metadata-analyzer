@@ -68,12 +68,32 @@ def test_calculate_next_reference_time_hou():
 # Test with schedule based on days
 def test_calculate_next_reference_time_day():
     mock_schedule = _create_mock_schedule(
-        "foo", "DAY", 1, "12:00"
+        "foo", "DAY", 1, "14:00"
     )
     reference_time = datetime.fromisoformat("2000-01-01T10:00:00")
     schedule_based_analyzer = ScheduleBasedAnalyzer(None)
     next_reference_time = schedule_based_analyzer.calculate_next_reference_time(mock_schedule, reference_time)
-    assert next_reference_time == datetime.fromisoformat("2000-01-02T12:00:00")
+    assert next_reference_time == datetime.fromisoformat("2000-01-02T14:00:00")
+
+# Test with schedule based on weeks
+def test_calculate_next_reference_time_wee():
+    mock_schedule = _create_mock_schedule(
+        "foo", "WEE", 2, "12:00", days=["mo", "tu", "we", "th", "fr", "sa", "su"]
+    )
+    reference_time = datetime.fromisoformat("2000-01-01T18:00:00")
+    schedule_based_analyzer = ScheduleBasedAnalyzer(None)
+    next_reference_time = schedule_based_analyzer.calculate_next_reference_time(mock_schedule, reference_time)
+    assert next_reference_time == datetime.fromisoformat("2000-01-15T12:00:00")
+
+# Test with schedule based on months
+def test_calculate_next_reference_time_mon():
+    mock_schedule = _create_mock_schedule(
+        "foo", "MON", 1, "12:00", days=["mo", "tu", "we", "th", "fr", "sa", "su"]
+    )
+    reference_time = datetime.fromisoformat("2000-01-02T10:00:00")
+    schedule_based_analyzer = ScheduleBasedAnalyzer(None)
+    next_reference_time = schedule_based_analyzer.calculate_next_reference_time(mock_schedule, reference_time)
+    assert next_reference_time == datetime.fromisoformat("2000-02-01T12:00:00")
 
 
 
