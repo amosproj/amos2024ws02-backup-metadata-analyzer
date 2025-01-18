@@ -23,7 +23,10 @@ import { AlertFilterParams } from '../../../shared/types/alert-filter-type';
 import { APIResponse } from '../../../shared/types/api-response';
 import { NotificationService } from '../../../management/services/alert-notification/notification.service';
 import { AlertType } from '../../../shared/types/alertType';
-import { AlertSummary } from '../../../shared/types/alert-summary';
+import {
+  AlertSeverityStatistic,
+  AlertSummary,
+} from '../../../shared/types/alert-summary';
 
 const INITIAL_FILTER: AlertFilterParams = {
   limit: 10,
@@ -48,6 +51,11 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   readonly alertSeverityFilter: CustomAlertFilter;
   readonly alertTypeFilter: CustomAlertFilter;
 
+  readonly alertSeverityStats$: Observable<AlertSeverityStatistic> = of({
+    criticalAlerts: 0,
+    warningAlerts: 0,
+    infoAlerts: 0,
+  });
   readonly alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   alerts$: Observable<APIResponse<Alert>> = of({
@@ -86,8 +94,9 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     this.alertSeverityFilter = new CustomAlertFilter('severity');
     this.alertDateFilter = new CustomAlertFilter('date');
     this.alertTypeFilter = new CustomAlertFilter('alertType');
-  }
 
+    this.alertSeverityStats$ = this.alertService.getAlertSeverityStatistics();
+  }
   ngOnInit(): void {
     this.loadAlerts();
     this.loadAlertTypes();
@@ -129,6 +138,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  //to remove when backend is ready
   private calculateAlertSummary(alerts: Alert[]): AlertSummary {
     const severityCounts = alerts.reduce(
       (acc, alert) => {

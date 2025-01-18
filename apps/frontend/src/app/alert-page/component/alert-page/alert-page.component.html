@@ -5,31 +5,34 @@
   <div class="clr-row">
     <!-- Alert Statistics Card -->
     <div class="clr-col-12 clr-col-md-6">
-      <div class="card">
+      <div class="card" *ngIf="alertSeverityStats$ | async as severityStats">
         <div class="card-block" id="alert-summary-card">
           <div class="card-title">Alert Statistics</div>
           <div class="card-text">
             <div class="alert-summary">
-              <div class="summary-item" *ngIf="summary.criticalCount > 0">
+              <div
+                class="summary-item"
+                *ngIf="severityStats.criticalAlerts > 0"
+              >
                 <cds-icon
                   shape="error-standard"
                   class="is-solid critical"
                 ></cds-icon>
-                <span>{{ summary.criticalCount }} Critical</span>
+                <span>{{ severityStats.criticalAlerts }} Critical</span>
               </div>
-              <div class="summary-item" *ngIf="summary.warningCount > 0">
+              <div class="summary-item" *ngIf="severityStats.warningAlerts > 0">
                 <cds-icon
                   shape="warning-standard"
                   class="is-solid warning"
                 ></cds-icon>
-                <span>{{ summary.warningCount }} Warnings</span>
+                <span>{{ severityStats.warningAlerts }} Warnings</span>
               </div>
-              <div class="summary-item" *ngIf="summary.infoCount > 0">
+              <div class="summary-item" *ngIf="severityStats.infoAlerts > 0">
                 <cds-icon
                   shape="info-standard"
                   class="is-solid info"
                 ></cds-icon>
-                <span>{{ summary.infoCount }} Information</span>
+                <span>{{ severityStats.infoAlerts }} Information</span>
               </div>
             </div>
           </div>

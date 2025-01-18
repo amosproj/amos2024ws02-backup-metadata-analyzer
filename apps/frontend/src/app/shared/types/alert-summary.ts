@@ -24,3 +24,9 @@ export interface AlertSummary {
     repeatedAlerts: RepeatedAlert[];
     mostFrequentAlert?: RepeatedAlert;
   }
+
+export interface AlertSeverityStatistic {
+  criticalAlerts: number;
+  warningAlerts: number;
+  infoAlerts: number;
+}
