@@ -7,7 +7,6 @@ import { SeverityType } from '../../../shared/enums/severityType';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Alert } from '../../../shared/types/alert';
-import { randomUUID } from 'node:crypto';
 import { BackupType } from '../../../shared/enums/backup.types';
 
 describe('AlertPageComponent', () => {
@@ -17,66 +16,52 @@ describe('AlertPageComponent', () => {
   let alertUtils: AlertUtilsService;
   let notificationService: NotificationService;
 
-  const mockAlerts: Alert[] = [
-      {
-        id: randomUUID().toString(),
-        alertType: {
-          id: randomUUID().toString(),
-          name: 'test',
-          severity: SeverityType.CRITICAL,
-          user_active: false,
-          master_active: false,
-        },
-        backup: {
-          id: randomUUID().toString(),
-          sizeMB: 0,
-          creationDate: new Date(),
-          saveset: 'saveset',
-          type: BackupType.DIFFERENTIAL,
-        },
-        creationDate: new Date(),
-      },
-      {
-        id: randomUUID().toString(),
-        alertType: {
-          id: randomUUID().toString(),
-          name: 'test',
-          severity: SeverityType.INFO,
-          user_active: false,
-          master_active: false,
-        },
-        backup: {
-          id: randomUUID().toString(),
-          sizeMB: 0,
-          creationDate: new Date(),
-          saveset: 'saveset',
-          type: BackupType.DIFFERENTIAL,
-        },
-        creationDate: new Date(),
-      },
-      {
-        id: randomUUID().toString(),
-        alertType: {
-          id: randomUUID().toString(),
-          name: 'test',
-          severity: SeverityType.WARNING,
-          user_active: false,
-          master_active: false,
-        },
-        backup: {
-          id: randomUUID().toString(),
-          sizeMB: 0,
-          creationDate: new Date(),
-          saveset: 'saveset',
-          type: BackupType.DIFFERENTIAL,
-        },
-        creationDate: new Date(),
-      },
-    ];
+  const mockAlertTypes = [
+    { id: '1', name: 'STORAGE_FILL_ALERT', severity: SeverityType.CRITICAL },
+    { id: '2', name: 'BACKUP_ALERT', severity: SeverityType.WARNING },
+  ];
 
-  const mockAlertService = {
-    getAllAlerts: vi.fn(),
-    getRefreshObservable: vi.fn(),
+  const mockAPIResponse = {
+    data: [
+      {
+        id: '1',
+        creationDate: new Date('2024-01-01'),
+        alertType: {
+          id: '1',
+          name: 'STORAGE_FILL_ALERT',
+          severity: SeverityType.CRITICAL,
+          user_active: true,
+          master_active: true,
+        },
+        filled: 80,
+        capacity: 100,
+        highWaterMark: 90,
+        dataStoreName: 'store1',
+      },
+      {
+        id: '2',
+        creationDate: new Date('2024-01-02'),
+        alertType: {
+          id: '2',
+          name: 'BACKUP_ALERT',
+          severity: SeverityType.WARNING,
+          user_active: true,
+          master_active: true,
+        },
+        backup: {
+          id: '1',
+          sizeMB: 1000,
+          creationDate: new Date('2024-01-02'),
+          saveset: 'backup1',
+          type: BackupType.DIFFERENTIAL,
+        },
+      },
+    ],
+    paginationData: {
+      total: 2,
+      limit: 10,
+      offset: 0,
+    },
   };
 
   const mockServices = {
@@ -122,10 +107,16 @@ describe('AlertPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load alerts on init', () => {
-    expect(mockAlertService.getAllAlerts).toHaveBeenCalledWith();
-    expect(component.loading).toBe(false);
-  });
+  describe('Initialization', () => {
+    it('should load alerts and alert types on init', async () => {
+      component.ngOnInit();
+      const alerts = await firstValueFrom(component.alerts$);
+      expect(alerts).toEqual(mockAPIResponse);
+      expect(mockServices.alertService.getAllAlerts).toHaveBeenCalled();
+      expect(
+        mockServices.notificationService.getNotificationSettings
+      ).toHaveBeenCalled();
+    });
 
     it('should handle error when loading alerts fails', async () => {
       mockServices.alertService.getAllAlerts.mockReturnValueOnce(
@@ -152,17 +143,38 @@ describe('AlertPageComponent', () => {
       expect(component.isStorageFillAlert(storageFillAlert)).toBe(true);
     });
 
-    component.alertSummary$.subscribe((summary) => {
-      expect(summary.criticalCount).toBe(1);
-      expect(summary.warningCount).toBe(1);
-      expect(summary.infoCount).toBe(1);
-      expect(summary.totalCount).toBe(3);
+    it('should correctly identify alerts with backup', () => {
+      const backupAlert = mockAPIResponse.data[1];
+      expect(component.hasBackup(backupAlert)).toBe(true);
     });
   });
 
-  it('should format severity label correctly', () => {
-    expect(component.getSeverityLabel(SeverityType.CRITICAL)).toBe('CRITICAL');
-    expect(component.getSeverityLabel(SeverityType.WARNING)).toBe('WARNING');
+  describe('Utility Methods', () => {
+    it('should format severity label correctly', () => {
+      expect(component.getSeverityLabel(SeverityType.CRITICAL)).toBe(
+        'CRITICAL'
+      );
+      expect(component.getSeverityLabel(SeverityType.WARNING)).toBe('WARNING');
+    });
+
+    it('should delegate to alertUtils for formatting', () => {
+      const mockAlert = mockAPIResponse.data[0];
+
+      component.formatDate(mockAlert.creationDate);
+      expect(mockServices.alertUtils.formatDate).toHaveBeenCalledWith(
+        mockAlert.creationDate
+      );
+
+      component.getAlertReason(mockAlert);
+      expect(mockServices.alertUtils.getAlertReason).toHaveBeenCalledWith(
+        mockAlert
+      );
+
+      component.getAlertDetails(mockAlert);
+      expect(mockServices.alertUtils.getAlertDetails).toHaveBeenCalledWith(
+        mockAlert
+      );
+    });
   });
 
   describe('Cleanup', () => {
