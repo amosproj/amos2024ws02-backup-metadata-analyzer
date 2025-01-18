@@ -38,6 +38,7 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
+import { AlertStatisticsDto } from './dto/alertStatistics.dto';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
@@ -97,6 +98,29 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         await this.alertTypeRepository.save(alertType);
       }
     }
+  }
+
+  async getStatistics(): Promise<AlertStatisticsDto> {
+    const alertStatisticsDto: AlertStatisticsDto = {
+      infoAlerts: 0,
+      warningAlerts: 0,
+      criticalAlerts: 0,
+    };
+    for (const repo of this.alertRepositories) {
+      const infoAlerts = await repo.count({
+        where: { alertType: { severity: SeverityType.INFO } },
+      });
+      const warningAlerts = await repo.count({
+        where: { alertType: { severity: SeverityType.WARNING } },
+      });
+      const criticalAlerts = await repo.count({
+        where: { alertType: { severity: SeverityType.CRITICAL } },
+      });
+      alertStatisticsDto.infoAlerts += infoAlerts;
+      alertStatisticsDto.warningAlerts += warningAlerts;
+      alertStatisticsDto.criticalAlerts += criticalAlerts;
+    }
+    return alertStatisticsDto;
   }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
