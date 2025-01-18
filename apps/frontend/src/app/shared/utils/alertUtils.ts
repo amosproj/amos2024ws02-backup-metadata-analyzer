@@ -60,16 +60,20 @@ export class AlertUtilsService {
     switch (alert.alertType.name) {
       case 'SIZE_ALERT':
         const sizeAlert = alert as SizeAlert;
+        if (!sizeAlert.size || !sizeAlert.referenceSize) {
+          return 'Invalid size values in the alert';
+        }
+
         if (sizeAlert.size - sizeAlert.referenceSize < 0) {
-          percentage = Math.floor(
-            (1 - sizeAlert.size / sizeAlert.referenceSize) * 100
-          );
+          percentage = sizeAlert.referenceSize > 0 
+            ? Math.floor((1 - sizeAlert.size / sizeAlert.referenceSize) * 100)
+            : 0;
           description = `Size of backup decreased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
           break;
         } else {
-          percentage = Math.floor(
-            (sizeAlert.size / sizeAlert.referenceSize - 1) * 100
-          );
+          percentage = sizeAlert.referenceSize > 0 
+            ? Math.floor((sizeAlert.size / sizeAlert.referenceSize - 1) * 100)
+            : 0;
           description = `Size of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
           break;
         }

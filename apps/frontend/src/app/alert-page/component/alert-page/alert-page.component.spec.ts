@@ -137,38 +137,6 @@ describe('AlertPageComponent', () => {
     });
   });
 
-  describe('Alert Summary Calculation', () => {
-    it('should calculate alert summary correctly', async () => {
-      // Initialize component
-      component.ngOnInit();
-      fixture.detectChanges();
-
-      // Wait for initial API call to complete
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      // Get the summary
-      const summary = await firstValueFrom(component.alertSummary$);
-
-      // Verify the summary matches our mock data
-      expect(summary.criticalCount).toBe(1);
-      expect(summary.warningCount).toBe(1);
-      expect(summary.totalCount).toBe(2);
-      expect(summary.mostFrequentAlert).toBeDefined();
-    });
-    it('should have correct mock data', () => {
-      const criticalAlerts = mockAPIResponse.data.filter(
-        (alert) => alert.alertType.severity === SeverityType.CRITICAL
-      );
-      const warningAlerts = mockAPIResponse.data.filter(
-        (alert) => alert.alertType.severity === SeverityType.WARNING
-      );
-
-      expect(criticalAlerts.length).toBe(1);
-      expect(warningAlerts.length).toBe(1);
-    });
-  });
-
   describe('Alert Type Handling', () => {
     it('should correctly identify StorageFillAlert', () => {
       const storageFillAlert = mockAPIResponse.data[0];

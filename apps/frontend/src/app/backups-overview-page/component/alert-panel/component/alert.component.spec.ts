@@ -124,7 +124,7 @@ describe('AlertComponent', () => {
     component.ngOnDestroy();
     
     expect(isSubscriptionActive).toBe(true);
-    testSubscription.unsubscribe(); // Clean up test subscription
+    testSubscription.unsubscribe(); 
   });
 
   describe('filterAlerts', () => {
