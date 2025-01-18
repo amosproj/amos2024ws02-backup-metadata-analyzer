@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime, timedelta, time
 import sys
 
 
@@ -59,4 +60,53 @@ class ScheduleBasedAnalyzer:
 
     def _analyze_one_task_one_schedule(self, schedule, results, start_date):
         print(schedule, results, file=sys.stderr)
+        reference_time = results[0].start_time
+        print(reference_time, file=sys.stderr)
+        next_reference_time = self.calculate_next_reference_time(schedule, reference_time)
+        print(next_reference_time, file=sys.stderr)
         return []
+
+    def calculate_next_reference_time(self, schedule, reference_time):
+        base_to_seconds = {
+            "MIN": 60,
+            "HOU": 60 * 60,
+            "DAY": 24 * 60 * 60,
+            "WEE": 7 * 24 * 60 * 60,
+            "MON": 30 * 24 * 60 * 60,
+        }
+
+        assert schedule.p_base in base_to_seconds.keys()
+
+        # Calculate the expected timedelta between two backups for this schedule
+        multiplier = base_to_seconds[schedule.p_base]
+        expected_delta_seconds = schedule.p_count * multiplier
+        expected_delta = timedelta(seconds=expected_delta_seconds)
+
+        next_reference_time = reference_time + expected_delta;
+
+        # Use the start_time of the schedule if the base is in days, weeks or months
+        if schedule.p_base in ["DAY", "WEE", "MON"]:
+            try:
+                next_reference_time = datetime.combine(next_reference_time, time.fromisoformat(schedule.start_time))
+            except ValueError:
+                print(f"start_time with invalid format: {schedule_start_time}")
+
+        # Check for the weekday of the next_reference_time if the base is in weeks or months
+        if schedule.p_base in ["WEE", "MON"]:
+            day_mask = [
+                schedule.mo,
+                schedule.tu,
+                schedule.we,
+                schedule.th,
+                schedule.fr,
+                schedule.sa,
+                schedule.su,
+            ]
+            accepted_days = [i for i in range(7) if day_mask[i] == "1"]
+            assert accepted_days != []  # Should have at least one accepted day
+
+            while next_reference_time.weekday() not in accepted_days:
+                next_reference_time += timedelta(days=1)
+
+        return next_reference_time
+
