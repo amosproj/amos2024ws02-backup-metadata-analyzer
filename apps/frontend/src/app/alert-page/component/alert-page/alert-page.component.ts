@@ -52,11 +52,10 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   severityTypes = Object.values(SeverityType);
 
   readonly alertDateFilter: CustomAlertFilter;
-  readonly alertSeveverityFilter: CustomAlertFilter;
+  readonly alertSeverityFilter: CustomAlertFilter;
   readonly alertTypeFilter: CustomAlertFilter;
 
   readonly alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
-  private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   alerts$: Observable<APIResponse<Alert>> = of({
     data: [],
     total: 0,
@@ -78,7 +77,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     private readonly alertUtils: AlertUtilsService,
     private readonly alertTypeService: NotificationService
   ) {
-    this.alertSeveverityFilter = new CustomAlertFilter('severity');
+    this.alertSeverityFilter = new CustomAlertFilter('severity');
     this.alertDateFilter = new CustomAlertFilter('date');
     this.alertTypeFilter = new CustomAlertFilter('alertType');
   }
@@ -96,7 +95,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
     combineLatest([
       this.alertDateFilter.changes.pipe(startWith(null)),
-      this.alertSeveverityFilter.changes.pipe(startWith(null)),
+      this.alertSeverityFilter.changes.pipe(startWith(null)),
       this.alertTypeFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
@@ -171,8 +170,8 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       params.toDate = this.alertDateFilter.ranges.toDate;
     }
 
-    if (this.alertSeveverityFilter.isActive()) {
-      params.severity = this.alertSeveverityFilter.ranges.severity;
+    if (this.alertSeverityFilter.isActive()) {
+      params.severity = this.alertSeverityFilter.ranges.severity;
     }
 
     if (this.alertTypeFilter.isActive()) {

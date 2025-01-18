@@ -81,16 +81,16 @@
     <clr-dg-column [clrDgField]="'severity'">
       <ng-container *clrDgHideableColumn>
         Severity
-        <clr-dg-filter [clrDgFilter]="alertSeveverityFilter">
+        <clr-dg-filter [clrDgFilter]="alertSeverityFilter">
           <div class="clr-form-control">
             <label class="clr-control-label">Severity:</label>
             <div class="clr-control-container">
               <div class="clr-select-wrapper">
                 <select
                   class="clr-select"
-                  [(ngModel)]="alertSeveverityFilter.ranges.severity"
+                  [(ngModel)]="alertSeverityFilter.ranges.severity"
                   (ngModelChange)="
-                    alertSeveverityFilter.updateRanges({ severity: $event })
+                    alertSeverityFilter.updateRanges({ severity: $event })
                   "
                 >
                   <option value="">All</option>
