@@ -23,6 +23,7 @@ import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
 import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
+import { BackupSizesPerDayDto } from './dto/BackupSizesPerDay.dto';
 
 @ApiTags('Backup Data')
 @Controller('backupData')
@@ -90,5 +91,12 @@ export class BackupDataController {
     @Body() createBackupDataDtos: CreateBackupDataDto[]
   ): Promise<void> {
     return this.backupDataService.createBatched(createBackupDataDtos);
+  }
+
+  @Post('/sizes/perDay')
+  @ApiOperation({ summary: 'Returns the backupData sizes per day.' })
+  @ApiOkResponse({ type: BackupSizesPerDayDto, isArray: true })
+  async getBackupDataSizesPerDay(): Promise<BackupSizesPerDayDto[]> {
+    return this.backupDataService.getBackupDataSizesPerDay();
   }
 }

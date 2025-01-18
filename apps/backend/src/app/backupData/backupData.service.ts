@@ -29,6 +29,7 @@ import { TasksService } from '../tasks/tasks.service';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
 import { TaskEntity } from '../tasks/entity/task.entity';
 import { BackupInformationDto } from '../information/dto/backupInformation.dto';
+import { BackupSizesPerDayDto } from './dto/BackupSizesPerDay.dto';
 
 @Injectable()
 export class BackupDataService extends PaginationService {
@@ -88,6 +89,16 @@ export class BackupDataService extends PaginationService {
       this.createWhereClause(backupDataFilterDto, backupDataFilterByTaskIdsDto),
       paginationOptionsDto
     );
+  }
+
+  async getBackupDataSizesPerDay(): Promise<BackupSizesPerDayDto[]> {
+    return this.backupDataRepository
+      .createQueryBuilder('backup')
+      .select('DATE(backup.creationDate) as date')
+      .addSelect('SUM(backup.sizeMB) as size')
+      .groupBy('date')
+      .orderBy('date', 'ASC')
+      .getRawMany();
   }
 
   /**
