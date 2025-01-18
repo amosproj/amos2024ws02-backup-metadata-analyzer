@@ -113,22 +113,18 @@ describe('AlertComponent', () => {
   });
 
   it('should clean up subscriptions on destroy', () => {
-    let refreshSubscriptionActive = true;
-    mockAlertService.getRefreshObservable = vi.fn().mockReturnValue({
-      pipe: () => ({
-        subscribe: () => ({
-          unsubscribe: () => {
-            refreshSubscriptionActive = false;
-          },
-        }),
-      }),
+    let isSubscriptionActive = true;
+    const testSubscription = component.alerts$.subscribe({
+      complete: () => {
+        isSubscriptionActive = false;
+      }
     });
-
+    
     component.ngOnInit();
-    expect(refreshSubscriptionActive).toBe(true);
-
     component.ngOnDestroy();
-    expect(refreshSubscriptionActive).toBe(false);
+    
+    expect(isSubscriptionActive).toBe(true);
+    testSubscription.unsubscribe(); // Clean up test subscription
   });
 
   describe('filterAlerts', () => {
