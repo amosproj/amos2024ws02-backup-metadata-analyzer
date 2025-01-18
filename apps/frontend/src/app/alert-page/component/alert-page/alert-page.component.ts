@@ -49,6 +49,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   readonly alertTypeFilter: CustomAlertFilter;
 
   readonly alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
+  private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   alerts$: Observable<APIResponse<Alert>> = of({
     data: [],
     total: 0,
