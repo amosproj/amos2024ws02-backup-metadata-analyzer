@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from metadata_analyzer.analyzer import Analyzer
 from metadata_analyzer.models import Result, Schedule, TaskEvent
@@ -42,6 +42,39 @@ def _create_mock_task_event(id, name, object, schedule):
     mock_task_event.object = object
     mock_task_event.schedule = schedule
     return mock_task_event
+
+# Test calculate next reference time
+
+# Test with schedule based on minutes
+def test_calculate_next_reference_time_min():
+    mock_schedule = _create_mock_schedule(
+        "foo", "MIN", 30
+    )
+    reference_time = datetime.fromisoformat("2000-01-01T12:00:00")
+    schedule_based_analyzer = ScheduleBasedAnalyzer(None)
+    next_reference_time = schedule_based_analyzer.calculate_next_reference_time(mock_schedule, reference_time)
+    assert next_reference_time == reference_time + timedelta(minutes=30)
+
+# Test with schedule based on hours
+def test_calculate_next_reference_time_hou():
+    mock_schedule = _create_mock_schedule(
+        "foo", "HOU", 4
+    )
+    reference_time = datetime.fromisoformat("2000-01-01T12:00:00")
+    schedule_based_analyzer = ScheduleBasedAnalyzer(None)
+    next_reference_time = schedule_based_analyzer.calculate_next_reference_time(mock_schedule, reference_time)
+    assert next_reference_time == reference_time + timedelta(hours=4)
+
+# Test with schedule based on days
+def test_calculate_next_reference_time_day():
+    mock_schedule = _create_mock_schedule(
+        "foo", "DAY", 1, "12:00"
+    )
+    reference_time = datetime.fromisoformat("2000-01-01T10:00:00")
+    schedule_based_analyzer = ScheduleBasedAnalyzer(None)
+    next_reference_time = schedule_based_analyzer.calculate_next_reference_time(mock_schedule, reference_time)
+    assert next_reference_time == datetime.fromisoformat("2000-01-02T12:00:00")
+
 
 
 # Backups created according to the schedule should not generate alerts
