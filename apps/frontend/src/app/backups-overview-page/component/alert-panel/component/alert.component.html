@@ -1,5 +1,5 @@
 <div class="card" [ngClass]="getStatusClass()">
-  <div class="card-header" routerLink="/alert" style="cursor: pointer;">
+  <div class="card-header" routerLink="/alert" style="cursor: pointer">
     <span>Status: {{ status }}</span>
     <span class="alert-counts">
       <span *ngIf="criticalAlertsCount > 0" class="alert-count">
@@ -18,50 +18,55 @@
   </div>
   <div class="card-block">
     <div class="card-text">
-      <div *ngFor="let alert of alerts">
-        <clr-tooltip>
-          <div clrTooltipTrigger [ngClass]="getAlertClass(alert)" class="alert">
-            <cds-icon
-              *ngIf="alert.alertType.severity === SeverityType.CRITICAL"
-              shape="warning-standard"
-              class="is-solid"
-            ></cds-icon>
-            <cds-icon
-              *ngIf="alert.alertType.severity === SeverityType.WARNING"
-              shape="error-standard"
-              class="is-solid"
-            ></cds-icon>
-            <cds-icon
-              *ngIf="alert.alertType.severity === SeverityType.INFO"
-              shape="info-standard"
-              class="is-solid"
-            ></cds-icon>
-            <span>{{ getAlertReason(alert) }}</span>
-          </div>
-          <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
-            <div *ngIf="alert.backup">
-              <b>Backup Saveset:</b>
-              {{ alert.backup.saveset }}
-              <br />
-              <b>Creation Date:</b>
-              {{ formatDate(alert.backup.creationDate) }}
-              <br />
+      <ng-container *ngIf="alerts$ | async as alerts">
+        <div *ngFor="let alert of alerts">
+          <clr-tooltip>
+            <div
+              clrTooltipTrigger
+              [ngClass]="getAlertClass(alert)"
+              class="alert"
+            >
+              <cds-icon
+                *ngIf="alert.alertType.severity === SeverityType.CRITICAL"
+                shape="warning-standard"
+                class="is-solid"
+              ></cds-icon>
+              <cds-icon
+                *ngIf="alert.alertType.severity === SeverityType.WARNING"
+                shape="error-standard"
+                class="is-solid"
+              ></cds-icon>
+              <cds-icon
+                *ngIf="alert.alertType.severity === SeverityType.INFO"
+                shape="info-standard"
+                class="is-solid"
+              ></cds-icon>
+              <span>{{ getAlertReason(alert) }}</span>
             </div>
-            <div *ngIf="alert.alertType.name === 'STORAGE_FILL_ALERT'">
-              <b>Creation Date:</b>
-              {{ formatDate(alert.creationDate) }}
-              <br>
-            </div>
-            <br />
-            {{ getAlertDetails(alert) }}
-          </clr-tooltip-content>
-        </clr-tooltip>
-      </div>
-      <div *ngIf="alerts.length === 0">No Alerts.</div>
+            <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
+              <div *ngIf="alert.backup">
+                <b>Backup Saveset:</b>
+                {{ alert.backup.saveset }}
+                <br />
+                <b>Creation Date:</b>
+                {{ formatDate(alert.backup.creationDate) }}
+                <br />
+              </div>
+              <div *ngIf="alert.alertType.name === 'STORAGE_FILL_ALERT'">
+                <b>Creation Date:</b>
+                {{ formatDate(alert.creationDate) }}
+                <br />
+              </div>
+              <br />
+              {{ getAlertDetails(alert) }}
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+        <div *ngIf="alerts.length === 0">No Alerts.</div>
+      </ng-container>
     </div>
   </div>
   <div class="card-footer">
-    {{ total }} Alerts have been triggered in the last
-    {{ DAYS }} days.
+    {{ total }} Alerts have been triggered in the last {{ DAYS }} days.
   </div>
 </div>

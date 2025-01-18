@@ -44,9 +44,9 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
   severityTypes = Object.values(SeverityType);
 
-  protected alertDateFilter: CustomAlertFilter;
-  protected alertSeveverityFilter: CustomAlertFilter;
-  protected alertTypeFilter: CustomAlertFilter;
+  readonly alertDateFilter: CustomAlertFilter;
+  readonly alertSeveverityFilter: CustomAlertFilter;
+  readonly alertTypeFilter: CustomAlertFilter;
 
   readonly alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);

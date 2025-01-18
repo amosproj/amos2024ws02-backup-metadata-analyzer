@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../../../../shared/services/alert-service/alert-service.service';
 import { Alert, StorageFillAlert } from '../../../../shared/types/alert';
-import { Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
 import { AlertFilterParams } from '../../../../shared/types/alert-filter-type';
@@ -19,7 +19,8 @@ export class AlertComponent implements OnInit, OnDestroy {
     Date.now() - this.DAYS * 24 * 60 * 60 * 1000
   );
 
-  alerts: Alert[] = [];
+  private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
+  readonly alerts$ = this.alertsSubject.asObservable();
   total: number = 0;
   criticalAlertsCount = 0;
   warningAlertsCount = 0;
@@ -42,6 +43,19 @@ export class AlertComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.loadAlerts();
       });
+
+    this.alerts$.pipe(takeUntil(this.destroy$)).subscribe((alerts) => {
+      this.criticalAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.CRITICAL
+      ).length;
+      this.warningAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.WARNING
+      ).length;
+      this.infoAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.INFO
+      ).length;
+      this.status = this.getStatus(alerts);
+    });
   }
 
   loadAlerts(): void {
@@ -50,18 +64,9 @@ export class AlertComponent implements OnInit, OnDestroy {
       .getAllAlerts(params)
       .pipe(takeUntil(this.destroy$))
       .subscribe((response: APIResponse<Alert>) => {
-        this.alerts = this.filterAlerts(response.data);
+        const filteredAlerts = this.filterAlerts(response.data);
+        this.alertsSubject.next(filteredAlerts);
         this.total = response.paginationData.total;
-        this.criticalAlertsCount = this.alerts.filter(
-          (alert) => alert.alertType.severity === SeverityType.CRITICAL
-        ).length;
-        this.warningAlertsCount = this.alerts.filter(
-          (alert) => alert.alertType.severity === SeverityType.WARNING
-        ).length;
-        this.infoAlertsCount = this.alerts.filter(
-          (alert) => alert.alertType.severity === SeverityType.INFO
-        ).length;
-        this.status = this.getStatus();
       });
   }
 
@@ -102,17 +107,13 @@ export class AlertComponent implements OnInit, OnDestroy {
     return 'status-green';
   }
 
-  getStatus() {
+  getStatus(alerts: Alert[] = []) {
     if (
-      this.alerts.some(
-        (alert) => alert.alertType.severity === SeverityType.CRITICAL
-      )
+      alerts.some((alert) => alert.alertType.severity === SeverityType.CRITICAL)
     ) {
       return 'Critical';
     } else if (
-      this.alerts.some(
-        (alert) => alert.alertType.severity === SeverityType.WARNING
-      )
+      alerts.some((alert) => alert.alertType.severity === SeverityType.WARNING)
     ) {
       return 'Warning';
     }
