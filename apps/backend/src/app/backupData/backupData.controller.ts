@@ -109,10 +109,15 @@ export class BackupDataController {
     type: String,
     description: 'To Date',
   })
+  @ApiBody({
+    type: BackupDataFilterByTaskIdsDto,
+    required: false,
+  })
   async getBackupDataSizesPerDay(
     @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string
+    @Query('toDate') toDate?: string,
+    @Body() backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
   ): Promise<BackupSizesPerDayDto[]> {
-    return this.backupDataService.getBackupDataSizesPerDay(fromDate, toDate);
+    return this.backupDataService.getBackupDataSizesPerDay(fromDate, toDate, backupDataFilterByTaskIdsDto?.taskIds);
   }
 }
