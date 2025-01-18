@@ -91,14 +91,54 @@ export class BackupDataService extends PaginationService {
     );
   }
 
-  async getBackupDataSizesPerDay(): Promise<BackupSizesPerDayDto[]> {
-    return this.backupDataRepository
-      .createQueryBuilder('backup')
-      .select('DATE(backup.creationDate) as date')
-      .addSelect('SUM(backup.sizeMB) as size')
-      .groupBy('date')
-      .orderBy('date', 'ASC')
-      .getRawMany();
+  async getBackupDataSizesPerDay(
+    fromDate?: string,
+    toDate?: string
+  ): Promise<BackupSizesPerDayDto[]> {
+    //Validate Dates
+    let from: Date | null = null;
+    let to: Date | null = null;
+    if (fromDate) {
+      from = new Date(fromDate);
+      if (Number.isNaN(from.getTime())) {
+        throw new BadRequestException('parameter fromDate is not a valid date');
+      }
+      //Set time to first millisecond of the day
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+    }
+    if (toDate) {
+      to = new Date(toDate);
+      if (Number.isNaN(to.getTime())) {
+        throw new BadRequestException('parameter toDate is not a valid date');
+      }
+      //Set time to last millisecond of the day
+      to.setHours(0);
+      to.setMinutes(0);
+      to.setSeconds(0);
+      to.setDate(to.getDate() + 1);
+      to.setMilliseconds(-1);
+    }
+
+    const query = this.backupDataRepository.createQueryBuilder('backup');
+    query.select('DATE(backup.creationDate)', 'date');
+    query.addSelect('SUM(backup.sizeMB)', 'sizeMB');
+    query.groupBy('DATE(backup.creationDate)');
+
+    if (fromDate) {
+      query.andWhere('DATE(backup.creationDate) >= :fromDate', {
+        fromDate: from,
+      });
+    }
+    if (toDate) {
+      query.andWhere('DATE(backup.creationDate) <= :toDate', {
+        toDate: to,
+      });
+    }
+
+    return query.getRawMany();
   }
 
   /**

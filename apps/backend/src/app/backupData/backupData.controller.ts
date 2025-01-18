@@ -13,6 +13,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { BackupDataService } from './backupData.service';
@@ -96,7 +97,22 @@ export class BackupDataController {
   @Post('/sizes/perDay')
   @ApiOperation({ summary: 'Returns the backupData sizes per day.' })
   @ApiOkResponse({ type: BackupSizesPerDayDto, isArray: true })
-  async getBackupDataSizesPerDay(): Promise<BackupSizesPerDayDto[]> {
-    return this.backupDataService.getBackupDataSizesPerDay();
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    description: 'From Date',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    description: 'To Date',
+  })
+  async getBackupDataSizesPerDay(
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string
+  ): Promise<BackupSizesPerDayDto[]> {
+    return this.backupDataService.getBackupDataSizesPerDay(fromDate, toDate);
   }
 }
