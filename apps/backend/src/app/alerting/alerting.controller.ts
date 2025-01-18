@@ -14,6 +14,7 @@ import {
   ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
@@ -29,6 +30,7 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
+import { AlertStatisticsDto } from './dto/alertStatistics.dto';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -36,6 +38,19 @@ export class AlertingController {
   readonly logger = new Logger(AlertingController.name);
 
   constructor(private readonly alertingService: AlertingService) {}
+
+  @Get('statistics')
+  @ApiOperation({
+    summary: 'Returns the number of Info, Warning and Critical alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+    type: AlertStatisticsDto,
+  })
+  async getStatistics(): Promise<AlertStatisticsDto> {
+    return this.alertingService.getStatistics();
+  }
 
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })
