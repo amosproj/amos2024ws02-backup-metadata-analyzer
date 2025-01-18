@@ -10,7 +10,7 @@ export interface AlertOccurrence {
 export interface RepeatedAlert {
     type: string;
     count: number;
-    latestAlert?: Alert;
+    latestAlert: Alert;
     history?: AlertOccurrence[];
     taskId?: string;    // For task-related alerts
     storageId?: string; // For storage-related alerts

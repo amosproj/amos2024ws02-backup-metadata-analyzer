@@ -26,6 +26,7 @@ import { AlertType } from '../../../shared/types/alertType';
 import {
   AlertSeverityStatistic,
   AlertSummary,
+  RepeatedAlert,
 } from '../../../shared/types/alert-summary';
 
 const INITIAL_FILTER: AlertFilterParams = {
@@ -295,5 +296,27 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  getSeverityIcon(severity: SeverityType | undefined): string {
+    if (!severity) return 'info-standard';
+
+    switch (severity) {
+      case SeverityType.CRITICAL:
+        return 'error-standard';
+      case SeverityType.WARNING:
+        return 'warning-standard';
+      case SeverityType.INFO:
+        return 'info-standard';
+      default:
+        return 'info-standard';
+    }
+  }
+
+  getMostFrequentAlertIcon(alert: RepeatedAlert): string {
+    if (!alert?.latestAlert?.alertType?.severity) {
+      return 'info-standard';
+    }
+    return this.getSeverityIcon(alert.latestAlert.alertType.severity);
   }
 }

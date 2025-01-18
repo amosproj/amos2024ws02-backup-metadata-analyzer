@@ -42,91 +42,164 @@
 
     <!-- Frequent Alerts Card -->
     <div class="clr-col-12 clr-col-md-6">
-      <div class="card" *ngIf="summary.mostFrequentAlert">
+      <div class="card frequent-alerts-card" *ngIf="summary.mostFrequentAlert">
         <div class="card-block">
-          <div class="card-title">Most Frequent Alert</div>
+          <div class="card-title">Most frequent Alerts</div>
           <div
             class="card-text"
             *ngIf="summary.repeatedAlerts.length > 0; else noAlerts"
           >
+            <!-- Most Frequent Alert -->
             <clr-tooltip>
-              <div class="alert-info" clrTooltipTrigger>
-                <p>
-                  <strong>"{{ summary.mostFrequentAlert.type }}"</strong>
-                  occurred
-                  <strong>{{ summary.mostFrequentAlert.count }} times</strong>
-                </p>
-                <p *ngIf="summary.mostFrequentAlert.taskId">
-                  Task ID: {{ summary.mostFrequentAlert.taskId }}
-                </p>
-                <p *ngIf="summary.mostFrequentAlert.storageId">
-                  Storage ID: {{ summary.mostFrequentAlert.storageId }}
-                </p>
-              </div>
-              <clr-tooltip-content clrPosition="right" clrSize="lg" *clrIfOpen>
-                <div class="alert-history">
-                  <h6>Alert History</h6>
-                  <div
-                    *ngFor="let occurrence of summary.mostFrequentAlert.history"
-                    class="history-item"
+              <div
+                class="alert-trigger"
+                [ngClass]="
+                  summary.mostFrequentAlert?.latestAlert?.alertType?.severity?.toLowerCase()
+                "
+                clrTooltipTrigger
+              >
+                <div class="alert-header">
+                  <cds-icon
+                    [attr.shape]="
+                      getSeverityIcon(
+                        summary.mostFrequentAlert?.latestAlert?.alertType
+                          ?.severity
+                      )
+                    "
+                    class="is-solid"
+                  ></cds-icon>
+                  <span class="alert-type">{{
+                    summary.mostFrequentAlert.type
+                  }}</span>
+                  <span class="alert-count"
+                    >{{ summary.mostFrequentAlert.count }} occurrences</span
                   >
-                    <div class="history-date">
-                      {{ formatDate(occurrence.date) }}
-                    </div>
+                </div>
+
+                <div class="alert-meta">
+                  <span *ngIf="summary.mostFrequentAlert.taskId">
+                    <strong>Task ID:</strong>
+                    {{ summary.mostFrequentAlert.taskId }}
+                  </span>
+                  <span *ngIf="summary.mostFrequentAlert.storageId">
+                    <strong>Storage ID:</strong>
+                    {{ summary.mostFrequentAlert.storageId }}
+                  </span>
+                </div>
+              </div>
+
+              <clr-tooltip-content clrPosition="right" clrSize="lg" *clrIfOpen #tooltipContent>
+                <div class="alert-history">
+                  <h6>
+                    <cds-icon shape="history" class="is-solid"></cds-icon>
+                    Alert History
+                  </h6>
+
+                  <div class="timeline">
                     <div
-                      class="history-severity"
-                      [ngClass]="occurrence.severity.toLowerCase()"
+                      *ngFor="
+                        let occurrence of summary.mostFrequentAlert.history
+                      "
+                      class="timeline-item"
+                      [ngClass]="occurrence?.severity?.toLowerCase()"
                     >
-                      {{ occurrence.severity }}
+                      <div class="timeline-date">
+                        {{ formatDate(occurrence.date) }}
+                      </div>
+                      <div
+                        class="timeline-severity"
+                        [ngClass]="occurrence?.severity?.toLowerCase()"
+                      >
+                        <cds-icon
+                          [attr.shape]="getSeverityIcon(occurrence?.severity)"
+                          class="is-solid"
+                        ></cds-icon>
+                        {{ occurrence?.severity }}
+                      </div>
+                      <div class="timeline-details">
+                        {{ occurrence.details }}
+                      </div>
                     </div>
-                    <div class="history-details">{{ occurrence.details }}</div>
                   </div>
                 </div>
               </clr-tooltip-content>
             </clr-tooltip>
 
+            <!-- Other Repeated Alerts -->
             <div
               *ngIf="summary.repeatedAlerts.length > 1"
               class="repeated-alerts"
             >
-              <small>Other repeated alerts:</small>
-              <ul class="list-unstyled">
-                <li *ngFor="let alert of summary.repeatedAlerts.slice(1, 4)">
-                  <clr-tooltip>
-                    <span clrTooltipTrigger>
-                      {{ alert.type }}: {{ alert.count }} times
-                    </span>
-                    <clr-tooltip-content
-                      clrPosition="right"
-                      clrSize="lg"
-                      *clrIfOpen
-                    >
-                      <div class="alert-history">
-                        <h6>Alert History</h6>
+              <h6>Other Repeated Alerts</h6>
+              <div *ngFor="let alert of summary.repeatedAlerts.slice(1, 4)">
+                <clr-tooltip>
+                  <div
+                    class="alert-trigger"
+                    [ngClass]="
+                      alert?.latestAlert?.alertType?.severity?.toLowerCase()
+                    "
+                    clrTooltipTrigger
+                  >
+                    <div class="alert-header">
+                      <cds-icon
+                        [attr.shape]="
+                          getSeverityIcon(
+                            alert?.latestAlert?.alertType?.severity
+                          )
+                        "
+                        class="is-solid"
+                      ></cds-icon>
+                      <span class="alert-type">{{ alert.type }}</span>
+                      <span class="alert-count"
+                        >{{ alert.count }} occurrences</span
+                      >
+                    </div>
+                  </div>
+
+                  <clr-tooltip-content
+                    clrPosition="right"
+                    clrSize="lg"
+                    *clrIfOpen
+                  >
+                    <div class="alert-history">
+                      <h6>
+                        <cds-icon shape="history" class="is-solid"></cds-icon>
+                        Alert History
+                      </h6>
+
+                      <div class="timeline">
                         <div
                           *ngFor="let occurrence of alert.history"
-                          class="history-item"
+                          class="timeline-item"
+                          [ngClass]="occurrence?.severity?.toLowerCase()"
                         >
-                          <div class="history-date">
+                          <div class="timeline-date">
                             {{ formatDate(occurrence.date) }}
                           </div>
                           <div
-                            class="history-severity"
-                            [ngClass]="occurrence.severity.toLowerCase()"
+                            class="timeline-severity"
+                            [ngClass]="occurrence?.severity?.toLowerCase()"
                           >
-                            {{ occurrence.severity }}
+                            <cds-icon
+                              [attr.shape]="
+                                getSeverityIcon(occurrence?.severity)
+                              "
+                              class="is-solid"
+                            ></cds-icon>
+                            {{ occurrence?.severity }}
                           </div>
-                          <div class="history-details">
+                          <div class="timeline-details">
                             {{ occurrence.details }}
                           </div>
                         </div>
                       </div>
-                    </clr-tooltip-content>
-                  </clr-tooltip>
-                </li>
-              </ul>
+                    </div>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+              </div>
             </div>
           </div>
+
           <ng-template #noAlerts>
             <p>No alerts found</p>
           </ng-template>
