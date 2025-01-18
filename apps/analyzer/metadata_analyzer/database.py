@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from metadata_analyzer.models import BackupData, Result, Tasks, DataStore, Schedule
+from metadata_analyzer.models import BackupData, Result, Tasks, DataStore, Schedule, TaskEvent
 import os
 
 
@@ -56,6 +56,13 @@ class Database:
     def get_schedules(self):
         session = Session(self.engine)
         stmt = select(Schedule)
+
+        result = session.scalars(stmt)
+        return result
+
+    def get_task_events(self):
+        session = Session(self.engine)
+        stmt = select(TaskEvent)
 
         result = session.scalars(stmt)
         return result
