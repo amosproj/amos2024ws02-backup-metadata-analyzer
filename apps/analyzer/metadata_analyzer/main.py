@@ -95,7 +95,7 @@ def simple_rule_based_analysis_creation_dates():
     try:
         int(alert_limit)
         return jsonify(
-            Analyzer.simple_rule_based_analysis_creation_dates(int(alert_limit))
+            Analyzer.schedule_based_analysis(int(alert_limit))
         )
     except ValueError:
         return "Invalid value for alert limit", 400
