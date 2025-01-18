@@ -155,46 +155,6 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     );
   }
 
-  async createSizeAlert(createSizeAlertDto: CreateSizeAlertDto) {
-    // Check if alert already exists
-    const existingAlertEntity = await this.sizeAlertRepository.findOneBy({
-      backup: { id: createSizeAlertDto.backupId },
-    });
-
-    if (existingAlertEntity) {
-      console.log('Alert already exists -> ignoring it');
-      return;
-    }
-
-    const alert = new SizeAlertEntity();
-    alert.size = createSizeAlertDto.size;
-    alert.referenceSize = createSizeAlertDto.referenceSize;
-
-    const backup = await this.backupDataService.findOneById(
-      createSizeAlertDto.backupId
-    );
-    if (!backup) {
-      throw new NotFoundException(
-        `Backup with id ${createSizeAlertDto.backupId} not found`
-      );
-    }
-    alert.backup = backup;
-
-    const alertType = await this.alertTypeRepository.findOneBy({
-      name: SIZE_ALERT,
-    });
-    if (!alertType) {
-      throw new NotFoundException(`Alert type ${SIZE_ALERT} not found`);
-    }
-    alert.alertType = alertType;
-
-    await this.sizeAlertRepository.save(alert);
-
-    if (alert.alertType.user_active && alert.alertType.master_active) {
-      this.triggerAlertMail(alert);
-    }
-  }
-
   async createSizeAlertsBatched(createSizeAlertDtos: CreateSizeAlertDto[]) {
     const alertType = await this.alertTypeRepository.findOneBy({
       name: SIZE_ALERT,
@@ -212,7 +172,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
 
       if (existingAlertEntity) {
         console.log('Alert already exists -> ignoring it');
-        return;
+        continue;
       }
 
       const alert = new SizeAlertEntity();
@@ -230,6 +190,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       alert.backup = backup;
 
       alert.alertType = alertType;
+      alerts.push(alert);
     }
 
     await this.sizeAlertRepository.save(alerts);
@@ -238,50 +199,6 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       for (const alert of alerts) {
         this.triggerAlertMail(alert);
       }
-    }
-  }
-
-  async createCreationDateAlert(
-    createCreationDateAlertDto: CreateCreationDateAlertDto
-  ) {
-    // Check if alert already exists
-    const existingAlertEntity = await this.creationDateRepository.findOneBy({
-      backup: { id: createCreationDateAlertDto.backupId },
-    });
-
-    if (existingAlertEntity) {
-      console.log('Alert already exists -> ignoring it');
-      return;
-    }
-
-    const alert = new CreationDateAlertEntity();
-    alert.date = createCreationDateAlertDto.date;
-    alert.referenceDate = createCreationDateAlertDto.referenceDate;
-
-    const backup = await this.backupDataService.findOneById(
-      createCreationDateAlertDto.backupId
-    );
-    if (!backup) {
-      throw new NotFoundException(
-        `Backup with id ${createCreationDateAlertDto.backupId} not found`
-      );
-    }
-    alert.backup = backup;
-
-    const alertType = await this.alertTypeRepository.findOneBy({
-      name: CREATION_DATE_ALERT,
-    });
-    if (!alertType) {
-      throw new NotFoundException(
-        `Alert type ${CREATION_DATE_ALERT} not found`
-      );
-    }
-    alert.alertType = alertType;
-
-    await this.creationDateRepository.save(alert);
-
-    if (alert.alertType.user_active && alert.alertType.master_active) {
-      this.triggerAlertMail(alert);
     }
   }
 
@@ -305,7 +222,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       });
       if (existingAlertEntity) {
         console.log('Alert already exists -> ignoring it');
-        return;
+        continue;
       }
       const alert = new CreationDateAlertEntity();
       alert.date = alertDto.date;
