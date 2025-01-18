@@ -12,6 +12,10 @@ import { APIResponse } from '../../types/api-response';
 })
 export class AlertServiceService {
   private readonly refreshAlerts = new Subject<void>();
+  private readonly defaultParams = {
+    offset: 0,
+    limit: 10
+  };
   constructor(
     @Inject(BASE_URL) private readonly baseUrl: string,
     private readonly http: HttpClient
@@ -20,8 +24,14 @@ export class AlertServiceService {
   getAllAlerts(
     filterParams: AlertFilterParams
   ): Observable<APIResponse<Alert>> {
+
+    const mergedParams = {
+      ...this.defaultParams,
+      ...filterParams
+    };
+
     const cleanParams = Object.fromEntries(
-      Object.entries(filterParams).filter(
+      Object.entries(mergedParams).filter(
         ([_, value]) => value != null && value !== undefined
       )
     ) as {
@@ -31,20 +41,6 @@ export class AlertServiceService {
         | boolean
         | readonly (string | number | boolean)[];
     };
-
-    // If we want to add multi select for severity and alert types
-    
-    // if (filterParams.alertType && filterParams.alertType.length > 0) {
-    //   filterParams.alertType.forEach((type) => {
-    //     cleanParams[`alertType`] = filterParams.alertType!;
-    //   });
-    // }
-
-    // if (filterParams.severity && filterParams.severity.length > 0) {
-    //   filterParams.severity.forEach((type) => {
-    //     cleanParams[`severity`] = filterParams.severity!;
-    //   });
-    // }
 
     const params = new HttpParams({ fromObject: cleanParams });
 
