@@ -37,6 +37,11 @@ def _create_mock_storage(uuid, display_name, capacity, high_water_mark, filled, 
 
 	return mock_storage
 
+# Mock SimpleRuleBasedAnalyzer
+class MockSimpleRuleBasedAnalyzer:
+    def analyze_creation_dates(self, data, schedules, alert_limit, start_date, mode="DEFAULT"):
+        pass
+
 def test_update_data_all_types():
 	mock_result1 = _create_mock_result("foo", "1", "saveset1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"))
 	mock_result2 = _create_mock_result("foo", "2", "saveset2", "D", 150_000_000, datetime.fromisoformat("2000-01-02"))
@@ -54,7 +59,8 @@ def test_update_data_all_types():
 
 	database = MockDatabase(mock_results, mock_tasks, mock_storages)
 	backend = MockBackend()
-	Analyzer.init(database, backend, None, None, None)
+	simple_rule_based_analyzer = MockSimpleRuleBasedAnalyzer()
+	Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
 	Analyzer.update_data()
 
 	assert backend.backups == [{
@@ -63,28 +69,32 @@ def test_update_data_all_types():
 		"creationDate": mock_result1.start_time.isoformat(),
 		"type": "FULL",
 		"taskId": None,
-		"saveset": mock_result1.saveset
+		"saveset": mock_result1.saveset,
+		"scheduledTime": None
 	}, {
 		"id": mock_result2.uuid,
 		"sizeMB": mock_result2.data_size / 1_000_000,
 		"creationDate": mock_result2.start_time.isoformat(),
 		"type": "DIFFERENTIAL",
 		"taskId": None,
-		"saveset": mock_result2.saveset
+		"saveset": mock_result2.saveset,
+		"scheduledTime": None
 	}, {
 		"id": mock_result3.uuid,
 		"sizeMB": mock_result3.data_size / 1_000_000,
 		"creationDate": mock_result3.start_time.isoformat(),
 		"type": "INCREMENTAL",
 		"taskId": None,
-		"saveset": mock_result3.saveset
+		"saveset": mock_result3.saveset,
+		"scheduledTime": None
 	}, {
 		"id": mock_result4.uuid,
 		"sizeMB": mock_result4.data_size / 1_000_000,
 		"creationDate": mock_result4.start_time.isoformat(),
 		"type": "COPY",
 		"taskId": '123',
-		"saveset": mock_result4.saveset
+		"saveset": mock_result4.saveset,
+		"scheduledTime": None
 	}]
 
 	assert backend.tasks == [
@@ -118,20 +128,20 @@ def test_update_data_all_types():
 
 def test_update_data_not_a_backup():
 	mock_result1 = _create_mock_result("foo", "1", "saveset1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"), None, 0)
-
+	simple_rule_based_analyzer = MockSimpleRuleBasedAnalyzer()
 	database = MockDatabase([mock_result1], [])
 	backend = MockBackend()
-	Analyzer.init(database, backend, None, None, None)
+	Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
 	Analyzer.update_data()
 
 	assert backend.backups == []
 
 def test_update_data_no_subtasks():
 	mock_result1 = _create_mock_result("foo", "1", "saveset1", "F", 100_000_000, datetime.fromisoformat("2000-01-01"), None, 1, 1)
-
+	simple_rule_based_analyzer = MockSimpleRuleBasedAnalyzer()
 	database = MockDatabase([mock_result1], [])
 	backend = MockBackend()
-	Analyzer.init(database, backend, None, None, None)
+	Analyzer.init(database, backend, None, simple_rule_based_analyzer, None)
 	Analyzer.update_data()
 
 	assert backend.backups == []

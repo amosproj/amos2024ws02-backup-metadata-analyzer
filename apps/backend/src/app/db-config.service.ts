@@ -33,6 +33,8 @@ import { AddScheduledTimeToBackup1734538152155 } from './migrations/173453815215
 import { DataStoreEntity } from './dataStores/entity/dataStore.entity';
 import { DataStores1734616685846 } from './migrations/1734616685846-DataStores';
 import { AddAlertCreationDate1736344989806 } from './migrations/1736344989806-AddAlertCreationDate';
+import { StorageOverflowTime1736550460789 } from './migrations/1736550460789-StorageOverflowTime';
+import { DeprecatedFlag1737107214086 } from './migrations/1737107214086-DeprecatedFlag';
 
 /**
  * Used by NestJS to reach database.
@@ -85,6 +87,8 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AddScheduledTimeToBackup1734538152155,
         DataStores1734616685846,
         AddAlertCreationDate1736344989806,
+        StorageOverflowTime1736550460789,
+        DeprecatedFlag1737107214086,
       ],
       logging: true,
       logger: 'debug',

@@ -2,9 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AlertPageComponent } from './alert-page.component';
 import { AlertServiceService } from '../../../shared/services/alert-service/alert-service.service';
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
+import { NotificationService } from '../../../management/services/alert-notification/notification.service';
 import { SeverityType } from '../../../shared/enums/severityType';
-import { of, throwError } from 'rxjs';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { firstValueFrom, of, throwError } from 'rxjs';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Alert } from '../../../shared/types/alert';
 import { randomUUID } from 'node:crypto';
 import { BackupType } from '../../../shared/enums/backup.types';
@@ -14,6 +15,7 @@ describe('AlertPageComponent', () => {
   let fixture: ComponentFixture<AlertPageComponent>;
   let alertService: AlertServiceService;
   let alertUtils: AlertUtilsService;
+  let notificationService: NotificationService;
 
   const mockAlerts: Alert[] = [
       {
@@ -77,22 +79,31 @@ describe('AlertPageComponent', () => {
     getRefreshObservable: vi.fn(),
   };
 
-  const mockAlertUtils = {
-    getAlertClass: vi.fn(),
-    formatDate: vi.fn(),
-    getAlertReason: vi.fn(),
-    getAlertDetails: vi.fn(),
+  const mockServices = {
+    alertService: {
+      getAllAlerts: vi.fn().mockReturnValue(of(mockAPIResponse)),
+      getRefreshObservable: vi.fn().mockReturnValue(of(null)),
+    },
+    alertUtils: {
+      formatDate: vi.fn().mockReturnValue('formatted-date'),
+      getAlertReason: vi.fn().mockReturnValue('alert-reason'),
+      getAlertDetails: vi.fn().mockReturnValue('alert-details'),
+    },
+    notificationService: {
+      getNotificationSettings: vi.fn().mockReturnValue(of(mockAlertTypes)),
+    },
   };
 
   beforeEach(async () => {
-    mockAlertService.getAllAlerts.mockReturnValue(of(mockAlerts));
-    mockAlertService.getRefreshObservable.mockReturnValue(of(null));
-
     await TestBed.configureTestingModule({
       declarations: [AlertPageComponent],
       providers: [
-        { provide: AlertServiceService, useValue: mockAlertService },
-        { provide: AlertUtilsService, useValue: mockAlertUtils },
+        { provide: AlertServiceService, useValue: mockServices.alertService },
+        { provide: AlertUtilsService, useValue: mockServices.alertUtils },
+        {
+          provide: NotificationService,
+          useValue: mockServices.notificationService,
+        },
       ],
     }).compileComponents();
 
@@ -100,7 +111,11 @@ describe('AlertPageComponent', () => {
     component = fixture.componentInstance;
     alertService = TestBed.inject(AlertServiceService);
     alertUtils = TestBed.inject(AlertUtilsService);
-    fixture.detectChanges();
+    notificationService = TestBed.inject(NotificationService);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
   it('should create', () => {
@@ -112,20 +127,29 @@ describe('AlertPageComponent', () => {
     expect(component.loading).toBe(false);
   });
 
-  it('should handle error when loading alerts fails', () => {
-    mockAlertService.getAllAlerts.mockReturnValue(
-      throwError(() => new Error('Network error'))
-    );
-    component.ngOnInit();
-    expect(component.error).toBe(
-      'Failed to load alerts. Please try again later.'
-    );
-    expect(component.loading).toBe(false);
+    it('should handle error when loading alerts fails', async () => {
+      mockServices.alertService.getAllAlerts.mockReturnValueOnce(
+        throwError(() => new Error('Network error'))
+      );
+
+      component.ngOnInit();
+      await fixture.detectChanges();
+
+      try {
+        await firstValueFrom(component.alerts$);
+      } catch (error: unknown) {
+        expect(error).toBeDefined();
+        if (error instanceof Error) {
+          expect(error.message).toBe('Network error');
+        }
+      }
+    });
   });
 
-  it('should calculate alert summary correctly', () => {
-    component.alerts$.subscribe((alerts) => {
-      expect(alerts).toEqual(mockAlerts);
+  describe('Alert Type Handling', () => {
+    it('should correctly identify StorageFillAlert', () => {
+      const storageFillAlert = mockAPIResponse.data[0];
+      expect(component.isStorageFillAlert(storageFillAlert)).toBe(true);
     });
 
     component.alertSummary$.subscribe((summary) => {
@@ -141,13 +165,15 @@ describe('AlertPageComponent', () => {
     expect(component.getSeverityLabel(SeverityType.WARNING)).toBe('WARNING');
   });
 
-  it('should clean up subscriptions on destroy', () => {
-    const destroySpy = vi.spyOn(component['destroy$'], 'next');
-    const completeSpy = vi.spyOn(component['destroy$'], 'complete');
+  describe('Cleanup', () => {
+    it('should clean up subscriptions on destroy', () => {
+      const destroySpy = vi.spyOn(component['destroy$'], 'next');
+      const completeSpy = vi.spyOn(component['destroy$'], 'complete');
 
-    component.ngOnDestroy();
+      component.ngOnDestroy();
 
-    expect(destroySpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
+      expect(destroySpy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
+    });
   });
 });

@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../../../../shared/services/alert-service/alert-service.service';
-import { Alert } from '../../../../shared/types/alert';
-import { Subject, takeUntil } from 'rxjs';
+import { Alert, StorageFillAlert } from '../../../../shared/types/alert';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
+import { AlertFilterParams } from '../../../../shared/types/alert-filter-type';
+import { APIResponse } from '../../../../shared/types/api-response';
 
 @Component({
   selector: 'app-alert',
@@ -13,8 +15,13 @@ import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
 export class AlertComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
+  private readonly fromDate = new Date(
+    Date.now() - this.DAYS * 24 * 60 * 60 * 1000
+  );
 
-  alerts: Alert[] = [];
+  private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
+  readonly alerts$ = this.alertsSubject.asObservable();
+  total: number = 0;
   criticalAlertsCount = 0;
   warningAlertsCount = 0;
   infoAlertsCount = 0;
@@ -36,30 +43,58 @@ export class AlertComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.loadAlerts();
       });
+
+    this.alerts$.pipe(takeUntil(this.destroy$)).subscribe((alerts) => {
+      this.criticalAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.CRITICAL
+      ).length;
+      this.warningAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.WARNING
+      ).length;
+      this.infoAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.INFO
+      ).length;
+      this.status = this.getStatus(alerts);
+    });
   }
 
   loadAlerts(): void {
+    let params: AlertFilterParams = { fromDate: this.fromDate.toISOString() };
     this.alertService
-      .getAllAlerts(this.DAYS)
+      .getAllAlerts(params)
       .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: Alert[]) => {
-          this.criticalAlertsCount = data.filter(
-            (alert) => alert.alertType.severity === SeverityType.CRITICAL
-          ).length;
-          this.warningAlertsCount = data.filter(
-            (alert) => alert.alertType.severity === SeverityType.WARNING
-          ).length;
-          this.infoAlertsCount = data.filter(
-            (alert) => alert.alertType.severity === SeverityType.INFO
-          ).length;
-          this.alerts = data;
-          this.status = this.getStatus();
-        },
-        error: (error) => {
-          console.error('Error loading alerts:', error);
-        },
+      .subscribe((response: APIResponse<Alert>) => {
+        const filteredAlerts = this.filterAlerts(response.data);
+        this.alertsSubject.next(filteredAlerts);
+        this.total = response.paginationData.total;
       });
+  }
+
+  filterAlerts(alerts: Alert[]): Alert[] {
+    const alertMap = new Map<string, StorageFillAlert>();
+
+    const filteredAlerts: Alert[] = [];
+
+    // sort alerts by creationDate
+    alerts.sort((a, b) => {
+      return (
+        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+      );
+    });
+    alerts.forEach((alert) => {
+      // If alert is from type STORAGE_FILL_ALERT, only one is shown per data store
+      if (alert.alertType.name === 'STORAGE_FILL_ALERT') {
+        const storageFillAlert = alert as StorageFillAlert;
+        if (!alertMap.has(storageFillAlert.dataStoreName)) {
+          alertMap.set(storageFillAlert.dataStoreName, storageFillAlert);
+          filteredAlerts.push(storageFillAlert);
+        }
+      } else {
+        filteredAlerts.push(alert);
+      }
+    });
+
+    return filteredAlerts;
   }
 
   getStatusClass(): string {
@@ -72,17 +107,13 @@ export class AlertComponent implements OnInit, OnDestroy {
     return 'status-green';
   }
 
-  getStatus() {
+  getStatus(alerts: Alert[] = []) {
     if (
-      this.alerts.some(
-        (alert) => alert.alertType.severity === SeverityType.CRITICAL
-      )
+      alerts.some((alert) => alert.alertType.severity === SeverityType.CRITICAL)
     ) {
       return 'Critical';
     } else if (
-      this.alerts.some(
-        (alert) => alert.alertType.severity === SeverityType.WARNING
-      )
+      alerts.some((alert) => alert.alertType.severity === SeverityType.WARNING)
     ) {
       return 'Warning';
     }

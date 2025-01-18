@@ -10,6 +10,7 @@ import { BackupDataModule } from './backupData/backupData.module';
 import { AlertingModule } from './alerting/alerting.module';
 import { TasksModule } from './tasks/tasks.module';
 import { DataStoresModule } from './dataStores/dataStores.module';
+import { InformationModule } from './information/information.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { DataStoresModule } from './dataStores/dataStores.module';
     BackupDataModule,
     AlertingModule,
     TasksModule,
-    DataStoresModule
+    DataStoresModule,
+    InformationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

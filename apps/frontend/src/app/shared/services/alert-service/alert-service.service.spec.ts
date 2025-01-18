@@ -10,6 +10,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { SeverityType } from '../../enums/severityType';
 import { BackupType } from '../../enums/backup.types';
+import { AlertFilterParams } from '../../types/alert-filter-type';
 
 describe('AlertServiceService', () => {
   let service: AlertServiceService;
@@ -77,25 +78,36 @@ describe('AlertServiceService', () => {
       },
     ];
 
-    service.getAllAlerts().subscribe((alerts) => {
-      expect(alerts).toEqual(mockAlerts);
+    const filterParams: AlertFilterParams = {};
+
+    service.getAllAlerts(filterParams).subscribe((alerts) => {
+      expect(alerts).toEqual({
+        data: mockAlerts,
+        paginationData: { total: 2 },
+      });
     });
 
-    const req = httpMock.expectOne(`${baseUrl}/alerting`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockAlerts);
+    const req = httpMock.expectOne((request) => {
+      return (
+        request.url === `${baseUrl}/alerting` &&
+        request.method === 'GET' &&
+        request.params.get('offset') === '0' &&
+        request.params.get('limit') === '10'
+      );
+    });
+    req.flush({ data: mockAlerts, paginationData: { total: 2 } });
   });
 
   it('should fetch alerts with days parameter', () => {
-    const mockAlerts: Alert[] = [
+    const mockAlerts = [
       {
         id: randomUUID().toString(),
         alertType: {
           id: randomUUID().toString(),
           name: 'test',
           severity: SeverityType.INFO,
-          user_active: false,
-          master_active: false,
+          user_active: true,
+          master_active: true,
         },
         backup: {
           id: randomUUID().toString(),
@@ -126,13 +138,32 @@ describe('AlertServiceService', () => {
       },
     ];
     const days = 7;
+    const fromDate = new Date(
+      Date.now() - days * 24 * 60 * 60 * 1000
+    ).toISOString();
+    const filterParams: AlertFilterParams = {
+      fromDate,
+    };
 
-    service.getAllAlerts(days).subscribe((alerts) => {
-      expect(alerts).toEqual(mockAlerts);
+    service.getAllAlerts(filterParams).subscribe((alerts) => {
+      expect(alerts).toEqual({
+        data: mockAlerts,
+        paginationData: { total: 2 },
+      });
     });
 
-    const req = httpMock.expectOne(`${baseUrl}/alerting?days=${days}`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockAlerts);
+    // Use request matcher function instead of exact URL string
+    const req = httpMock.expectOne((request) => {
+      return (
+        request.url === `${baseUrl}/alerting` &&
+        request.method === 'GET' &&
+        request.params.has('fromDate') &&
+        request.params.get('fromDate') === fromDate &&
+        request.params.get('offset') === '0' &&
+        request.params.get('limit') === '10'
+      );
+    });
+
+    req.flush({ data: mockAlerts, paginationData: { total: 2 } });
   });
 });

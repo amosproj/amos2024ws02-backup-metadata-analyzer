@@ -47,10 +47,12 @@ import { InformationPanelComponent } from './backups-overview-page/component/inf
 import { BackupTableComponent } from './backup-statistics-page/component/backup-table/backup-table.component';
 import { SidePanelComponent } from './shared/components/filter-side-panel/side-panel.component';
 import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
+import { FactsPanelComponent } from './backups-overview-page/component/facts-panel/facts-panel.component';
 import { UserManualComponent } from './management/components/user-manual/user-manual/user-manual.component';
 import { AlertPageComponent } from './alert-page/component/alert-page/alert-page.component';
 import { DatePipe } from '@angular/common';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay/loading-overlay.component';
+
 
 @NgModule({
   declarations: [
@@ -67,6 +69,7 @@ import { LoadingOverlayComponent } from './shared/components/loading-overlay/loa
     BackupTableComponent,
     SidePanelComponent,
     BackupStatisticsPageComponent,
+    FactsPanelComponent,
     UserManualComponent,
     AlertPageComponent,
     LoadingOverlayComponent,

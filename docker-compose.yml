@@ -64,27 +64,41 @@ services:
       context: ./apps/analyzer
       dockerfile: Dockerfile
 
-    command: ['python3.11', 'main.py', '--host', '0.0.0.0']
+    command: >
+      sh -c "
+      export PGPASSWORD=${ANALYZER_DATABASE_PASSWORD};
+      until psql -h ${ANALYZER_DATABASE_HOST} -U ${ANALYZER_DATABASE_USER} -d ${ANALYZER_DATABASE_DATABASE} -tAq -c 'SELECT 1'; do
+        echo Waiting for data import...
+        sleep 2;
+      done;
+      echo Data import complete. Starting analyzer;      
+      ./.venv/bin/python3.11 main.py --host 0.0.0.0
+      "
 
     environment:
       # Flask
       - FLASK_RUN_HOST=${ANALYZER_FLASK_RUN_HOST}
       - FLASK_RUN_PORT=${ANALYZER_FLASK_RUN_PORT}
       - BACKEND_URL=${BACKEND_URL}
+      - ANOMALY_THRESHOLD=${ANALYZER_DATABASE_ANOMALY_THRESHOLD}
+      - CLUSTER_NUMBER=${ANALYZER_DATABASE_CLUSTER_NUMBER}
       # Analyzer Database
       - DATABASE_HOST=${ANALYZER_DATABASE_HOST}
       - DATABASE_PORT=${ANALYZER_DATABASE_PORT}
       - DATABASE_USER=${ANALYZER_DATABASE_USER}
       - DATABASE_PASSWORD=${ANALYZER_DATABASE_PASSWORD}
       - DATABASE_DATABASE=${ANALYZER_DATABASE_DATABASE}
+
     env_file:
       - .env.docker
 
     ports:
       - 8000:8000
     depends_on:
-      - analyzerDatabase
-      - backend
+      # - analyzerDatabase
+      analyzerDatabase:
+        condition: service_healthy
+
     networks:
       - app-network
 
@@ -118,6 +132,14 @@ services:
     volumes:
       - ./db_dump.sql:/docker-entrypoint-initdb.d/db_dump.sql
       - ./00-init-roles.sql:/docker-entrypoint-initdb.d/00-init-roles.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  mono-node-modules: null
+  #   mono-node-modules: null
+
+  mono-node-modules:
+    driver: local

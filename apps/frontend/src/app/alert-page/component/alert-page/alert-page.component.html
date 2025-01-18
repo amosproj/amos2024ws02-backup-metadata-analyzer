@@ -73,13 +73,97 @@
   </clr-alert>
 
   <!-- Alert Grid -->
-  <clr-datagrid [clrDgLoading]="loading">
-    <clr-dg-column>Severity</clr-dg-column>
-    <clr-dg-column>Date</clr-dg-column>
-    <clr-dg-column>Type</clr-dg-column>
+  <clr-datagrid
+    *ngIf="alerts$ | async as alerts"
+    [clrDgLoading]="loading"
+    (clrDgRefresh)="refresh($event)"
+  >
+    <clr-dg-column [clrDgField]="'severity'">
+      <ng-container *clrDgHideableColumn>
+        Severity
+        <clr-dg-filter [clrDgFilter]="alertSeveverityFilter">
+          <div class="clr-form-control">
+            <label class="clr-control-label">Severity:</label>
+            <div class="clr-control-container">
+              <div class="clr-select-wrapper">
+                <select
+                  class="clr-select"
+                  [(ngModel)]="alertSeveverityFilter.ranges.severity"
+                  (ngModelChange)="
+                    alertSeveverityFilter.updateRanges({ severity: $event })
+                  "
+                >
+                  <option value="">All</option>
+                  <option *ngFor="let type of severityTypes" [value]="type">
+                    {{ type }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </clr-dg-filter>
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'date'">
+      <ng-container *clrDgHideableColumn>
+        Date
+        <clr-dg-filter [clrDgFilter]="alertDateFilter">
+          <clr-input-container>
+            <label>From:</label>
+            <input
+              clrInput
+              type="date"
+              [(ngModel)]="alertDateFilter.ranges.fromDate"
+              (ngModelChange)="
+                alertDateFilter.updateRanges({ fromDate: $event })
+              "
+            />
+          </clr-input-container>
+          <clr-input-container>
+            <label>To:</label>
+            <input
+              clrInput
+              type="date"
+              [(ngModel)]="alertDateFilter.ranges.toDate"
+              (ngModelChange)="alertDateFilter.updateRanges({ toDate: $event })"
+            />
+          </clr-input-container>
+        </clr-dg-filter>
+      </ng-container>
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'type'">
+      <ng-container *clrDgHideableColumn>
+        Type
+        <clr-dg-filter [clrDgFilter]="alertTypeFilter">
+          <div class="clr-form-control">
+            <label class="clr-control-label">Type:</label>
+            <div class="clr-control-container">
+              <div class="clr-select-wrapper">
+                <select
+                  class="clr-select"
+                  [(ngModel)]="alertTypeFilter.ranges.severity"
+                  (ngModelChange)="
+                    alertTypeFilter.updateRanges({ alertType: $event })
+                  "
+                >
+                  <option value="">All</option>
+                  <option
+                    *ngFor="let type of alertTypeSubject | async"
+                    [value]="type.name"
+                  >
+                    {{ type.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </clr-dg-filter>
+      </ng-container>
+    </clr-dg-column>
     <clr-dg-column>Details</clr-dg-column>
 
-    <clr-dg-row *ngFor="let alert of alerts$ | async" [clrDgItem]="alert">
+    <clr-dg-placeholder>We couldn't find any alerts!</clr-dg-placeholder>
+    <clr-dg-row *ngFor="let alert of alerts.data" [clrDgItem]="alert">
       <clr-dg-cell>
         <div
           class="severity-badge"
@@ -137,12 +221,23 @@
     </clr-dg-row>
 
     <clr-dg-footer>
-      <clr-dg-pagination #pagination [clrDgTotalItems]="summary.totalCount">
+      <clr-dg-pagination
+        #pagination
+        [clrDgTotalItems]="alerts.paginationData.total"
+      >
         <clr-dg-page-size [clrPageSizeOptions]="PAGE_SIZES"
           >Alerts per page</clr-dg-page-size
         >
-        {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
-        {{ summary.totalCount }} alerts
+        {{
+          alerts.paginationData.offset ? +alerts.paginationData.offset + 1 : 0
+        }}
+        -
+        {{
+          alerts.paginationData.offset
+            ? +alerts.paginationData.offset + pageSize
+            : 0
+        }}
+        of {{ alerts.paginationData.total }} alerts
       </clr-dg-pagination>
     </clr-dg-footer>
   </clr-datagrid>

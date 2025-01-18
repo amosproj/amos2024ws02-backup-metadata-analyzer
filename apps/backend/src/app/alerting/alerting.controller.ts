@@ -25,6 +25,10 @@ import { BackupType } from '../backupData/dto/backupType';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { AlertStatusDto } from './dto/alertStatus.dto';
 import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
+import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
+import { AlertFilterDto } from './dto/alertFilter.dto';
+import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
+import { PaginationDto } from '../utils/pagination/PaginationDto';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -91,23 +95,17 @@ export class AlertingController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all alerts.' })
-  @ApiQuery({
-    name: 'backupId',
-    description: 'Filter alerts by backup id',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'days',
-    description: 'Filter alerts by backups (or creation Date if not linked with Backup) of the last x days',
-    required: false,
-    type: Number,
-  })
-  async getAllAlerts(
-    @Query('backupId') backupId?: string,
-    @Query('days') days?: number
-  ): Promise<Alert[]> {
-    return this.alertingService.getAllAlerts(backupId, days);
+  @ApiOperation({ summary: 'Returns all alert Objects paginated.' })
+  async findAll(
+    @Query() paginationOptionsDto: PaginationOptionsDto,
+    @Query() alertFilterDto: AlertFilterDto,
+    @Query() backupDataOrderOptionsDto: AlertOrderOptionsDto
+  ): Promise<PaginationDto<Alert>> {
+    return this.alertingService.getAllAlertsPaginated(
+      paginationOptionsDto,
+      backupDataOrderOptionsDto,
+      alertFilterDto
+    );
   }
 
   @Post('size')
@@ -133,14 +131,16 @@ export class AlertingController {
   }
 
   @Post('storageFill')
-  @ApiOperation({ summary: 'Create a new storage fill alert.' })
-  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiOperation({
+    summary:
+      'Creates new storage fill alerts. (All alerts have to be sent at once)',
+  })
   @ApiBody({ type: CreateStorageFillAlertDto })
   async storageFillAlert(
-    @Body() createStorageFillAlertDto: CreateStorageFillAlertDto
+    @Body() createStorageFillAlertDtos: CreateStorageFillAlertDto[]
   ): Promise<void> {
-    await this.alertingService.createStorageFillAlert(
-      createStorageFillAlertDto
+    await this.alertingService.createStorageFillAlerts(
+      createStorageFillAlertDtos
     );
   }
 
