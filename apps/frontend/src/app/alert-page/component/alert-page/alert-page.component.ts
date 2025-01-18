@@ -198,6 +198,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
         ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
         : 0,
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
+      orderBy: state.sort?.by ? state.sort.by.toString() : 'date',
     };
 
     if (state.filters) {
