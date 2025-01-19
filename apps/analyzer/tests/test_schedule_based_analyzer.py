@@ -159,8 +159,9 @@ def test_alerts_correct_schedule():
     assert backend.missing_backup_alerts == []
     assert backend.additional_backup_alerts == []
 
+
 # Additional backup should generate additional backup alert
-def test_alerts_correct_schedule():
+def test_alerts_additional_backup():
     mock_result1 = _create_mock_result(
         "foo",
         "1",
@@ -185,7 +186,7 @@ def test_alerts_correct_schedule():
         datetime.fromisoformat("2000-01-01T18:00:00"),
         "bar",
     )
-    mock_schedule = _create_mock_schedule("bar", "HOU", 3)
+    mock_schedule = _create_mock_schedule("bar", "HOU", 6)
     mock_task_event = _create_mock_task_event(1, "1", "foo", "bar")
 
     database = MockDatabase(
@@ -202,4 +203,159 @@ def test_alerts_correct_schedule():
 
     assert backend.creation_date_alerts == []
     assert backend.missing_backup_alerts == []
+    assert backend.additional_backup_alerts == [
+        {
+            "backupId": mock_result2.uuid,
+            "date": mock_result2.start_time,
+        }
+    ]
+
+
+# Multiple additional backups should generate multiple additional backup alerts
+def test_alerts_multiple_additional_backups():
+    mock_result1 = _create_mock_result(
+        "foo",
+        "1",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T12:00:00"),
+        "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo",
+        "2",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T14:00:00"),
+        "bar",
+    )
+    mock_result3 = _create_mock_result(
+        "foo",
+        "3",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T16:00:00"),
+        "bar",
+    )
+    mock_result4 = _create_mock_result(
+        "foo",
+        "4",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T18:00:00"),
+        "bar",
+    )
+    mock_schedule = _create_mock_schedule("bar", "HOU", 6)
+    mock_task_event = _create_mock_task_event(1, "1", "foo", "bar")
+
+    database = MockDatabase(
+        [mock_result1, mock_result2, mock_result3, mock_result4],
+        [],
+        [],
+        [mock_schedule],
+        [mock_task_event],
+    )
+    backend = MockBackend()
+    schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
+    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T22:00:00"))
+
+    assert backend.creation_date_alerts == []
+    assert backend.missing_backup_alerts == []
+    assert backend.additional_backup_alerts == [
+        {
+            "backupId": mock_result2.uuid,
+            "date": mock_result2.start_time,
+        },
+        {
+            "backupId": mock_result3.uuid,
+            "date": mock_result3.start_time,
+        },
+    ]
+
+
+# Missing backup should generate missing backup alert
+def test_alerts_missing_backup():
+    mock_result1 = _create_mock_result(
+        "foo",
+        "1",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T12:00:00"),
+        "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo",
+        "2",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T18:00:00"),
+        "bar",
+    )
+    mock_schedule = _create_mock_schedule("bar", "HOU", 3)
+    mock_task_event = _create_mock_task_event(1, "1", "foo", "bar")
+
+    database = MockDatabase(
+        [mock_result1, mock_result2],
+        [],
+        [],
+        [mock_schedule],
+        [mock_task_event],
+    )
+    backend = MockBackend()
+    schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
+    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T20:00:00"))
+
+    assert backend.creation_date_alerts == []
+    assert backend.missing_backup_alerts == [
+        {
+            "referenceTime": datetime.fromisoformat("2000-01-01T15:00:00"),
+        }
+    ]
+    assert backend.additional_backup_alerts == []
+
+
+# Multiple missing backups should generate multiple missing backup alerts
+def test_alerts_multiple_missing_backups():
+    mock_result1 = _create_mock_result(
+        "foo",
+        "1",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T12:00:00"),
+        "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo",
+        "2",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T18:00:00"),
+        "bar",
+    )
+    mock_schedule = _create_mock_schedule("bar", "HOU", 2)
+    mock_task_event = _create_mock_task_event(1, "1", "foo", "bar")
+
+    database = MockDatabase(
+        [mock_result1, mock_result2],
+        [],
+        [],
+        [mock_schedule],
+        [mock_task_event],
+    )
+    backend = MockBackend()
+    schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
+    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T19:00:00"))
+
+    assert backend.creation_date_alerts == []
+    assert backend.missing_backup_alerts == [
+        {
+            "referenceTime": datetime.fromisoformat("2000-01-01T14:00:00"),
+        },
+        {
+            "referenceTime": datetime.fromisoformat("2000-01-01T16:00:00"),
+        },
+    ]
     assert backend.additional_backup_alerts == []
