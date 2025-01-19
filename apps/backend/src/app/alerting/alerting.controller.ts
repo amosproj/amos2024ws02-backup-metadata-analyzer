@@ -52,6 +52,19 @@ export class AlertingController {
     return this.alertingService.getStatistics();
   }
 
+  @Get('repetitions')
+  @ApiOperation({
+    summary: 'Returns Information about repeated Alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+    type: AlertStatisticsDto,
+  })
+  async getRepetitions(): Promise<AlertStatisticsDto> {
+    return this.alertingService.getStatistics();
+  }
+
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })
   @ApiConflictResponse({ description: 'Alert type already exists' })
