@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Get,
   Injectable,
   NotFoundException,
   OnModuleInit,
@@ -39,10 +40,11 @@ import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
 import { AlertStatisticsDto } from './dto/alertStatistics.dto';
+import { AlertSummaryDto, RepeatedAlertDto } from './dto/alertSummary';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
-  alertRepositories: Repository<any>[] = [];
+  alertRepositories: Repository<Alert>[] = [];
 
   constructor(
     @InjectRepository(AlertTypeEntity)
@@ -122,6 +124,38 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     }
     return alertStatisticsDto;
   }
+
+
+  async getRepetitionsAsArray(): Promise<RepeatedAlertDto[]> {
+    const retAlerts: RepeatedAlertDto[] = [];
+    for (const repository of this.alertRepositories) {
+      const alerts = await repository
+        .createQueryBuilder('alert')
+        .select('backup.taskId, COUNT(alert.id) as count')
+        .addSelect('alertType.severity, alertType.name AS type')
+        .leftJoin('alert.backup', 'backup')
+        .leftJoin('alert.alertType', 'alertType')
+        .groupBy('backup.taskId, alertType.severity, alertType.name')
+        .having('COUNT(alert.id) > 1')
+        .getRawMany() as RepeatedAlertDto[];
+      retAlerts.push(...alerts);
+    }
+
+
+    return retAlerts;
+  }
+
+
+
+  // async getRepetitions(): Promise<AlertSummaryDto> {
+  //   for(const repository of this.alertRepositories) {
+  //     const alerts = await repository
+  //     .createQueryBuilder('alert')
+  //     .select('*, COUNT(alert.id) as count')
+  //     .groupBy('alert.backup.taskId, alert.alertType')
+  //     .getRawMany() as Alert[];
+  //   }
+  // }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
     const entity = await this.alertTypeRepository.findOneBy({
