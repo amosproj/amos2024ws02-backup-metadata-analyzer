@@ -5,12 +5,14 @@ from metadata_analyzer.creation_date_alert import CreationDateAlert
 from metadata_analyzer.missing_backup_alert import MissingBackupAlert
 from metadata_analyzer.additional_backup_alert import AdditionalBackupAlert
 
+
 class ScheduleBasedAnalyzer:
     def __init__(self, backend):
         self.backend = backend
 
-    def analyze(self, results, schedules, task_events, alert_limit, start_date, stop_date):
-        print("Schedule based analysis")
+    def analyze(
+        self, results, schedules, task_events, alert_limit, start_date, stop_date
+    ):
         # Group the results by their task
         groups = defaultdict(list)
         for result in results:
@@ -32,7 +34,18 @@ class ScheduleBasedAnalyzer:
                 task, results, schedules, task_events, start_date, stop_date
             )
 
-        for alert in alerts:
+        # Because we ignore alerts which would be created earlier than the current latest alert,
+        # we have to sort the alerts to not miss any alerts in the future
+        alerts = sorted(alerts, key=ScheduleBasedAnalyzer._alert_key_function)
+
+        # If no alert limit was passed set it to default value
+        if alert_limit is None:
+            alert_limit = 10
+
+        # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
+        count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+
+        for alert in alerts[:count]:
             print(alert.as_json())
             if isinstance(alert, CreationDateAlert):
                 self.backend.create_creation_date_alert(alert.as_json())
@@ -41,11 +54,11 @@ class ScheduleBasedAnalyzer:
             elif isinstance(alert, AdditionalBackupAlert):
                 self.backend.create_additional_backup_alert(alert.as_json())
 
-        # TODO: create alert
-        count = 0
         return {"count": count}
 
-    def _analyze_one_task(self, task, results, schedules, task_events, start_date, stop_date):
+    def _analyze_one_task(
+        self, task, results, schedules, task_events, start_date, stop_date
+    ):
         used_schedule_names = [
             task_event.schedule
             for task_event in task_events
@@ -62,7 +75,10 @@ class ScheduleBasedAnalyzer:
         alerts = []
         for used_schedule in used_schedules:
             alerts += self._analyze_one_task_one_schedule(
-                used_schedule, schedule_groups[used_schedule.name], start_date, stop_date
+                used_schedule,
+                schedule_groups[used_schedule.name],
+                start_date,
+                stop_date,
             )
 
         return alerts
@@ -73,38 +89,49 @@ class ScheduleBasedAnalyzer:
         tolerance = self.calculate_tolerance(schedule)
         print(tolerance)
         first_start = results[0].start_time
-        last_ref, cur_ref, next_ref = first_start, first_start, self.calculate_next_reference_time(schedule, first_start) 
-        print(last_ref, cur_ref, next_ref)
+        last_ref, cur_ref, next_ref = (
+            first_start,
+            first_start,
+            self.calculate_next_reference_time(schedule, first_start),
+        )
         while cur_ref < stop_date:
-            left_end = last_ref + (cur_ref - last_ref) / 2 # Inclusive
-            right_end = cur_ref + (next_ref - cur_ref) / 2 # Exclusive
+            left_end = last_ref + (cur_ref - last_ref) / 2  # Inclusive
+            right_end = cur_ref + (next_ref - cur_ref) / 2  # Exclusive
             print(left_end, right_end)
 
-            cur_results = [result for result in results if left_end <= result.start_time < right_end]
+            cur_results = [
+                result
+                for result in results
+                if left_end <= result.start_time < right_end
+            ]  # TODO: optimize
             print(cur_results)
 
             if len(cur_results) > 0:
-                nearest_result = min(cur_results, key=lambda result: abs(result.start_time - cur_ref))
+                nearest_result = min(
+                    cur_results, key=lambda result: abs(result.start_time - cur_ref)
+                )
                 smallest_diff = abs(nearest_result.start_time - cur_ref)
+
+                if smallest_diff > tolerance:
+                    alerts.append(CreationDateAlert(nearest_result, cur_ref))
+
+                for result in cur_results:
+                    if result.uuid != nearest_result.uuid:
+                        alerts.append(AdditionalBackupAlert(result))
             else:
-                nearest_result = None
-            print(nearest_result, smallest_diff)
-
-            if nearest_result is None:
                 alerts.append(MissingBackupAlert(cur_ref))
-
-            if smallest_diff > tolerance:
-                alerts.append(CreationDateAlert(nearest_result, cur_ref))
-            
-            for result in cur_results:
-                if nearest_result is None or result.uuid != nearest_result.uuid:
+                for result in cur_results:
                     alerts.append(AdditionalBackupAlert(result))
 
-            last_ref, cur_ref, next_ref = cur_ref, next_ref, self.calculate_next_reference_time(schedule, next_ref)
+            last_ref, cur_ref, next_ref = (
+                cur_ref,
+                next_ref,
+                self.calculate_next_reference_time(schedule, next_ref),
+            )
         return alerts
 
     def calculate_tolerance(self, schedule):
-        return 0.1 * self.calculate_expected_delta(schedule);
+        return 0.1 * self.calculate_expected_delta(schedule)
 
     def calculate_expected_delta(self, schedule):
         base_to_seconds = {
@@ -122,15 +149,16 @@ class ScheduleBasedAnalyzer:
         expected_delta_seconds = schedule.p_count * multiplier
         return timedelta(seconds=expected_delta_seconds)
 
-
     def calculate_next_reference_time(self, schedule, reference_time):
         expected_delta = self.calculate_expected_delta(schedule)
-        next_reference_time = reference_time + expected_delta;
+        next_reference_time = reference_time + expected_delta
 
         # Use the start_time of the schedule if the base is in days, weeks or months
         if schedule.p_base in ["DAY", "WEE", "MON"]:
             try:
-                next_reference_time = datetime.combine(next_reference_time, time.fromisoformat(schedule.start_time))
+                next_reference_time = datetime.combine(
+                    next_reference_time, time.fromisoformat(schedule.start_time)
+                )
             except ValueError:
                 print(f"start_time with invalid format: {schedule_start_time}")
 
@@ -153,3 +181,10 @@ class ScheduleBasedAnalyzer:
 
         return next_reference_time
 
+    def _alert_key_function(alert):
+        if isinstance(alert, CreationDateAlert) or isinstance(
+            alert, AdditionalBackupAlert
+        ):
+            return alert.date
+        else:
+            return alert.reference_date

@@ -159,6 +159,7 @@ def test_alerts_correct_schedule():
     assert backend.missing_backup_alerts == []
     assert backend.additional_backup_alerts == []
 
+
 # Backups created according to the schedule should not generate alerts even with small deviations
 def test_alerts_correct_schedule_small_deviations():
     mock_result1 = _create_mock_result(
@@ -211,6 +212,7 @@ def test_alerts_correct_schedule_small_deviations():
     assert backend.creation_date_alerts == []
     assert backend.missing_backup_alerts == []
     assert backend.additional_backup_alerts == []
+
 
 # Backups created according to the schedule should generate alerts with large deviations
 def test_alerts_correct_schedule_large_deviations():
@@ -275,6 +277,7 @@ def test_alerts_correct_schedule_large_deviations():
     ]
     assert backend.missing_backup_alerts == []
     assert backend.additional_backup_alerts == []
+
 
 # Additional backup should generate additional backup alert
 def test_alerts_additional_backup():
@@ -475,6 +478,7 @@ def test_alerts_multiple_missing_backups():
         },
     ]
     assert backend.additional_backup_alerts == []
+
 
 # Check correct behavior of mixing additional backup alerts and creation date alerts
 def test_alerts_creation_date_alert_and_additional_backup_alerts():
