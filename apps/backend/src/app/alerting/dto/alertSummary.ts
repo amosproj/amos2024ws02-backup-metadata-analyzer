@@ -74,7 +74,7 @@ export class RepeatedAlertDto {
     description: 'Alert History', 
     example: 0 
   })
-  history?: AlertOccurenceDto[];
+  history?: Date[];
 
   @ApiProperty({ 
     description: 'Task ID of alert', 
