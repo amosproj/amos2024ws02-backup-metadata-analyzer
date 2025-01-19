@@ -98,7 +98,7 @@ def test_calculate_next_reference_time_mon():
 
 
 # Backups created according to the schedule should not generate alerts
-def test_creation_time_alert_correct_schedule():
+def test_alerts_correct_schedule():
     mock_result1 = _create_mock_result(
         "foo", "1", "F", 100_000_000, datetime.fromisoformat("2000-01-01T12:00:00"), "bar",
     )
@@ -127,3 +127,5 @@ def test_creation_time_alert_correct_schedule():
     Analyzer.schedule_based_analysis(-1)
 
     assert backend.creation_date_alerts == []
+    assert backend.missing_backup_alerts == []
+    assert backend.additional_backup_alerts == []
