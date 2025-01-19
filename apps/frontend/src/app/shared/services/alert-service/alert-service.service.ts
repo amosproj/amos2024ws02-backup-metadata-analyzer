@@ -6,7 +6,10 @@ import { map, share, shareReplay } from 'rxjs/operators';
 import { Alert } from '../../types/alert';
 import { AlertFilterParams } from '../../types/alert-filter-type';
 import { APIResponse } from '../../types/api-response';
-import { AlertSeverityStatistic, AlertSummary } from '../../types/alert-summary';
+import {
+  AlertSeverityStatistic,
+  AlertSummary,
+} from '../../types/alert-summary';
 
 @Injectable({
   providedIn: 'root',
@@ -51,9 +54,9 @@ export class AlertServiceService {
       .pipe(shareReplay(1));
   }
 
-  getAlertSeverityStatistics(): Observable<AlertSeverityStatistic> {
+  getAlertRepetitions(): Observable<AlertSummary> {
     return this.http
-      .get<AlertSeverityStatistic>(`${this.baseUrl}/alerting/statistics`)
+      .get<AlertSummary>(`${this.baseUrl}/alerting/repetitions`)
       .pipe(shareReplay(1));
   }
 
