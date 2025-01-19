@@ -139,24 +139,24 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         .having('COUNT(alert.id) > 1')
         .getRawMany() as RepeatedAlertDto[];
 
-      for(const alert of alerts) {
-      const history: Date[] = [];
-      if(alert.taskId && alert.type){
-      const alertEntities = await repository.find({
-        where: {
-          backup: { taskId: { id: alert.taskId } },
-          alertType: { name: alert.type as unknown as string },
-        },
-        order: {
-          creationDate: 'DESC',
-        },
-      });
-      for (const alertEntity of alertEntities) {
-        history.push(alertEntity.creationDate);
+      for (const alert of alerts) {
+        const history: Date[] = [];
+        if (alert.taskId && alert.type) {
+          const alertEntities = await repository.find({
+            where: {
+              backup: { taskId: { id: alert.taskId } },
+              alertType: { name: alert.type as unknown as string },
+            },
+            order: {
+              creationDate: 'DESC',
+            },
+          });
+          for (const alertEntity of alertEntities) {
+            history.push(alertEntity.creationDate);
+          }
+        }
+        alert.history = history;
       }
-    }
-    alert.history = history;
-  }
       retAlerts.push(...alerts);
     }
     return retAlerts;
