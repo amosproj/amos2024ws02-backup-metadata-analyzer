@@ -213,16 +213,6 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     }
   }
 
-  // async getRepetitions(): Promise<AlertSummaryDto> {
-  //   for(const repository of this.alertRepositories) {
-  //     const alerts = await repository
-  //     .createQueryBuilder('alert')
-  //     .select('*, COUNT(alert.id) as count')
-  //     .groupBy('alert.backup.taskId, alert.alertType')
-  //     .getRawMany() as Alert[];
-  //   }
-  // }
-
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
     const entity = await this.alertTypeRepository.findOneBy({
       name: createAlertTypeDto.name,
