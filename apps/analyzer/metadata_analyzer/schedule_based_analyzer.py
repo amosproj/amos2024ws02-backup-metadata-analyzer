@@ -26,8 +26,6 @@ class ScheduleBasedAnalyzer:
         alerts = []
         for task, unordered_results in groups.items():
             results = sorted(unordered_results, key=lambda result: result.start_time)
-            if task != "ntx_ase-vm1":  # TODO: remove
-                continue
             alerts += self._analyze_one_task(
                 task, results, schedules, task_events, start_date, stop_date
             )
@@ -59,17 +57,28 @@ class ScheduleBasedAnalyzer:
         return []
 
     def _analyze_one_task_one_schedule(self, schedule, results, start_date, stop_date):
-        print(schedule, results, file=sys.stderr)
+        print(schedule, results)
+        tolerance = self.calculate_tolerance(schedule)
+        print(tolerance)
         first_start = results[0].start_time
         last_ref, cur_ref, next_ref = first_start, first_start, self.calculate_next_reference_time(schedule, first_start) 
-        print(last_ref, cur_ref, next_ref, file=sys.stderr)
-        stop_date = datetime.fromisoformat("2024-10-22") # TODO: remove
+        print(last_ref, cur_ref, next_ref)
         while cur_ref < stop_date:
-            cur_ref = self.calculate_next_reference_time(schedule, cur_ref)
-            print(cur_ref, file=sys.stderr)
+            left_end = last_ref + (cur_ref - last_ref) / 2 # Inclusive
+            right_end = cur_ref + (next_ref - cur_ref) / 2 # Exclusive
+            print(left_end, right_end)
+
+            left_tolerance = cur_ref - tolerance
+            right_tolerance = cur_ref + tolerance
+            print("Tol:", left_tolerance, right_tolerance)
+
+            last_ref, cur_ref, next_ref = cur_ref, next_ref, self.calculate_next_reference_time(schedule, next_ref)
         return []
 
-    def calculate_next_reference_time(self, schedule, reference_time):
+    def calculate_tolerance(self, schedule):
+        return 0.1 * self.calculate_expected_delta(schedule);
+
+    def calculate_expected_delta(self, schedule):
         base_to_seconds = {
             "MIN": 60,
             "HOU": 60 * 60,
@@ -83,8 +92,11 @@ class ScheduleBasedAnalyzer:
         # Calculate the expected timedelta between two backups for this schedule
         multiplier = base_to_seconds[schedule.p_base]
         expected_delta_seconds = schedule.p_count * multiplier
-        expected_delta = timedelta(seconds=expected_delta_seconds)
+        return timedelta(seconds=expected_delta_seconds)
 
+
+    def calculate_next_reference_time(self, schedule, reference_time):
+        expected_delta = self.calculate_expected_delta(schedule)
         next_reference_time = reference_time + expected_delta;
 
         # Use the start_time of the schedule if the base is in days, weeks or months
