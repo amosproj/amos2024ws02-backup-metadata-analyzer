@@ -13,8 +13,9 @@ import {
   ApiConflictResponse, ApiCreatedResponse, ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiQuery, ApiResponse,
-  ApiTags
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
@@ -29,6 +30,8 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
+import { AlertStatisticsDto } from './dto/alertStatistics.dto';
+import { AlertSummaryDto } from './dto/alertSummary';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -36,6 +39,32 @@ export class AlertingController {
   readonly logger = new Logger(AlertingController.name);
 
   constructor(private readonly alertingService: AlertingService) {}
+
+  @Get('statistics')
+  @ApiOperation({
+    summary: 'Returns the number of Info, Warning and Critical alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+    type: AlertStatisticsDto,
+  })
+  async getStatistics(): Promise<AlertStatisticsDto> {
+    return this.alertingService.getStatistics();
+  }
+
+  @Get('repetitions')
+  @ApiOperation({
+    summary: 'Returns Information about repeated Alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+  })
+  async getTestRepetitions(): Promise<AlertSummaryDto> {
+    return this.alertingService.getRepetitions();
+  }
+
 
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })

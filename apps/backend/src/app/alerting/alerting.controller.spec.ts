@@ -23,6 +23,8 @@ import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity'
 import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
+import { groupBy } from 'rxjs';
+import { count } from 'console';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -68,6 +70,7 @@ const sizeAlert: SizeAlertEntity = {
 
 const mockSizeAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  count: jest.fn().mockResolvedValue(1),
   find: jest.fn().mockImplementation(() => Promise.resolve([sizeAlert])),
   findOneBy: jest.fn().mockResolvedValue(null),
   createQueryBuilder: jest.fn(() => ({
@@ -75,6 +78,10 @@ const mockSizeAlertRepository = {
     leftJoinAndSelect: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
     getManyAndCount: jest.fn().mockResolvedValue([[sizeAlert], 1]),
   })),
   query: jest.fn().mockResolvedValue([sizeAlert, [{ count: '1' }]]),
@@ -104,12 +111,17 @@ const mockAlertTypeRepository = {
 
 const mockCreationDateAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  count: jest.fn().mockResolvedValue(1),
   find: jest.fn().mockImplementation(() => Promise.resolve([sizeAlert])),
   createQueryBuilder: jest.fn(() => ({
     select: jest.fn().mockReturnThis(),
     leftJoinAndSelect: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
     getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
   })),
   query: jest.fn().mockResolvedValue([[], [{ count: '1' }]]),
@@ -118,12 +130,17 @@ const mockCreationDateAlertRepository = {
 
 const mockStorageFillAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  count: jest.fn().mockResolvedValue(1),
   find: jest.fn().mockImplementation(() => Promise.resolve([sizeAlert])),
   createQueryBuilder: jest.fn(() => ({
     select: jest.fn().mockReturnThis(),
     leftJoinAndSelect: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
     getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
   })),
   findBy: jest.fn().mockResolvedValue([]),
@@ -189,6 +206,21 @@ describe('AlertingController (e2e)', () => {
     expect(response.body).toEqual({
       data: [],
       paginationData: { limit: '10', offset: '0', total: null },
+    });
+  });
+
+  it('GET /alerting/repetitions - should return repetitions', async () => {
+
+    const response = await request(app.getHttpServer())
+      .get('/alerting/repetitions')
+      .query({})
+      .expect(200);
+
+    expect(response.body).toEqual({
+      criticalAlerts: 3,
+      infoAlerts: 3,
+      repeatedAlerts: [],
+      warningAlerts: 3,
     });
   });
 
