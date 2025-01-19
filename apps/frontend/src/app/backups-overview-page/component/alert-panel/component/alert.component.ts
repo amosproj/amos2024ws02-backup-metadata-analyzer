@@ -1,28 +1,26 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../../../../shared/services/alert-service/alert-service.service';
-import {
-  Alert,
-  CreationDateAlert,
-  SizeAlert,
-  StorageFillAlert,
-} from '../../../../shared/types/alert';
-import { DatePipe } from '@angular/common';
-import { shortenBytes } from '../../../../shared/utils/shortenBytes';
-import { Subject, takeUntil } from 'rxjs';
+import { Alert, StorageFillAlert } from '../../../../shared/types/alert';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
+import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
+import { AlertFilterParams } from '../../../../shared/types/alert-filter-type';
+import { APIResponse } from '../../../../shared/types/api-response';
 
 @Component({
   selector: 'app-alert',
   templateUrl: './alert.component.html',
   styleUrl: './alert.component.css',
-  providers: [DatePipe],
 })
 export class AlertComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
-  private readonly fromDate = new Date(Date.now() - this.DAYS * 24 * 60 * 60 * 1000);
+  private readonly fromDate = new Date(
+    Date.now() - this.DAYS * 24 * 60 * 60 * 1000
+  );
 
-  alerts: Alert[] = [];
+  private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
+  readonly alerts$ = this.alertsSubject.asObservable();
   total: number = 0;
   criticalAlertsCount = 0;
   warningAlertsCount = 0;
@@ -34,7 +32,7 @@ export class AlertComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly alertService: AlertServiceService,
-    private datePipe: DatePipe
+    private readonly alertUtils: AlertUtilsService
   ) {}
 
   ngOnInit(): void {
@@ -45,26 +43,30 @@ export class AlertComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.loadAlerts();
       });
+
+    this.alerts$.pipe(takeUntil(this.destroy$)).subscribe((alerts) => {
+      this.criticalAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.CRITICAL
+      ).length;
+      this.warningAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.WARNING
+      ).length;
+      this.infoAlertsCount = alerts.filter(
+        (alert) => alert.alertType.severity === SeverityType.INFO
+      ).length;
+      this.status = this.getStatus(alerts);
+    });
   }
 
   loadAlerts(): void {
+    let params: AlertFilterParams = { fromDate: this.fromDate.toISOString() };
     this.alertService
-      .getAllAlerts(this.fromDate.toISOString())
+      .getAllAlerts(params)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data: { alerts: Alert[], total: number }) => {
-      console.log("Data: ", data);
-      this.alerts = this.filterAlerts(data.alerts);
-      this.total = data.total;
-      this.criticalAlertsCount = this.alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.CRITICAL
-      ).length;
-      this.warningAlertsCount = this.alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.WARNING
-      ).length;
-      this.infoAlertsCount = this.alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.INFO
-      ).length;
-      this.status = this.getStatus();
+      .subscribe((response: APIResponse<Alert>) => {
+        const filteredAlerts = this.filterAlerts(response.data);
+        this.alertsSubject.next(filteredAlerts);
+        this.total = response.paginationData.total;
       });
   }
 
@@ -105,107 +107,29 @@ export class AlertComponent implements OnInit, OnDestroy {
     return 'status-green';
   }
 
-  getAlertClass(alert: Alert): string {
-    if (alert.alertType.severity === SeverityType.CRITICAL) {
-      return 'alert-red';
-    } else if (alert.alertType.severity === SeverityType.WARNING) {
-      return 'alert-yellow';
-    } else {
-      return 'alert-blue';
-    }
-  }
-
-  getStatus() {
+  getStatus(alerts: Alert[] = []) {
     if (
-      this.alerts.some(
-        (alert) => alert.alertType.severity === SeverityType.CRITICAL
-      )
+      alerts.some((alert) => alert.alertType.severity === SeverityType.CRITICAL)
     ) {
       return 'Critical';
     } else if (
-      this.alerts.some(
-        (alert) => alert.alertType.severity === SeverityType.WARNING
-      )
+      alerts.some((alert) => alert.alertType.severity === SeverityType.WARNING)
     ) {
       return 'Warning';
     }
     return 'OK';
   }
 
-  getAlertReason(alert: Alert) {
-    let reason = '';
-    let percentage = 0;
-    switch (alert.alertType.name) {
-      case 'SIZE_ALERT':
-        const sizeAlert = alert as SizeAlert;
-        if (sizeAlert.size - sizeAlert.referenceSize < 0) {
-          percentage = Math.floor(
-            (1 - sizeAlert.size / sizeAlert.referenceSize) * 100
-          );
-          reason = `Size of backup decreased`;
-          break;
-        } else {
-          percentage = Math.floor(
-            (sizeAlert.size / sizeAlert.referenceSize - 1) * 100
-          );
-          reason = `Size of backup increased`;
-          break;
-        }
-      case 'CREATION_DATE_ALERT':
-        reason = `Backup was started at an unusual time`;
-        break;
-      case 'STORAGE_FILL_ALERT':
-        reason = `Less available storage space than expected`;
-        break;
-    }
-    return reason;
-  }
+  getAlertClass = (alert: Alert): string =>
+    this.alertUtils.getAlertClass(alert);
 
-  getAlertDetails(alert: Alert) {
-    let description = '';
-    let percentage = 0;
-    switch (alert.alertType.name) {
-      case 'SIZE_ALERT':
-        const sizeAlert = alert as SizeAlert;
-        if (sizeAlert.size - sizeAlert.referenceSize < 0) {
-          percentage = Math.floor(
-            (1 - sizeAlert.size / sizeAlert.referenceSize) * 100
-          );
-          description = `Size of backup decreased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
-          break;
-        } else {
-          percentage = Math.floor(
-            (sizeAlert.size / sizeAlert.referenceSize - 1) * 100
-          );
-          description = `Size of backup increased by ${percentage}% compared to the previous backup. This could indicate a problem with the backup.`;
-          break;
-        }
-      case 'CREATION_DATE_ALERT':
-        const creationDateAlert = alert as CreationDateAlert;
+  formatDate = (date: Date): string => this.alertUtils.formatDate(date);
 
-        description = `Backup was started at ${this.formatDate(
-          creationDateAlert.date
-        )}, but based on the defined schedule, it should have been started at around ${this.formatDate(
-          creationDateAlert.referenceDate
-        )}`;
-        break;
-      case 'STORAGE_FILL_ALERT':
-        const storageFillAlert = alert as StorageFillAlert;
-        description = `The current storage fill of storage with name "${storageFillAlert.dataStoreName}" is ${shortenBytes(
-          storageFillAlert.filled * 1_000_000_000
-        )}, which is above the threshold of ${shortenBytes(
-          storageFillAlert.highWaterMark * 1_000_000_000
-        )}. This indicates insufficient available storage space. Maximum capacity is ${shortenBytes(
-          storageFillAlert.capacity * 1_000_000_000
-        )}`;
-        break;
-    }
-    return description;
-  }
+  getAlertReason = (alert: Alert): string =>
+    this.alertUtils.getAlertReason(alert);
 
-  formatDate(date: Date): string {
-    return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
-  }
+  getAlertDetails = (alert: Alert): string =>
+    this.alertUtils.getAlertDetails(alert);
 
   ngOnDestroy(): void {
     this.destroy$.next();
