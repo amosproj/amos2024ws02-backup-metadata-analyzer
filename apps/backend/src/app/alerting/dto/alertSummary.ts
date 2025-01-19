@@ -62,7 +62,7 @@ export class RepeatedAlertDto {
   @ApiProperty({ 
     description: 'Alert History', 
   })
-  history?: AlertOcurrence[];
+  history?: AlertOcurrenceDto[];
 
   @ApiProperty({ 
     description: 'Task ID of alert', 
@@ -75,23 +75,15 @@ export class RepeatedAlertDto {
   storageId?: string;
 }
 
-export class AlertOcurrence{
+export class AlertOcurrenceDto{
   @ApiProperty({ 
     description: 'Date of alert', 
   })
   date!: Date;
 
-  // only apply for size alerts
-
   @ApiProperty({ 
-    description: 'reference size', 
+    description: 'Alert ID', 
   })
-  referenceSize?: number;
-
-  @ApiProperty({ 
-    description: 'size', 
-  })
-  size?: number;
-
+  alertId!: string;
 }
 

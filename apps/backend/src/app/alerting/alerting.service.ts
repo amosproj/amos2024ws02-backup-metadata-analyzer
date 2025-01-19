@@ -40,7 +40,7 @@ import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
 import { AlertStatisticsDto } from './dto/alertStatistics.dto';
-import { AlertOcurrence, AlertSummaryDto, RepeatedAlertDto } from './dto/alertSummary';
+import { AlertOcurrenceDto, AlertSummaryDto, RepeatedAlertDto } from './dto/alertSummary';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
@@ -144,10 +144,8 @@ export class AlertingService extends PaginationService implements OnModuleInit {
           .having('COUNT(alert.id) > 1')
           .getRawMany() as RepeatedAlertDto[];
 
-        const isSizeAlert = repository === this.sizeAlertRepository;
-
         for (const repeatedAlert of repeatedAlerts) {
-          const history: AlertOcurrence[] = [];
+          const history: AlertOcurrenceDto[] = [];
           if (repeatedAlert.taskId && repeatedAlert.type) {
             const alertEntities = await repository.find({
               where: {
@@ -161,8 +159,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
             for (const alertEntity of alertEntities) {
               history.push({
                 date: alertEntity.creationDate,
-                referenceSize: isSizeAlert ? (alertEntity as SizeAlertEntity).referenceSize : undefined,
-                size: isSizeAlert ? (alertEntity as SizeAlertEntity).size : undefined,
+                alertId: alertEntity.id,
               });
             }
           }
@@ -199,7 +196,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         .getRawMany() as RepeatedAlertDto[];
       // get History of storage associated alerts
       for (const repeatedStorageAlert of repeatedStorageAlerts) {
-        const history: AlertOcurrence[] = [];
+        const history: AlertOcurrenceDto[] = [];
 
         const alertEntities = await this.storageFillRepository.find({
           where: {
@@ -211,7 +208,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
           },
         });
         for (const alertEntity of alertEntities) {
-          history.push({ date: alertEntity.creationDate });
+          history.push({  date: alertEntity.creationDate, alertId: alertEntity.id });
         }
         repeatedStorageAlert.history = history;
       }
