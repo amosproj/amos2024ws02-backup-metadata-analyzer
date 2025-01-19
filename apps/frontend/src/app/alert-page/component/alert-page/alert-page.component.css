@@ -375,3 +375,16 @@ clr-tooltip {
   margin-top: 0.5rem;
 }
 
+
+.datagrid-row.datagrid-selected {
+  animation: fadeHighlight 2s ease-out;
+}
+
+@keyframes fadeHighlight {
+  0% {
+    background-color: rgba(0, 114, 163, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}

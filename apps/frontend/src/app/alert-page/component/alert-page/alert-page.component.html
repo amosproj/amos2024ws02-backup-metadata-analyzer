@@ -5,34 +5,40 @@
   <div class="clr-row">
     <!-- Alert Statistics Card -->
     <div class="clr-col-12 clr-col-md-6">
-      <div class="card" *ngIf="alertSeverityStats$ | async as severityStats">
+      <div class="card">
         <div class="card-block" id="alert-summary-card">
           <div class="card-title">Alert Statistics</div>
           <div class="card-text">
             <div class="alert-summary">
               <div
                 class="summary-item"
-                *ngIf="severityStats.criticalAlerts > 0"
+                *ngIf="summary.criticalAlerts && summary.criticalAlerts > 0"
               >
                 <cds-icon
                   shape="error-standard"
                   class="is-solid critical"
                 ></cds-icon>
-                <span>{{ severityStats.criticalAlerts }} Critical</span>
+                <span>{{ summary.criticalAlerts }} Critical</span>
               </div>
-              <div class="summary-item" *ngIf="severityStats.warningAlerts > 0">
+              <div
+                class="summary-item"
+                *ngIf="summary.warningAlerts && summary.warningAlerts > 0"
+              >
                 <cds-icon
                   shape="warning-standard"
                   class="is-solid warning"
                 ></cds-icon>
-                <span>{{ severityStats.warningAlerts }} Warnings</span>
+                <span>{{ summary.warningAlerts }} Warnings</span>
               </div>
-              <div class="summary-item" *ngIf="severityStats.infoAlerts > 0">
+              <div
+                class="summary-item"
+                *ngIf="summary.infoAlerts && summary.infoAlerts > 0"
+              >
                 <cds-icon
                   shape="info-standard"
                   class="is-solid info"
                 ></cds-icon>
-                <span>{{ severityStats.infoAlerts }} Information</span>
+                <span>{{ summary.infoAlerts }} Information</span>
               </div>
             </div>
           </div>
@@ -44,7 +50,7 @@
     <div class="clr-col-12 clr-col-md-6">
       <div class="card frequent-alerts-card" *ngIf="summary.mostFrequentAlert">
         <div class="card-block">
-          <div class="card-title">Most frequent Alerts</div>
+          <div class="card-title">Most Frequent Alerts</div>
           <div
             class="card-text"
             *ngIf="summary.repeatedAlerts.length > 0; else noAlerts"
@@ -53,17 +59,13 @@
             <clr-tooltip>
               <div
                 class="alert-trigger"
-                [ngClass]="
-                  summary.mostFrequentAlert.latestAlert.alertType.severity.toLowerCase()
-                "
+                [ngClass]="summary.mostFrequentAlert.severity.toLowerCase()"
                 clrTooltipTrigger
               >
                 <div class="alert-header">
                   <cds-icon
                     [attr.shape]="
-                      getSeverityIcon(
-                        summary.mostFrequentAlert.latestAlert.alertType.severity
-                      )
+                      getSeverityIcon(summary.mostFrequentAlert.severity)
                     "
                     class="is-solid"
                   ></cds-icon>
@@ -80,19 +82,10 @@
                     <strong>Task ID:</strong>
                     {{ summary.mostFrequentAlert.taskId }}
                   </span>
-                  <span *ngIf="summary.mostFrequentAlert.storageId">
-                    <strong>Storage ID:</strong>
-                    {{ summary.mostFrequentAlert.storageId }}
-                  </span>
                 </div>
               </div>
 
-              <clr-tooltip-content
-                clrPosition="left"
-                clrSize="lg"
-                *clrIfOpen
-                #tooltipContent
-              >
+              <clr-tooltip-content clrPosition="left" clrSize="lg" *clrIfOpen>
                 <div class="alert-history">
                   <h6>
                     <cds-icon shape="history" class="is-solid"></cds-icon>
@@ -105,23 +98,29 @@
                         let occurrence of summary.mostFrequentAlert.history
                       "
                       class="timeline-item"
-                      [ngClass]="occurrence.severity.toLowerCase()"
+                      [ngClass]="
+                        summary.mostFrequentAlert.severity.toLowerCase()
+                      "
                     >
                       <div class="timeline-date">
-                        {{ formatDate(occurrence.date) }}
+                        {{ occurrence.date | date : 'MMM d, y, h:mm a' }}
                       </div>
                       <div
                         class="timeline-severity"
-                        [ngClass]="occurrence.severity.toLowerCase()"
+                        [ngClass]="
+                          summary.mostFrequentAlert.severity.toLowerCase()
+                        "
                       >
                         <cds-icon
-                          [attr.shape]="getSeverityIcon(occurrence.severity)"
+                          [attr.shape]="
+                            getSeverityIcon(summary.mostFrequentAlert.severity)
+                          "
                           class="is-solid"
                         ></cds-icon>
-                        {{ occurrence.severity }}
+                        {{ summary.mostFrequentAlert.severity }}
                       </div>
                       <div class="timeline-details">
-                        {{ occurrence.details }}
+                        Alert ID: {{ occurrence.alertId }}
                       </div>
                     </div>
                   </div>
@@ -139,22 +138,24 @@
                 <clr-tooltip>
                   <div
                     class="alert-trigger"
-                    [ngClass]="
-                      alert.latestAlert.alertType.severity.toLowerCase()
-                    "
+                    [ngClass]="alert.severity.toLowerCase()"
                     clrTooltipTrigger
                   >
                     <div class="alert-header">
                       <cds-icon
-                        [attr.shape]="
-                          getSeverityIcon(alert.latestAlert.alertType.severity)
-                        "
+                        [attr.shape]="getSeverityIcon(alert.severity)"
                         class="is-solid"
                       ></cds-icon>
                       <span class="alert-type">{{ alert.type }}</span>
                       <span class="alert-count"
                         >{{ alert.count }} occurrences</span
                       >
+                    </div>
+
+                    <div class="alert-meta" *ngIf="alert.taskId">
+                      <span>
+                        <strong>Task ID:</strong> {{ alert.taskId }}
+                      </span>
                     </div>
                   </div>
 
@@ -173,25 +174,23 @@
                         <div
                           *ngFor="let occurrence of alert.history"
                           class="timeline-item"
-                          [ngClass]="occurrence.severity.toLowerCase()"
+                          [ngClass]="alert.severity.toLowerCase()"
                         >
                           <div class="timeline-date">
-                            {{ formatDate(occurrence.date) }}
+                            {{ occurrence.date }}
                           </div>
                           <div
                             class="timeline-severity"
-                            [ngClass]="occurrence.severity.toLowerCase()"
+                            [ngClass]="alert.severity.toLowerCase()"
                           >
                             <cds-icon
-                              [attr.shape]="
-                                getSeverityIcon(occurrence.severity)
-                              "
+                              [attr.shape]="getSeverityIcon(alert.severity)"
                               class="is-solid"
                             ></cds-icon>
-                            {{ occurrence.severity }}
+                            {{ alert.severity }}
                           </div>
                           <div class="timeline-details">
-                            {{ occurrence.details }}
+                            Alert ID: {{ occurrence.alertId }}
                           </div>
                         </div>
                       </div>
@@ -335,7 +334,7 @@
         </div>
       </clr-dg-cell>
       <clr-dg-cell>{{ formatDate(alert.creationDate) }}</clr-dg-cell>
-      <clr-dg-cell >{{ alert.alertType.name }}</clr-dg-cell>
+      <clr-dg-cell>{{ alert.alertType.name }}</clr-dg-cell>
       <clr-dg-cell>
         <span style="font-weight: bold">{{ getAlertReason(alert) }}</span>
         <ng-container [ngSwitch]="alert.alertType.name">
