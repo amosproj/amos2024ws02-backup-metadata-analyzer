@@ -128,7 +128,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
 
-            <!-- Other Repeated Alerts -->
+
             <div
               *ngIf="summary.repeatedAlerts.length > 1"
               class="repeated-alerts"
@@ -334,7 +334,7 @@
         </div>
       </clr-dg-cell>
       <clr-dg-cell>{{ formatDate(alert.creationDate) }}</clr-dg-cell>
-      <clr-dg-cell>{{ alert.alertType.name }}</clr-dg-cell>
+      <clr-dg-cell class="break-word">{{ alert.alertType.name }}</clr-dg-cell>
       <clr-dg-cell>
         <span style="font-weight: bold">{{ getAlertReason(alert) }}</span>
         <ng-container [ngSwitch]="alert.alertType.name">

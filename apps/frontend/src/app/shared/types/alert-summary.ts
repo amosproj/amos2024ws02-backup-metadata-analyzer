@@ -1,5 +1,4 @@
 import { SeverityType } from '../enums/severityType';
-import { Alert } from './alert';
 
 // Interface for the history items in repeated alerts
 export interface AlertHistoryItem {
@@ -24,10 +23,4 @@ export interface AlertSummary {
   warningAlerts: number;
   repeatedAlerts: RepeatedAlert[];
   mostFrequentAlert: RepeatedAlert;
-}
-
-export interface AlertSeverityStatistic {
-  criticalAlerts: number;
-  warningAlerts: number;
-  infoAlerts: number;
 }
