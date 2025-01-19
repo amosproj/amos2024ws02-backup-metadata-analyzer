@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Get,
   Injectable,
   NotFoundException,
   OnModuleInit,
@@ -39,10 +40,11 @@ import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
 import { AlertStatisticsDto } from './dto/alertStatistics.dto';
+import { AlertOcurrenceDto, AlertSummaryDto, RepeatedAlertDto } from './dto/alertSummary';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
-  alertRepositories: Repository<any>[] = [];
+  alertRepositories: Repository<Alert>[] = [];
 
   constructor(
     @InjectRepository(AlertTypeEntity)
@@ -121,6 +123,98 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       alertStatisticsDto.criticalAlerts += criticalAlerts;
     }
     return alertStatisticsDto;
+  }
+
+
+  async getRepetitions(): Promise<AlertSummaryDto> {
+    const retAlerts: RepeatedAlertDto[] = [];
+
+    for (const repository of this.alertRepositories) {
+      if (repository === this.storageFillRepository) {
+        await this.fetchRepeatedStorageAlerts(retAlerts); // adds alerts to retAlerts
+      } else {
+
+        // get History of task associated alerts
+        const repeatedAlerts = await repository
+          .createQueryBuilder('alert')
+          .select('alertType.severity, alertType.name AS type, backup.taskId, COUNT(alert.id) as count')
+          .leftJoin('alert.backup', 'backup')
+          .leftJoin('alert.alertType', 'alertType')
+          .where('backup.taskId IS NOT NULL')
+          .groupBy('backup.taskId, alertType.severity, alertType.name')
+          .having('COUNT(alert.id) > 1')
+          .getRawMany() as RepeatedAlertDto[];
+
+        for (const repeatedAlert of repeatedAlerts) {
+          const history: AlertOcurrenceDto[] = [];
+          if (repeatedAlert.taskId && repeatedAlert.type) {
+            const alertEntities = await repository.find({
+              where: {
+                backup: { taskId: { id: repeatedAlert.taskId } },
+                alertType: { name: repeatedAlert.type as unknown as string },
+              },
+              order: {
+                creationDate: 'DESC',
+              },
+            });
+            for (const alertEntity of alertEntities) {
+              history.push({
+                date: alertEntity.creationDate,
+                alertId: alertEntity.id,
+              });
+            }
+          }
+          repeatedAlert.history = history;
+        }
+        retAlerts.push(...repeatedAlerts);
+      }
+      retAlerts.sort((a, b) => b.count - a.count);
+    }
+
+    const alertStatisticsDto: AlertStatisticsDto = await this.getStatistics();
+    const alertSummaryDto: AlertSummaryDto = {
+      infoAlerts: alertStatisticsDto.infoAlerts,
+      criticalAlerts: alertStatisticsDto.criticalAlerts,
+      warningAlerts: alertStatisticsDto.warningAlerts,
+      repeatedAlerts: retAlerts,
+      mostFrequentAlert: retAlerts[0],
+    };
+
+    return alertSummaryDto;
+  }
+
+
+
+
+  private async fetchRepeatedStorageAlerts(retAlerts: RepeatedAlertDto[]) {
+    {
+      const repeatedStorageAlerts = await this.storageFillRepository
+        .createQueryBuilder('alert')
+        .select('alertType.severity, alertType.name AS type, COUNT(alert.id) as count')
+        .leftJoin('alert.alertType', 'alertType')
+        .groupBy('alert.dataStoreName, alertType.severity, alertType.name')
+        .having('COUNT(alert.id) > 1')
+        .getRawMany() as RepeatedAlertDto[];
+      // get History of storage associated alerts
+      for (const repeatedStorageAlert of repeatedStorageAlerts) {
+        const history: AlertOcurrenceDto[] = [];
+
+        const alertEntities = await this.storageFillRepository.find({
+          where: {
+            dataStoreName: repeatedStorageAlert.storageId,
+            alertType: { name: repeatedStorageAlert.type as unknown as string },
+          },
+          order: {
+            creationDate: 'DESC',
+          },
+        });
+        for (const alertEntity of alertEntities) {
+          history.push({  date: alertEntity.creationDate, alertId: alertEntity.id });
+        }
+        repeatedStorageAlert.history = history;
+      }
+      retAlerts.push(...repeatedStorageAlerts);
+    }
   }
 
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
