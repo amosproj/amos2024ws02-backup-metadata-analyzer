@@ -53,31 +53,18 @@ export class AlertingController {
     return this.alertingService.getStatistics();
   }
 
-  @Get('testRepetitions')
+  @Get('repetitions')
   @ApiOperation({
     summary: 'Returns Information about repeated Alerts.',
   })
   @ApiResponse({
     status: 200,
     description: 'The number of Info, Warning and Critical alerts.',
-    type: Array<Alert>,
   })
   async getTestRepetitions(): Promise<AlertSummaryDto> {
-    return this.alertingService.getRepetitionsAsArray();
+    return this.alertingService.getRepetitions();
   }
 
-  // @Get('repetitions')
-  // @ApiOperation({
-  //   summary: 'Returns Information about repeated Alerts.',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'The number of Info, Warning and Critical alerts.',
-  //   type: AlertStatisticsDto,
-  // })
-  // async getRepetitions(): Promise<AlertSummaryDto> {
-  //   return this.alertingService.getRepetitions();
-  // }
 
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })

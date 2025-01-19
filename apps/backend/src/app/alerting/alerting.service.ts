@@ -126,25 +126,23 @@ export class AlertingService extends PaginationService implements OnModuleInit {
   }
 
 
-  async getRepetitionsAsArray(): Promise<AlertSummaryDto> {
+  async getRepetitions(): Promise<AlertSummaryDto> {
     const retAlerts: RepeatedAlertDto[] = [];
     
     for (const repository of this.alertRepositories) {
       if (repository === this.storageFillRepository) {
         await this.fetchRepeatedStorageAlerts(retAlerts); // adds alerts to retAlerts
       } else {
+
+      // get History of task associated alerts
       const repeatedAlerts = await repository
         .createQueryBuilder('alert')
-        .select('backup.taskId, COUNT(alert.id) as count')
-        .addSelect('alertType.severity, alertType.name AS type')
+        .select('alertType.severity, alertType.name AS type, backup.taskId, COUNT(alert.id) as count')
         .leftJoin('alert.backup', 'backup')
         .leftJoin('alert.alertType', 'alertType')
         .groupBy('backup.taskId, alertType.severity, alertType.name')
         .having('COUNT(alert.id) > 1')
         .getRawMany() as RepeatedAlertDto[];
-
-
-      // get History of task associated alerts
 
       for (const repeatedAlert of repeatedAlerts) {
         const history: Date[] = [];
