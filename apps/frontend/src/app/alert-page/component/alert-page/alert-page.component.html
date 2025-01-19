@@ -54,7 +54,7 @@
               <div
                 class="alert-trigger"
                 [ngClass]="
-                  summary.mostFrequentAlert?.latestAlert?.alertType?.severity?.toLowerCase()
+                  summary.mostFrequentAlert.latestAlert.alertType.severity.toLowerCase()
                 "
                 clrTooltipTrigger
               >
@@ -62,8 +62,7 @@
                   <cds-icon
                     [attr.shape]="
                       getSeverityIcon(
-                        summary.mostFrequentAlert?.latestAlert?.alertType
-                          ?.severity
+                        summary.mostFrequentAlert.latestAlert.alertType.severity
                       )
                     "
                     class="is-solid"
@@ -88,7 +87,12 @@
                 </div>
               </div>
 
-              <clr-tooltip-content clrPosition="right" clrSize="lg" *clrIfOpen #tooltipContent>
+              <clr-tooltip-content
+                clrPosition="left"
+                clrSize="lg"
+                *clrIfOpen
+                #tooltipContent
+              >
                 <div class="alert-history">
                   <h6>
                     <cds-icon shape="history" class="is-solid"></cds-icon>
@@ -101,20 +105,20 @@
                         let occurrence of summary.mostFrequentAlert.history
                       "
                       class="timeline-item"
-                      [ngClass]="occurrence?.severity?.toLowerCase()"
+                      [ngClass]="occurrence.severity.toLowerCase()"
                     >
                       <div class="timeline-date">
                         {{ formatDate(occurrence.date) }}
                       </div>
                       <div
                         class="timeline-severity"
-                        [ngClass]="occurrence?.severity?.toLowerCase()"
+                        [ngClass]="occurrence.severity.toLowerCase()"
                       >
                         <cds-icon
-                          [attr.shape]="getSeverityIcon(occurrence?.severity)"
+                          [attr.shape]="getSeverityIcon(occurrence.severity)"
                           class="is-solid"
                         ></cds-icon>
-                        {{ occurrence?.severity }}
+                        {{ occurrence.severity }}
                       </div>
                       <div class="timeline-details">
                         {{ occurrence.details }}
@@ -136,16 +140,14 @@
                   <div
                     class="alert-trigger"
                     [ngClass]="
-                      alert?.latestAlert?.alertType?.severity?.toLowerCase()
+                      alert.latestAlert.alertType.severity.toLowerCase()
                     "
                     clrTooltipTrigger
                   >
                     <div class="alert-header">
                       <cds-icon
                         [attr.shape]="
-                          getSeverityIcon(
-                            alert?.latestAlert?.alertType?.severity
-                          )
+                          getSeverityIcon(alert.latestAlert.alertType.severity)
                         "
                         class="is-solid"
                       ></cds-icon>
@@ -157,7 +159,7 @@
                   </div>
 
                   <clr-tooltip-content
-                    clrPosition="right"
+                    clrPosition="left"
                     clrSize="lg"
                     *clrIfOpen
                   >
@@ -171,22 +173,22 @@
                         <div
                           *ngFor="let occurrence of alert.history"
                           class="timeline-item"
-                          [ngClass]="occurrence?.severity?.toLowerCase()"
+                          [ngClass]="occurrence.severity.toLowerCase()"
                         >
                           <div class="timeline-date">
                             {{ formatDate(occurrence.date) }}
                           </div>
                           <div
                             class="timeline-severity"
-                            [ngClass]="occurrence?.severity?.toLowerCase()"
+                            [ngClass]="occurrence.severity.toLowerCase()"
                           >
                             <cds-icon
                               [attr.shape]="
-                                getSeverityIcon(occurrence?.severity)
+                                getSeverityIcon(occurrence.severity)
                               "
                               class="is-solid"
                             ></cds-icon>
-                            {{ occurrence?.severity }}
+                            {{ occurrence.severity }}
                           </div>
                           <div class="timeline-details">
                             {{ occurrence.details }}

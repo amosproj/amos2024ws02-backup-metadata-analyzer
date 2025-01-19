@@ -8,6 +8,8 @@ import { firstValueFrom, of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Alert } from '../../../shared/types/alert';
 import { BackupType } from '../../../shared/enums/backup.types';
+import { RepeatedAlert } from '../../../shared/types/alert-summary';
+import { ClrDatagridStateInterface } from '@clr/angular';
 
 describe('AlertPageComponent', () => {
   let component: AlertPageComponent;
@@ -64,10 +66,17 @@ describe('AlertPageComponent', () => {
     },
   };
 
+  const mockAlertStatistics = {
+    criticalAlerts: 1,
+    warningAlerts: 1,
+    infoAlerts: 0,
+  };
+
   const mockServices = {
     alertService: {
       getAllAlerts: vi.fn().mockReturnValue(of(mockAPIResponse)),
       getRefreshObservable: vi.fn().mockReturnValue(of(null)),
+      getAlertSeverityStatistics: vi.fn().mockReturnValue(of(mockAlertStatistics))
     },
     alertUtils: {
       formatDate: vi.fn().mockReturnValue('formatted-date'),
@@ -186,6 +195,111 @@ describe('AlertPageComponent', () => {
 
       expect(destroySpy).toHaveBeenCalled();
       expect(completeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('Filtering', () => {
+    it('should update filter options when refresh is called', () => {
+      const mockState: ClrDatagridStateInterface<any> = {
+        page: { size: 20, current: 2 },
+        sort: { by: 'date', reverse: true },
+        filters: [],
+      };
+
+      component.refresh(mockState);
+
+      expect(component.loading).toBe(false);
+    });
+
+    it('should handle filter changes correctly', async () => {
+      component.alertDateFilter.ranges = {
+        fromDate: new Date().toISOString(),
+        toDate: new Date().toISOString(),
+        severity: null,
+        alertType: null,
+        id: null,
+      };
+      component.alertSeverityFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        severity: SeverityType.CRITICAL,
+        alertType: null,
+        id: null,
+      };
+      component.alertTypeFilter.ranges = {
+        fromDate: null,
+        toDate: null,
+        severity: null,
+        alertType: 'STORAGE_FILL_ALERT',
+        id: null,
+      };
+
+      component.ngOnInit();
+      const alerts = await firstValueFrom(component.alerts$);
+      expect(alerts).toBeDefined();
+    });
+  });
+
+  describe('Severity Icons', () => {
+    it('should return correct icon for each severity type', () => {
+      expect(component.getSeverityIcon(SeverityType.CRITICAL)).toBe(
+        'error-standard'
+      );
+      expect(component.getSeverityIcon(SeverityType.WARNING)).toBe(
+        'warning-standard'
+      );
+      expect(component.getSeverityIcon(SeverityType.INFO)).toBe(
+        'info-standard'
+      );
+      expect(component.getSeverityIcon(undefined)).toBe('info-standard');
+    });
+
+    it('should get correct icon for most frequent alert', () => {
+      const mockRepeatedAlert: RepeatedAlert = {
+        type: 'SOME_ALERT_TYPE',
+        count: 1,
+        latestAlert: {
+          alertType: {
+            severity: SeverityType.CRITICAL,
+            id: '',
+            name: '',
+            user_active: true,
+            master_active: true,
+          },
+          id: '',
+          creationDate: new Date(),
+        },
+      };
+      expect(component.getMostFrequentAlertIcon(mockRepeatedAlert)).toBe(
+        'error-standard'
+      );
+    });
+  });
+
+  describe('Alert Summary Calculation', () => {
+    it('should calculate alert summary correctly', async () => {
+      component.ngOnInit();
+      const summary = await firstValueFrom(component.alertSummary$);
+
+      expect(summary).toHaveProperty('criticalCount');
+      expect(summary).toHaveProperty('warningCount');
+      expect(summary).toHaveProperty('infoCount');
+      expect(summary).toHaveProperty('repeatedAlerts');
+    });
+
+    it('should handle empty alerts array', async () => {
+      mockServices.alertService.getAllAlerts.mockReturnValueOnce(
+        of({
+          data: [],
+          paginationData: { total: 0, limit: 10, offset: 0 },
+        })
+      );
+
+      component.ngOnInit();
+      const summary = await firstValueFrom(component.alertSummary$);
+
+      expect(summary.totalCount).toBe(0);
+      expect(summary.repeatedAlerts).toHaveLength(0);
     });
   });
 });
