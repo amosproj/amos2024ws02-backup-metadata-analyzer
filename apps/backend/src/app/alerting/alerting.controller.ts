@@ -31,6 +31,7 @@ import { AlertFilterDto } from './dto/alertFilter.dto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
 import { AlertStatisticsDto } from './dto/alertStatistics.dto';
+import { AlertSummaryDto } from './dto/alertSummary';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -51,6 +52,19 @@ export class AlertingController {
   async getStatistics(): Promise<AlertStatisticsDto> {
     return this.alertingService.getStatistics();
   }
+
+  @Get('repetitions')
+  @ApiOperation({
+    summary: 'Returns Information about repeated Alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+  })
+  async getTestRepetitions(): Promise<AlertSummaryDto> {
+    return this.alertingService.getRepetitions();
+  }
+
 
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })
