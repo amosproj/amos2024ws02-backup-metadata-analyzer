@@ -70,13 +70,22 @@ describe('AlertPageComponent', () => {
     criticalAlerts: 1,
     warningAlerts: 1,
     infoAlerts: 0,
+    repeatedAlerts: [],
+    mostFrequentAlert: {
+      severity: SeverityType.CRITICAL,
+      type: '',
+      taskId: '',
+      count: '',
+      history: [],
+      latestAlert: null,
+    },
   };
 
   const mockServices = {
     alertService: {
       getAllAlerts: vi.fn().mockReturnValue(of(mockAPIResponse)),
       getRefreshObservable: vi.fn().mockReturnValue(of(null)),
-      getAlertSeverityStatistics: vi.fn().mockReturnValue(of(mockAlertStatistics))
+      getAlertRepetitions: vi.fn().mockReturnValue(of(mockAlertStatistics)),
     },
     alertUtils: {
       formatDate: vi.fn().mockReturnValue('formatted-date'),
@@ -240,50 +249,14 @@ describe('AlertPageComponent', () => {
     });
   });
 
-  describe('Severity Icons', () => {
-    it('should return correct icon for each severity type', () => {
-      expect(component.getSeverityIcon(SeverityType.CRITICAL)).toBe(
-        'error-standard'
-      );
-      expect(component.getSeverityIcon(SeverityType.WARNING)).toBe(
-        'warning-standard'
-      );
-      expect(component.getSeverityIcon(SeverityType.INFO)).toBe(
-        'info-standard'
-      );
-      expect(component.getSeverityIcon(undefined)).toBe('info-standard');
-    });
-
-    it('should get correct icon for most frequent alert', () => {
-      const mockRepeatedAlert: RepeatedAlert = {
-        type: 'SOME_ALERT_TYPE',
-        count: 1,
-        latestAlert: {
-          alertType: {
-            severity: SeverityType.CRITICAL,
-            id: '',
-            name: '',
-            user_active: true,
-            master_active: true,
-          },
-          id: '',
-          creationDate: new Date(),
-        },
-      };
-      expect(component.getMostFrequentAlertIcon(mockRepeatedAlert)).toBe(
-        'error-standard'
-      );
-    });
-  });
-
   describe('Alert Summary Calculation', () => {
     it('should calculate alert summary correctly', async () => {
       component.ngOnInit();
-      const summary = await firstValueFrom(component.alertSummary$);
+      const summary = await firstValueFrom(component['alertSummary$']);
 
-      expect(summary).toHaveProperty('criticalCount');
-      expect(summary).toHaveProperty('warningCount');
-      expect(summary).toHaveProperty('infoCount');
+      expect(summary).toHaveProperty('criticalAlerts');
+      expect(summary).toHaveProperty('warningAlerts');
+      expect(summary).toHaveProperty('infoAlerts');
       expect(summary).toHaveProperty('repeatedAlerts');
     });
 
@@ -296,9 +269,8 @@ describe('AlertPageComponent', () => {
       );
 
       component.ngOnInit();
-      const summary = await firstValueFrom(component.alertSummary$);
+      const summary = await firstValueFrom(component['alertSummary$']);
 
-      expect(summary.totalCount).toBe(0);
       expect(summary.repeatedAlerts).toHaveLength(0);
     });
   });
