@@ -140,6 +140,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
           .select('alertType.severity, alertType.name AS type, backup.taskId, COUNT(alert.id) as count')
           .leftJoin('alert.backup', 'backup')
           .leftJoin('alert.alertType', 'alertType')
+          .where('backup.taskId IS NOT NULL')
           .groupBy('backup.taskId, alertType.severity, alertType.name')
           .having('COUNT(alert.id) > 1')
           .getRawMany() as RepeatedAlertDto[];
