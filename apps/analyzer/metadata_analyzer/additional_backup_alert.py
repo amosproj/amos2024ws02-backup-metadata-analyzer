@@ -1,4 +1,4 @@
-class CreationDateAlert:
+class AdditionalBackupAlert:
     def __init__(self, result):
         self.backup_uuid = result.uuid
         self.date = result.start_time

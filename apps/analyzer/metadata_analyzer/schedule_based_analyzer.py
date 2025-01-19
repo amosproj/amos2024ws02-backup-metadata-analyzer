@@ -1,7 +1,9 @@
 from collections import defaultdict
 from datetime import datetime, timedelta, time
 import sys
-
+from metadata_analyzer.creation_date_alert import CreationDateAlert
+from metadata_analyzer.missing_backup_alert import MissingBackupAlert
+from metadata_analyzer.additional_backup_alert import AdditionalBackupAlert
 
 class ScheduleBasedAnalyzer:
     def __init__(self, backend):
@@ -30,6 +32,15 @@ class ScheduleBasedAnalyzer:
                 task, results, schedules, task_events, start_date, stop_date
             )
 
+        for alert in alerts:
+            print(alert.as_json())
+            if isinstance(alert, CreationDateAlert):
+                self.backend.create_creation_date_alert(alert.as_json())
+            elif isinstance(alert, MissingBackupAlert):
+                self.backend.create_missing_backup_alert(alert.as_json())
+            elif isinstance(alert, AdditionalBackupAlert):
+                self.backend.create_additional_backup_alert(alert.as_json())
+
         # TODO: create alert
         count = 0
         return {"count": count}
@@ -54,9 +65,10 @@ class ScheduleBasedAnalyzer:
                 used_schedule, schedule_groups[used_schedule.name], start_date, stop_date
             )
 
-        return []
+        return alerts
 
     def _analyze_one_task_one_schedule(self, schedule, results, start_date, stop_date):
+        alerts = []
         print(schedule, results)
         tolerance = self.calculate_tolerance(schedule)
         print(tolerance)
@@ -68,12 +80,28 @@ class ScheduleBasedAnalyzer:
             right_end = cur_ref + (next_ref - cur_ref) / 2 # Exclusive
             print(left_end, right_end)
 
-            left_tolerance = cur_ref - tolerance
-            right_tolerance = cur_ref + tolerance
-            print("Tol:", left_tolerance, right_tolerance)
+            cur_results = [result for result in results if left_end <= result.start_time < right_end]
+            print(cur_results)
+
+            if len(cur_results) > 0:
+                nearest_result = min(cur_results, key=lambda result: abs(result.start_time - cur_ref))
+                smallest_diff = abs(nearest_result.start_time - cur_ref)
+            else:
+                nearest_result = None
+            print(nearest_result, smallest_diff)
+
+            if nearest_result is None:
+                alerts.append(MissingBackupAlert(cur_ref))
+
+            if smallest_diff > tolerance:
+                alerts.append(CreationDateAlert(nearest_result, cur_ref))
+            
+            for result in cur_results:
+                if nearest_result is None or result.uuid != nearest_result.uuid:
+                    alerts.append(AdditionalBackupAlert(result))
 
             last_ref, cur_ref, next_ref = cur_ref, next_ref, self.calculate_next_reference_time(schedule, next_ref)
-        return []
+        return alerts
 
     def calculate_tolerance(self, schedule):
         return 0.1 * self.calculate_expected_delta(schedule);

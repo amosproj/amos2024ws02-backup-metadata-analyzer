@@ -206,7 +206,7 @@ def test_alerts_additional_backup():
     assert backend.additional_backup_alerts == [
         {
             "backupId": mock_result2.uuid,
-            "date": mock_result2.start_time,
+            "date": mock_result2.start_time.isoformat(),
         }
     ]
 
@@ -265,11 +265,11 @@ def test_alerts_multiple_additional_backups():
     assert backend.additional_backup_alerts == [
         {
             "backupId": mock_result2.uuid,
-            "date": mock_result2.start_time,
+            "date": mock_result2.start_time.isoformat(),
         },
         {
             "backupId": mock_result3.uuid,
-            "date": mock_result3.start_time,
+            "date": mock_result3.start_time.isoformat(),
         },
     ]
 
@@ -310,7 +310,7 @@ def test_alerts_missing_backup():
     assert backend.creation_date_alerts == []
     assert backend.missing_backup_alerts == [
         {
-            "referenceTime": datetime.fromisoformat("2000-01-01T15:00:00"),
+            "referenceDate": "2000-01-01T15:00:00",
         }
     ]
     assert backend.additional_backup_alerts == []
@@ -352,10 +352,10 @@ def test_alerts_multiple_missing_backups():
     assert backend.creation_date_alerts == []
     assert backend.missing_backup_alerts == [
         {
-            "referenceTime": datetime.fromisoformat("2000-01-01T14:00:00"),
+            "referenceDate": "2000-01-01T14:00:00",
         },
         {
-            "referenceTime": datetime.fromisoformat("2000-01-01T16:00:00"),
+            "referenceDate": "2000-01-01T16:00:00",
         },
     ]
     assert backend.additional_backup_alerts == []
