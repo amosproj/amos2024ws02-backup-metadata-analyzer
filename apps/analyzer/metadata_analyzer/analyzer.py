@@ -212,7 +212,10 @@ class Analyzer:
 		results = list(Analyzer.database.get_results())
 		schedules = list(Analyzer.database.get_schedules())
 		task_events = list(Analyzer.database.get_task_events())
-		start_date = Analyzer._get_start_date(results, "CREATION_DATE_ALERT", None) # TODO: change
+		start_date = max(
+			Analyzer._get_start_date(results, "CREATION_DATE_ALERT", None),
+			Analyzer._get_start_date(results, "ADDITIONAL_BACKUP_ALERT", None),
+		)
 		return Analyzer.schedule_based_analyzer.analyze(results, schedules, task_events, alert_limit, start_date, stop_date)
 
 	def simple_rule_based_analysis_storage_capacity(alert_limit):
