@@ -186,8 +186,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     {
       const repeatedStorageAlerts = await this.storageFillRepository
         .createQueryBuilder('alert')
-        .select('COUNT(alert.id) as count')
-        .addSelect('alertType.severity, alertType.name AS type')
+        .select('alertType.severity, alertType.name AS type, COUNT(alert.id) as count')
         .leftJoin('alert.alertType', 'alertType')
         .groupBy('alert.dataStoreName, alertType.severity, alertType.name')
         .having('COUNT(alert.id) > 1')
