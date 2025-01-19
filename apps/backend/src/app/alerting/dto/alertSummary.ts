@@ -1,17 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean } from 'class-validator';
 import { AlertTypeEntity } from '../entity/alertType.entity';
 import { Alert } from '../entity/alerts/alert';
 import { SeverityType } from './severityType';
 
 export class AlertSummaryDto {
-  @ApiProperty({
-    description: 'Status of the alert, if it is active or not',
-    example: true,
-  })
-  status!: boolean;
-
-  @ApiProperty({ 
+ @ApiProperty({ 
     description: 'Number of Info alerts',
     example: 0 
 })
