@@ -223,7 +223,7 @@
     [clrDgLoading]="loading"
     (clrDgRefresh)="refresh($event)"
   >
-    <clr-dg-column [clrDgField]="'severity'">
+    <clr-dg-column [clrDgField]="'severity'" [clrDgColAutoWidth]="true">
       <ng-container *clrDgHideableColumn>
         Severity
         <clr-dg-filter [clrDgFilter]="alertSeverityFilter">
@@ -305,7 +305,7 @@
         </clr-dg-filter>
       </ng-container>
     </clr-dg-column>
-    <clr-dg-column>Details</clr-dg-column>
+    <clr-dg-column [clrDgColAutoWidth]="true">Details</clr-dg-column>
 
     <clr-dg-placeholder>We couldn't find any alerts!</clr-dg-placeholder>
     <clr-dg-row *ngFor="let alert of alerts.data" [clrDgItem]="alert">
@@ -335,7 +335,7 @@
         </div>
       </clr-dg-cell>
       <clr-dg-cell>{{ formatDate(alert.creationDate) }}</clr-dg-cell>
-      <clr-dg-cell>{{ alert.alertType.name }}</clr-dg-cell>
+      <clr-dg-cell >{{ alert.alertType.name }}</clr-dg-cell>
       <clr-dg-cell>
         <span style="font-weight: bold">{{ getAlertReason(alert) }}</span>
         <ng-container [ngSwitch]="alert.alertType.name">

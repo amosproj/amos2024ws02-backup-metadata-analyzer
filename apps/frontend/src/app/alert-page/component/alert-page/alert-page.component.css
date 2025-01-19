@@ -242,11 +242,11 @@ clr-tooltip {
   z-index: 1000;
 }.alert-history {
   max-width: 400px;
-  max-height: 500px;
+  max-height: 400px;
   padding: 1.5rem;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
   scrollbar-width: thin;
   pointer-events: auto !important; /* Enables interaction with tooltip content */
@@ -309,7 +309,7 @@ clr-tooltip {
 .timeline-item::before {
   content: '';
   position: absolute;
-  left: -2rem;
+  left: -2.2rem;
   top: 0;
   width: 12px;
   height: 12px;
@@ -373,83 +373,5 @@ clr-tooltip {
   padding: 0.75rem;
   border-radius: 6px;
   margin-top: 0.5rem;
-}.alert-history {
-  max-width: 400px;
-  max-height: 400px;
-  padding: 1rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  overflow-y: auto;
-  scrollbar-width: thin;
 }
 
-
-.history-item {
-  position: relative;
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  border-radius: 6px;
-  background: #f8f9fa;
-  transition: transform 0.2s ease;
-}
-
-.history-item:hover {
-  transform: translateX(4px);
-  background: #f0f2f4;
-}
-
-.history-item:last-child {
-  margin-bottom: 0;
-}
-
-.history-date {
-  font-size: 0.8rem;
-  color: #666;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.4rem;
-}
-
-.history-date::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ddd;
-}
-
-.history-severity {
-  display: inline-block;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-bottom: 0.4rem;
-}
-
-.history-severity.critical {
-  color: #fff;
-  background: #c92100;
-}
-
-.history-severity.warning {
-  color: #fff;
-  background: #f57600;
-}
-
-.history-severity.info {
-  color: #fff;
-  background: #0072a3;
-}
-
-.history-details {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  color: #444;
-  padding-left: 1rem;
-  border-left: 2px solid #eee;
-}
