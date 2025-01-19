@@ -1,29 +1,30 @@
-import { SeverityType } from "../enums/severityType";
-import { Alert } from "./alert";
+import { SeverityType } from '../enums/severityType';
+import { Alert } from './alert';
 
-export interface AlertOccurrence {
-    date: Date;
-    details: string;
-    severity: SeverityType;
-  }
-  
+// Interface for the history items in repeated alerts
+export interface AlertHistoryItem {
+  date: string;
+  alertId: string;
+}
+
+// Interface for repeated alerts
 export interface RepeatedAlert {
-    type: string;
-    count: number;
-    latestAlert: Alert;
-    history?: AlertOccurrence[];
-    taskId?: string;    // For task-related alerts
-    storageId?: string; // For storage-related alerts
-  }
-  
+  latestAlert: any;
+  severity: SeverityType;
+  type: string;
+  taskId: string;
+  count: string;
+  history: AlertHistoryItem[];
+}
+
+// Main interface for alert summary from backend
 export interface AlertSummary {
-    criticalCount: number;
-    warningCount: number;
-    infoCount: number;
-    totalCount: number;
-    repeatedAlerts: RepeatedAlert[];
-    mostFrequentAlert?: RepeatedAlert;
-  }
+  infoAlerts: number;
+  criticalAlerts: number;
+  warningAlerts: number;
+  repeatedAlerts: RepeatedAlert[];
+  mostFrequentAlert: RepeatedAlert;
+}
 
 export interface AlertSeverityStatistic {
   criticalAlerts: number;
