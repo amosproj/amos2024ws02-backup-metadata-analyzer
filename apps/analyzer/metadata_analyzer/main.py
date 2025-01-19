@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from datetime import datetime
 from metadata_analyzer.database import Database
 from metadata_analyzer.simple_analyzer import SimpleAnalyzer
 from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
@@ -91,11 +92,12 @@ def simple_rule_based_analysis_inc():
 @swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisCreationDates.yaml'), validation=False)
 def simple_rule_based_analysis_creation_dates():
     alert_limit = request.args.get("alertLimit")
+    now = datetime.now()
 
     try:
         int(alert_limit)
         return jsonify(
-            Analyzer.schedule_based_analysis(int(alert_limit))
+            Analyzer.schedule_based_analysis(int(alert_limit), now)
         )
     except ValueError:
         return "Invalid value for alert limit", 400

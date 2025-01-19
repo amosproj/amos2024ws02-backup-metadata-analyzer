@@ -7,7 +7,7 @@ class ScheduleBasedAnalyzer:
     def __init__(self, backend):
         self.backend = backend
 
-    def analyze(self, results, schedules, task_events, alert_limit, start_date):
+    def analyze(self, results, schedules, task_events, alert_limit, start_date, stop_date):
         print("Schedule based analysis")
         # Group the results by their task
         groups = defaultdict(list)
@@ -29,14 +29,14 @@ class ScheduleBasedAnalyzer:
             if task != "ntx_ase-vm1":  # TODO: remove
                 continue
             alerts += self._analyze_one_task(
-                task, results, schedules, task_events, start_date
+                task, results, schedules, task_events, start_date, stop_date
             )
 
         # TODO: create alert
         count = 0
         return {"count": count}
 
-    def _analyze_one_task(self, task, results, schedules, task_events, start_date):
+    def _analyze_one_task(self, task, results, schedules, task_events, start_date, stop_date):
         used_schedule_names = [
             task_event.schedule
             for task_event in task_events
@@ -53,17 +53,20 @@ class ScheduleBasedAnalyzer:
         alerts = []
         for used_schedule in used_schedules:
             alerts += self._analyze_one_task_one_schedule(
-                used_schedule, schedule_groups[used_schedule.name], start_date
+                used_schedule, schedule_groups[used_schedule.name], start_date, stop_date
             )
 
         return []
 
-    def _analyze_one_task_one_schedule(self, schedule, results, start_date):
+    def _analyze_one_task_one_schedule(self, schedule, results, start_date, stop_date):
         print(schedule, results, file=sys.stderr)
-        reference_time = results[0].start_time
-        print(reference_time, file=sys.stderr)
-        next_reference_time = self.calculate_next_reference_time(schedule, reference_time)
-        print(next_reference_time, file=sys.stderr)
+        first_start = results[0].start_time
+        last_ref, cur_ref, next_ref = first_start, first_start, self.calculate_next_reference_time(schedule, first_start) 
+        print(last_ref, cur_ref, next_ref, file=sys.stderr)
+        stop_date = datetime.fromisoformat("2024-10-22") # TODO: remove
+        while cur_ref < stop_date:
+            cur_ref = self.calculate_next_reference_time(schedule, cur_ref)
+            print(cur_ref, file=sys.stderr)
         return []
 
     def calculate_next_reference_time(self, schedule, reference_time):
