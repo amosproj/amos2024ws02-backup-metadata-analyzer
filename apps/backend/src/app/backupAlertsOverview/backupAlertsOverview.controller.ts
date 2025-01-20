@@ -75,4 +75,20 @@ export class BackupAlertsOverviewController {
     );
     return result;
   }
+
+  @Get('count-backups-without-alerts')
+  @ApiOperation({
+    summary: 'Returns the count of backups without any alerts.',
+  })
+  @ApiOkResponse({
+    description: 'Count of backups without any alerts returned.',
+    type: Number,
+  })
+  async getBackupsWithoutAlertsCount(): Promise<number> {
+    this.logger.log('Fetching the count of backups without any alerts.');
+    const count =
+      await this.backupAlertsOverviewService.getBackupWithoutAlertsCount();
+    this.logger.log(`Backups without alerts: ${count}`);
+    return count;
+  }
 }

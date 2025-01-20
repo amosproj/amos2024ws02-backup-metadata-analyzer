@@ -73,4 +73,16 @@ export class BackupAlertsOverviewService {
       severity: severity?.severity || 'UNKNOWN',
     };
   }
+
+  async getBackupWithoutAlertsCount(): Promise<number> {
+    const query = this.backupRepository
+      .createQueryBuilder('bd')
+      .leftJoin('SizeAlert', 'sa', 'bd.id = sa.backupId')
+      .leftJoin('CreationDateAlert', 'cda', 'bd.id = cda.backupId')
+      .where('sa.backupId IS NULL AND cda.backupId IS NULL')
+      .select('COUNT(DISTINCT bd.id)', 'count');
+
+    const result = await query.getRawOne();
+    return Number(result.count);
+  }
 }
