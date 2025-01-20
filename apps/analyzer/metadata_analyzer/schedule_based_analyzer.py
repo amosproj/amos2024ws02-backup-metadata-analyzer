@@ -74,6 +74,9 @@ class ScheduleBasedAnalyzer:
 
         alerts = []
         for used_schedule in used_schedules:
+            if used_schedule.p_base == "CAL": # Not implemented
+                continue
+
             alerts += self._analyze_one_task_one_schedule(
                 used_schedule,
                 schedule_groups[used_schedule.name],
@@ -85,26 +88,40 @@ class ScheduleBasedAnalyzer:
 
     def _analyze_one_task_one_schedule(self, schedule, results, start_date, stop_date):
         alerts = []
-        print(schedule, results)
+        stop_date = min(stop_date, results[-1].start_time + 2 * self.calculate_expected_delta(schedule)) # Stop a potential flood of missing backup alerts (5-min schedule generates 1000s of alerts)
         tolerance = self.calculate_tolerance(schedule)
-        print(tolerance)
-        first_start = results[0].start_time
+        first_start = results[0].start_time # Use the first start and not the start date of the schedule because results doesn't store all backups in the past
         last_ref, cur_ref, next_ref = (
             first_start,
             first_start,
             self.calculate_next_reference_time(schedule, first_start),
         )
+        print(results[0].task, schedule, start_date, stop_date, len(results), cur_ref, next_ref, self.calculate_expected_delta(schedule), file=sys.stderr)
+        num_consecutive_alerts = 0
         while cur_ref < stop_date:
             if last_ref >= start_date:
-                alerts += self._analyze_one_ref(
+                new_alerts = self._analyze_one_ref(
                     results, last_ref, cur_ref, next_ref, tolerance
                 )
+                if new_alerts != []:
+                    num_consecutive_alerts += 1
+                else:
+                    num_consecutive_alerts = 0
+                alerts += new_alerts
+
+            # There are some breaks in the results table which are multiple months long and would generate 10000s of alerts for short schedules 
+            # This is not a pretty fix but the only one I could come up with
+            if num_consecutive_alerts > 10:
+                alerts = []
 
             last_ref, cur_ref, next_ref = (
                 cur_ref,
                 next_ref,
                 self.calculate_next_reference_time(schedule, next_ref),
             )
+        print("Generated", len(alerts), file=sys.stderr)
+        for alert in alerts[:5]:
+            print(alert.as_json(), file=sys.stderr)
         return alerts
 
     def _analyze_one_ref(self, results, last_ref, cur_ref, next_ref, tolerance):
