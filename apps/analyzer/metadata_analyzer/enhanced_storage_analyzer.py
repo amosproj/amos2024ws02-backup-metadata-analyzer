@@ -13,20 +13,72 @@ class EnhancedStorageAnalyzer:
     def analyze_future_storage_capacity(self, data, labeled_data_store, time, high_water_mark, capacity):
         forecasted_overflows = []
 
-        # go through all data_stores
+        # gets names of data_stores that match labels for the backup results
+        distinct_names = set([row.name for row in labeled_data_store])
+        # gets the saveset (as an identifier) for all backups that are relevant for these labels
+        savesets = set([row.saveset for row in labeled_data_store])
+
+        # throws all backups into a dataframe
+        root_df = pd.DataFrame([res.as_dict() for res in data])
+        # removes backups from dataframe by their saveset if they are not saved on the data_stores in question
+        root_df = root_df.loc[root_df["saveset"].isin(savesets)]
+
+        # gets all tasks of the backups that are relevant
+        tasks = root_df['task'].unique()
+        #TODO make into a set
+        
+        #TODO do data cleaning before logic 
+
+        # calculating the share of a task by data_store
+        # groups savesets of backups by the data_store they are saved on
+        data_store_groups = {}
         for row in labeled_data_store:
-            print("reached")
-                
+            if row.name not in data_store_groups:
+                data_store_groups[row.name] = [row.saveset]
+            else:
+                data_store_groups[row.name].append(row.saveset)
 
-        #for data_store in data_stores:
-        #    # Skip data stores with missing data
-        #    if (
-        #       
-        #    ):
-        #        continue
+        # calculating the forecast of backup tasks
+        # groups savesets by their task
+        backup_task_groups = {}
+        df = root_df.groupby("task")
+        print("grouped df by task",flush=True)
+        # starts forecast for every task
+        for task,group in backup_task_groups:
+            #TODO comment forecast back in
+            print("forecast should happen now",flush=True)
+            #self.forecast_storage(group,self.forecast_length)
 
+        print("keys",flush=True)
+        print(list(data_store_groups.keys()),flush=True)
+        print(root_df.head,flush=True)
+
+        for store_group_key in data_store_groups:
+            print("fun")
         
 
+        print("distinct names",flush=True)
+        print(distinct_names,flush=True)
+        # go through all data_stores
+        #for row in labeled_data_store:
+        #    if i < 10:
+        #        print("saveset " + str(row.saveset) + " filled " + str(row.filled) + " capacity " + str(row.capacity),flush=True)
+        #    i = i + 1
+        #    store_backup = []
+        #    df = root_df.loc[root_df["saveset"] == row.saveset]
+            #store_backup.append({"data_frame":df})
+            # TODO assuming datasize is correct value to use here
+            # alternatives: stored_size, total_size
+            #sum_backup_size = df["data_size"].sum()
+            # TODO assuming capacity is represented in gb, data_size is in byte
+            #share_of_store = (sum_backup_size/1000000000) / row.filled
+
+            #store_backup.append({})
+            
+
+            #store_backup.append({"high_water_mark":row.high_water_mark})
+            #store_backup.append({"capacity":row.capacity})
+        
             #    if (
             #        result.task == ""
             #        or result.is_backup == 0
@@ -36,73 +88,13 @@ class EnhancedStorageAnalyzer:
             #        or result.data_size == 0
             #    ):
             #       data.remove(result)
-
-                # TODO when mapping between results and data_stores is found,
-                #  use this information to split up forecasted storage sizes
-                #print("data_store_uuid: ",flush=True)
-                #print(data_store.uuid,flush=True)
-                #print("location_uuid: ",flush=True)
-                #print(result.location_uuid,flush=True)
-                #print("data_store_name: ",flush=True)
-                #print(data_store.name,flush=True)
-                #print("location: ",flush=True)
-                #print(result.location,flush=True)
-                #print("data_size:",flush=True)
-                #print(result.data_size,flush=True)
-                #print("stored_size:",flush=True)
-                #print(result.stored_size,flush=True)
-
-            # TODO add parametrization so goes through all valid backups instead of all valid drives
-            # bc i probably won't get that information
-
-            # TODO change time series logic to continue until time to full found
-            # read table into a dataframe
-            #df = pd.DataFrame([res.as_dict() for res in data])
-            #forecast_size = self.forecast_storage(df, time)
-
-            #print("current data_store name:",flush=True)
-            #print(data_store.name,flush=True)
-            #print("current datastore uuid:",flush=True)
-            #print(data_store.uuid,flush=True)
-            #for label in labels:
-            #    print("current data_store name:",flush=True)
-            #    print(data_store.name,flush=True)
-            #    print("current datastore uuid:",flush=True)
-            #    print(data_store.uuid,flush=True)
-            #    print("going through the labels")
-            #    print("saveset:",flush=True)
-            #    print(label.saveset,flush=True)
-            #    print("uuid",flush=True)
-            #    print(label.uuid,flush=True)
-            #    print("pool:",flush=True)
-            #    print(label.pool,flush=True)
-
-            #TODO remove, placeholder
-        forecast_size = None
-
-        single_overflow = []
-        if forecast_size is None:
-            single_overflow.append({"high_water_mark": False})
-            single_overflow.append({"capacity": False})
-        else:
-            if forecast_size > high_water_mark:
-                single_overflow.append({"high_water_mark": True})
-            else: 
-                single_overflow.append({"high_water_mark": False})
-            if forecast_size > capacity:
-                single_overflow.append({"capacity": True})
-            else:
-                single_overflow.append({"capacity": False})    
-                
-            # TODO analyze when overflow is going to be (capacity and high watermark)
-            # TODO write into forecasted_overflows (unit in seconds?)
-
-            # adds overflows of specific backup task to collection
-            forecasted_overflows.append({single_overflow})
-        return forecasted_overflows
+        #print("row count: " + str(i),flush=True)
+        return None
     
-    def forecast_storage(self,df,time):
+    def forecast_storage(self,df):
         # TODO adjust passed time to actual time series frequency, then calculate number of steps
+        # TODO convert seconds to steps
+        steps = self.forecast_length
 
         # remove entries that have the same sbc_start, necessary for indexing the time axis (could cause problems later)
         df = df.drop_duplicates(subset=["sbc_start"])

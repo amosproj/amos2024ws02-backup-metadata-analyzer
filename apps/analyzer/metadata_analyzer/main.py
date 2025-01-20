@@ -273,10 +273,12 @@ def enhanced_analysis_storage_capacity():
         return jsonify(
             Analyzer.enhanced_analysis_storage_capacity(time,high_water_mark,capacity)
         )
-    except KeyError:
-        return "Missing field of type " + field, 400
+    #except KeyError:
+    #    return "Missing field of type " + field, 400
     except ValueError:
         return "Invalid value for alert limit", 400
+    
+#TODO add endpoint for setting forecast steps
 
 def main():
     database = Database()

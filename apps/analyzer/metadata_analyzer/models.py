@@ -41,6 +41,8 @@ class Result(Base):
     sbc_start: Mapped[datetime]
 
     data_size: Mapped[int]
+    stored_size: Mapped[int]
+    total_size: Mapped[int]
     throughput: Mapped[str]
     duration: Mapped[int]
 
@@ -50,6 +52,7 @@ class Result(Base):
     def __str__(self):
         return repr(self)
 
+    #TODO clean up model attributes
     def as_dict(self):
         return {
             "saveset": self.saveset,
@@ -65,6 +68,8 @@ class Result(Base):
             "data_size": self.data_size,
             "throughput": self.throughput,
             "duration": self.duration,
+            "stored_size": self.stored_size,
+            "total_size": self.data_size
         }
 
 
