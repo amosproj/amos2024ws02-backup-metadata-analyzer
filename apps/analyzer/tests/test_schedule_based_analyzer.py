@@ -543,3 +543,85 @@ def test_alerts_creation_date_alert_and_additional_backup_alerts():
             "date": mock_result2.start_time.isoformat(),
         }
     ]
+
+
+# Check if start_date is considered
+def test_alerts_start_date_no_alerts():
+    mock_result1 = _create_mock_result(
+        "foo",
+        "1",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T12:00:00"),
+        "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo",
+        "2",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T18:00:00"),
+        "bar",
+    )
+    mock_schedule = _create_mock_schedule("bar", "HOU", 3)
+    mock_task_event = _create_mock_task_event(1, "1", "foo", "bar")
+
+    database = MockDatabase(
+        [mock_result1, mock_result2],
+        [],
+        [],
+        [mock_schedule],
+        [mock_task_event],
+    )
+    backend = MockBackend()
+    backend.set_latest_alert_id("CREATION_DATE_ALERT", None, "2")
+    schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
+    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T20:00:00"))
+
+    assert backend.creation_date_alerts == []
+    assert backend.missing_backup_alerts == []
+    assert backend.additional_backup_alerts == []
+
+
+# Check if start_date is considered
+def test_alerts_start_date_alert():
+    mock_result1 = _create_mock_result(
+        "foo",
+        "1",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T12:00:00"),
+        "bar",
+    )
+    mock_result2 = _create_mock_result(
+        "foo",
+        "2",
+        "F",
+        100_000_000,
+        datetime.fromisoformat("2000-01-01T18:00:00"),
+        "bar",
+    )
+    mock_schedule = _create_mock_schedule("bar", "HOU", 3)
+    mock_task_event = _create_mock_task_event(1, "1", "foo", "bar")
+
+    database = MockDatabase(
+        [mock_result1, mock_result2],
+        [],
+        [],
+        [mock_schedule],
+        [mock_task_event],
+    )
+    backend = MockBackend()
+    backend.set_latest_alert_id("CREATION_DATE_ALERT", None, "1")
+    schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
+    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T20:00:00"))
+
+    assert backend.creation_date_alerts == []
+    assert backend.missing_backup_alerts == [
+        {
+            "referenceDate": "2000-01-01T15:00:00",
+        }
+    ]
+    assert backend.additional_backup_alerts == []

@@ -95,39 +95,42 @@ class ScheduleBasedAnalyzer:
             self.calculate_next_reference_time(schedule, first_start),
         )
         while cur_ref < stop_date:
-            left_end = last_ref + (cur_ref - last_ref) / 2  # Inclusive
-            right_end = cur_ref + (next_ref - cur_ref) / 2  # Exclusive
-            print(left_end, right_end)
-
-            cur_results = [
-                result
-                for result in results
-                if left_end <= result.start_time < right_end
-            ]  # TODO: optimize
-            print(cur_results)
-
-            if len(cur_results) > 0:
-                nearest_result = min(
-                    cur_results, key=lambda result: abs(result.start_time - cur_ref)
+            if last_ref >= start_date:
+                alerts += self._analyze_one_ref(
+                    results, last_ref, cur_ref, next_ref, tolerance
                 )
-                smallest_diff = abs(nearest_result.start_time - cur_ref)
-
-                if smallest_diff > tolerance:
-                    alerts.append(CreationDateAlert(nearest_result, cur_ref))
-
-                for result in cur_results:
-                    if result.uuid != nearest_result.uuid:
-                        alerts.append(AdditionalBackupAlert(result))
-            else:
-                alerts.append(MissingBackupAlert(cur_ref))
-                for result in cur_results:
-                    alerts.append(AdditionalBackupAlert(result))
 
             last_ref, cur_ref, next_ref = (
                 cur_ref,
                 next_ref,
                 self.calculate_next_reference_time(schedule, next_ref),
             )
+        return alerts
+
+    def _analyze_one_ref(self, results, last_ref, cur_ref, next_ref, tolerance):
+        alerts = []
+        left_end = last_ref + (cur_ref - last_ref) / 2  # Inclusive
+        right_end = cur_ref + (next_ref - cur_ref) / 2  # Exclusive
+
+        cur_results = [
+            result for result in results if left_end <= result.start_time < right_end
+        ]  # TODO: optimize
+
+        if len(cur_results) > 0:
+            nearest_result = min(
+                cur_results, key=lambda result: abs(result.start_time - cur_ref)
+            )
+            smallest_diff = abs(nearest_result.start_time - cur_ref)
+
+            if smallest_diff > tolerance:
+                alerts.append(CreationDateAlert(nearest_result, cur_ref))
+
+            for result in cur_results:
+                if result.uuid != nearest_result.uuid:
+                    alerts.append(AdditionalBackupAlert(result))
+        else:
+            alerts.append(MissingBackupAlert(cur_ref))
+
         return alerts
 
     def calculate_tolerance(self, schedule):
