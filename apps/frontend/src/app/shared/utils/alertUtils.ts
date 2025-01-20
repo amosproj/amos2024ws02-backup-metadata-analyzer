@@ -5,6 +5,8 @@ import {
   CreationDateAlert,
   SizeAlert,
   StorageFillAlert,
+  MissingBackupAlert,
+  AdditionalBackupAlert,
 } from '../types/alert';
 import { SeverityType } from '../enums/severityType';
 import { shortenBytes } from './shortenBytes';
