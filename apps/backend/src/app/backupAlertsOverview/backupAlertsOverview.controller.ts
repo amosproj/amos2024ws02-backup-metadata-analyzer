@@ -18,7 +18,7 @@ export class BackupAlertsOverviewController {
   })
   @ApiOkResponse({
     description: 'The count of backups grouped by alert class.',
-    type: BackupAlertsOverviewDto, // Dokumentiert, dass ein DTO zurückgegeben wird
+    type: BackupAlertsOverviewDto,
   })
   async getBackupCountsByAlertClass(): Promise<BackupAlertsOverviewDto> {
     this.logger.log('Fetching the count of backups grouped by alert class.');
