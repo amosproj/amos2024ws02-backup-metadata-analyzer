@@ -10,6 +10,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from '@clr/angular';
 import {
   angleIcon,
+  barsIcon,
   bellIcon,
   bookIcon,
   ClarityIcons,
@@ -20,6 +21,7 @@ import {
   filterIcon,
   helpIcon,
   homeIcon,
+  infoStandardIcon,
   lineChartIcon,
   lockIcon,
   plusIcon,
@@ -45,7 +47,12 @@ import { InformationPanelComponent } from './backups-overview-page/component/inf
 import { BackupTableComponent } from './backup-statistics-page/component/backup-table/backup-table.component';
 import { SidePanelComponent } from './shared/components/filter-side-panel/side-panel.component';
 import { BackupStatisticsPageComponent } from './backup-statistics-page/component/backup-statistics-page.component';
+import { FactsPanelComponent } from './backups-overview-page/component/facts-panel/facts-panel.component';
 import { UserManualComponent } from './management/components/user-manual/user-manual/user-manual.component';
+import { AlertPageComponent } from './alert-page/component/alert-page/alert-page.component';
+import { DatePipe } from '@angular/common';
+import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay/loading-overlay.component';
+
 
 @NgModule({
   declarations: [
@@ -62,7 +69,10 @@ import { UserManualComponent } from './management/components/user-manual/user-ma
     BackupTableComponent,
     SidePanelComponent,
     BackupStatisticsPageComponent,
-    UserManualComponent
+    FactsPanelComponent,
+    UserManualComponent,
+    AlertPageComponent,
+    LoadingOverlayComponent,
   ],
   imports: [
     BrowserModule,
@@ -74,7 +84,7 @@ import { UserManualComponent } from './management/components/user-manual/user-ma
     HttpClientModule,
     RouterModule.forRoot(appRoutes),
   ],
-  providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }],
+  providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }, DatePipe],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -101,6 +111,8 @@ export class AppModule {
       helpIcon,
       bookIcon,
       lineChartIcon,
+      infoStandardIcon,
+      barsIcon
     );
   }
 }

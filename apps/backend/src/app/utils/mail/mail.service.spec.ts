@@ -92,6 +92,7 @@ describe('MailService', () => {
         saveset: 'saveset1',
       },
       creationDate: new Date(),
+      deprecated: false,
     };
 
     await service.sendAlertMail(alert);

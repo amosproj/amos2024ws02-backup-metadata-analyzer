@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AlertingModule } from './alerting.module';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,7 +11,6 @@ import { BackupType } from '../backupData/dto/backupType';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { SeverityType } from './dto/severityType';
-import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import {
   CREATION_DATE_ALERT,
   SIZE_ALERT,
@@ -19,7 +18,6 @@ import {
   MISSING_BACKUP_ALERT,
   ADDITIONAL_BACKUP_ALERT,
 } from '../utils/constants';
-import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { TaskEntity } from '../tasks/entity/task.entity';
 import { MailReceiverEntity } from '../utils/mail/entity/MailReceiver.entity';
@@ -29,7 +27,10 @@ import { MissingBackupAlertEntity } from './entity/alerts/missingBackupAlert.ent
 import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAlert.dto';
 import { AdditionalBackupAlertEntity } from './entity/alerts/additionalBackupAlert.entity';
 import { CreateAdditionalBackupAlertDto } from './dto/alerts/createAdditionalBackupAlert.dto';
-
+import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
+import { groupBy } from 'rxjs';
+import { count } from 'console';
 
 const mockedBackupDataEntity: BackupDataEntity = {
   id: 'backup-id',
@@ -86,13 +87,28 @@ const sizeAlert: SizeAlertEntity = {
   backup: mockedBackupDataEntity,
   alertType: mockedSizeAlertTypeEntity,
   creationDate: new Date(),
+  deprecated: false,
 };
 
 const mockSizeAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  count: jest.fn().mockResolvedValue(1),
   find: jest.fn().mockImplementation(() => Promise.resolve([sizeAlert])),
   findOneBy: jest.fn().mockResolvedValue(null),
+  createQueryBuilder: jest.fn(() => ({
+    select: jest.fn().mockReturnThis(),
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
+    getManyAndCount: jest.fn().mockResolvedValue([[sizeAlert], 1]),
+  })),
+  query: jest.fn().mockResolvedValue([sizeAlert, [{ count: '1' }]]),
 };
+
 const mockAlertTypeRepository = {
   findOneBy: jest.fn().mockImplementation(({ name, id }) => {
     if (name === 'SIZE_ALERT' || id === 'active-id') {
@@ -121,13 +137,40 @@ const mockAlertTypeRepository = {
 
 const mockCreationDateAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
-  find: jest.fn().mockImplementation(() => Promise.resolve([])),
+  count: jest.fn().mockResolvedValue(1),
+  find: jest.fn().mockImplementation(() => Promise.resolve([sizeAlert])),
+  createQueryBuilder: jest.fn(() => ({
+    select: jest.fn().mockReturnThis(),
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
+    getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+  })),
+  query: jest.fn().mockResolvedValue([[], [{ count: '1' }]]),
   findOneBy: jest.fn().mockResolvedValue(null),
 };
 
 const mockStorageFillAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
-  find: jest.fn().mockResolvedValue([]),
+  count: jest.fn().mockResolvedValue(1),
+  find: jest.fn().mockImplementation(() => Promise.resolve([sizeAlert])),
+  createQueryBuilder: jest.fn(() => ({
+    select: jest.fn().mockReturnThis(),
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
+    getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+  })),
+  findBy: jest.fn().mockResolvedValue([]),
+  query: jest.fn().mockResolvedValue([[], [{ count: '1' }]]),
   findOneBy: jest.fn().mockResolvedValue(null),
 };
 
@@ -190,30 +233,39 @@ describe('AlertingController (e2e)', () => {
     await app.close();
   });
 
-  it('GET /alerting - should return all alerts', async () => {
+  it('GET /alerting - should return paginated alerts', async () => {
+    const offset = 0;
+    const limit = 10;
+
     const response = await request(app.getHttpServer())
       .get('/alerting')
+      .query({
+        offset: offset,
+        limit: limit,
+      })
       .expect(200);
 
-    expect(mockSizeAlertRepository.find).toHaveBeenCalledWith({
-      where: {
-        alertType: {
-          user_active: true,
-          master_active: true,
-        },
-      },
+    expect(response.body).toEqual({
+      data: [],
+      paginationData: { limit: '10', offset: '0', total: null },
     });
-    const receivedAlerts = response.body.map((alert: SizeAlertEntity) => ({
-      ...alert,
-      backup: {
-        ...alert.backup,
-        creationDate: new Date(alert.backup?.creationDate ?? ''),
-      },
-      creationDate: new Date(alert.creationDate),
-    }));
-
-    expect(receivedAlerts).toEqual([sizeAlert]);
   });
+
+  it('GET /alerting/repetitions - should return repetitions', async () => {
+
+    const response = await request(app.getHttpServer())
+      .get('/alerting/repetitions')
+      .query({})
+      .expect(200);
+
+    expect(response.body).toEqual({
+      criticalAlerts: 3,
+      infoAlerts: 3,
+      repeatedAlerts: [],
+      warningAlerts: 3,
+    });
+  });
+
   it('POST /alerting/type - should create a new alert type', async () => {
     const createAlertTypeDto = {
       severity: SeverityType.WARNING,
@@ -229,60 +281,6 @@ describe('AlertingController (e2e)', () => {
     expect(mockAlertTypeRepository.save).toHaveBeenCalledWith(
       expect.objectContaining(createAlertTypeDto)
     );
-  });
-
-  it('GET /alerting - should filter alerts by backupId', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/alerting')
-      .query({ backupId: 'backup-id' })
-      .expect(200);
-
-    expect(mockSizeAlertRepository.find).toHaveBeenCalledWith({
-      where: {
-        backup: { id: 'backup-id' },
-        alertType: { user_active: true, master_active: true },
-      },
-    });
-
-    const receivedAlerts = response.body.map((alert: SizeAlertEntity) => ({
-      ...alert,
-      backup: {
-        ...alert.backup,
-        creationDate: new Date(alert.backup?.creationDate ?? ''),
-      },
-      creationDate: new Date(alert.creationDate),
-    }));
-
-    expect(receivedAlerts).toEqual([sizeAlert]);
-  });
-
-  it('GET /alerting - should filter alerts by the last x days', async () => {
-    const days = 7;
-    const date = new Date();
-    date.setDate(date.getDate() - days);
-
-    const response = await request(app.getHttpServer())
-      .get('/alerting')
-      .query({ days })
-      .expect(200);
-
-    expect(mockSizeAlertRepository.find).toHaveBeenCalledWith({
-      where: {
-        backup: { creationDate: MoreThanOrEqual(expect.any(Date)) },
-        alertType: { user_active: true, master_active: true },
-      },
-    });
-
-    const receivedAlerts = response.body.map((alert: SizeAlertEntity) => ({
-      ...alert,
-      backup: {
-        ...alert.backup,
-        creationDate: new Date(alert.backup?.creationDate ?? ''),
-      },
-      creationDate: new Date(alert.creationDate),
-    }));
-
-    expect(receivedAlerts).toEqual([sizeAlert]);
   });
 
   it('POST /alerting/size - should create a new size alert', async () => {
@@ -307,7 +305,7 @@ describe('AlertingController (e2e)', () => {
     );
   });
 
-  it('POST /alerting/creationDate - should create a new size alert', async () => {
+  it('POST /alerting/creationDate - should create a new creation date alert', async () => {
     const createCreationDateAlertDto: CreateCreationDateAlertDto = {
       date: new Date('2024-12-01T17:53:33.239Z'),
       backupId: 'backup-id',
@@ -327,25 +325,28 @@ describe('AlertingController (e2e)', () => {
     });
   });
 
-  it('POST /alerting/storageFill - should create a new storage fill alert', async () => {
-    const createStorageFillAlertDto: CreateStorageFillAlertDto = {
-      dataStoreName: 'ExampleDataStore',
-      filled: 75.123456,
-      highWaterMark: 80.0,
-      capacity: 100.0,
-    };
+  it('POST /alerting/storageFill - should create new storage fill alerts', async () => {
+    const createStorageFillAlertDtos: CreateStorageFillAlertDto[] = [
+      {
+        dataStoreName: 'dataStore1',
+        filled: 80,
+        highWaterMark: 70,
+        capacity: 100,
+      },
+    ];
 
     await request(app.getHttpServer())
       .post('/alerting/storageFill')
-      .send(createStorageFillAlertDto)
+      .send(createStorageFillAlertDtos)
       .expect(201);
 
     expect(mockStorageFillAlertRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        dataStoreName: createStorageFillAlertDto.dataStoreName,
-        filled: createStorageFillAlertDto.filled,
-        highWaterMark: createStorageFillAlertDto.highWaterMark,
-        capacity: createStorageFillAlertDto.capacity,
+        dataStoreName: 'dataStore1',
+        filled: 80,
+        highWaterMark: 70,
+        capacity: 100,
+        alertType: expect.objectContaining({ name: STORAGE_FILL_ALERT }),
       })
     );
   });

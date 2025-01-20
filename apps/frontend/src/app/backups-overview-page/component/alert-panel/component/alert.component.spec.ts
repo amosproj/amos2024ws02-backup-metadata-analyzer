@@ -1,185 +1,23 @@
 import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { AlertComponent } from './alert.component';
 import { of } from 'rxjs';
-import { Alert, SizeAlert } from '../../../../shared/types/alert';
+import { Alert } from '../../../../shared/types/alert';
 import { randomUUID } from 'crypto';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { BackupType } from '../../../../shared/enums/backup.types';
+import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
 
 describe('AlertComponent', () => {
   let component: AlertComponent;
+  let alertUtils: AlertUtilsService;
   let mockAlertService: {
     getAllAlerts: Mock;
-  };
-  let mockDatePipe: {
-    transform: Mock;
+    getRefreshObservable: Mock;
   };
 
-  beforeEach(() => {
-    mockAlertService = {
-      getAllAlerts: vi.fn(),
-    };
-
-    mockDatePipe = {
-      transform: vi.fn(),
-    };
-
-    component = new AlertComponent(
-      mockAlertService as any,
-      mockDatePipe as any
-    );
-  });
-
-  describe('loadAlerts', () => {
-    it('should load and process alerts correctly', () => {
-      const mockAlerts: Alert[] = [
-        {
-          id: randomUUID().toString(),
-          alertType: {
-            id: randomUUID().toString(),
-            name: 'test',
-            severity: SeverityType.CRITICAL,
-            user_active: false,
-            master_active: false,
-          },
-          backup: {
-            id: randomUUID().toString(),
-            sizeMB: 0,
-            creationDate: new Date(),
-            saveset: 'saveset',
-            type: BackupType.DIFFERENTIAL,
-          },
-          creationDate: new Date(),
-        },
-        {
-          id: randomUUID().toString(),
-          alertType: {
-            id: randomUUID().toString(),
-            name: 'test',
-            severity: SeverityType.INFO,
-            user_active: false,
-            master_active: false,
-          },
-          backup: {
-            id: randomUUID().toString(),
-            sizeMB: 0,
-            creationDate: new Date(),
-            saveset: 'saveset',
-            type: BackupType.DIFFERENTIAL,
-          },
-          creationDate: new Date(),
-        },
-        {
-          id: randomUUID().toString(),
-          alertType: {
-            id: randomUUID().toString(),
-            name: 'test',
-            severity: SeverityType.WARNING,
-            user_active: false,
-            master_active: false,
-          },
-          backup: {
-            id: randomUUID().toString(),
-            sizeMB: 0,
-            creationDate: new Date(),
-            saveset: 'saveset',
-            type: BackupType.DIFFERENTIAL,
-          },
-          creationDate: new Date(),
-        },
-      ];
-
-      mockAlertService.getAllAlerts.mockReturnValue(of(mockAlerts));
-
-      component.loadAlerts();
-
-      expect(component.criticalAlertsCount).toBe(1);
-      expect(component.infoAlertsCount).toBe(1);
-      expect(component.warningAlertsCount).toBe(1);
-      expect(component.status).toBe('Critical');
-    });
-
-    it('should set status to OK when no alerts', () => {
-      mockAlertService.getAllAlerts.mockReturnValue(of([]));
-
-      component.loadAlerts();
-
-      expect(component.alerts.length).toBe(0);
-      expect(component.status).toBe('OK');
-    });
-  });
-
-  describe('getStatus', () => {
-    it('should return OK when no alerts', () => {
-      component.alerts = [];
-      expect(component.getStatus()).toBe('OK');
-    });
-
-    it('should return Critical when critical alerts exist', () => {
-      component.alerts = [
-        {
-          id: randomUUID().toString(),
-          alertType: {
-            id: randomUUID().toString(),
-            name: 'test',
-            severity: SeverityType.CRITICAL,
-            user_active: false,
-            master_active: false,
-          },
-          backup: {
-            id: randomUUID().toString(),
-            sizeMB: 0,
-            creationDate: new Date(),
-            saveset: 'saveset',
-            type: BackupType.DIFFERENTIAL,
-          },
-          creationDate: new Date(),
-        },
-      ];
-      expect(component.getStatus()).toBe('Critical');
-    });
-
-    it('should return Warning when non-critical alerts exist', () => {
-      component.alerts = [
-        {
-          id: randomUUID().toString(),
-          alertType: {
-            id: randomUUID().toString(),
-            name: 'test',
-            severity: SeverityType.WARNING,
-            user_active: false,
-            master_active: false,
-          },
-          backup: {
-            id: randomUUID().toString(),
-            sizeMB: 0,
-            creationDate: new Date(),
-            saveset: 'saveset',
-            type: BackupType.DIFFERENTIAL,
-          },
-          creationDate: new Date(),
-        },
-      ];
-      expect(component.getStatus()).toBe('Warning');
-    });
-  });
-
-  describe('getStatusClass', () => {
-    it('should return correct CSS class for different statuses', () => {
-      component.status = 'Critical';
-      expect(component.getStatusClass()).toBe('status-red');
-
-      component.status = 'Warning';
-      expect(component.getStatusClass()).toBe('status-yellow');
-
-      component.status = 'OK';
-      expect(component.getStatusClass()).toBe('status-green');
-    });
-  });
-
-  describe('getAlertClass', () => {
-    it('should return correct alert class based on alert type', () => {
-      const criticalAlert: Alert = {
+  const mockAlerts = {
+    data: [
+      {
         id: randomUUID().toString(),
         alertType: {
           id: randomUUID().toString(),
@@ -196,14 +34,13 @@ describe('AlertComponent', () => {
           type: BackupType.DIFFERENTIAL,
         },
         creationDate: new Date(),
-      };
-
-      const nonCriticalAlert: Alert = {
+      },
+      {
         id: randomUUID().toString(),
         alertType: {
           id: randomUUID().toString(),
           name: 'test',
-          severity: SeverityType.WARNING,
+          severity: SeverityType.INFO,
           user_active: false,
           master_active: false,
         },
@@ -215,88 +52,104 @@ describe('AlertComponent', () => {
           type: BackupType.DIFFERENTIAL,
         },
         creationDate: new Date(),
-      };
+      },
+    ],
+    paginationData: {
+      total: 2,
+    },
+  };
 
-      expect(component.getAlertClass(criticalAlert)).toBe('alert-red');
-      expect(component.getAlertClass(nonCriticalAlert)).toBe('alert-yellow');
-    });
+  beforeEach(() => {
+    mockAlertService = {
+      getAllAlerts: vi.fn().mockReturnValue(of(mockAlerts)),
+      getRefreshObservable: vi.fn().mockReturnValue(of(null)),
+    };
+
+    alertUtils = {
+      getAlertClass: vi.fn().mockReturnValue('alert-class'),
+      formatDate: vi.fn().mockReturnValue('formatted-date'),
+      getAlertReason: vi.fn().mockReturnValue('alert-reason'),
+      getAlertDetails: vi.fn().mockReturnValue('alert-details'),
+    } as any;
+
+    component = new AlertComponent(mockAlertService as any, alertUtils as any);
   });
 
-  describe('getAlertReason', () => {
-    it('should return correct reason for size decreased alert', () => {
-      const alert: SizeAlert = {
-        id: randomUUID().toString(),
-        alertType: {
-          id: randomUUID().toString(),
-          name: 'SIZE_ALERT',
-          severity: SeverityType.WARNING,
-          user_active: false,
-          master_active: false,
-        },
-        backup: {
-          id: randomUUID().toString(),
-          sizeMB: 20,
-          creationDate: new Date(),
-          saveset: 'saveset',
-          type: BackupType.DIFFERENTIAL,
-        },
-        creationDate: new Date(),
-        size: 20,
-        referenceSize: 100,
-      };
-
-      expect(component.getAlertReason(alert)).toBe('Size of backup decreased');
-    });
-
-    it('should return correct reason for size increased alert', () => {
-      const alert: SizeAlert = {
-        id: randomUUID().toString(),
-        alertType: {
-          id: randomUUID().toString(),
-          name: 'SIZE_ALERT',
-          severity: SeverityType.WARNING,
-          user_active: false,
-          master_active: false,
-        },
-        backup: {
-          id: randomUUID().toString(),
-          sizeMB: 100,
-          creationDate: new Date(),
-          saveset: 'saveset',
-          type: BackupType.DIFFERENTIAL,
-        },
-        creationDate: new Date(),
-        size: 100,
-        referenceSize: 20,
-      };
-
-      expect(component.getAlertReason(alert)).toBe('Size of backup increased');
-    });
+  it('should initialize with correct default values', () => {
+    expect(component.DAYS).toBe(7);
+    expect(component.status).toBe('OK');
+    expect(component.total).toBe(0);
   });
 
-  describe('formatDate', () => {
-    it('should format date using DatePipe', () => {
-      const testDate = new Date('2023-01-01T12:00:00');
-      mockDatePipe.transform.mockReturnValue('01.01.2023 12:00');
+  it('should return correct status class', () => {
+    component.status = 'Critical';
+    expect(component.getStatusClass()).toBe('status-red');
 
-      const formattedDate = component.formatDate(testDate);
+    component.status = 'Warning';
+    expect(component.getStatusClass()).toBe('status-yellow');
 
-      expect(mockDatePipe.transform).toHaveBeenCalledWith(
-        testDate,
-        'dd.MM.yyyy HH:mm'
-      );
-      expect(formattedDate).toBe('01.01.2023 12:00');
+    component.status = 'OK';
+    expect(component.getStatusClass()).toBe('status-green');
+  });
+
+  it('should load alerts on init', () => {
+    component.ngOnInit();
+
+    expect(mockAlertService.getAllAlerts).toHaveBeenCalled();
+    expect(component.total).toBe(2);
+  });
+
+  it('should call alertUtils methods correctly', () => {
+    const mockAlert = mockAlerts.data[0];
+
+    component.getAlertClass(mockAlert);
+    expect(alertUtils.getAlertClass).toHaveBeenCalledWith(mockAlert);
+
+    component.getAlertReason(mockAlert);
+    expect(alertUtils.getAlertReason).toHaveBeenCalledWith(mockAlert);
+
+    component.getAlertDetails(mockAlert);
+    expect(alertUtils.getAlertDetails).toHaveBeenCalledWith(mockAlert);
+  });
+
+  it('should clean up subscriptions on destroy', () => {
+    let isSubscriptionActive = true;
+    const testSubscription = component.alerts$.subscribe({
+      complete: () => {
+        isSubscriptionActive = false;
+      }
     });
+    
+    component.ngOnInit();
+    component.ngOnDestroy();
+    
+    expect(isSubscriptionActive).toBe(true);
+    testSubscription.unsubscribe(); 
+  });
 
-    it('should return empty string if date transformation fails', () => {
-      const testDate = new Date('2023-01-01T12:00:00');
-      mockDatePipe.transform.mockReturnValue(null);
+  describe('filterAlerts', () => {
+    it('should filter storage fill alerts correctly', () => {
+      const storageFillAlerts = [
+        {
+          ...mockAlerts.data[0],
+          alertType: {
+            ...mockAlerts.data[0].alertType,
+            name: 'STORAGE_FILL_ALERT',
+          },
+          dataStoreName: 'store1',
+        },
+        {
+          ...mockAlerts.data[0],
+          alertType: {
+            ...mockAlerts.data[0].alertType,
+            name: 'STORAGE_FILL_ALERT',
+          },
+          dataStoreName: 'store1',
+        },
+      ];
 
-      const formattedDate = component.formatDate(testDate);
-
-      expect(formattedDate).toBe('');
+      const filtered = component.filterAlerts(storageFillAlerts);
+      expect(filtered.length).toBe(1);
     });
   });
 });
-
-

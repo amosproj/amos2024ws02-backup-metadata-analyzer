@@ -25,8 +25,8 @@ class MockBackend:
 	def create_size_alert(self, alert):
 		self.size_alerts.append(alert)
 
-	def create_storage_fill_alert(self, alert):
-		self.storage_fill_alerts.append(alert)
+	def create_storage_fill_alerts(self, alerts):
+		self.storage_fill_alerts += alerts
 
 	def create_missing_backup_alert(self, alert):
 		self.missing_backup_alerts.append(alert)
@@ -42,3 +42,9 @@ class MockBackend:
 			return self.latest_alert_ids[(alert_type, backup_type)]
 		else:
 			return ""
+
+	def get_latest_backup_date(self):
+		if len(self.backups) == 0:
+			return None
+		else:
+			return self.backups[-1]

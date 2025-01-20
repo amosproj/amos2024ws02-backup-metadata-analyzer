@@ -4,4 +4,5 @@ export interface DataStore {
   capacity: number;
   highWaterMark: number;
   filled: number;
+  overflowTime?: number;
 }

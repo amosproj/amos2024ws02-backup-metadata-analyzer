@@ -14,6 +14,7 @@ import {
   ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
@@ -27,6 +28,12 @@ import { AlertStatusDto } from './dto/alertStatus.dto';
 import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
 import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAlert.dto';
 import { CreateAdditionalBackupAlertDto } from './dto/alerts/createAdditionalBackupAlert.dto';
+import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
+import { AlertFilterDto } from './dto/alertFilter.dto';
+import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
+import { PaginationDto } from '../utils/pagination/PaginationDto';
+import { AlertStatisticsDto } from './dto/alertStatistics.dto';
+import { AlertSummaryDto } from './dto/alertSummary';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -34,6 +41,32 @@ export class AlertingController {
   readonly logger = new Logger(AlertingController.name);
 
   constructor(private readonly alertingService: AlertingService) {}
+
+  @Get('statistics')
+  @ApiOperation({
+    summary: 'Returns the number of Info, Warning and Critical alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+    type: AlertStatisticsDto,
+  })
+  async getStatistics(): Promise<AlertStatisticsDto> {
+    return this.alertingService.getStatistics();
+  }
+
+  @Get('repetitions')
+  @ApiOperation({
+    summary: 'Returns Information about repeated Alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+  })
+  async getTestRepetitions(): Promise<AlertSummaryDto> {
+    return this.alertingService.getRepetitions();
+  }
+
 
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })
@@ -93,23 +126,17 @@ export class AlertingController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all alerts.' })
-  @ApiQuery({
-    name: 'backupId',
-    description: 'Filter alerts by backup id',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'days',
-    description: 'Filter alerts by backups (or creation Date if not linked with Backup) of the last x days',
-    required: false,
-    type: Number,
-  })
-  async getAllAlerts(
-    @Query('backupId') backupId?: string,
-    @Query('days') days?: number
-  ): Promise<Alert[]> {
-    return this.alertingService.getAllAlerts(backupId, days);
+  @ApiOperation({ summary: 'Returns all alert Objects paginated.' })
+  async findAll(
+    @Query() paginationOptionsDto: PaginationOptionsDto,
+    @Query() alertFilterDto: AlertFilterDto,
+    @Query() backupDataOrderOptionsDto: AlertOrderOptionsDto
+  ): Promise<PaginationDto<Alert>> {
+    return this.alertingService.getAllAlertsPaginated(
+      paginationOptionsDto,
+      backupDataOrderOptionsDto,
+      alertFilterDto
+    );
   }
 
   @Post('size')
@@ -135,14 +162,16 @@ export class AlertingController {
   }
 
   @Post('storageFill')
-  @ApiOperation({ summary: 'Create a new storage fill alert.' })
-  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiOperation({
+    summary:
+      'Creates new storage fill alerts. (All alerts have to be sent at once)',
+  })
   @ApiBody({ type: CreateStorageFillAlertDto })
   async storageFillAlert(
-    @Body() createStorageFillAlertDto: CreateStorageFillAlertDto
+    @Body() createStorageFillAlertDtos: CreateStorageFillAlertDto[]
   ): Promise<void> {
-    await this.alertingService.createStorageFillAlert(
-      createStorageFillAlertDto
+    await this.alertingService.createStorageFillAlerts(
+      createStorageFillAlertDtos
     );
   }
 
