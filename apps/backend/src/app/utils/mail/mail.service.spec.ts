@@ -137,6 +137,7 @@ describe('MailService', () => {
       },
       referenceDate: new Date(),
       creationDate: new Date(),
+      deprecated: false,
     };
 
     await service.sendAlertMail(alert);
