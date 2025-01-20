@@ -378,3 +378,68 @@ clr-tooltip {
 .break-word {
   word-break: break-all;
 }
+
+/* alert-page.component.css */
+
+.alert-meta {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.alert-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.alert-meta-row strong {
+  min-width: 100px;
+  color: #333;
+}
+
+.alert-meta-value {
+  color: #444;
+}
+
+.timeline-alert-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+
+.alert-trigger {
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.alert-trigger.critical {
+  background-color: #fff1f0;
+  border-left: 4px solid #c92100;
+}
+
+.alert-trigger.warning {
+  background-color: #fff7e6;
+  border-left: 4px solid #f57600;
+}
+
+.alert-trigger.info {
+  background-color: #f0f7ff;
+  border-left: 4px solid #0072a3;
+}
+
+/* Style for selected row */
+.datagrid-row.datagrid-selected {
+  background-color: rgba(0, 114, 163, 0.1) !important;
+}
+
+/* Add animation for smoother transition */
+.datagrid-row {
+  transition: background-color 0.3s ease;
+}

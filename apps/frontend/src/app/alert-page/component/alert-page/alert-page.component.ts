@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SeverityType } from '../../../shared/enums/severityType';
 import { Alert, StorageFillAlert } from '../../../shared/types/alert';
 import {
@@ -18,15 +18,41 @@ import { AlertServiceService } from '../../../shared/services/alert-service/aler
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
 import { shortenBytes } from '../../../shared/utils/shortenBytes';
 import { CustomAlertFilter } from './alertfilter';
-import { ClrDatagrid, ClrDatagridStateInterface } from '@clr/angular';
+import { ClrDatagridStateInterface } from '@clr/angular';
 import { AlertFilterParams } from '../../../shared/types/alert-filter-type';
 import { APIResponse } from '../../../shared/types/api-response';
 import { NotificationService } from '../../../management/services/alert-notification/notification.service';
 import { AlertType } from '../../../shared/types/alertType';
 import {
-  AlertSummary,
-  RepeatedAlert,
+  AlertSummary
 } from '../../../shared/types/alert-summary';
+
+const INITIAL_ALERT_SUMMARY: AlertSummary = {
+  criticalAlerts: 0,
+  warningAlerts: 0,
+  infoAlerts: 0,
+  repeatedAlerts: [],
+  mostFrequentAlert: {
+    severity: SeverityType.CRITICAL,
+    type: '',
+    taskId: '',
+    displayName: '',
+    count: '',
+    history: [],
+    latestAlert: {
+      id: '',
+      alertType: {
+        id: '',
+        name: '',
+        severity: SeverityType.CRITICAL,
+        user_active: true,
+        master_active: true,
+      },
+      creationDate: new Date(),
+    },
+    firstOccurence: new Date().toISOString(),
+  },
+};
 
 const INITIAL_FILTER: AlertFilterParams = {
   limit: 10,
@@ -39,11 +65,8 @@ const INITIAL_FILTER: AlertFilterParams = {
   styleUrl: './alert-page.component.css',
 })
 export class AlertPageComponent implements OnInit, OnDestroy {
-  @ViewChild(ClrDatagrid) datagrid!: ClrDatagrid;
-
   protected readonly SeverityType = SeverityType;
   readonly PAGE_SIZES = [10, 20, 50, 100];
-  readonly pageSize = 10;
   loading = false;
   error: string | null = null;
 
@@ -54,7 +77,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   readonly alertTypeFilter: CustomAlertFilter;
 
   readonly alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
-  private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   alerts$: Observable<APIResponse<Alert>> = of({
     data: [],
     total: 0,
@@ -64,20 +86,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     INITIAL_FILTER
   );
 
-  protected alertSummary$: Observable<AlertSummary> = of({
-    criticalAlerts: 0,
-    warningAlerts: 0,
-    infoAlerts: 0,
-    repeatedAlerts: [],
-    mostFrequentAlert: {
-      severity: SeverityType.CRITICAL,
-      type: '',
-      taskId: '',
-      count: '',
-      history: [],
-      latestAlert: null,
-    },
-  });
+  protected alertSummary$: Observable<AlertSummary> = of(INITIAL_ALERT_SUMMARY);
 
   private readonly destroy$ = new Subject<void>();
 
@@ -120,9 +129,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
     this.alerts$ = this.filterOptions$.pipe(
       switchMap((params) => this.alertService.getAllAlerts(params)),
-      tap((response) => {
-        this.alertsSubject.next(response.data);
-      }),
       takeUntil(this.destroy$)
     );
   }
@@ -173,9 +179,9 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
     const params: AlertFilterParams = {
       ...INITIAL_FILTER,
-      limit: state.page?.size ?? this.pageSize,
+      limit: state.page?.size ?? 10,
       offset: state.page?.current
-        ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
+        ? (state.page.current - 1) * (state.page?.size ?? 10)
         : 0,
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
       orderBy: state.sort?.by ? state.sort.by.toString() : 'date',

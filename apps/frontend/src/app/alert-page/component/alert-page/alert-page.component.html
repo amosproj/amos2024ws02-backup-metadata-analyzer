@@ -78,10 +78,27 @@
                 </div>
 
                 <div class="alert-meta">
-                  <span *ngIf="summary.mostFrequentAlert.taskId">
-                    <strong>Task ID:</strong>
-                    {{ summary.mostFrequentAlert.taskId }}
-                  </span>
+                  <div class="alert-meta-row">
+                    <strong>Task Name:</strong>
+                    <span class="alert-meta-value">{{
+                      summary.mostFrequentAlert.displayName
+                    }}</span>
+                  </div>
+                  <div class="alert-meta-row">
+                    <strong>First Occurred:</strong>
+                    <span class="alert-meta-value">{{
+                      summary.mostFrequentAlert.firstOccurence
+                        | date : 'MMM d, y, h:mm:ss a'
+                    }}</span>
+                  </div>
+                  <div class="alert-meta-row">
+                    <strong>Latest Alert:</strong>
+                    <span class="alert-meta-value">{{
+                      formatDate(
+                        summary.mostFrequentAlert.latestAlert.creationDate
+                      )
+                    }}</span>
+                  </div>
                 </div>
               </div>
 
@@ -103,24 +120,13 @@
                       "
                     >
                       <div class="timeline-date">
-                        {{ occurrence.date | date : 'MMM d, y, h:mm a' }}
+                        {{ occurrence.date | date : 'MMM d, y, h:mm:ss a' }}
                       </div>
-                      <div
-                        class="timeline-severity"
-                        [ngClass]="
-                          summary.mostFrequentAlert.severity.toLowerCase()
-                        "
-                      >
-                        <cds-icon
-                          [attr.shape]="
-                            getSeverityIcon(summary.mostFrequentAlert.severity)
-                          "
-                          class="is-solid"
-                        ></cds-icon>
-                        {{ summary.mostFrequentAlert.severity }}
-                      </div>
+
                       <div class="timeline-details">
-                        Alert ID: {{ occurrence.alertId }}
+                        <div class="timeline-alert-info">
+                          Alert ID: {{ occurrence.alertId }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -128,7 +134,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
 
-
+            <!-- Other Repeated Alerts -->
             <div
               *ngIf="summary.repeatedAlerts.length > 1"
               class="repeated-alerts"
@@ -152,10 +158,19 @@
                       >
                     </div>
 
-                    <div class="alert-meta" *ngIf="alert.taskId">
-                      <span>
-                        <strong>Task ID:</strong> {{ alert.taskId }}
-                      </span>
+                    <div class="alert-meta">
+                      <div class="alert-meta-row">
+                        <strong>Task Name:</strong>
+                        <span class="alert-meta-value">{{
+                          alert.displayName
+                        }}</span>
+                      </div>
+                      <div class="alert-meta-row">
+                        <strong>First Occurred:</strong>
+                        <span class="alert-meta-value">{{
+                          alert.firstOccurence | date : 'MMM d, y, h:mm:ss a'
+                        }}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -177,7 +192,7 @@
                           [ngClass]="alert.severity.toLowerCase()"
                         >
                           <div class="timeline-date">
-                            {{ occurrence.date }}
+                            {{ occurrence.date | date : 'MMM d, y, h:mm:ss a' }}
                           </div>
                           <div
                             class="timeline-severity"
@@ -190,7 +205,9 @@
                             {{ alert.severity }}
                           </div>
                           <div class="timeline-details">
-                            Alert ID: {{ occurrence.alertId }}
+                            <div class="timeline-alert-info">
+                              Alert ID:{{ occurrence.alertId }}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -216,7 +233,7 @@
     </clr-alert-item>
   </clr-alert>
 
-  <!-- Alert Grid -->
+  <!-- Grid -->
   <clr-datagrid
     *ngIf="alerts$ | async as alerts"
     [clrDgLoading]="loading"
@@ -378,7 +395,7 @@
         -
         {{
           alerts.paginationData.offset
-            ? +alerts.paginationData.offset + pageSize
+            ? +alerts.paginationData.offset + 10
             : 0
         }}
         of {{ alerts.paginationData.total }} alerts
