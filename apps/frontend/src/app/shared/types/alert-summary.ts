@@ -1,4 +1,5 @@
 import { SeverityType } from '../enums/severityType';
+import { Alert } from './alert';
 
 // Interface for the history items in repeated alerts
 export interface AlertHistoryItem {
@@ -8,12 +9,15 @@ export interface AlertHistoryItem {
 
 // Interface for repeated alerts
 export interface RepeatedAlert {
-  latestAlert: any;
   severity: SeverityType;
   type: string;
   taskId: string;
+  displayName: string;
   count: string;
+  latestAlert: Alert;
   history: AlertHistoryItem[];
+  firstOccurence: string;
+
 }
 
 // Main interface for alert summary from backend
