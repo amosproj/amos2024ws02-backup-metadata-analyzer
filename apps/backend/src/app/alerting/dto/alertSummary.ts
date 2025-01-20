@@ -65,6 +65,7 @@ export class RepeatedAlertDto {
   firstOccurence?: Date;
 
   @ApiProperty({ 
+
     description: 'Alert History', 
   })
   history?: AlertOcurrenceDto[];
