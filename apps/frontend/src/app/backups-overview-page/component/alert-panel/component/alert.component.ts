@@ -59,7 +59,7 @@ export class AlertComponent implements OnInit, OnDestroy {
   }
 
   loadAlerts(): void {
-    let params: AlertFilterParams = { fromDate: this.fromDate.toISOString() };
+    let params: AlertFilterParams = { fromDate: this.fromDate.toISOString(), limit: 5 };
     this.alertService
       .getAllAlerts(params)
       .pipe(takeUntil(this.destroy$))
