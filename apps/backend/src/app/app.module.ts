@@ -11,6 +11,7 @@ import { AlertingModule } from './alerting/alerting.module';
 import { TasksModule } from './tasks/tasks.module';
 import { DataStoresModule } from './dataStores/dataStores.module';
 import { InformationModule } from './information/information.module';
+import { BackupAlertsOverviewModule } from './backupAlertsOverview/backupAlertsOverview.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { InformationModule } from './information/information.module';
     TasksModule,
     DataStoresModule,
     InformationModule,
+    BackupAlertsOverviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
