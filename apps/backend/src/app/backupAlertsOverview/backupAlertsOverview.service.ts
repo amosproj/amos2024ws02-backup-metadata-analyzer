@@ -2,87 +2,93 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
-import { SizeAlertEntity } from '../alerting/entity/alerts/sizeAlert.entity';
-import { AlertTypeEntity } from '../alerting/entity/alertType.entity';
-import { CreationDateAlertEntity } from '../alerting/entity/alerts/creationDateAlert.entity';
+import { BackupAlertsOverviewDto } from './dto/backupAlertsOverview.dto';
+import { BackupAlertsOverviewEntity } from './entity/backupAlertsOverview.entity';
 
 @Injectable()
 export class BackupAlertsOverviewService {
   constructor(
     @InjectRepository(BackupDataEntity)
     private readonly backupRepository: Repository<BackupDataEntity>,
-    @InjectRepository(SizeAlertEntity)
-    private readonly sizeAlertRepository: Repository<SizeAlertEntity>,
-    @InjectRepository(AlertTypeEntity)
-    private readonly alertTypeRepository: Repository<AlertTypeEntity>,
-    @InjectRepository(CreationDateAlertEntity)
-    private readonly creationDateAlertRepository: Repository<CreationDateAlertEntity>
+    @InjectRepository(BackupAlertsOverviewEntity)
+    private readonly backupAlertsOverviewRepository: Repository<BackupAlertsOverviewEntity>
   ) {}
 
-  async getBackupCount(): Promise<number> {
-    // Fetch total count of backups from the database
-    return this.backupRepository.count();
-  }
+  async getBackupCountsByAlertClass(): Promise<BackupAlertsOverviewDto> {
+    const query = `
+          WITH AlertsByBackup AS (
+      SELECT 
+        bd.id AS "backupId",
+        at.severity
+      FROM "BackupData" bd
+      LEFT JOIN "SizeAlert" sa ON bd.id = sa."backupId" AND sa.deprecated = false
+      LEFT JOIN "CreationDateAlert" cda ON bd.id = cda."backupId" AND cda.deprecated = false
+      LEFT JOIN "AlertType" at ON (sa."alertTypeId" = at.id OR cda."alertTypeId" = at.id)
+      WHERE at.severity IS NOT NULL
+    ),
+    ClassifiedBackups AS (
+      SELECT 
+        "backupId",
+        CASE
+          WHEN COUNT(CASE WHEN severity = 'CRITICAL' THEN 1 END) > 0 THEN 'CRITICAL'
+          WHEN COUNT(CASE WHEN severity = 'WARNING' THEN 1 END) > 0 THEN 'WARNING'
+          WHEN COUNT(CASE WHEN severity = 'INFO' THEN 1 END) > 0 THEN 'INFO'
+          ELSE 'OK'
+        END AS "alertClass"
+      FROM AlertsByBackup
+      GROUP BY "backupId"
 
-  async getSizeAlertCountWithSeverity(): Promise<{
-    count: number;
-    severity: string;
-  }> {
-    // Fetch count of unique backups with Size alerts from the database
-    const count = await this.sizeAlertRepository
-      .createQueryBuilder('sizeAlert')
-      .select('COUNT(DISTINCT sizeAlert.backupId)', 'count')
-      .where('sizeAlert.deprecated = :deprecated', { deprecated: false })
-      .getRawOne();
+      UNION ALL
 
-    // Fetch the severity for Size alerts from the AlertType table
-    const severity = await this.alertTypeRepository
-      .createQueryBuilder('alertType')
-      .select('alertType.severity')
-      .where('alertType.name = :name', { name: 'SIZE_ALERT' })
-      .getOne();
+      SELECT 
+        bd.id AS "backupId",
+        'OK' AS "alertClass"
+      FROM "BackupData" bd
+      LEFT JOIN "SizeAlert" sa ON bd.id = sa."backupId" AND sa.deprecated = false
+      LEFT JOIN "CreationDateAlert" cda ON bd.id = cda."backupId" AND cda.deprecated = false
+      WHERE sa."backupId" IS NULL AND cda."backupId" IS NULL
+    )
+    SELECT 
+      "alertClass",
+      COUNT(*) AS "totalBackupsForClass"
+    FROM ClassifiedBackups
+    GROUP BY "alertClass";
+  `;
 
-    return {
-      count: Number(count.count),
-      severity: severity?.severity || 'UNKNOWN',
-    };
-  }
+    const result = await this.backupRepository.query(query);
 
-  async getCreationDateAlertCountWithSeverity(): Promise<{
-    count: number;
-    severity: string;
-  }> {
-    // Fetch count of unique backups with CreationDate alerts from the database
-    const count = await this.creationDateAlertRepository
-      .createQueryBuilder('creationDateAlert')
-      .select('COUNT(DISTINCT creationDateAlert.backupId)', 'count')
-      .where('creationDateAlert.deprecated = :deprecated', {
-        deprecated: false,
+    const dto = new BackupAlertsOverviewDto();
+    dto.ok = Number(
+      result.find((row: any) => row.alertClass === 'OK')
+        ?.totalBackupsForClass || 0
+    );
+    dto.info = Number(
+      result.find((row: any) => row.alertClass === 'INFO')
+        ?.totalBackupsForClass || 0
+    );
+    dto.warning = Number(
+      result.find((row: any) => row.alertClass === 'WARNING')
+        ?.totalBackupsForClass || 0
+    );
+    dto.critical = Number(
+      result.find((row: any) => row.alertClass === 'CRITICAL')
+        ?.totalBackupsForClass || 0
+    );
+    // Insert results in the BackupAlertsOverview table
+    await this.backupAlertsOverviewRepository
+      .createQueryBuilder()
+      .insert()
+      .into('BackupAlertsOverview')
+      .values({
+        id: '00000000-0000-0000-0000-000000000001',
+        ok: dto.ok,
+        info: dto.info,
+        warning: dto.warning,
+        critical: dto.critical,
       })
-      .getRawOne();
+      .orUpdate(['ok', 'info', 'warning', 'critical'], ['id'])
+      .execute();
 
-    // Fetch the severity for CreationDate alerts from the AlertType table
-    const severity = await this.alertTypeRepository
-      .createQueryBuilder('alertType')
-      .select('alertType.severity')
-      .where('alertType.name = :name', { name: 'CREATION_DATE_ALERT' })
-      .getOne();
-
-    return {
-      count: Number(count.count),
-      severity: severity?.severity || 'UNKNOWN',
-    };
-  }
-
-  async getBackupWithoutAlertsCount(): Promise<number> {
-    const query = this.backupRepository
-      .createQueryBuilder('bd')
-      .leftJoin('SizeAlert', 'sa', 'bd.id = sa.backupId')
-      .leftJoin('CreationDateAlert', 'cda', 'bd.id = cda.backupId')
-      .where('sa.backupId IS NULL AND cda.backupId IS NULL')
-      .select('COUNT(DISTINCT bd.id)', 'count');
-
-    const result = await query.getRawOne();
-    return Number(result.count);
+    return dto;
   }
 }

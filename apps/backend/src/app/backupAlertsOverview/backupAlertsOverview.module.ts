@@ -6,6 +6,8 @@ import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { SizeAlertEntity } from '../alerting/entity/alerts/sizeAlert.entity';
 import { AlertTypeEntity } from '../alerting/entity/alertType.entity';
 import { CreationDateAlertEntity } from '../alerting/entity/alerts/creationDateAlert.entity';
+import { BackupAlertsOverviewDto } from './dto/backupAlertsOverview.dto';
+import { BackupAlertsOverviewEntity } from './entity/backupAlertsOverview.entity';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { CreationDateAlertEntity } from '../alerting/entity/alerts/creationDateA
       SizeAlertEntity,
       AlertTypeEntity,
       CreationDateAlertEntity,
+      BackupAlertsOverviewDto,
+      BackupAlertsOverviewEntity,
     ]),
   ],
   controllers: [BackupAlertsOverviewController],
