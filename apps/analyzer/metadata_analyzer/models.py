@@ -69,7 +69,8 @@ class Result(Base):
             "throughput": self.throughput,
             "duration": self.duration,
             "stored_size": self.stored_size,
-            "total_size": self.data_size
+            "total_size": self.data_size,
+            "subtask_flag":self.subtask_flag
         }
 
 

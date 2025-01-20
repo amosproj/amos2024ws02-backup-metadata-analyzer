@@ -22,6 +22,7 @@ class EnhancedStorageAnalyzer:
         root_df = pd.DataFrame([res.as_dict() for res in data])
         # removes backups from dataframe by their saveset if they are not saved on the data_stores in question
         root_df = root_df.loc[root_df["saveset"].isin(savesets)]
+        root_df = root_df.loc[root_df["subtask_flag"]=='0']
 
         # gets all tasks of the backups that are relevant
         tasks = root_df['task'].unique()
@@ -39,15 +40,17 @@ class EnhancedStorageAnalyzer:
                 data_store_groups[row.name].append(row.saveset)
 
         # calculating the forecast of backup tasks
-        # groups savesets by their task
-        backup_task_groups = {}
+        # groups savesets by their task, relevant tasks implicitly filtered as well
         df = root_df.groupby("task")
         print("grouped df by task",flush=True)
         # starts forecast for every task
-        for task,group in backup_task_groups:
-            #TODO comment forecast back in
+        for task,group in df:
+            #TODO check if size is actually smaller than capacity when finally split up
+            # if not maybe try to interpret data_size as total, so only take data_size of latest saveset value
+            task_size = group["data_size"].sum()
             print("forecast should happen now",flush=True)
-            #self.forecast_storage(group,self.forecast_length)
+            #TODO comment forecast back in
+            #forecast = self.forecast_storage(group,self.forecast_length)
 
         print("keys",flush=True)
         print(list(data_store_groups.keys()),flush=True)
@@ -126,4 +129,6 @@ class EnhancedStorageAnalyzer:
             chosen_freq = freqs[0]
             print("frequency chosen for this time series was " + int(chosen_freq), flush=True)
             print("forecasting...",flush=True)
+
+            #TODO return timeseries that includes forecasted steps
  
