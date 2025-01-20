@@ -60,6 +60,11 @@ export class RepeatedAlertDto {
   latestAlert?: Alert;
 
   @ApiProperty({ 
+    description: 'First Alert occurence', 
+  })
+  firstOccurence?: Date;
+
+  @ApiProperty({ 
     description: 'Alert History', 
   })
   history?: AlertOcurrenceDto[];
@@ -68,6 +73,11 @@ export class RepeatedAlertDto {
     description: 'Task ID of alert', 
   })
   taskId?: string;
+
+  @ApiProperty({ 
+    description: 'Task Name of alert', 
+  })
+  taskDisplayName?: string;
 
   @ApiProperty({ 
     description: 'Storage ID of alert', 
