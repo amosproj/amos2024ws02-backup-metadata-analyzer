@@ -1,5 +1,6 @@
 from metadata_analyzer.forecast_storage_fill_alert import ForecastStorageFillAlert
 import pandas as pd
+from darts import TimeSeries
 
 class EnhancedStorageAnalyzer:
     forecast_length = 31556952
@@ -26,11 +27,7 @@ class EnhancedStorageAnalyzer:
 
         # gets all tasks of the backups that are relevant
         tasks = root_df['task'].unique()
-        #TODO make into a set
-        
-        #TODO do data cleaning before logic 
 
-        # calculating the share of a task by data_store
         # groups savesets of backups by the data_store they are saved on
         data_store_groups = {}
         for row in labeled_data_store:
@@ -39,18 +36,71 @@ class EnhancedStorageAnalyzer:
             else:
                 data_store_groups[row.name].append(row.saveset)
 
-        # calculating the forecast of backup tasks
+        # calculates the forecast values of each task
+        forecasts = {}
         # groups savesets by their task, relevant tasks implicitly filtered as well
-        df = root_df.groupby("task")
-        print("grouped df by task",flush=True)
+        tasks_savesets = root_df.groupby("task")
+        #print("grouped df by task",flush=True)
         # starts forecast for every task
-        for task,group in df:
+        for task,group in tasks_savesets:
             #TODO check if size is actually smaller than capacity when finally split up
             # if not maybe try to interpret data_size as total, so only take data_size of latest saveset value
             task_size = group["data_size"].sum()
-            print("forecast should happen now",flush=True)
-            #TODO comment forecast back in
+            print("task size is " + str(task_size),flush=True)
+            #print("forecast should happen now",flush=True)
+
+            #TODO test, feeding "group" to forecast should work
+            #TODO comment forecast back in, remove placeholder time series in next lines
+            forecast = {'sbc_start':["2025-01-01","2025-01-02","2025-01-03"],'data_size':['21','42','73']}
+            forecast = TimeSeries.from_series(forecast, fill_missing_dates=False, freq='d')
             #forecast = self.forecast_storage(group,self.forecast_length)
+            forecasts.update({task:forecast})
+
+        task_size_on_datastore = {}
+        for store,group in data_store_groups.items():
+        
+            # get size of task on data_store
+            task_sizes = {}
+            for saveset in group:
+                #print("group looks like this",flush=True)
+                #print(group,flush=True)
+                print("saveset in loop",flush=True)
+                print(saveset,flush=True)
+
+                current_task = root_df.loc[root_df['saveset'] == saveset]
+
+                # sums up the total size a certain task needs on a data_store
+                if current_task.empty:
+                    print("saveset for task not found in root_df",flush=True)
+                else: 
+                    current_task = current_task.iloc[0]['task']
+                    #print("current task is now",flush=True)
+                    #print(current_task,flush=True)
+                    if current_task not in task_sizes:
+                        task_sizes.update({current_task:root_df.loc[root_df['saveset'] == saveset].iloc[0]['data_size']})
+                    else:
+                        sum = task_sizes[current_task] + root_df.loc[root_df['saveset'] == saveset].iloc[0]['data_size']
+                        task_sizes.update({current_task:sum})
+            
+            # scale forecast values
+            prev = pd.DataFrame()
+            #TODO fix placeholder scaler
+            scaler = 0.7
+            # for savesets that have task that is in 
+                # add previous groups to current (scaled) 
+            current_task_sizes = task_size_on_datastore[store]
+            for task,size in current_task_sizes:
+                # TODO adjust unit of size
+                prev = prev.add(size * scaler, fill_value=0)
+
+            task_size_on_datastore.update({store:task_sizes})
+
+
+
+        #print("stores with their tasks, all with the sizes on that store",flush=True)
+        #print(task_size_on_datastore,flush=True)
+        #TODO calc share using filled and capacity
+
 
         print("keys",flush=True)
         print(list(data_store_groups.keys()),flush=True)
@@ -59,39 +109,6 @@ class EnhancedStorageAnalyzer:
         for store_group_key in data_store_groups:
             print("fun")
         
-
-        print("distinct names",flush=True)
-        print(distinct_names,flush=True)
-        # go through all data_stores
-        #for row in labeled_data_store:
-        #    if i < 10:
-        #        print("saveset " + str(row.saveset) + " filled " + str(row.filled) + " capacity " + str(row.capacity),flush=True)
-        #    i = i + 1
-        #    store_backup = []
-        #    df = root_df.loc[root_df["saveset"] == row.saveset]
-            #store_backup.append({"data_frame":df})
-            # TODO assuming datasize is correct value to use here
-            # alternatives: stored_size, total_size
-            #sum_backup_size = df["data_size"].sum()
-            # TODO assuming capacity is represented in gb, data_size is in byte
-            #share_of_store = (sum_backup_size/1000000000) / row.filled
-
-            #store_backup.append({})
-            
-
-            #store_backup.append({"high_water_mark":row.high_water_mark})
-            #store_backup.append({"capacity":row.capacity})
-        
-            #    if (
-            #        result.task == ""
-            #        or result.is_backup == 0
-            #        or result.data_size is None
-            #        or result.start_time is None
-            #        or result.subtask_flag != "0"
-            #        or result.data_size == 0
-            #    ):
-            #       data.remove(result)
-        #print("row count: " + str(i),flush=True)
         return None
     
     def forecast_storage(self,df):
@@ -128,6 +145,9 @@ class EnhancedStorageAnalyzer:
         else:
             chosen_freq = freqs[0]
             print("frequency chosen for this time series was " + int(chosen_freq), flush=True)
+            #TODO forecasting here
+            df.index = df["sbc_start"]  # sets index to datetime in sbc_start column
+            working_df = working_df.drop("sbc_start", axis=1)  # removes column because values are now in index
             print("forecasting...",flush=True)
 
             #TODO return timeseries that includes forecasted steps
