@@ -256,17 +256,48 @@ describe('AlertingService', () => {
         {
           provide: getRepositoryToken(MissingBackupAlertEntity),
           useValue: {
-            find: jest.fn().mockResolvedValue([]),
+            save: jest
+              .fn(),
+            find: jest.fn().mockImplementation(() => Promise.resolve([])),
+            createQueryBuilder: jest.fn(() => ({
+              select: jest.fn().mockReturnThis(),
+              leftJoinAndSelect: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              getQuery: jest.fn().mockReturnThis(),
+              getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+            })),
+            query: jest
+              .fn()
+              .mockResolvedValue([
+                creationDateAlertEntities,
+                [{ count: creationDateAlertEntities.length.toString() }],
+              ]),
             findOneBy: jest.fn().mockResolvedValue(null),
-            save: jest.fn(),
+            findBy: jest.fn(),
           },
         },
         {
           provide: getRepositoryToken(AdditionalBackupAlertEntity),
           useValue: {
-            find: jest.fn().mockResolvedValue([]),
+            save: jest
+              .fn()
+              .mockImplementation((alert) => Promise.resolve(alert)),
+            find: jest.fn().mockImplementation(() => Promise.resolve([])),
+            createQueryBuilder: jest.fn(() => ({
+              select: jest.fn().mockReturnThis(),
+              leftJoinAndSelect: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              getQuery: jest.fn().mockReturnThis(),
+              getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+            })),
+            query: jest
+              .fn()
+              .mockResolvedValue([
+                creationDateAlertEntities,
+                [{ count: creationDateAlertEntities.length.toString() }],
+              ]),
             findOneBy: jest.fn().mockResolvedValue(null),
-            save: jest.fn(),
+            findBy: jest.fn(),
           },
         },
         {

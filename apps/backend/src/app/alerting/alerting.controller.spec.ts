@@ -176,14 +176,38 @@ const mockStorageFillAlertRepository = {
 
 const mockMissingBackupAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  count: jest.fn().mockResolvedValue(1),
   find: jest.fn().mockResolvedValue([]),
   findOneBy: jest.fn().mockResolvedValue(null),
+  createQueryBuilder: jest.fn(() => ({
+    select: jest.fn().mockReturnThis(),
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
+    getManyAndCount: jest.fn().mockResolvedValue([[sizeAlert], 1]),
+  })),
 };
 
 const mockAdditionalBackupAlertRepository = {
   save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  count: jest.fn().mockResolvedValue(1),
   find: jest.fn().mockResolvedValue([]),
   findOneBy: jest.fn().mockResolvedValue(null),
+  createQueryBuilder: jest.fn(() => ({
+    select: jest.fn().mockReturnThis(),
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
+    getManyAndCount: jest.fn().mockResolvedValue([[sizeAlert], 1]),
+  })),
 };
 
 describe('AlertingController (e2e)', () => {
@@ -259,10 +283,10 @@ describe('AlertingController (e2e)', () => {
       .expect(200);
 
     expect(response.body).toEqual({
-      criticalAlerts: 3,
-      infoAlerts: 3,
+      criticalAlerts: 5,
+      infoAlerts: 5,
       repeatedAlerts: [],
-      warningAlerts: 3,
+      warningAlerts: 5,
     });
   });
 
