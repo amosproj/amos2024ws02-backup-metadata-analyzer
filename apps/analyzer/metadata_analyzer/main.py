@@ -264,9 +264,9 @@ def enhanced_analysis_storage_capacity():
             Analyzer.enhanced_analysis_storage_capacity()
         )
     except KeyError as keyError:
-        return "KeyError occurred: " + keyError, 500
+        return "KeyError occurred: " + str(keyError), 500
     except ValueError as valError:
-        return "Invalid value occurred: " + valError, 500
+        return "Invalid value occurred: " + str(valError), 500
     
 @app.route("/setEnhancedSizeForecastSteps", methods=["POST"])
 @swag_from(os.path.join(path,'swagger','setEnhancedSizeForecastSteps.yaml'), validation=False)
