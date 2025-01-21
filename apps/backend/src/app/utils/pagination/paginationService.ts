@@ -146,6 +146,11 @@ export class PaginationService {
     };
   }
 
+  /**
+   * Takes the order information from the requests and builds an SQL string based on it
+   * @param orderInfo 
+   * @returns SQL string for the order clause
+   */
   private createOrderClauseString(orderInfo: AlertOrderOptionsDto) {
     let orderClause = '';
     if (orderInfo.orderBy === 'severity') {
