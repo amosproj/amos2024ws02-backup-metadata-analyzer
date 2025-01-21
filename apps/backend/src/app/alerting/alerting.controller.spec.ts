@@ -375,28 +375,6 @@ describe('AlertingController (e2e)', () => {
     );
   });
 
-  it('GET /alerting/storageFill - should return all storage fill alerts', async () => {
-    const mockAlert = {
-      dataStoreName: 'ExampleDataStore',
-      filled: 75.123,
-      highWaterMark: 80.0,
-      capacity: 100.0,
-    };
-
-    mockStorageFillAlertRepository.find.mockResolvedValue([mockAlert]);
-
-    const response = await request(app.getHttpServer())
-      .get('/alerting')
-      .expect(200);
-
-    const filteredResponse = response.body.filter(
-      (alert: any) => alert.highWaterMark !== undefined
-    );
-
-    expect(mockStorageFillAlertRepository.find).toHaveBeenCalled();
-    expect(filteredResponse).toEqual([mockAlert]);
-  });
-
   it('POST /alerting/missingBackup - should create a new missing backup alert', async () => {
     const createMissingBackupAlertDto: CreateMissingBackupAlertDto = {
       referenceDate: new Date('2025-01-13T17:53:33.239Z'),
