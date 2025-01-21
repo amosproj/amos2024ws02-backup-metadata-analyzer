@@ -11,7 +11,7 @@ class EnhancedStorageAnalyzer:
 
 
     # Analyzes if storage capacity will be reached within confines of forecast
-    def analyze_future_storage_capacity(self, data, labeled_data_store, time, high_water_mark, capacity):
+    def analyze_future_storage_capacity(self, data, labeled_data_store):
         scaled_forecasts = {}
 
         # gets names of data_stores that match labels for the backup results
@@ -144,7 +144,8 @@ class EnhancedStorageAnalyzer:
         print("stores with their scaled forecasted series",flush=True)
         print(scaled_forecasts,flush=True)
         
-        return None
+        # TODO find out overflow time with filled attribute, add into return object along with datatore
+        return {"placeholder_data_store":"placeholder_overflow_time"}
     
     def forecast_storage(self,df):
         # TODO adjust passed time to actual time series frequency, then calculate number of steps

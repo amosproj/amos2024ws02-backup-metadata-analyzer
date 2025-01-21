@@ -1,35 +1,18 @@
-Runs an enhanced, forecast based analysis on data stores searching for ones that will soon be full. Time should be passed in seconds.
-        ---
-    parameters:
-      - name: input
-        in: body
-        type: object
-        required: true
-        properties:
-            time:
-                type: string
-                example: '128'
-            high_water_mark:
-                type: string
-                example: '1010.0'
-            capacity:
-                type: string
-                example: '1024.0'
+Runs an enhanced, forecast based analysis on data stores searching for ones that will soon be full. Time is returned in seconds.
+    ---
     definitions:
-        forecasted_times:
+        overflow_times:
             type: object
             properties:
-                time_to_high_water_mark:
+                dataStore1:
                     type: int
-                    example: 4056
-                time_to_capacity:
+                    example: 12321
+                dataStore2:
                     type: int
-                    example: 5000
-                unit:
-                    type: String
-                    example: "s"
+                    example: 42
+                dataStore3:
+                    type: int
+                    example: 219832
     responses:
       200:
-        description: The steps or time until high watermark is reached, followed by the steps or time until the capacity is reached
-        schema:
-          $ref: '#/definitions/forecasted_times'
+        description: All forecasted overflow times that could be determined
