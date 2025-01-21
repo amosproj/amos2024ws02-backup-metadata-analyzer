@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
-  ApiConflictResponse,
+  ApiConflictResponse, ApiCreatedResponse, ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
@@ -78,6 +78,7 @@ export class AlertingController {
   @ApiOperation({ summary: 'Activate Alert Type by user.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiBody({ type: AlertStatusDto })
+  @ApiNoContentResponse({ description: 'Alert Type Status changed' })
   async userChangeActiveStatusAlertType(
     @Param('alertTypeId') alertTypeId: string,
     @Body() alertStatusDto: AlertStatusDto
@@ -92,6 +93,7 @@ export class AlertingController {
   @ApiOperation({ summary: 'Activate Alert Type by admin.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiBody({ type: AlertStatusDto })
+  @ApiNoContentResponse({ description: 'Alert Type Status changed' })
   async adminChangeActiveStatusAlertType(
     @Param('alertTypeId') alertTypeId: string,
     @Body() alertStatusDto: AlertStatusDto
@@ -116,6 +118,12 @@ export class AlertingController {
     required: false,
     type: Boolean,
   })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all alert types.',
+    type: AlertTypeEntity,
+    isArray: true,
+  })
   async getAllAlertTypes(
     @Query('user_active') user_active?: boolean,
     @Query('master_active') master_active?: boolean
@@ -125,6 +133,12 @@ export class AlertingController {
 
   @Get()
   @ApiOperation({ summary: 'Returns all alert Objects paginated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all alert Objects paginated.',
+    type: Alert,
+    isArray: true,
+  })
   async findAll(
     @Query() paginationOptionsDto: PaginationOptionsDto,
     @Query() alertFilterDto: AlertFilterDto,
@@ -137,25 +151,29 @@ export class AlertingController {
     );
   }
 
-  @Post('size')
-  @ApiOperation({ summary: 'Create a new size alert.' })
+  @Post('size/batched')
+  @ApiOperation({ summary: 'Creates multiple new size alerts batched.' })
   @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiCreatedResponse({ description: 'Size Alerts created' })
   @ApiBody({ type: CreateSizeAlertDto })
-  async createSizeAlert(
-    @Body() createSizeAlertDto: CreateSizeAlertDto
+  async createSizeAlertsBatched(
+    @Body() createSizeAlertDtos: CreateSizeAlertDto[]
   ): Promise<void> {
-    await this.alertingService.createSizeAlert(createSizeAlertDto);
+    await this.alertingService.createSizeAlertsBatched(createSizeAlertDtos);
   }
 
-  @Post('creationDate')
-  @ApiOperation({ summary: 'Create a new creation Date alert.' })
+  @Post('creationDate/batched')
+  @ApiOperation({
+    summary: 'Create multiple new creation Date alerts batched.',
+  })
   @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiCreatedResponse({ description: 'Creation Date Alerts created' })
   @ApiBody({ type: CreateCreationDateAlertDto })
-  async createCreationDateAlert(
-    @Body() createCreationDateAlertDto: CreateCreationDateAlertDto
+  async createCreationDateAlertsBatched(
+    @Body() createCreationDateAlertDtos: CreateCreationDateAlertDto[]
   ): Promise<void> {
-    await this.alertingService.createCreationDateAlert(
-      createCreationDateAlertDto
+    await this.alertingService.createCreationDateAlertsBatched(
+      createCreationDateAlertDtos
     );
   }
 
@@ -164,6 +182,7 @@ export class AlertingController {
     summary:
       'Creates new storage fill alerts. (All alerts have to be sent at once)',
   })
+  @ApiCreatedResponse({ description: 'Storage Fill Alerts created' })
   @ApiBody({ type: CreateStorageFillAlertDto })
   async storageFillAlert(
     @Body() createStorageFillAlertDtos: CreateStorageFillAlertDto[]
@@ -179,6 +198,11 @@ export class AlertingController {
       'Gets the id of the backup with the latest alert of the given type.',
   })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the backupId of the latest alert of the given type.',
+    type: String,
+  })
   @ApiQuery({
     name: 'backupType',
     description: 'Filter by backup type',
