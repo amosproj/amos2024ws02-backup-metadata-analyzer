@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, Subject, takeUntil, tap } from 'rxjs';
 import { BASE_URL } from '../../types/configuration';
 import { AlertServiceService } from '../alert-service/alert-service.service';
 import { DataStoresService } from '../data-stores-service/data-stores-service.service';
@@ -11,6 +11,7 @@ import { InformationServiceService } from '../information-service/information-se
   providedIn: 'root',
 })
 export class AnalyzerService {
+  private readonly destroy$ = new Subject<void>();
   constructor(
     @Inject(BASE_URL) private readonly baseUrl: string,
     private readonly http: HttpClient,

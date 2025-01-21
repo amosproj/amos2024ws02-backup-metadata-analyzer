@@ -137,11 +137,13 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         // get History of task associated alerts
         const repeatedAlerts = await repository
           .createQueryBuilder('alert')
-          .select('alertType.severity, alertType.name AS type, backup.taskId, COUNT(alert.id) as count')
+          .select('alertType.severity, alertType.name AS type, backup.taskId, task.displayName, COUNT(alert.id) as count')
           .leftJoin('alert.backup', 'backup')
+          .leftJoin('backup.taskId', 'task')
           .leftJoin('alert.alertType', 'alertType')
           .where('backup.taskId IS NOT NULL')
-          .groupBy('backup.taskId, alertType.severity, alertType.name')
+          .groupBy('backup.taskId, alertType.severity, alertType.name, task.displayName')
+
           .having('COUNT(alert.id) > 1')
           .getRawMany() as RepeatedAlertDto[];
 
@@ -163,8 +165,11 @@ export class AlertingService extends PaginationService implements OnModuleInit {
                 alertId: alertEntity.id,
               });
             }
+            repeatedAlert.latestAlert = alertEntities[0];
           }
-          repeatedAlert.history = history;
+          
+          repeatedAlert.history = history.slice(0,5);
+          repeatedAlert.firstOccurence = history[history.length - 1].date;
         }
         retAlerts.push(...repeatedAlerts);
       }
@@ -211,7 +216,8 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         for (const alertEntity of alertEntities) {
           history.push({  date: alertEntity.creationDate, alertId: alertEntity.id });
         }
-        repeatedStorageAlert.history = history;
+        repeatedStorageAlert.history = history.slice(0,5);
+        repeatedStorageAlert.firstOccurence = history[history.length - 1].date;
       }
       retAlerts.push(...repeatedStorageAlerts);
     }

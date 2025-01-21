@@ -62,7 +62,10 @@ describe('AppComponent', () => {
     const expectedNavItems = [
       'Dashboard',
       'Backup Statistics',
+      'Analysis Overview',
+      'Find Data',
       'How to get started?',
+      
     ];
 
     // Use a Set to get unique nav item texts
@@ -80,8 +83,13 @@ describe('AppComponent', () => {
     const routerLinks = fixture.debugElement.queryAll(By.css('[routerLink]'));
     const expectedRoutes = [
       '/',
+      '/',
+      '/',
       '/backup-statistics',
+      '/alert',
+      '/findData',
       '/user-manual',
+      
     ];
 
     routerLinks.forEach((link, index) => {
