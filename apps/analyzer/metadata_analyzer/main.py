@@ -255,7 +255,6 @@ def calculate_training_indices():
         )
     return "Calculation of training series was succesful", 200
 
-# TODO refactor this to match logic
 @app.route("/enhancedAnalysisStorageCapacity", methods=["GET"])
 @swag_from(os.path.join(path,'swagger','enhancedAnalysisStorageCapacity.yaml'), validation=False)
 def enhanced_analysis_storage_capacity():
@@ -265,8 +264,8 @@ def enhanced_analysis_storage_capacity():
         )
     except KeyError as keyError:
         return "KeyError occurred: " + str(keyError), 500
-    except ValueError as valError:
-        return "Invalid value occurred: " + str(valError), 500
+    #except ValueError as valError:
+    #    return "Invalid value occurred: " + str(valError), 500
     
 @app.route("/setEnhancedSizeForecastSteps", methods=["POST"])
 @swag_from(os.path.join(path,'swagger','setEnhancedSizeForecastSteps.yaml'), validation=False)
