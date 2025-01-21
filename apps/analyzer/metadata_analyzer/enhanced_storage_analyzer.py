@@ -3,14 +3,20 @@ import pandas as pd
 import numpy as np
 from darts import TimeSeries
 from darts.models import AutoARIMA
+from decimal import Decimal
 
 class EnhancedStorageAnalyzer:
-    forecast_length = 31556952
+    forecast_length = 31622400
+    frequency = 86400
 
     # TODO endpoint for this
     def set_forecast_length(self, new_length):
         self.forecast_length = new_length
 
+    def set_forecast_frequency(self,new_frequency):
+        self.frequency = new_frequency
+
+    
 
     # Analyzes if storage capacity will be reached within confines of forecast
     def analyze_future_storage_capacity(self, data, labeled_data_store):
@@ -67,16 +73,13 @@ class EnhancedStorageAnalyzer:
             # get size of task on data_store
             task_sizes = {}
             for saveset in group:
-                #print("group looks like this",flush=True)
-                #print(group,flush=True)
-                #print("saveset in loop",flush=True)
-                #print(saveset,flush=True)
 
                 current_task = root_df.loc[root_df['saveset'] == saveset]
 
                 # sums up the total size a certain task needs on a data_store
                 if not current_task.empty: 
                     current_task = current_task.iloc[0]['task']
+
                     # TODO ensure updates the right values bc of iloc() function
                     if current_task not in task_sizes:
                         task_sizes.update({current_task:root_df.loc[root_df['saveset'] == saveset].iloc[0]['data_size']})
@@ -87,10 +90,7 @@ class EnhancedStorageAnalyzer:
             
             # scale forecast values
             prev = None
-            #print("list i want to get sth out of",flush=True)
-            #print(task_size_on_datastore,flush=True)
-            #print("key i use on it",flush=True)
-            #print(store,flush=True)
+
             # gets tasks and their corresponding sizes that lie on selected data_store
             current_task_sizes = task_size_on_datastore[store]
 
@@ -158,7 +158,7 @@ class EnhancedStorageAnalyzer:
         chosen_freq = chosen_freq[0]
         #TODO add endpoint to change
         print("lock in chosen frequency at a day")
-        chosen_freq = 86400
+        chosen_freq = self.frequency
 
         # calculates number of steps to take for forecasting
         steps = int(self.forecast_length/chosen_freq)
@@ -181,13 +181,10 @@ class EnhancedStorageAnalyzer:
 
         #series must have 30 values, otherwise forecast is not possible
         if(len(series)>30):
-        
+            
+            # TODO tweak init values
             model = AutoARIMA(start_p=8, max_p=12, start_q=1)
             model.fit(series)
-    
-            print("model was fit",flush=True)
-            print("number of steps is",flush=True)
-            print(steps,flush=True)
             pred = model.predict(steps)
             pred = pred.values(True)
         else:
@@ -202,16 +199,22 @@ class EnhancedStorageAnalyzer:
         overflows = {}
 
         for key,forecasted_steps in scaled_forecasts.items():
-            #assume capacity in gb, forecast in bytes
-            limit = data_store_capacities[key]
-            step_width = len(forecasted_steps) / self.forecast_length
+            multiplier = 1000000000 #assume capacity in gb, forecast in bytes
+            limit = data_store_capacities[key][0]
+            print("limit is " + str(limit),flush=True)
+            step_width = self.forecast_length / len(forecasted_steps)
             print("step width is " + str(step_width),flush=True)
             if not any(np.isnan(forecasted_steps)):
                 # calculates how many steps
                 i = 0
                 for step in forecasted_steps:
                     i = i + 1
-                    if step >= limit:
+                    step = step[0]
+                    print("step is " + str(step/multiplier),flush=True)
+                    print("step converted to " + str(Decimal(step)),flush=True)
+                    
+                    # converts data_size in scientific notation to an int
+                    if Decimal(step) >= limit * multiplier:
                         break
                 print("without scaling would land at " + str(i) + " steps",flush=True)
                 overflows.update({key:(i * step_width)})
