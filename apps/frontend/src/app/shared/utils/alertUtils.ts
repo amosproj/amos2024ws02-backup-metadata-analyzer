@@ -101,6 +101,6 @@ export class AlertUtilsService {
   }
 
   formatDate(date: Date): string {
-    return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') || '';
+    return this.datePipe.transform(date, 'MMM d, y, h:mm:ss a') || '';
   }
 }

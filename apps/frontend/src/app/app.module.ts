@@ -20,6 +20,7 @@ import {
   errorStandardIcon,
   filterIcon,
   helpIcon,
+  historyIcon,
   homeIcon,
   infoStandardIcon,
   lineChartIcon,
@@ -112,7 +113,8 @@ export class AppModule {
       bookIcon,
       lineChartIcon,
       infoStandardIcon,
-      barsIcon
+      barsIcon,
+      historyIcon
     );
   }
 }

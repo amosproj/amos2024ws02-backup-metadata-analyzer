@@ -12,6 +12,7 @@ import {
   Subject,
   switchMap,
   takeUntil,
+  tap,
 } from 'rxjs';
 import { AlertServiceService } from '../../../shared/services/alert-service/alert-service.service';
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
@@ -22,20 +23,41 @@ import { AlertFilterParams } from '../../../shared/types/alert-filter-type';
 import { APIResponse } from '../../../shared/types/api-response';
 import { NotificationService } from '../../../management/services/alert-notification/notification.service';
 import { AlertType } from '../../../shared/types/alertType';
+import {
+  AlertSummary
+} from '../../../shared/types/alert-summary';
+
+const INITIAL_ALERT_SUMMARY: AlertSummary = {
+  criticalAlerts: 0,
+  warningAlerts: 0,
+  infoAlerts: 0,
+  repeatedAlerts: [],
+  mostFrequentAlert: {
+    severity: SeverityType.CRITICAL,
+    type: '',
+    taskId: '',
+    displayName: '',
+    count: '',
+    history: [],
+    latestAlert: {
+      id: '',
+      alertType: {
+        id: '',
+        name: '',
+        severity: SeverityType.CRITICAL,
+        user_active: true,
+        master_active: true,
+      },
+      creationDate: new Date(),
+    },
+    firstOccurence: new Date().toISOString(),
+  },
+};
 
 const INITIAL_FILTER: AlertFilterParams = {
   limit: 10,
   includeDeprecated: true,
 };
-
-interface AlertSummary {
-  criticalCount: number;
-  warningCount: number;
-  infoCount: number;
-  totalCount: number;
-  repeatedAlerts: { type: string; count: number }[];
-  mostFrequentAlert?: { type: string; count: number };
-}
 
 @Component({
   selector: 'app-alert-page',
@@ -45,7 +67,6 @@ interface AlertSummary {
 export class AlertPageComponent implements OnInit, OnDestroy {
   protected readonly SeverityType = SeverityType;
   readonly PAGE_SIZES = [10, 20, 50, 100];
-  readonly pageSize = 10;
   loading = false;
   error: string | null = null;
 
@@ -65,10 +86,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     INITIAL_FILTER
   );
 
-  readonly alertSummary$: Observable<AlertSummary> = this.alerts$.pipe(
-    map((response) => this.calculateAlertSummary(response.data)),
-    shareReplay(1)
-  );
+  protected alertSummary$: Observable<AlertSummary> = of(INITIAL_ALERT_SUMMARY);
 
   private readonly destroy$ = new Subject<void>();
 
@@ -81,16 +99,17 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     this.alertDateFilter = new CustomAlertFilter('date');
     this.alertTypeFilter = new CustomAlertFilter('alertType');
   }
-
   ngOnInit(): void {
     this.loadAlerts();
     this.loadAlertTypes();
+    this.loadAlertSummary();
 
     this.alertService
       .getRefreshObservable()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.loadAlerts();
+        this.loadAlertSummary();
       });
 
     combineLatest([
@@ -120,42 +139,10 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  private calculateAlertSummary(alerts: Alert[]): AlertSummary {
-    const severityCounts = alerts.reduce(
-      (acc, alert) => {
-        switch (alert.alertType.severity) {
-          case SeverityType.CRITICAL:
-            acc.criticalCount++;
-            break;
-          case SeverityType.WARNING:
-            acc.warningCount++;
-            break;
-          case SeverityType.INFO:
-            acc.infoCount++;
-            break;
-        }
-        return acc;
-      },
-      { criticalCount: 0, warningCount: 0, infoCount: 0 }
-    );
-
-    const alertTypeCounts = alerts.reduce((acc, alert) => {
-      const type = alert.alertType.name;
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const repeatedAlerts = Object.entries(alertTypeCounts)
-      .filter(([_, count]) => count > 1)
-      .map(([type, count]) => ({ type, count }))
-      .sort((a, b) => b.count - a.count);
-
-    return {
-      ...severityCounts,
-      totalCount: alerts.length,
-      repeatedAlerts,
-      mostFrequentAlert: repeatedAlerts[0],
-    };
+  private loadAlertSummary(): void {
+    this.alertSummary$ = this.alertService
+      .getAlertRepetitions()
+      .pipe(shareReplay(1));
   }
 
   /**
@@ -192,9 +179,9 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
     const params: AlertFilterParams = {
       ...INITIAL_FILTER,
-      limit: state.page?.size ?? this.pageSize,
+      limit: state.page?.size ?? 10,
       offset: state.page?.current
-        ? (state.page.current - 1) * (state.page?.size ?? this.pageSize)
+        ? (state.page.current - 1) * (state.page?.size ?? 10)
         : 0,
       sortOrder: state.sort?.reverse ? 'DESC' : 'ASC',
       orderBy: state.sort?.by ? state.sort.by.toString() : 'date',
@@ -233,5 +220,25 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Select the alert type icon
+   * @param severity type of alert
+   * @returns severity icon
+   */
+  protected getSeverityIcon(severity: SeverityType | undefined): string {
+    if (!severity) return 'info-standard';
+
+    switch (severity) {
+      case SeverityType.CRITICAL:
+        return 'error-standard';
+      case SeverityType.WARNING:
+        return 'warning-standard';
+      case SeverityType.INFO:
+        return 'info-standard';
+      default:
+        return 'info-standard';
+    }
   }
 }
