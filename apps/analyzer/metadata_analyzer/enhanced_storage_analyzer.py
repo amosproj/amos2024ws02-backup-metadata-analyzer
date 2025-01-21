@@ -162,11 +162,6 @@ class EnhancedStorageAnalyzer:
 
         # calculates number of steps to take for forecasting
         steps = int(self.forecast_length/chosen_freq)
-        print("forecast length ",flush=True)
-        print(self.forecast_length,flush=True)
-        print("frequency ",flush=True)
-        print(chosen_freq,flush=True)
-        print("steps are " + str(steps),flush=True)
 
         df.index = df["sbc_start"]  # sets index to datetime in sbc_start column
         df = df.drop("sbc_start", axis=1)  # removes column because values are now in index
@@ -183,40 +178,35 @@ class EnhancedStorageAnalyzer:
         if(len(series)>30):
             
             # TODO tweak init values
-            model = AutoARIMA(start_p=8, max_p=12, start_q=1)
+            model = AutoARIMA()
             model.fit(series)
             pred = model.predict(steps)
             pred = pred.values(True)
         else:
             pred = None
-
-        print("prediction next",flush=True)
-        print(pred,flush=True)
         return pred
  
     def get_overflow_times(self,scaled_forecasts,data_store_capacities):
-        print("extracting overflow times")
         overflows = {}
 
         for key,forecasted_steps in scaled_forecasts.items():
             multiplier = 1000000000 #assume capacity in gb, forecast in bytes
             limit = data_store_capacities[key][0]
-            print("limit is " + str(limit),flush=True)
+            #print("limit is " + str(limit),flush=True)
             step_width = self.forecast_length / len(forecasted_steps)
-            print("step width is " + str(step_width),flush=True)
+            #print("step width is " + str(step_width),flush=True)
             if not any(np.isnan(forecasted_steps)):
                 # calculates how many steps
                 i = 0
                 for step in forecasted_steps:
                     i = i + 1
                     step = step[0]
-                    print("step is " + str(step/multiplier),flush=True)
-                    print("step converted to " + str(Decimal(step)),flush=True)
+                    #print("step is " + str(step/multiplier),flush=True)
+                    #print("step converted to " + str(Decimal(step)),flush=True)
                     
                     # converts data_size in scientific notation to an int
                     if Decimal(step) >= limit * multiplier:
                         break
-                print("without scaling would land at " + str(i) + " steps",flush=True)
                 overflows.update({key:(i * step_width)})
         return overflows
 
