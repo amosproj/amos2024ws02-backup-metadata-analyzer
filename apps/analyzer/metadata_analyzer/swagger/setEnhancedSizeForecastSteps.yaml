@@ -1,0 +1,13 @@
+Sets a new threshold value for the time series analysis, should be between 1 and 0
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: steps
+        schema:
+            type: string
+    responses:
+        200:
+            description: Steps set
+        400:
+            description: The value set for the forecasting steps was not valid

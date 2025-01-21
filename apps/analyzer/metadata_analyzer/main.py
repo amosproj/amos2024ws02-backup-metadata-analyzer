@@ -278,7 +278,18 @@ def enhanced_analysis_storage_capacity():
     except ValueError:
         return "Invalid value for alert limit", 400
     
-#TODO add endpoint for setting forecast steps
+@app.route("/setEnhancedSizeForecastSteps", methods=["POST"])
+@swag_from(os.path.join(path,'swagger','setEnhancedSizeForecastSteps.yaml'), validation=False)
+def set_enhanced_size_forecast_steps():
+    try:
+        steps = int(request.args.get("steps"))
+    except:
+        return (
+            "Threshold value could not be converted to int, was " + str(steps),
+            400,
+        )
+    Analyzer.enhanced_storage_analyzer.set_forecast_length(steps), 200
+    return "Setting forecasting steps was succesful", 200
 
 def main():
     database = Database()
