@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  Get,
   Injectable,
   NotFoundException,
   OnModuleInit,
@@ -40,7 +39,11 @@ import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
 import { AlertStatisticsDto } from './dto/alertStatistics.dto';
-import { AlertOcurrenceDto, AlertSummaryDto, RepeatedAlertDto } from './dto/alertSummary';
+import {
+  AlertOcurrenceDto,
+  AlertSummaryDto,
+  RepeatedAlertDto,
+} from './dto/alertSummary';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
@@ -102,7 +105,13 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     }
   }
 
-  async getStatistics(): Promise<AlertStatisticsDto> {
+  async getStatistics(
+    includeDeprecated?: boolean
+  ): Promise<AlertStatisticsDto> {
+    const filter = {} as FindOptionsWhere<Alert>;
+    if (!includeDeprecated) {
+      filter.deprecated = false;
+    }
     const alertStatisticsDto: AlertStatisticsDto = {
       infoAlerts: 0,
       warningAlerts: 0,
@@ -110,13 +119,13 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     };
     for (const repo of this.alertRepositories) {
       const infoAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.INFO }, deprecated: false },
+        where: { ...filter, alertType: { severity: SeverityType.INFO } },
       });
       const warningAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.WARNING }, deprecated: false },
+        where: { ...filter, alertType: { severity: SeverityType.WARNING } },
       });
       const criticalAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.CRITICAL }, deprecated: false },
+        where: { ...filter, alertType: { severity: SeverityType.CRITICAL } },
       });
       alertStatisticsDto.infoAlerts += infoAlerts;
       alertStatisticsDto.warningAlerts += warningAlerts;
@@ -125,7 +134,6 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return alertStatisticsDto;
   }
 
-
   async getRepetitions(): Promise<AlertSummaryDto> {
     const retAlerts: RepeatedAlertDto[] = [];
 
@@ -133,19 +141,22 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       if (repository === this.storageFillRepository) {
         await this.fetchRepeatedStorageAlerts(retAlerts); // adds alerts to retAlerts
       } else {
-
         // get History of task associated alerts
-        const repeatedAlerts = await repository
+        const repeatedAlerts = (await repository
           .createQueryBuilder('alert')
-          .select('alertType.severity, alertType.name AS type, backup.taskId, task.displayName, COUNT(alert.id) as count')
+          .select(
+            'alertType.severity, alertType.name AS type, backup.taskId, task.displayName, COUNT(alert.id) as count'
+          )
           .leftJoin('alert.backup', 'backup')
           .leftJoin('backup.taskId', 'task')
           .leftJoin('alert.alertType', 'alertType')
           .where('backup.taskId IS NOT NULL')
-          .groupBy('backup.taskId, alertType.severity, alertType.name, task.displayName')
+          .groupBy(
+            'backup.taskId, alertType.severity, alertType.name, task.displayName'
+          )
 
           .having('COUNT(alert.id) > 1')
-          .getRawMany() as RepeatedAlertDto[];
+          .getRawMany()) as RepeatedAlertDto[];
 
         for (const repeatedAlert of repeatedAlerts) {
           const history: AlertOcurrenceDto[] = [];
@@ -167,8 +178,8 @@ export class AlertingService extends PaginationService implements OnModuleInit {
             }
             repeatedAlert.latestAlert = alertEntities[0];
           }
-          
-          repeatedAlert.history = history.slice(0,5);
+
+          repeatedAlert.history = history.slice(0, 5);
           repeatedAlert.firstOccurence = history[history.length - 1].date;
         }
         retAlerts.push(...repeatedAlerts);
@@ -176,7 +187,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       retAlerts.sort((a, b) => b.count - a.count);
     }
 
-    const alertStatisticsDto: AlertStatisticsDto = await this.getStatistics();
+    const alertStatisticsDto: AlertStatisticsDto = await this.getStatistics(true);
     const alertSummaryDto: AlertSummaryDto = {
       infoAlerts: alertStatisticsDto.infoAlerts,
       criticalAlerts: alertStatisticsDto.criticalAlerts,
@@ -188,18 +199,17 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return alertSummaryDto;
   }
 
-
-
-
   private async fetchRepeatedStorageAlerts(retAlerts: RepeatedAlertDto[]) {
     {
-      const repeatedStorageAlerts = await this.storageFillRepository
+      const repeatedStorageAlerts = (await this.storageFillRepository
         .createQueryBuilder('alert')
-        .select('alertType.severity, alertType.name AS type, COUNT(alert.id) as count')
+        .select(
+          'alertType.severity, alertType.name AS type, COUNT(alert.id) as count'
+        )
         .leftJoin('alert.alertType', 'alertType')
         .groupBy('alert.dataStoreName, alertType.severity, alertType.name')
         .having('COUNT(alert.id) > 1')
-        .getRawMany() as RepeatedAlertDto[];
+        .getRawMany()) as RepeatedAlertDto[];
       // get History of storage associated alerts
       for (const repeatedStorageAlert of repeatedStorageAlerts) {
         const history: AlertOcurrenceDto[] = [];
@@ -214,9 +224,12 @@ export class AlertingService extends PaginationService implements OnModuleInit {
           },
         });
         for (const alertEntity of alertEntities) {
-          history.push({  date: alertEntity.creationDate, alertId: alertEntity.id });
+          history.push({
+            date: alertEntity.creationDate,
+            alertId: alertEntity.id,
+          });
         }
-        repeatedStorageAlert.history = history.slice(0,5);
+        repeatedStorageAlert.history = history.slice(0, 5);
         repeatedStorageAlert.firstOccurence = history[history.length - 1].date;
       }
       retAlerts.push(...repeatedStorageAlerts);

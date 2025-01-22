@@ -50,7 +50,15 @@ export class AlertingController {
     description: 'The number of Info, Warning and Critical alerts.',
     type: AlertStatisticsDto,
   })
-  async getStatistics(): Promise<AlertStatisticsDto> {
+  @ApiQuery({
+    name: 'includeDeprecated',
+    description: 'Include deprecated alerts',
+    required: false,
+    type: Boolean,
+  })
+  async getStatistics(
+    @Query('includeDeprecated') includeDeprecated?: boolean
+  ): Promise<AlertStatisticsDto> {
     return this.alertingService.getStatistics();
   }
 
