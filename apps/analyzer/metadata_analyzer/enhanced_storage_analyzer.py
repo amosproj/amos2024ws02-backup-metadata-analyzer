@@ -96,13 +96,8 @@ class EnhancedStorageAnalyzer:
 
             for task,size in current_task_sizes.items():
                 # divides size of task that is on data_store by size of whole task
-                print("scaling",flush=True)
-                print("size on store is " + str(size),flush=True)
-                print("total size of task next",flush=True)
                 total_task_size = task_total_sizes[task]
-                print(total_task_size,flush=True)
                 scaler = size/(total_task_size)
-                print("scaler is " + str(scaler),flush=True)
                 #checks if first forecast for store, else adds normally
 
                 #TODO tweak for tasks with different lengths, should be filtered out bc of steps but maybe mismatched frequencies can cause errors
@@ -110,22 +105,12 @@ class EnhancedStorageAnalyzer:
 
                     forecast = forecasts[task]
 
-                    print("unscaled dataframe from forecast series",flush=True)
-                    print(forecast,flush=True)
                     if prev is None:
                         prev = forecast * scaler
-                        print("scaled forecast",flush=True)
-                        print(prev,flush=True)
                     else:
                         prev = np.add(prev,forecast * scaler)
-                    print("adding prev",flush=True)
-                    print(prev,flush=True)
-                    print("to the forecast of this task",flush=True)
-                    print(forecast,flush=True)
+            
             scaled_forecasts.update({store:prev})
-
-        print("stores with their scaled forecasted series",flush=True)
-        print(scaled_forecasts,flush=True)
         
         return self.get_overflow_times(scaled_forecasts,data_store_capacities)
     
@@ -174,17 +159,13 @@ class EnhancedStorageAnalyzer:
         for key,forecasted_steps in scaled_forecasts.items():
             multiplier = 1000000000 #assume capacity in gb, forecast in bytes
             limit = data_store_capacities[key][0]
-            #print("limit is " + str(limit),flush=True)
             step_width = self.forecast_length / len(forecasted_steps)
-            #print("step width is " + str(step_width),flush=True)
             if not any(np.isnan(forecasted_steps)):
                 # calculates how many steps
                 i = 0
                 for step in forecasted_steps:
                     i = i + 1
                     step = step[0]
-                    #print("step is " + str(step/multiplier),flush=True)
-                    #print("step converted to " + str(Decimal(step)),flush=True)
                     
                     # converts data_size in scientific notation to an int
                     if Decimal(step) >= limit * multiplier:
