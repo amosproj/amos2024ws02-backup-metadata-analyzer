@@ -10,11 +10,11 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
-  ApiConflictResponse,
+  ApiConflictResponse, ApiCreatedResponse, ApiNoContentResponse,
   ApiNotFoundResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
@@ -30,6 +30,8 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
+import { AlertStatisticsDto } from './dto/alertStatistics.dto';
+import { AlertSummaryDto } from './dto/alertSummary';
 
 @ApiTags('Alerting')
 @Controller('alerting')
@@ -37,6 +39,32 @@ export class AlertingController {
   readonly logger = new Logger(AlertingController.name);
 
   constructor(private readonly alertingService: AlertingService) {}
+
+  @Get('statistics')
+  @ApiOperation({
+    summary: 'Returns the number of Info, Warning and Critical alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+    type: AlertStatisticsDto,
+  })
+  async getStatistics(): Promise<AlertStatisticsDto> {
+    return this.alertingService.getStatistics();
+  }
+
+  @Get('repetitions')
+  @ApiOperation({
+    summary: 'Returns Information about repeated Alerts.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of Info, Warning and Critical alerts.',
+  })
+  async getTestRepetitions(): Promise<AlertSummaryDto> {
+    return this.alertingService.getRepetitions();
+  }
+
 
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })
@@ -50,6 +78,7 @@ export class AlertingController {
   @ApiOperation({ summary: 'Activate Alert Type by user.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiBody({ type: AlertStatusDto })
+  @ApiNoContentResponse({ description: 'Alert Type Status changed' })
   async userChangeActiveStatusAlertType(
     @Param('alertTypeId') alertTypeId: string,
     @Body() alertStatusDto: AlertStatusDto
@@ -64,6 +93,7 @@ export class AlertingController {
   @ApiOperation({ summary: 'Activate Alert Type by admin.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiBody({ type: AlertStatusDto })
+  @ApiNoContentResponse({ description: 'Alert Type Status changed' })
   async adminChangeActiveStatusAlertType(
     @Param('alertTypeId') alertTypeId: string,
     @Body() alertStatusDto: AlertStatusDto
@@ -88,6 +118,12 @@ export class AlertingController {
     required: false,
     type: Boolean,
   })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all alert types.',
+    type: AlertTypeEntity,
+    isArray: true,
+  })
   async getAllAlertTypes(
     @Query('user_active') user_active?: boolean,
     @Query('master_active') master_active?: boolean
@@ -97,49 +133,62 @@ export class AlertingController {
 
   @Get()
   @ApiOperation({ summary: 'Returns all alert Objects paginated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all alert Objects paginated.',
+    type: Alert,
+    isArray: true,
+  })
   async findAll(
     @Query() paginationOptionsDto: PaginationOptionsDto,
     @Query() alertFilterDto: AlertFilterDto,
-    @Query() backupDataOrderOptionsDto: AlertOrderOptionsDto,
+    @Query() backupDataOrderOptionsDto: AlertOrderOptionsDto
   ): Promise<PaginationDto<Alert>> {
     return this.alertingService.getAllAlertsPaginated(
       paginationOptionsDto,
       backupDataOrderOptionsDto,
-      alertFilterDto,
+      alertFilterDto
     );
   }
 
-  @Post('size')
-  @ApiOperation({ summary: 'Create a new size alert.' })
+  @Post('size/batched')
+  @ApiOperation({ summary: 'Creates multiple new size alerts batched.' })
   @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiCreatedResponse({ description: 'Size Alerts created' })
   @ApiBody({ type: CreateSizeAlertDto })
-  async createSizeAlert(
-    @Body() createSizeAlertDto: CreateSizeAlertDto
+  async createSizeAlertsBatched(
+    @Body() createSizeAlertDtos: CreateSizeAlertDto[]
   ): Promise<void> {
-    await this.alertingService.createSizeAlert(createSizeAlertDto);
+    await this.alertingService.createSizeAlertsBatched(createSizeAlertDtos);
   }
 
-  @Post('creationDate')
-  @ApiOperation({ summary: 'Create a new creation Date alert.' })
+  @Post('creationDate/batched')
+  @ApiOperation({
+    summary: 'Create multiple new creation Date alerts batched.',
+  })
   @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiCreatedResponse({ description: 'Creation Date Alerts created' })
   @ApiBody({ type: CreateCreationDateAlertDto })
-  async createCreationDateAlert(
-    @Body() createCreationDateAlertDto: CreateCreationDateAlertDto
+  async createCreationDateAlertsBatched(
+    @Body() createCreationDateAlertDtos: CreateCreationDateAlertDto[]
   ): Promise<void> {
-    await this.alertingService.createCreationDateAlert(
-      createCreationDateAlertDto
+    await this.alertingService.createCreationDateAlertsBatched(
+      createCreationDateAlertDtos
     );
   }
 
   @Post('storageFill')
-  @ApiOperation({ summary: 'Create a new storage fill alert.' })
-  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiOperation({
+    summary:
+      'Creates new storage fill alerts. (All alerts have to be sent at once)',
+  })
+  @ApiCreatedResponse({ description: 'Storage Fill Alerts created' })
   @ApiBody({ type: CreateStorageFillAlertDto })
   async storageFillAlert(
-    @Body() createStorageFillAlertDto: CreateStorageFillAlertDto
+    @Body() createStorageFillAlertDtos: CreateStorageFillAlertDto[]
   ): Promise<void> {
-    await this.alertingService.createStorageFillAlert(
-      createStorageFillAlertDto
+    await this.alertingService.createStorageFillAlerts(
+      createStorageFillAlertDtos
     );
   }
 
@@ -149,6 +198,11 @@ export class AlertingController {
       'Gets the id of the backup with the latest alert of the given type.',
   })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the backupId of the latest alert of the given type.',
+    type: String,
+  })
   @ApiQuery({
     name: 'backupType',
     description: 'Filter by backup type',

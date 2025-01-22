@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Get,
   Injectable,
   NotFoundException,
   OnModuleInit,
@@ -12,7 +13,6 @@ import {
   FindOneOptions,
   FindOptionsWhere,
   ILike,
-  In,
   LessThanOrEqual,
   MoreThanOrEqual,
   Repository,
@@ -39,11 +39,12 @@ import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
-import { TaskEntity } from '../tasks/entity/task.entity';
+import { AlertStatisticsDto } from './dto/alertStatistics.dto';
+import { AlertOcurrenceDto, AlertSummaryDto, RepeatedAlertDto } from './dto/alertSummary';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
-  alertRepositories: Repository<any>[] = [];
+  alertRepositories: Repository<Alert>[] = [];
 
   constructor(
     @InjectRepository(AlertTypeEntity)
@@ -101,6 +102,127 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     }
   }
 
+  async getStatistics(): Promise<AlertStatisticsDto> {
+    const alertStatisticsDto: AlertStatisticsDto = {
+      infoAlerts: 0,
+      warningAlerts: 0,
+      criticalAlerts: 0,
+    };
+    for (const repo of this.alertRepositories) {
+      const infoAlerts = await repo.count({
+        where: { alertType: { severity: SeverityType.INFO } },
+      });
+      const warningAlerts = await repo.count({
+        where: { alertType: { severity: SeverityType.WARNING } },
+      });
+      const criticalAlerts = await repo.count({
+        where: { alertType: { severity: SeverityType.CRITICAL } },
+      });
+      alertStatisticsDto.infoAlerts += infoAlerts;
+      alertStatisticsDto.warningAlerts += warningAlerts;
+      alertStatisticsDto.criticalAlerts += criticalAlerts;
+    }
+    return alertStatisticsDto;
+  }
+
+
+  async getRepetitions(): Promise<AlertSummaryDto> {
+    const retAlerts: RepeatedAlertDto[] = [];
+
+    for (const repository of this.alertRepositories) {
+      if (repository === this.storageFillRepository) {
+        await this.fetchRepeatedStorageAlerts(retAlerts); // adds alerts to retAlerts
+      } else {
+
+        // get History of task associated alerts
+        const repeatedAlerts = await repository
+          .createQueryBuilder('alert')
+          .select('alertType.severity, alertType.name AS type, backup.taskId, task.displayName, COUNT(alert.id) as count')
+          .leftJoin('alert.backup', 'backup')
+          .leftJoin('backup.taskId', 'task')
+          .leftJoin('alert.alertType', 'alertType')
+          .where('backup.taskId IS NOT NULL')
+          .groupBy('backup.taskId, alertType.severity, alertType.name, task.displayName')
+
+          .having('COUNT(alert.id) > 1')
+          .getRawMany() as RepeatedAlertDto[];
+
+        for (const repeatedAlert of repeatedAlerts) {
+          const history: AlertOcurrenceDto[] = [];
+          if (repeatedAlert.taskId && repeatedAlert.type) {
+            const alertEntities = await repository.find({
+              where: {
+                backup: { taskId: { id: repeatedAlert.taskId } },
+                alertType: { name: repeatedAlert.type as unknown as string },
+              },
+              order: {
+                creationDate: 'DESC',
+              },
+            });
+            for (const alertEntity of alertEntities) {
+              history.push({
+                date: alertEntity.creationDate,
+                alertId: alertEntity.id,
+              });
+            }
+            repeatedAlert.latestAlert = alertEntities[0];
+          }
+          
+          repeatedAlert.history = history.slice(0,5);
+          repeatedAlert.firstOccurence = history[history.length - 1].date;
+        }
+        retAlerts.push(...repeatedAlerts);
+      }
+      retAlerts.sort((a, b) => b.count - a.count);
+    }
+
+    const alertStatisticsDto: AlertStatisticsDto = await this.getStatistics();
+    const alertSummaryDto: AlertSummaryDto = {
+      infoAlerts: alertStatisticsDto.infoAlerts,
+      criticalAlerts: alertStatisticsDto.criticalAlerts,
+      warningAlerts: alertStatisticsDto.warningAlerts,
+      repeatedAlerts: retAlerts,
+      mostFrequentAlert: retAlerts[0],
+    };
+
+    return alertSummaryDto;
+  }
+
+
+
+
+  private async fetchRepeatedStorageAlerts(retAlerts: RepeatedAlertDto[]) {
+    {
+      const repeatedStorageAlerts = await this.storageFillRepository
+        .createQueryBuilder('alert')
+        .select('alertType.severity, alertType.name AS type, COUNT(alert.id) as count')
+        .leftJoin('alert.alertType', 'alertType')
+        .groupBy('alert.dataStoreName, alertType.severity, alertType.name')
+        .having('COUNT(alert.id) > 1')
+        .getRawMany() as RepeatedAlertDto[];
+      // get History of storage associated alerts
+      for (const repeatedStorageAlert of repeatedStorageAlerts) {
+        const history: AlertOcurrenceDto[] = [];
+
+        const alertEntities = await this.storageFillRepository.find({
+          where: {
+            dataStoreName: repeatedStorageAlert.storageId,
+            alertType: { name: repeatedStorageAlert.type as unknown as string },
+          },
+          order: {
+            creationDate: 'DESC',
+          },
+        });
+        for (const alertEntity of alertEntities) {
+          history.push({  date: alertEntity.creationDate, alertId: alertEntity.id });
+        }
+        repeatedStorageAlert.history = history.slice(0,5);
+        repeatedStorageAlert.firstOccurence = history[history.length - 1].date;
+      }
+      retAlerts.push(...repeatedStorageAlerts);
+    }
+  }
+
   async createAlertType(createAlertTypeDto: CreateAlertTypeDto) {
     const entity = await this.alertTypeRepository.findOneBy({
       name: createAlertTypeDto.name,
@@ -139,14 +261,14 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return await this.alertTypeRepository.find({ where });
   }
 
-  async triggerAlertMail(alert: Alert) {
-    await this.mailService.sendAlertMail(alert);
+  triggerAlertMail(alert: Alert) {
+    this.mailService.sendAlertMail(alert);
   }
 
   async getAllAlertsPaginated(
     paginationOptionsDto: PaginationOptionsDto,
     alertOrderOptionsDto: AlertOrderOptionsDto,
-    alertFilterDto: AlertFilterDto,
+    alertFilterDto: AlertFilterDto
   ): Promise<PaginationDto<Alert>> {
     return this.paginateAlerts<Alert>(
       this.alertRepositories,
@@ -157,74 +279,56 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     );
   }
 
-
-  async createSizeAlert(createSizeAlertDto: CreateSizeAlertDto) {
-    // Check if alert already exists
-    const existingAlertEntity = await this.sizeAlertRepository.findOneBy({
-      backup: { id: createSizeAlertDto.backupId },
-    });
-
-    if (existingAlertEntity) {
-      console.log('Alert already exists -> ignoring it');
-      return;
-    }
-
-    const alert = new SizeAlertEntity();
-    alert.size = createSizeAlertDto.size;
-    alert.referenceSize = createSizeAlertDto.referenceSize;
-
-    const backup = await this.backupDataService.findOneById(
-      createSizeAlertDto.backupId
-    );
-    if (!backup) {
-      throw new NotFoundException(
-        `Backup with id ${createSizeAlertDto.backupId} not found`
-      );
-    }
-    alert.backup = backup;
-
+  async createSizeAlertsBatched(createSizeAlertDtos: CreateSizeAlertDto[]) {
     const alertType = await this.alertTypeRepository.findOneBy({
       name: SIZE_ALERT,
     });
     if (!alertType) {
       throw new NotFoundException(`Alert type ${SIZE_ALERT} not found`);
     }
-    alert.alertType = alertType;
 
-    await this.sizeAlertRepository.save(alert);
+    const alerts: SizeAlertEntity[] = [];
+    for (const alertDto of createSizeAlertDtos) {
+      // Check if alert already exists
+      const existingAlertEntity = await this.sizeAlertRepository.findOneBy({
+        backup: { id: alertDto.backupId },
+      });
 
-    if (alert.alertType.user_active && alert.alertType.master_active) {
-      await this.triggerAlertMail(alert);
+      if (existingAlertEntity) {
+        console.log('Alert already exists -> ignoring it');
+        continue;
+      }
+
+      const alert = new SizeAlertEntity();
+      alert.size = alertDto.size;
+      alert.referenceSize = alertDto.referenceSize;
+
+      const backup = await this.backupDataService.findOneById(
+        alertDto.backupId
+      );
+      if (!backup) {
+        throw new NotFoundException(
+          `Backup with id ${alertDto.backupId} not found`
+        );
+      }
+      alert.backup = backup;
+
+      alert.alertType = alertType;
+      alerts.push(alert);
+    }
+
+    await this.sizeAlertRepository.save(alerts);
+
+    if (alertType.user_active && alertType.master_active) {
+      for (const alert of alerts) {
+        this.triggerAlertMail(alert);
+      }
     }
   }
 
-  async createCreationDateAlert(
-    createCreationDateAlertDto: CreateCreationDateAlertDto
+  async createCreationDateAlertsBatched(
+    createCreationDateAlertDtos: CreateCreationDateAlertDto[]
   ) {
-    // Check if alert already exists
-    const existingAlertEntity = await this.creationDateRepository.findOneBy({
-      backup: { id: createCreationDateAlertDto.backupId },
-    });
-
-    if (existingAlertEntity) {
-      console.log('Alert already exists -> ignoring it');
-      return;
-    }
-
-    const alert = new CreationDateAlertEntity();
-    alert.date = createCreationDateAlertDto.date;
-    alert.referenceDate = createCreationDateAlertDto.referenceDate;
-
-    const backup = await this.backupDataService.findOneById(
-      createCreationDateAlertDto.backupId
-    );
-    if (!backup) {
-      throw new NotFoundException(
-        `Backup with id ${createCreationDateAlertDto.backupId} not found`
-      );
-    }
-    alert.backup = backup;
-
     const alertType = await this.alertTypeRepository.findOneBy({
       name: CREATION_DATE_ALERT,
     });
@@ -233,16 +337,89 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         `Alert type ${CREATION_DATE_ALERT} not found`
       );
     }
-    alert.alertType = alertType;
 
-    await this.creationDateRepository.save(alert);
+    const alerts: CreationDateAlertEntity[] = [];
+    for (const alertDto of createCreationDateAlertDtos) {
+      // Check if alert already exists
+      const existingAlertEntity = await this.creationDateRepository.findOneBy({
+        backup: { id: alertDto.backupId },
+      });
+      if (existingAlertEntity) {
+        console.log('Alert already exists -> ignoring it');
+        continue;
+      }
+      const alert = new CreationDateAlertEntity();
+      alert.date = alertDto.date;
+      alert.referenceDate = alertDto.referenceDate;
 
-    if (alert.alertType.user_active && alert.alertType.master_active) {
-      await this.triggerAlertMail(alert);
+      const backup = await this.backupDataService.findOneById(
+        alertDto.backupId
+      );
+      if (!backup) {
+        throw new NotFoundException(
+          `Backup with id ${alertDto.backupId} not found`
+        );
+      }
+      alert.backup = backup;
+      alert.alertType = alertType;
+
+      alerts.push(alert);
+    }
+
+    await this.creationDateRepository.save(alerts);
+
+    if (alertType.user_active && alertType.master_active) {
+      for (const alert of alerts) {
+        this.triggerAlertMail(alert);
+      }
     }
   }
 
-  async createStorageFillAlert(
+  async createStorageFillAlerts(
+    createStorageFillAlertDtos: CreateStorageFillAlertDto[]
+  ) {
+    const existingStorageFillAlerts = await this.storageFillRepository.findBy({
+      deprecated: false,
+    });
+    // Analyzer has analyzed all data stores. So if there is an existing alert that is not in the new list of alerts, it is deprecated
+    const deprecatedAlerts = existingStorageFillAlerts.filter(
+      (alert) =>
+        !createStorageFillAlertDtos.find(
+          (dto) => dto.dataStoreName === alert.dataStoreName
+        )
+    );
+
+    for (const alert of deprecatedAlerts) {
+      alert.deprecated = true;
+      await this.storageFillRepository.save(alert);
+    }
+
+    for (const alertDto of createStorageFillAlertDtos) {
+      //If alert already exists with same values, ignore new one
+      const existingAlert = await this.storageFillRepository.findOneBy({
+        dataStoreName: alertDto.dataStoreName,
+        deprecated: false,
+      });
+      if (existingAlert) {
+        if (
+          Math.floor(existingAlert.filled) === alertDto.filled &&
+          Math.floor(existingAlert.highWaterMark) === alertDto.highWaterMark &&
+          Math.floor(existingAlert.capacity) === alertDto.capacity
+        ) {
+          console.log(
+            'Storage Fill alert already exists, with no values changed -> ignoring it'
+          );
+          continue;
+        } else {
+          existingAlert.deprecated = true;
+          await this.storageFillRepository.save(existingAlert);
+        }
+      }
+      await this.createStorageFillAlert(alertDto);
+    }
+  }
+
+  private async createStorageFillAlert(
     createStorageFillAlertDto: CreateStorageFillAlertDto
   ) {
     const alert = new StorageFillAlertEntity();
@@ -262,7 +439,7 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     await this.storageFillRepository.save(alert);
 
     if (alert.alertType.user_active && alert.alertType.master_active) {
-      await this.triggerAlertMail(alert);
+      this.triggerAlertMail(alert);
     }
   }
 
@@ -322,69 +499,67 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return alert.backup.id;
   }
 
-    createWhereClause(
-      alertFilterDto: AlertFilterDto,
-    ) {
-      const where: FindOptionsWhere<Alert> = {};
-  
-      //ID search
-      if (alertFilterDto.id) {
-        //like search
-        where.id = ILike(`%${alertFilterDto.id}%`);
-      }
-  
-      // backupId search
-      if (alertFilterDto.backupId) {
-        where.backup = { id: alertFilterDto.backupId };
-      }
+  createWhereClause(alertFilterDto: AlertFilterDto) {
+    const where: FindOptionsWhere<Alert> = {};
 
-      // Check if params from and to are valid dates
-  
-      let from: Date | null = null;
-      let to: Date | null = null;
-      if (alertFilterDto.fromDate) {
-        from = new Date(alertFilterDto.fromDate);
-        if (Number.isNaN(from.getTime())) {
-          throw new BadRequestException('parameter fromDate is not a valid date');
-        }
-        //Set time to first millisecond of the day
-        from.setHours(0);
-        from.setMinutes(0);
-        from.setSeconds(0);
-        from.setMilliseconds(0);
-      }
-      if (alertFilterDto.toDate) {
-        to = new Date(alertFilterDto.toDate);
-        if (Number.isNaN(to.getTime())) {
-          throw new BadRequestException('parameter toDate is not a valid date');
-        }
-        //Set time to last millisecond of the day
-        to.setHours(0);
-        to.setMinutes(0);
-        to.setSeconds(0);
-        to.setDate(to.getDate() + 1);
-        to.setMilliseconds(-1);
-      }
-  
-      //Creation date search
-      if (alertFilterDto.fromDate && alertFilterDto.toDate) {
-        where.creationDate = Between(from!, to!);
-      } else if (alertFilterDto.fromDate) {
-        where.creationDate = MoreThanOrEqual(from!);
-      } else if (alertFilterDto.toDate) {
-        where.creationDate = LessThanOrEqual(to!);
-      }
-
-      // severity search
-      if (alertFilterDto.severity) {
-        where.alertType = { severity: alertFilterDto.severity as SeverityType };
-      }
-
-      // alertType search
-      if (alertFilterDto.alertType) {
-        where.alertType = { name: alertFilterDto.alertType };
-      }
-
-      return where;
+    //ID search
+    if (alertFilterDto.id) {
+      //like search
+      where.id = ILike(`%${alertFilterDto.id}%`);
     }
+
+    // backupId search
+    if (alertFilterDto.backupId) {
+      where.backup = { id: alertFilterDto.backupId };
+    }
+
+    // Check if params from and to are valid dates
+
+    let from: Date | null = null;
+    let to: Date | null = null;
+    if (alertFilterDto.fromDate) {
+      from = new Date(alertFilterDto.fromDate);
+      if (Number.isNaN(from.getTime())) {
+        throw new BadRequestException('parameter fromDate is not a valid date');
+      }
+      //Set time to first millisecond of the day
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+    }
+    if (alertFilterDto.toDate) {
+      to = new Date(alertFilterDto.toDate);
+      if (Number.isNaN(to.getTime())) {
+        throw new BadRequestException('parameter toDate is not a valid date');
+      }
+      //Set time to last millisecond of the day
+      to.setHours(0);
+      to.setMinutes(0);
+      to.setSeconds(0);
+      to.setDate(to.getDate() + 1);
+      to.setMilliseconds(-1);
+    }
+
+    //Creation date search
+    if (alertFilterDto.fromDate && alertFilterDto.toDate) {
+      where.creationDate = Between(from!, to!);
+    } else if (alertFilterDto.fromDate) {
+      where.creationDate = MoreThanOrEqual(from!);
+    } else if (alertFilterDto.toDate) {
+      where.creationDate = LessThanOrEqual(to!);
+    }
+
+    // severity search
+    if (alertFilterDto.severity) {
+      where.alertType = { severity: alertFilterDto.severity as SeverityType };
+    }
+
+    // alertType search
+    if (alertFilterDto.alertType) {
+      where.alertType = { name: alertFilterDto.alertType };
+    }
+
+    return where;
+  }
 }

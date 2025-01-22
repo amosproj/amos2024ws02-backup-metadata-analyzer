@@ -43,6 +43,7 @@ describe('BackupDataService', () => {
           provide: getRepositoryToken(TaskEntity),
           useValue: {
             findOneBy: jest.fn().mockResolvedValue(new TaskEntity()),
+            find: jest.fn().mockResolvedValue([new TaskEntity()]),
           },
         },
       ],

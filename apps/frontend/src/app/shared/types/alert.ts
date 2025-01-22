@@ -1,5 +1,6 @@
 import { Backup } from './backup';
 import { AlertType } from './alertType';
+import { BackupType } from '../enums/backup.types';
 
 export interface Alert {
   id: string;

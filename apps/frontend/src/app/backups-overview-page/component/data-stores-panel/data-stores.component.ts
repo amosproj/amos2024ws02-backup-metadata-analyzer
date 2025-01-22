@@ -13,6 +13,7 @@ export class DataStoresComponent implements OnDestroy, OnInit {
   dataStores$: Observable<DataStore[]> = of([]);
 
   showAll = false;
+  sortBy: 'filled' | 'overflowTime' = 'filled';
 
   constructor(private readonly dataStoresService: DataStoresService) {}
 
@@ -56,10 +57,14 @@ export class DataStoresComponent implements OnDestroy, OnInit {
     this.showAll = !this.showAll;
   }
 
-  private sortDataStores(dataStores: DataStore[]): DataStore[] {
-    return dataStores.sort(
-      (a, b) => this.getFilledPercentage(b) - this.getFilledPercentage(a)
-    );
+  sortDataStores(dataStores: DataStore[]): DataStore[] {
+    return dataStores.sort((a, b) => {
+      if (this.sortBy === 'filled') {
+        return this.getFilledPercentage(b) - this.getFilledPercentage(a);
+      } else {
+        return (a.overflowTime ?? Infinity) - (b.overflowTime ?? Infinity);
+      }
+    });
   }
 
   getOverflowTimeLabel(overflowTime?: number): string {
@@ -75,5 +80,11 @@ export class DataStoresComponent implements OnDestroy, OnInit {
       return `Now`;
     }
     return `${overflowTime} days`;
+  }
+
+  changeSortBy(event: Event) {
+    const element = event.target as HTMLSelectElement;
+    this.sortBy = element.value as 'filled' | 'overflowTime';
+    this.loadDataStores();
   }
 }

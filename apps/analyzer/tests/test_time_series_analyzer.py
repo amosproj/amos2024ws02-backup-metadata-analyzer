@@ -1,12 +1,11 @@
-from datetime import datetime
+import pandas as pd
+import pytest
 
 from metadata_analyzer.analyzer import Analyzer
 from metadata_analyzer.models import Result
 from metadata_analyzer.time_series_analyzer import Time_series_analyzer
 from tests.mock_backend import MockBackend
 from tests.mock_database import MockDatabase
-import pytest
-import pandas as pd
 
 
 class Test_time_series_analyzer:
@@ -49,7 +48,7 @@ class Test_time_series_analyzer:
             [mock_result1, mock_result2, mock_result3, mock_result4]
         )
         time_series_analyzer = Time_series_analyzer([0.95, 5])
-        Analyzer.init(database, backend, None, None, time_series_analyzer)
+        Analyzer.init(database, backend, None, time_series_analyzer)
         Analyzer.load_time_series_data()
 
         with pytest.raises(ValueError) as valErr:
@@ -155,7 +154,7 @@ class Test_time_series_analyzer:
             ]
         )
         time_series_analyzer = Time_series_analyzer([0.95, 5])
-        Analyzer.init(database, backend, None, None, time_series_analyzer)
+        Analyzer.init(database, backend, None, time_series_analyzer)
         Analyzer.load_time_series_data()
 
         result = Analyzer.simple_time_series_analysis(
@@ -264,7 +263,7 @@ class Test_time_series_analyzer:
         time_series_analyzer = Time_series_analyzer([0.95, 5])
         Analyzer.time_series_analyzer.set_training_start(0)
         Analyzer.time_series_analyzer.set_training_end(5)
-        Analyzer.init(database, backend, None, None, time_series_analyzer)
+        Analyzer.init(database, backend, None, time_series_analyzer)
         Analyzer.load_time_series_data()
 
         result = Analyzer.simple_time_series_analysis(

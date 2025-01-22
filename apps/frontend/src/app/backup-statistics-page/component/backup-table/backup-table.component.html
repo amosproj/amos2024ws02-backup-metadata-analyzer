@@ -26,10 +26,10 @@
 
     <clr-dg-column [clrDgField]="'sizeMB'">
       <ng-container *clrDgHideableColumn>
-        Size (MB)
+        Size
         <clr-dg-filter [clrDgFilter]="backupSizeFilter">
           <clr-input-container>
-            <label>From:</label>
+            <label>From (MB):</label>
             <input
               clrInput
               type="number"
@@ -40,7 +40,7 @@
             />
           </clr-input-container>
           <clr-input-container>
-            <label>To:</label>
+            <label>To (MB):</label>
             <input
               clrInput
               type="number"

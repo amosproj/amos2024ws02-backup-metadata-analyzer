@@ -1,6 +1,19 @@
 <div class="card data-store-card">
   <div class="card-header">
     <span class="data-store-name">Data Stores</span>
+
+    <div class="clr-form-control">
+      <label for="select-full" class="clr-control-label">Sort by</label>
+      <div class="clr-control-container">
+        <div class="clr-select-wrapper">
+          <select id="select-full" class="clr-select" (change)="changeSortBy($event)" [value]="sortBy">
+            <option value="filled">Filled Percentage</option>
+            <option value="overflowTime">Overflow Time</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
   </div>
   <div class="card-body">
     <div
