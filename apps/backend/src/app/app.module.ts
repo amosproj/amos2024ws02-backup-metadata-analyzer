@@ -5,12 +5,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DbConfigService } from './db-config.service';
-import { DemoModule } from './demo/demo.module';
 import { BackupDataModule } from './backupData/backupData.module';
 import { AlertingModule } from './alerting/alerting.module';
 import { TasksModule } from './tasks/tasks.module';
 import { DataStoresModule } from './dataStores/dataStores.module';
 import { InformationModule } from './information/information.module';
+import { AnalyzerServiceModule } from './analyzerService/analyzer-service.module';
 
 @Module({
   imports: [
@@ -21,12 +21,12 @@ import { InformationModule } from './information/information.module';
       imports: [ConfigModule],
       useClass: DbConfigService,
     }),
-    DemoModule,
     BackupDataModule,
     AlertingModule,
     TasksModule,
     DataStoresModule,
     InformationModule,
+    AnalyzerServiceModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -20,14 +20,14 @@ class Backend:
 		r = requests.post(url, json=storage)
 		r.raise_for_status()
 
-	def create_size_alert(self, alert):
-		url = self.backend_url + "alerting/size"
-		r = requests.post(url, json=alert)
+	def create_size_alerts_batched(self, alerts):
+		url = self.backend_url + "alerting/size/batched"
+		r = requests.post(url, json=alerts)
 		r.raise_for_status()
 
-	def create_creation_date_alert(self, alert):
-		url = self.backend_url + "alerting/creationDate"
-		r = requests.post(url, json=alert)
+	def create_creation_date_alerts_batched(self, alerts):
+		url = self.backend_url + "alerting/creationDate/batched"
+		r = requests.post(url, json=alerts)
 		r.raise_for_status()
 
 	def create_storage_fill_alerts(self, alerts):

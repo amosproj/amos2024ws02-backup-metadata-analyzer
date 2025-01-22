@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -33,6 +34,8 @@ import { BackupSizesPerDayDto } from './dto/BackupSizesPerDay.dto';
 
 @Injectable()
 export class BackupDataService extends PaginationService {
+  readonly logger = new Logger(BackupDataService.name);
+
   constructor(
     @InjectRepository(BackupDataEntity)
     private readonly backupDataRepository: Repository<BackupDataEntity>,
@@ -172,10 +175,13 @@ export class BackupDataService extends PaginationService {
   async createBatched(
     createBackupDataDtos: CreateBackupDataDto[]
   ): Promise<void> {
+    const existingTaskIds = await this.tasksService.findAll().then((tasks) => {
+      return tasks.map((task) => task.id);
+    });
     //ignore unknown taskIds
     for (const dto of createBackupDataDtos) {
-      if (dto.taskId && !(await this.tasksService.findOne(dto.taskId))) {
-        console.warn(
+      if (dto.taskId && !existingTaskIds.includes(dto.taskId)) {
+        this.logger.debug(
           `Task with id ${dto.taskId} not found - still creating the backup, but without task`
         );
         dto.taskId = undefined;

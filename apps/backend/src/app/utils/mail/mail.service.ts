@@ -41,7 +41,7 @@ export class MailService {
     const receiverEntities = await this.getAllMailReceiver();
 
     if (receiverEntities.length === 0) {
-      this.logger.log('No mail receivers found. Skipping sending mail');
+      this.logger.debug('No mail receivers found. Skipping sending mail');
       return;
     }
     const receivers = receiverEntities
@@ -144,14 +144,14 @@ export class MailService {
     attachments?: any[]
   ) {
     if (!this.MAILING_ACTIVE) {
-      this.logger.log(
+      this.logger.debug(
         `Mailing is disabled. Would have sent mail to: ${receivers.join(
           ','
         )} with subject "${subject}`
       );
       return;
     }
-    this.logger.log(
+    this.logger.debug(
       `Sending mail to: ${receivers.join(',')} with subject "${subject}"`
     );
     await this.mailerService.sendMail({

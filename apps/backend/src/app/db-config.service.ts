@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
-import { DemoEntity } from './demo/entity/demo.entity';
 import { Init1730126846408 } from './migrations/1730126846408-Init';
 import { BackupDataEntity } from './backupData/entity/backupData.entity';
 import { AddBackupDataTable1730491370687 } from './migrations/1730491370687-AddBackupDataTable';
@@ -55,7 +54,6 @@ export class DbConfigService implements TypeOrmOptionsFactory {
       password: this.configService.getOrThrow<string>('DATABASE_PASSWORD'),
       database: this.configService.getOrThrow<string>('DATABASE_DATABASE'),
       entities: [
-        DemoEntity,
         BackupDataEntity,
         AlertTypeEntity,
         SizeAlertEntity,
