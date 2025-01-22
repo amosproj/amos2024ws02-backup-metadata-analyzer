@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
@@ -6,13 +6,24 @@ import { BackupAlertsOverviewDto } from './dto/backupAlertsOverview.dto';
 import { BackupAlertsOverviewEntity } from './entity/backupAlertsOverview.entity';
 
 @Injectable()
-export class BackupAlertsOverviewService {
+export class BackupAlertsOverviewService implements OnModuleInit {
+  private severityOverview!: BackupAlertsOverviewDto;
+
   constructor(
     @InjectRepository(BackupDataEntity)
     private readonly backupRepository: Repository<BackupDataEntity>,
     @InjectRepository(BackupAlertsOverviewEntity)
     private readonly backupAlertsOverviewRepository: Repository<BackupAlertsOverviewEntity>
   ) {}
+
+  async onModuleInit() {
+    this.severityOverview = await this.getBackupCountsByAlertClass();
+  }
+
+  // Expose the severityOverview variable
+  getSeverityOverview(): BackupAlertsOverviewDto {
+    return this.severityOverview;
+  }
 
   async getBackupCountsByAlertClass(): Promise<BackupAlertsOverviewDto> {
     const query = `
@@ -88,7 +99,7 @@ export class BackupAlertsOverviewService {
       })
       .orUpdate(['ok', 'info', 'warning', 'critical'], ['id'])
       .execute();
-
+    console.log(this.getSeverityOverview());
     return dto;
   }
 }
