@@ -14,7 +14,7 @@ describe('BackupAlertsOverviewController', () => {
         {
           provide: BackupAlertsOverviewService,
           useValue: {
-            getBackupCountsByAlertClass: jest.fn(),
+            getBackupAlertsBySeverity: jest.fn(),
           },
         },
       ],
@@ -33,11 +33,11 @@ describe('BackupAlertsOverviewController', () => {
     mockResult.warning = 2;
     mockResult.critical = 1;
 
-    serviceMock.getBackupCountsByAlertClass.mockResolvedValue(mockResult);
+    serviceMock.getBackupAlertsBySeverity.mockResolvedValue(mockResult);
 
-    const result = await controller.getBackupCountsByAlertClass();
+    const result = await controller.getBackupAlertsBySeverity();
 
     expect(result).toEqual(mockResult);
-    expect(serviceMock.getBackupCountsByAlertClass).toHaveBeenCalledTimes(1);
+    expect(serviceMock.getBackupAlertsBySeverity).toHaveBeenCalledTimes(1);
   });
 });

@@ -17,7 +17,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    this.severityOverview = await this.getBackupCountsByAlertClass();
+    this.severityOverview = await this.getBackupAlertsBySeverity();
   }
 
   // Expose the severityOverview variable
@@ -25,7 +25,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
     return this.severityOverview;
   }
 
-  async getBackupCountsByAlertClass(): Promise<BackupAlertsOverviewDto> {
+  async getBackupAlertsBySeverity(): Promise<BackupAlertsOverviewDto> {
     const query = `
           WITH AlertsByBackup AS (
       SELECT 

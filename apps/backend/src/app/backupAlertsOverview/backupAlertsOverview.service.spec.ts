@@ -56,7 +56,7 @@ describe('BackupAlertsOverviewService', () => {
     ];
     backupRepositoryMock.query.mockResolvedValue(mockQueryResult);
 
-    const result = await service.getBackupCountsByAlertClass();
+    const result = await service.getBackupAlertsBySeverity();
 
     expect(result).toEqual({
       ok: 5,
@@ -93,7 +93,7 @@ describe('BackupAlertsOverviewService', () => {
         } as any)
     );
 
-    await service.getBackupCountsByAlertClass();
+    await service.getBackupAlertsBySeverity();
 
     expect(insertMock).toHaveBeenCalled();
     expect(valuesMock).toHaveBeenCalledWith({

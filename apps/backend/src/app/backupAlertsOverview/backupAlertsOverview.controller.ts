@@ -20,10 +20,10 @@ export class BackupAlertsOverviewController {
     description: 'The count of backup alerts grouped by severity.',
     type: BackupAlertsOverviewDto,
   })
-  async getBackupCountsByAlertClass(): Promise<BackupAlertsOverviewDto> {
+  async getBackupAlertsBySeverity(): Promise<BackupAlertsOverviewDto> {
     this.logger.log('Fetching the count of backup alerts grouped by severity.');
     const result =
-      await this.backupAlertsOverviewService.getBackupCountsByAlertClass();
+      await this.backupAlertsOverviewService.getBackupAlertsBySeverity();
     this.logger.log('Counts by severity retrieved successfully.');
     return result;
   }
