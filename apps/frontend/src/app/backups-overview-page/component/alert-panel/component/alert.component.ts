@@ -67,6 +67,7 @@ export class AlertComponent implements OnInit, OnDestroy {
     const params: AlertFilterParams = {
       fromDate: this.fromDate.toISOString(),
       limit: 5,
+      orderBy: 'severity',
     };
     this.alertService
       .getAllAlerts(params)
