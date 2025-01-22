@@ -1,11 +1,25 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../../../../shared/services/alert-service/alert-service.service';
 import { Alert, StorageFillAlert } from '../../../../shared/types/alert';
-import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  of,
+  shareReplay,
+  Subject,
+  takeUntil,
+} from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
 import { AlertFilterParams } from '../../../../shared/types/alert-filter-type';
 import { APIResponse } from '../../../../shared/types/api-response';
+import { AlertCounts } from '../../../../shared/types/alertCounts';
+
+const INITIAL_ALERT_COUNTS: AlertCounts = {
+  criticalAlerts: 0,
+  warningAlerts: 0,
+  infoAlerts: 0,
+};
 
 @Component({
   selector: 'app-alert',
@@ -21,10 +35,9 @@ export class AlertComponent implements OnInit, OnDestroy {
 
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   readonly alerts$ = this.alertsSubject.asObservable();
-  total: number = 0;
-  criticalAlertsCount = 0;
-  warningAlertsCount = 0;
-  infoAlertsCount = 0;
+  total = 0;
+
+  protected alertCounts$: Observable<AlertCounts> = of(INITIAL_ALERT_COUNTS);
 
   status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
@@ -37,6 +50,7 @@ export class AlertComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadAlerts();
+
     this.alertService
       .getRefreshObservable()
       .pipe(takeUntil(this.destroy$))
@@ -45,21 +59,15 @@ export class AlertComponent implements OnInit, OnDestroy {
       });
 
     this.alerts$.pipe(takeUntil(this.destroy$)).subscribe((alerts) => {
-      this.criticalAlertsCount = alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.CRITICAL
-      ).length;
-      this.warningAlertsCount = alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.WARNING
-      ).length;
-      this.infoAlertsCount = alerts.filter(
-        (alert) => alert.alertType.severity === SeverityType.INFO
-      ).length;
       this.status = this.getStatus(alerts);
     });
   }
 
   loadAlerts(): void {
-    let params: AlertFilterParams = { fromDate: this.fromDate.toISOString(), limit: 5 };
+    const params: AlertFilterParams = {
+      fromDate: this.fromDate.toISOString(),
+      limit: 5,
+    };
     this.alertService
       .getAllAlerts(params)
       .pipe(takeUntil(this.destroy$))
@@ -68,6 +76,8 @@ export class AlertComponent implements OnInit, OnDestroy {
         this.alertsSubject.next(filteredAlerts);
         this.total = response.paginationData.total;
       });
+
+    this.alertCounts$ = this.alertService.getAlertCounts().pipe(shareReplay(1));
   }
 
   filterAlerts(alerts: Alert[]): Alert[] {
