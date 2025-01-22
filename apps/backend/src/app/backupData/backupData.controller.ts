@@ -25,6 +25,7 @@ import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
 import { BackupSizesPerDayDto } from './dto/BackupSizesPerDay.dto';
+import { BackupType } from './dto/backupType';
 
 @ApiTags('Backup Data')
 @Controller('backupData')
@@ -109,6 +110,13 @@ export class BackupDataController {
     type: String,
     description: 'To Date',
   })
+  @ApiQuery({
+    name: 'types',
+    required: false,
+    type: String,
+    isArray: true,
+    description: 'Array of backup types',
+  })
   @ApiBody({
     type: BackupDataFilterByTaskIdsDto,
     required: false,
@@ -116,8 +124,14 @@ export class BackupDataController {
   async getBackupDataSizesPerDay(
     @Query('fromDate') fromDate?: string,
     @Query('toDate') toDate?: string,
+    @Query('types') types?: BackupType[],
     @Body() backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
   ): Promise<BackupSizesPerDayDto[]> {
-    return this.backupDataService.getBackupDataSizesPerDay(fromDate, toDate, backupDataFilterByTaskIdsDto?.taskIds);
+    return this.backupDataService.getBackupDataSizesPerDay(
+      fromDate,
+      toDate,
+      backupDataFilterByTaskIdsDto?.taskIds,
+      types
+    );
   }
 }

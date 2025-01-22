@@ -97,7 +97,8 @@ export class BackupDataService extends PaginationService {
   async getBackupDataSizesPerDay(
     fromDate?: string,
     toDate?: string,
-    taskIds?: string[]
+    taskIds?: string[],
+    types?: string[]
   ): Promise<BackupSizesPerDayDto[]> {
     //Validate Dates
     //TODO: extract to seperate method
@@ -145,6 +146,10 @@ export class BackupDataService extends PaginationService {
 
     if (taskIds) {
       query.andWhere('backup.taskId IN (:...taskIds)', { taskIds });
+    }
+
+    if (types) {
+      query.andWhere('backup.type IN (:...types)', { types });
     }
 
     return query.getRawMany();
