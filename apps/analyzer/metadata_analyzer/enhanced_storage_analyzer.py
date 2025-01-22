@@ -139,25 +139,7 @@ class EnhancedStorageAnalyzer:
         df = df[["sbc_start", "data_size"]]
         df = df.dropna()
 
-        # gets backup frequencies present in dataset
-        freqs = df.diff()["sbc_start"]
-        # orders frequencies by count and removes NaN edge cases
-        freqs = freqs.value_counts()
-        freqs = freqs[freqs.notnull()]
-        freqs = freqs.reset_index()  # resetting index back into dataframe
-        # converts into returnable format
-        freqs["sbc_start"] = freqs["sbc_start"].dt.total_seconds()
-        freqs = freqs.to_dict()
-
-        chosen_freq = 0
-        chosen_freq = freqs['sbc_start']
-
-        if not bool(chosen_freq):
-            #case if no frequencies were found
-            return None
-        chosen_freq = chosen_freq[0]
-        #TODO add endpoint to change
-        print("lock in chosen frequency at a day")
+        # sets frequency at a fixed value, switch to dynamic method for risky results
         chosen_freq = self.frequency
 
         # calculates number of steps to take for forecasting
@@ -210,5 +192,23 @@ class EnhancedStorageAnalyzer:
                 overflows.update({key:(i * step_width)})
         return overflows
 
+    def set_frequency(df):
+        # gets backup frequencies present in dataset
+        freqs = df.diff()["sbc_start"]
+        # orders frequencies by count and removes NaN edge cases
+        freqs = freqs.value_counts()
+        freqs = freqs[freqs.notnull()]
+        freqs = freqs.reset_index()  # resetting index back into dataframe
+        # converts into returnable format
+        freqs["sbc_start"] = freqs["sbc_start"].dt.total_seconds()
+        freqs = freqs.to_dict()
+
+        chosen_freq = 0
+        chosen_freq = freqs['sbc_start']
+
+        if not bool(chosen_freq):
+            #case if no frequencies were found
+            return None
+        return = chosen_freq[0]
 
 
