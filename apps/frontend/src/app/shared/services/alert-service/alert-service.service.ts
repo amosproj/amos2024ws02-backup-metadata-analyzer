@@ -59,9 +59,15 @@ export class AlertServiceService {
       .pipe(shareReplay(1));
   }
 
-  getAlertCounts(): Observable<AlertCounts> {
+  getAlertCounts(fromDate?: string): Observable<AlertCounts> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
     return this.http
-      .get<AlertCounts>(`${this.baseUrl}/alerting/statistics`)
+      .get<AlertCounts>(`${this.baseUrl}/alerting/statistics`, {
+        params: params,
+      })
       .pipe(shareReplay(1));
   }
 

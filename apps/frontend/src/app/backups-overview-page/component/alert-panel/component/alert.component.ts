@@ -78,7 +78,7 @@ export class AlertComponent implements OnInit, OnDestroy {
         this.total = response.paginationData.total;
       });
 
-    this.alertCounts$ = this.alertService.getAlertCounts().pipe(shareReplay(1));
+    this.alertCounts$ = this.alertService.getAlertCounts(this.fromDate.toISOString()).pipe(shareReplay(1));
   }
 
   filterAlerts(alerts: Alert[]): Alert[] {
