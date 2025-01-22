@@ -63,7 +63,6 @@ describe('AppComponent', () => {
       'Dashboard',
       'Backup Statistics',
       'Analysis Overview',
-      'Find Data',
       'How to get started?',
       
     ];
