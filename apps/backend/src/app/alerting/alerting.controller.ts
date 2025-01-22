@@ -51,15 +51,15 @@ export class AlertingController {
     type: AlertStatisticsDto,
   })
   @ApiQuery({
-    name: 'includeDeprecated',
-    description: 'Include deprecated alerts',
+    name: 'fromDate',
+    description: 'Filter alerts by creation date',
     required: false,
-    type: Boolean,
+    type: String,
   })
   async getStatistics(
-    @Query('includeDeprecated') includeDeprecated?: boolean
+    @Query('fromDate') fromDate?: string
   ): Promise<AlertStatisticsDto> {
-    return this.alertingService.getStatistics();
+    return this.alertingService.getStatistics(undefined, fromDate);
   }
 
   @Get('repetitions')

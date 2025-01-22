@@ -106,11 +106,30 @@ export class AlertingService extends PaginationService implements OnModuleInit {
   }
 
   async getStatistics(
-    includeDeprecated?: boolean
+    includeDeprecated?: boolean,
+    fromDate?: string
   ): Promise<AlertStatisticsDto> {
+    // Check if param is valid date
+
+    let from: Date | null = null;
+    if (fromDate) {
+      from = new Date(fromDate);
+      if (Number.isNaN(from.getTime())) {
+        throw new BadRequestException('parameter fromDate is not a valid date');
+      }
+      //Set time to first millisecond of the day
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+    }
+
     const filter = {} as FindOptionsWhere<Alert>;
-    if (!includeDeprecated) {
+    if (includeDeprecated === undefined || includeDeprecated === false) {
       filter.deprecated = false;
+    }
+    if (from) {
+      filter.creationDate = MoreThanOrEqual(from);
     }
     const alertStatisticsDto: AlertStatisticsDto = {
       infoAlerts: 0,
@@ -187,7 +206,9 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       retAlerts.sort((a, b) => b.count - a.count);
     }
 
-    const alertStatisticsDto: AlertStatisticsDto = await this.getStatistics(true);
+    const alertStatisticsDto: AlertStatisticsDto = await this.getStatistics(
+      true
+    );
     const alertSummaryDto: AlertSummaryDto = {
       infoAlerts: alertStatisticsDto.infoAlerts,
       criticalAlerts: alertStatisticsDto.criticalAlerts,
