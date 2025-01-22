@@ -6,11 +6,11 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
-  HttpCode,
   Put,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -29,31 +29,42 @@ export class DataStoresController {
 
   @Get()
   @ApiOperation({ summary: 'Returns all data stores.' })
-  @ApiOkResponse()
+  @ApiOkResponse({
+    description: 'All data stores.',
+    type: CreateDataStoreDto,
+    isArray: true,
+  })
   async findAll() {
     return this.dataStoresService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Returns the data store with the given id.' })
-  @ApiOkResponse()
-  @ApiNotFoundResponse()
+  @ApiOkResponse({
+    description: 'The data store with the given id.',
+    type: CreateDataStoreDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Data store with given id not found.',
+  })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.dataStoresService.findOne(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Creates a new data store.' })
-  @ApiCreatedResponse()
+  @ApiCreatedResponse({
+    description: 'Data store created successfully.',
+    type: CreateDataStoreDto,
+  })
   async create(@Body() createDataStoreDto: CreateDataStoreDto) {
     return this.dataStoresService.create(createDataStoreDto);
   }
 
   @Put(':id/OverflowTime')
   @ApiOperation({ summary: 'Sets the overflow time for a data store.' })
-  @ApiOkResponse({ description: 'Overflow time updated successfully.' })
+  @ApiNoContentResponse({ description: 'Overflow time updated successfully.' })
   @ApiNotFoundResponse({ description: 'Data store with given id not found.' })
-  @HttpCode(200)
   async setOverflowTime(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() payload: SetOverflowTimeDto

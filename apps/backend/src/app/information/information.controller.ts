@@ -11,9 +11,14 @@ export class InformationController {
   constructor(private readonly informationService: InformationService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Returns informations about metadata of our analysations' })
-  @ApiOkResponse()
-  async findAll(): Promise<BackupInformationDto> {
+  @ApiOperation({
+    summary: 'Returns informations about metadata of our analysis',
+  })
+  @ApiOkResponse({
+    description: 'Informations about metadata of our analysis',
+    type: BackupInformationDto,
+  })
+  async getBackupInformation(): Promise<BackupInformationDto> {
     return this.informationService.getBackupInformation();
   }
 }

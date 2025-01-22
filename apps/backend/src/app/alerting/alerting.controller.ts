@@ -10,11 +10,13 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
-  ApiConflictResponse, ApiCreatedResponse, ApiNoContentResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
@@ -44,8 +46,7 @@ export class AlertingController {
   @ApiOperation({
     summary: 'Returns the number of Info, Warning and Critical alerts.',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'The number of Info, Warning and Critical alerts.',
     type: AlertStatisticsDto,
   })
@@ -57,18 +58,18 @@ export class AlertingController {
   @ApiOperation({
     summary: 'Returns Information about repeated Alerts.',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'The number of Info, Warning and Critical alerts.',
+    type: AlertSummaryDto,
   })
   async getTestRepetitions(): Promise<AlertSummaryDto> {
     return this.alertingService.getRepetitions();
   }
 
-
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })
   @ApiConflictResponse({ description: 'Alert type already exists' })
+  @ApiCreatedResponse({ description: 'Alert Type created' })
   @ApiBody({ type: CreateAlertTypeDto })
   async createAlertType(@Body() createAlertTypeDto: CreateAlertTypeDto) {
     await this.alertingService.createAlertType(createAlertTypeDto);
@@ -118,8 +119,7 @@ export class AlertingController {
     required: false,
     type: Boolean,
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'Returns all alert types.',
     type: AlertTypeEntity,
     isArray: true,
@@ -133,8 +133,7 @@ export class AlertingController {
 
   @Get()
   @ApiOperation({ summary: 'Returns all alert Objects paginated.' })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'Returns all alert Objects paginated.',
     type: Alert,
     isArray: true,
@@ -198,8 +197,7 @@ export class AlertingController {
       'Gets the id of the backup with the latest alert of the given type.',
   })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'Returns the backupId of the latest alert of the given type.',
     type: String,
   })
