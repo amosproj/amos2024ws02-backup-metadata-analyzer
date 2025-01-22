@@ -190,6 +190,6 @@ class EnhancedStorageAnalyzer:
         if not bool(chosen_freq):
             #case if no frequencies were found
             return None
-        return = chosen_freq[0]
+        return chosen_freq[0]
 
 
