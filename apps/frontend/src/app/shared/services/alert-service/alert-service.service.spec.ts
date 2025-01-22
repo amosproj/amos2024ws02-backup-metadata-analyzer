@@ -166,4 +166,50 @@ describe('AlertServiceService', () => {
 
     req.flush({ data: mockAlerts, paginationData: { total: 2 } });
   });
+
+  it('should fetch alert counts without fromDate parameter', () => {
+    const mockAlertCounts = {
+      total: 5,
+      critical: 1,
+      warning: 2,
+      info: 2,
+    };
+
+    service.getAlertCounts().subscribe((alertCounts) => {
+      expect(alertCounts).toEqual(mockAlertCounts);
+    });
+
+    const req = httpMock.expectOne((request) => {
+      return (
+        request.url === `${baseUrl}/alerting/statistics` &&
+        request.method === 'GET' &&
+        !request.params.has('fromDate')
+      );
+    });
+    req.flush(mockAlertCounts);
+  });
+
+  it('should fetch alert counts with fromDate parameter', () => {
+    const mockAlertCounts = {
+      total: 3,
+      critical: 1,
+      warning: 1,
+      info: 1,
+    };
+    const fromDate = new Date().toISOString();
+
+    service.getAlertCounts(fromDate).subscribe((alertCounts) => {
+      expect(alertCounts).toEqual(mockAlertCounts);
+    });
+
+    const req = httpMock.expectOne((request) => {
+      return (
+        request.url === `${baseUrl}/alerting/statistics` &&
+        request.method === 'GET' &&
+        request.params.has('fromDate') &&
+        request.params.get('fromDate') === fromDate
+      );
+    });
+    req.flush(mockAlertCounts);
+  });
 });

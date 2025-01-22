@@ -86,7 +86,6 @@ describe('AppComponent', () => {
       '/',
       '/backup-statistics',
       '/alert',
-      '/findData',
       '/user-manual',
       
     ];

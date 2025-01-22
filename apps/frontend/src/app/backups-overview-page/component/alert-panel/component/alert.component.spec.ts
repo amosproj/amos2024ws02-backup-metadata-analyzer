@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { AlertComponent } from './alert.component';
 import { of } from 'rxjs';
-import { Alert } from '../../../../shared/types/alert';
 import { randomUUID } from 'crypto';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { BackupType } from '../../../../shared/enums/backup.types';
@@ -12,6 +11,7 @@ describe('AlertComponent', () => {
   let alertUtils: AlertUtilsService;
   let mockAlertService: {
     getAllAlerts: Mock;
+    getAlertCounts: Mock;
     getRefreshObservable: Mock;
   };
 
@@ -62,6 +62,15 @@ describe('AlertComponent', () => {
   beforeEach(() => {
     mockAlertService = {
       getAllAlerts: vi.fn().mockReturnValue(of(mockAlerts)),
+      getAlertCounts: vi.fn().mockReturnValue(
+        of({
+          data: {
+            criticalAlerts: 1,
+            warningAlerts: 1,
+            infoAlerts: 0,
+          },
+        })
+      ),
       getRefreshObservable: vi.fn().mockReturnValue(of(null)),
     };
 
@@ -117,14 +126,14 @@ describe('AlertComponent', () => {
     const testSubscription = component.alerts$.subscribe({
       complete: () => {
         isSubscriptionActive = false;
-      }
+      },
     });
-    
+
     component.ngOnInit();
     component.ngOnDestroy();
-    
+
     expect(isSubscriptionActive).toBe(true);
-    testSubscription.unsubscribe(); 
+    testSubscription.unsubscribe();
   });
 
   describe('filterAlerts', () => {
