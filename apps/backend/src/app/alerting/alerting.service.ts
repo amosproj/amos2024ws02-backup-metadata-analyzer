@@ -110,13 +110,13 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     };
     for (const repo of this.alertRepositories) {
       const infoAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.INFO } },
+        where: { alertType: { severity: SeverityType.INFO }, deprecated: false },
       });
       const warningAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.WARNING } },
+        where: { alertType: { severity: SeverityType.WARNING }, deprecated: false },
       });
       const criticalAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.CRITICAL } },
+        where: { alertType: { severity: SeverityType.CRITICAL }, deprecated: false },
       });
       alertStatisticsDto.infoAlerts += infoAlerts;
       alertStatisticsDto.warningAlerts += warningAlerts;
