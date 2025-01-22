@@ -30,10 +30,10 @@ describe('BackupAlertsOverviewService', () => {
 
   it('should return BackupAlertsOverviewDto with correct counts', async () => {
     const mockQueryResult = [
-      { alertClass: 'OK', totalBackupsForClass: 5 },
-      { alertClass: 'INFO', totalBackupsForClass: 3 },
-      { alertClass: 'WARNING', totalBackupsForClass: 2 },
-      { alertClass: 'CRITICAL', totalBackupsForClass: 1 },
+      { severity: 'OK', totalBackupsForSeverity: 5 },
+      { severity: 'INFO', totalBackupsForSeverity: 3 },
+      { severity: 'WARNING', totalBackupsForSeverity: 2 },
+      { severity: 'CRITICAL', totalBackupsForSeverity: 1 },
     ];
     backupRepositoryMock.query.mockResolvedValue(mockQueryResult);
 

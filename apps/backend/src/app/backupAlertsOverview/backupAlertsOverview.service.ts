@@ -42,7 +42,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
           WHEN COUNT(CASE WHEN severity = 'WARNING' THEN 1 END) > 0 THEN 'WARNING'
           WHEN COUNT(CASE WHEN severity = 'INFO' THEN 1 END) > 0 THEN 'INFO'
           ELSE 'OK'
-        END AS "alertClass"
+        END AS "severity"
       FROM AlertsByBackup
       GROUP BY "backupId"
 
@@ -50,37 +50,37 @@ export class BackupAlertsOverviewService implements OnModuleInit {
 
       SELECT 
         bd.id AS "backupId",
-        'OK' AS "alertClass"
+        'OK' AS "severity"
       FROM "BackupData" bd
       LEFT JOIN "SizeAlert" sa ON bd.id = sa."backupId" AND sa.deprecated = false
       LEFT JOIN "CreationDateAlert" cda ON bd.id = cda."backupId" AND cda.deprecated = false
       WHERE sa."backupId" IS NULL AND cda."backupId" IS NULL
     )
     SELECT 
-      "alertClass",
-      COUNT(*) AS "totalBackupsForClass"
+      "severity",
+      COUNT(*) AS "totalBackupsForSeverity"
     FROM ClassifiedBackups
-    GROUP BY "alertClass";
+    GROUP BY "severity";
   `;
 
     const result = await this.backupRepository.query(query);
 
     const dto = new BackupAlertsOverviewDto();
     dto.ok = Number(
-      result.find((row: any) => row.alertClass === 'OK')
-        ?.totalBackupsForClass || 0
+      result.find((row: any) => row.severity === 'OK')
+        ?.totalBackupsForSeverity || 0
     );
     dto.info = Number(
-      result.find((row: any) => row.alertClass === 'INFO')
-        ?.totalBackupsForClass || 0
+      result.find((row: any) => row.severity === 'INFO')
+        ?.totalBackupsForSeverity || 0
     );
     dto.warning = Number(
-      result.find((row: any) => row.alertClass === 'WARNING')
-        ?.totalBackupsForClass || 0
+      result.find((row: any) => row.severity === 'WARNING')
+        ?.totalBackupsForSeverity || 0
     );
     dto.critical = Number(
-      result.find((row: any) => row.alertClass === 'CRITICAL')
-        ?.totalBackupsForClass || 0
+      result.find((row: any) => row.severity === 'CRITICAL')
+        ?.totalBackupsForSeverity || 0
     );
 
     console.log(this.getSeverityOverview());
