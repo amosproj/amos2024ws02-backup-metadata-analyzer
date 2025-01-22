@@ -59,7 +59,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       });
 
     this.alerts$.pipe(takeUntil(this.destroy$)).subscribe((alerts) => {
-      this.status = this.getStatus(alerts);
+      this.status = this.getStatus();
     });
   }
 
@@ -118,17 +118,18 @@ export class AlertComponent implements OnInit, OnDestroy {
     return 'status-green';
   }
 
-  getStatus(alerts: Alert[] = []) {
-    if (
-      alerts.some((alert) => alert.alertType.severity === SeverityType.CRITICAL)
-    ) {
-      return 'Critical';
-    } else if (
-      alerts.some((alert) => alert.alertType.severity === SeverityType.WARNING)
-    ) {
-      return 'Warning';
-    }
-    return 'OK';
+  getStatus(): 'OK' | 'Warning' | 'Critical' {
+    let status: 'OK' | 'Warning' | 'Critical' = 'OK';
+
+    this.alertCounts$.subscribe((counts) => {
+      if (counts.criticalAlerts > 0) {
+        status = 'Critical';
+      } else if (counts.warningAlerts > 0) {
+        status = 'Warning';
+      }
+    });
+
+    return status;
   }
 
   getAlertClass = (alert: Alert): string =>
