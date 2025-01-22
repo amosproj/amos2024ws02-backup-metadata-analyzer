@@ -33,8 +33,6 @@ import { DataStores1734616685846 } from './migrations/1734616685846-DataStores';
 import { AddAlertCreationDate1736344989806 } from './migrations/1736344989806-AddAlertCreationDate';
 import { StorageOverflowTime1736550460789 } from './migrations/1736550460789-StorageOverflowTime';
 import { DeprecatedFlag1737107214086 } from './migrations/1737107214086-DeprecatedFlag';
-import { BackupAlertsOverviewEntity } from './backupAlertsOverview/entity/backupAlertsOverview.entity';
-import { BackupAlertsOverview1737367335003 } from './migrations/1737367335003-BackupAlertsOverview';
 
 /**
  * Used by NestJS to reach database.
@@ -64,7 +62,6 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         TaskEntity,
         MailReceiverEntity,
         DataStoreEntity,
-        BackupAlertsOverviewEntity,
       ],
       migrationsRun: true,
       migrations: [
@@ -90,7 +87,6 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AddAlertCreationDate1736344989806,
         StorageOverflowTime1736550460789,
         DeprecatedFlag1737107214086,
-        BackupAlertsOverview1737367335003,
       ],
       logging: true,
       logger: 'debug',

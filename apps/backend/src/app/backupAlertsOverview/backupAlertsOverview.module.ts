@@ -4,15 +4,10 @@ import { BackupAlertsOverviewController } from './backupAlertsOverview.controlle
 import { BackupAlertsOverviewService } from './backupAlertsOverview.service';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { BackupAlertsOverviewDto } from './dto/backupAlertsOverview.dto';
-import { BackupAlertsOverviewEntity } from './entity/backupAlertsOverview.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      BackupDataEntity,
-      BackupAlertsOverviewDto,
-      BackupAlertsOverviewEntity,
-    ]),
+    TypeOrmModule.forFeature([BackupDataEntity, BackupAlertsOverviewDto]),
   ],
   controllers: [BackupAlertsOverviewController],
   providers: [BackupAlertsOverviewService],

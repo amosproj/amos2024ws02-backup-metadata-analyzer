@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { BackupAlertsOverviewDto } from './dto/backupAlertsOverview.dto';
-import { BackupAlertsOverviewEntity } from './entity/backupAlertsOverview.entity';
 
 @Injectable()
 export class BackupAlertsOverviewService implements OnModuleInit {
@@ -11,9 +10,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
 
   constructor(
     @InjectRepository(BackupDataEntity)
-    private readonly backupRepository: Repository<BackupDataEntity>,
-    @InjectRepository(BackupAlertsOverviewEntity)
-    private readonly backupAlertsOverviewRepository: Repository<BackupAlertsOverviewEntity>
+    private readonly backupRepository: Repository<BackupDataEntity>
   ) {}
 
   async onModuleInit() {
@@ -85,20 +82,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       result.find((row: any) => row.alertClass === 'CRITICAL')
         ?.totalBackupsForClass || 0
     );
-    // Insert results in the BackupAlertsOverview table
-    await this.backupAlertsOverviewRepository
-      .createQueryBuilder()
-      .insert()
-      .into('BackupAlertsOverview')
-      .values({
-        id: '00000000-0000-0000-0000-000000000001',
-        ok: dto.ok,
-        info: dto.info,
-        warning: dto.warning,
-        critical: dto.critical,
-      })
-      .orUpdate(['ok', 'info', 'warning', 'critical'], ['id'])
-      .execute();
+
     console.log(this.getSeverityOverview());
     return dto;
   }
