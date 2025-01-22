@@ -60,7 +60,6 @@ export class AlertingController {
   })
   @ApiOkResponse({
     description: 'The number of Info, Warning and Critical alerts.',
-    type: AlertSummaryDto,
   })
   async getTestRepetitions(): Promise<AlertSummaryDto> {
     return this.alertingService.getRepetitions();
