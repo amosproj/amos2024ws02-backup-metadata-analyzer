@@ -50,7 +50,11 @@ export class ChartService {
 
     this.animateChart(chart, series);
   }
-
+  /**
+   * Creates root for the chart
+   * @param containerId unique id of the chart
+   * @returns root to identify the chart
+   */
   private initializeRoot(containerId: string): am5.Root {
     if (this.roots[containerId]) {
       this.roots[containerId].dispose();
@@ -218,6 +222,11 @@ export class ChartService {
     throw new Error('Unsupported chart configuration');
   }
 
+  /**
+   * ChartControls
+   * @param chart selected chart
+   * @param config chart config
+   */
   private addChartControls(chart: am5.Chart, config: ChartConfig): void {
     chart.children.unshift(
       am5.Legend.new(chart.root, {
@@ -239,12 +248,18 @@ export class ChartService {
       );
     }
   }
+  /**
+   * Prepares data for column charts to visualize correct data format
+   * @param backups
+   * @param timeRange selected filter time range
+   * @returns Array of grouped objects with date and sizeMB properties
+   */
   prepareColumnData(backups: TimelineData[], timeRange: TimeRange): any[] {
     if (!backups?.length) return [];
 
     const processedData = backups.map((backup) => ({
       date: new Date(backup.date),
-      sizeMB: Number(backup.sizeMB),
+      sizeMB: Number(backup.sizeMB) * 1000000,
     }));
 
     // Sort data by date
