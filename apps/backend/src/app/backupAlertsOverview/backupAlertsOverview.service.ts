@@ -58,7 +58,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
     ).filter((tableName) => tableName !== null); // Remove `null` values
 
     console.log('Existing tables:', existingTables);
-    // console.log(alertTypes);
 
     // 2. Generate joins from existing tables
     const alertJoins = existingTables
@@ -128,7 +127,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       GROUP BY "severity";
     `;
 
-    console.log('Final SQL query:', query);
+    //console.log('Final SQL query:', query);
 
     const result = await this.backupRepository.query(query);
 
@@ -149,12 +148,9 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       result.find((row: any) => row.severity === 'CRITICAL')
         ?.totalBackupsForSeverity || 0
     );
-    // console.log(query);
-    // console.log(alertTypes);
-    // console.log(alertJoins);
-    // console.log(alertTypeJoinCondition);
+
     this.severityOverview = dto;
-    console.log(this.getSeverityOverview());
+
     return dto;
   }
 }
