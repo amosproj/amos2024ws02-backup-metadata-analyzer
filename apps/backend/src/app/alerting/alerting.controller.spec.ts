@@ -241,46 +241,56 @@ describe('AlertingController (e2e)', () => {
     );
   });
 
-  it('POST /alerting/size - should create a new size alert', async () => {
-    const createAlertDto: CreateSizeAlertDto = {
-      size: 100,
-      referenceSize: 200,
-      backupId: 'backup-id',
-    };
+  it('POST /alerting/size/batched - should create new size alerts batched', async () => {
+    const createSizeAlertDtos: CreateSizeAlertDto[] = [
+      {
+        size: 100,
+        referenceSize: 200,
+        backupId: 'backup-id',
+      },
+    ];
 
     await request(app.getHttpServer())
-      .post('/alerting/size')
-      .send(createAlertDto)
+      .post('/alerting/size/batched')
+      .send(createSizeAlertDtos)
       .expect(201);
 
     expect(mockSizeAlertRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        size: createAlertDto.size,
-        referenceSize: createAlertDto.referenceSize,
-        backup: expect.objectContaining({ id: createAlertDto.backupId }),
-        alertType: expect.objectContaining({ name: SIZE_ALERT }),
-      })
+      expect.arrayContaining([
+        expect.objectContaining({
+          size: createSizeAlertDtos[0].size,
+          referenceSize: createSizeAlertDtos[0].referenceSize,
+          backup: expect.objectContaining({
+            id: createSizeAlertDtos[0].backupId,
+          }),
+          alertType: expect.objectContaining({ name: SIZE_ALERT }),
+        }),
+      ])
     );
   });
 
-  it('POST /alerting/creationDate - should create a new creation date alert', async () => {
-    const createCreationDateAlertDto: CreateCreationDateAlertDto = {
-      date: new Date('2024-12-01T17:53:33.239Z'),
-      backupId: 'backup-id',
-      referenceDate: new Date('2024-12-01T17:53:33.239Z'),
-    };
+  it('POST /alerting/creationDate/batched - should create new creation date alerts batched', async () => {
+    const createCreationDateAlertDtos: CreateCreationDateAlertDto[] = [
+      {
+        date: new Date('2024-12-01T17:53:33.239Z'),
+        backupId: 'backup-id',
+        referenceDate: new Date('2024-12-01T17:53:33.239Z'),
+      },
+    ];
 
     await request(app.getHttpServer())
-      .post('/alerting/creationDate')
-      .send(createCreationDateAlertDto)
+      .post('/alerting/creationDate/batched')
+      .send(createCreationDateAlertDtos)
       .expect(201);
 
-    expect(mockCreationDateAlertRepository.save).toHaveBeenCalledWith({
-      date: new Date('2024-12-01T17:53:33.239Z').toISOString(),
-      referenceDate: new Date('2024-12-01T17:53:33.239Z').toISOString(),
-      backup: mockedBackupDataEntity,
-      alertType: mockedCreationDateAlertTypeEntity,
-    });
+    expect(mockCreationDateAlertRepository.save).toHaveBeenCalledWith([
+      {
+        date: new Date('2024-12-01T17:53:33.239Z').toISOString(),
+        referenceDate: new Date('2024-12-01T17:53:33.239Z').toISOString(),
+        backup: mockedBackupDataEntity,
+        alertType: mockedCreationDateAlertTypeEntity,
+      },
+    ]);
   });
 
   it('POST /alerting/storageFill - should create new storage fill alerts', async () => {

@@ -92,10 +92,24 @@ class SimpleRuleBasedAnalyzer:
 			alert_limit = 10
 
 		# Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
-		count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+		maxAlerts = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
 		# Send the alerts to the backend
-		for alert in alerts[:count]:
-			self.backend.create_size_alert(alert.as_json())
+		# Batch the api calls to the backend for improved efficiency
+		batch = []
+		count = 0
+
+		for alert in alerts[:maxAlerts]:
+			batch.append(alert.as_json())
+			count += 1
+
+			# Send a full batch
+			if len(batch) == 100:
+				self.backend.create_size_alerts_batched(batch)
+				batch = []
+
+		# Send the remaining results
+		if len(batch) > 0:
+			self.backend.create_size_alerts_batched(batch)
 
 		return {"count": count}
 
@@ -137,10 +151,24 @@ class SimpleRuleBasedAnalyzer:
 			alert_limit = 10
 
 		# Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
-		count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+		maxAlerts = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
 		# Send the alerts to the backend
-		for alert in alerts[:count]:
-			self.backend.create_size_alert(alert.as_json())
+		# Batch the api calls to the backend for improved efficiency
+		batch = []
+		count = 0
+
+		for alert in alerts[:maxAlerts]:
+			batch.append(alert.as_json())
+			count += 1
+
+			# Send a full batch
+			if len(batch) == 100:
+				self.backend.create_size_alerts_batched(batch)
+				batch = []
+
+		# Send the remaining results
+		if len(batch) > 0:
+			self.backend.create_size_alerts_batched(batch)
 
 		return {"count": count}
 
@@ -208,10 +236,24 @@ class SimpleRuleBasedAnalyzer:
 			alert_limit = 10
 
 		# Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
-		count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+		maxAlerts = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
 		# Send the alerts to the backend
-		for alert in alerts[:count]:
-			self.backend.create_size_alert(alert.as_json())
+		# Batch the api calls to the backend for improved efficiency
+		batch = []
+		count = 0
+
+		for alert in alerts[:maxAlerts]:
+			batch.append(alert.as_json())
+			count += 1
+
+			# Send a full batch
+			if len(batch) == 100:
+				self.backend.create_size_alerts_batched(batch)
+				batch = []
+
+		# Send the remaining results
+		if len(batch) > 0:
+			self.backend.create_size_alerts_batched(batch)
 
 		return {"count": count}
 
@@ -261,10 +303,24 @@ class SimpleRuleBasedAnalyzer:
 			alert_limit = 10
 
 		# Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
-		count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
+		maxAlerts = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
 		# Send the alerts to the backend
-		for alert in alerts[:count]:
-			self.backend.create_creation_date_alert(alert.as_json())
+		# Batch the api calls to the backend for improved efficiency
+		batch = []
+		count = 0
+
+		for alert in alerts[:maxAlerts]:
+			batch.append(alert.as_json())
+			count += 1
+
+			# Send a full batch
+			if len(batch) == 100:
+				self.backend.create_creation_date_alerts_batched(batch)
+				batch = []
+
+		# Send the remaining results
+		if len(batch) > 0:
+			self.backend.create_creation_date_alerts_batched(batch)
 
 		return {"count": count}
 
