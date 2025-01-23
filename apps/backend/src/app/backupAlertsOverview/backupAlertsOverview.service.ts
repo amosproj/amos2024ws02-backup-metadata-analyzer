@@ -28,45 +28,76 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       FROM "AlertType"
     `);
 
-    // 2. Dynamische SQL-Joins für alle Alert-Typen erzeugen
-    const alertJoins = alertTypes
-      .map((alert: { name: string; severity: string }) => {
-        const tableName =
-          alert.name
-            .toLowerCase() // alles klein
-            .replace(/_([a-z])/g, (_, char) => char.toUpperCase()) // Konvertiere _a zu A
-            .replace(/^([a-z])/, (_, char) => char.toUpperCase()) // Erster Buchstabe groß
-            .replace('Alert', '') + 'Alert'; // Füge 'Alert' wieder hinzu
+    // 1. Find existing tables and store them in an array
+    const existingTables = (
+      await Promise.all(
+        alertTypes.map(async (alert: { name: string }) => {
+          const tableName =
+            alert.name
+              .toLowerCase()
+              .replace(/_([a-z])/g, (_, char) => char.toUpperCase())
+              .replace(/^([a-z])/, (_, char) => char.toUpperCase())
+              .replace('Alert', '') + 'Alert';
 
+          // Check if the table exists
+          const tableExists = await this.backupRepository.query(`
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = '${tableName}'
+      `);
+
+          if (tableExists.length === 0) {
+            console.warn(`Table "${tableName}" does not exist and is skipped.`);
+            return null; // Table does not exist, skip
+          }
+
+          return tableName; // Table exists, save the name
+        })
+      )
+    ).filter((tableName) => tableName !== null); // Remove `null` values
+
+    console.log('Existing tables:', existingTables);
+    // console.log(alertTypes);
+
+    // 2. Generate joins from existing tables
+    const alertJoins = existingTables
+      .map((tableName) => {
         return `
-          LEFT JOIN "${tableName}" ON bd.id = "${tableName}"."backupId" AND "${tableName}"."deprecated" = false
-        `;
+      LEFT JOIN "${tableName}" ON bd.id = "${tableName}"."backupId" AND "${tableName}"."deprecated" = false
+    `;
       })
-      .join(' '); // Joins kombinieren
+      .join(' ');
 
-    // 3. Dynamische Join-Bedingung für die AlertType-Tabelle erzeugen
-    const alertTypeJoinCondition = alertTypes
-      .map((alert: { name: string }) => {
-        const tableName =
-          alert.name
-            .toLowerCase()
-            .replace(/_([a-z])/g, (_, char) => char.toUpperCase())
-            .replace(/^([a-z])/, (_, char) => char.toUpperCase())
-            .replace('Alert', '') + 'Alert';
+    console.log('Generierte Joins:', alertJoins);
 
+    // 3. Generate WHERE conditions from the existing tables
+    const whereConditions = existingTables
+      .map((tableName) => {
+        return `"${tableName}"."backupId" IS NULL`;
+      })
+      .join(' AND ');
+
+    console.log('Generated WHERE conditions:', whereConditions);
+
+    // 4. Create dynamic join condition for the AlertType table
+    const alertTypeJoinCondition = existingTables
+      .map((tableName) => {
         return `"${tableName}"."alertTypeId" = at.id`;
       })
-      .join(' OR '); // OR-Bedingung für alle Alert-Tabellen
+      .join(' OR ');
 
-    // 4. Dynamische SQL-Abfrage erstellen
+    console.log('Generated alertTypeJoinCondition:', alertTypeJoinCondition);
+
+    // 5. Create dynamic SQL query
     const query = `
       WITH AlertsByBackup AS (
         SELECT 
           bd.id AS "backupId",
           at.severity
         FROM "BackupData" bd
-        ${alertJoins} -- Dynamische Joins für die Alert-Typen
-        LEFT JOIN "AlertType" at ON (${alertTypeJoinCondition}) -- Dynamische Join-Bedingung für AlertType
+        ${alertJoins} -- Dynamic joins for the alert types
+        LEFT JOIN "AlertType" at ON (${alertTypeJoinCondition}) -- Dynamic Join Condition for AlertType
         WHERE at.severity IS NOT NULL
       ),
       ClassifiedBackups AS (
@@ -87,19 +118,8 @@ export class BackupAlertsOverviewService implements OnModuleInit {
           bd.id AS "backupId",
           'OK' AS "severity"
         FROM "BackupData" bd
-        ${alertJoins} -- Dynamische Joins wiederverwendet
-        WHERE ${alertTypes
-          .map((alert: { name: string }) => {
-            const tableName =
-              alert.name
-                .toLowerCase()
-                .replace(/_([a-z])/g, (_, char) => char.toUpperCase())
-                .replace(/^([a-z])/, (_, char) => char.toUpperCase())
-                .replace('Alert', '') + 'Alert';
-
-            return `"${tableName}"."backupId" IS NULL`;
-          })
-          .join(' AND ')} -- Dynamische Bedingung für fehlende Alerts
+        ${alertJoins} -- Dynamic joins reused
+        WHERE ${whereConditions} -- Dynamic condition for missing alerts
       )
       SELECT 
         "severity",
@@ -107,6 +127,8 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       FROM ClassifiedBackups
       GROUP BY "severity";
     `;
+
+    console.log('Final SQL query:', query);
 
     const result = await this.backupRepository.query(query);
 
@@ -128,9 +150,9 @@ export class BackupAlertsOverviewService implements OnModuleInit {
         ?.totalBackupsForSeverity || 0
     );
     // console.log(query);
-    console.log(alertTypes);
-    console.log(alertJoins);
-    console.log(alertTypeJoinCondition);
+    // console.log(alertTypes);
+    // console.log(alertJoins);
+    // console.log(alertTypeJoinCondition);
     this.severityOverview = dto;
     console.log(this.getSeverityOverview());
     return dto;
