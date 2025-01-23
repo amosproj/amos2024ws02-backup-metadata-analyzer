@@ -32,12 +32,13 @@ export class BackupAlertsOverviewService implements OnModuleInit {
     const existingTables = (
       await Promise.all(
         alertTypes.map(async (alert: { name: string }) => {
-          const tableName =
-            alert.name
-              .toLowerCase()
-              .replace(/_([a-z])/g, (_, char) => char.toUpperCase())
-              .replace(/^([a-z])/, (_, char) => char.toUpperCase())
-              .replace('Alert', '') + 'Alert';
+          const tableName = alert?.name
+            ? alert.name
+                .toLowerCase()
+                .replace(/_([a-z])/g, (_, char) => char.toUpperCase())
+                .replace(/^([a-z])/, (_, char) => char.toUpperCase())
+                .replace('Alert', '') + 'Alert'
+            : null;
 
           // Check if the table exists
           const tableExists = await this.backupRepository.query(`
@@ -57,7 +58,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       )
     ).filter((tableName) => tableName !== null); // Remove `null` values
 
-    console.log('Existing tables:', existingTables);
+    // console.log('Existing tables:', existingTables);
 
     // 2. Generate joins from existing tables
     const alertJoins = existingTables
@@ -68,7 +69,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       })
       .join(' ');
 
-    console.log('Generierte Joins:', alertJoins);
+    // console.log('Generierte Joins:', alertJoins);
 
     // 3. Generate WHERE conditions from the existing tables
     const whereConditions = existingTables
@@ -77,7 +78,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       })
       .join(' AND ');
 
-    console.log('Generated WHERE conditions:', whereConditions);
+    // console.log('Generated WHERE conditions:', whereConditions);
 
     // 4. Create dynamic join condition for the AlertType table
     const alertTypeJoinCondition = existingTables
@@ -86,7 +87,7 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       })
       .join(' OR ');
 
-    console.log('Generated alertTypeJoinCondition:', alertTypeJoinCondition);
+    // console.log('Generated alertTypeJoinCondition:', alertTypeJoinCondition);
 
     // 5. Create dynamic SQL query
     const query = `
