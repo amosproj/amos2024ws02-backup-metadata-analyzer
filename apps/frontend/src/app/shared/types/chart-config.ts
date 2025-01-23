@@ -14,3 +14,14 @@ export interface ChartConfig {
     valueField?: string;
     seriesName?: string;
   }
+
+
+export interface TimelineData {
+  date: Date;
+  sizeMB: number;
+}
+
+export interface PieChartData {
+  category: string;
+  sizeMB: number;
+}
