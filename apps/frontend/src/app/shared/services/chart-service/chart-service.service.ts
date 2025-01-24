@@ -211,17 +211,17 @@ export class ChartService {
           name: config.seriesName || 'Distribution',
           valueField: config.valueField || 'value',
           categoryField: config.categoryField || 'category',
-          legendValueText: '{value} backups',
+          legendValueText: '{config.valueField} backups',
           legendLabelText: '{category}',
         })
       );
+
       this.chartHasNoDataHandler(series, config, 'pie');
 
       return series;
     }
     throw new Error('Unsupported chart configuration');
   }
-
   /**
    * ChartControls
    * @param chart selected chart
@@ -327,22 +327,29 @@ export class ChartService {
     }
   }
 
-  preparePieData(backups: PieChartData[]): any[] {
-    const ranges = [
-      { min: 0, max: 100, category: '0-100 MB' },
-      { min: 100, max: 500, category: '100-500 MB' },
-      { min: 500, max: 1000, category: '500MB-1GB' },
-      { min: 1000, max: Infinity, category: '>1GB' },
-    ];
+  preparePieData(data: any[]): any[] {
+    const total = data.reduce((sum, item) => sum + item.count, 0);
+    return data.map((item) => ({
+      category: this.createSizeCategory(item.startSize, item.endSize),
+      count: item.count,
+      value: (item.count / total) * 100, // Calculate percentage
+    }));
+  }
+  private createSizeCategory(start: number, end: number): string {
+    if (end === -1) {
+      return `>${this.formatSize(start)}`;
+    }
+    return `${this.formatSize(start)} - ${this.formatSize(end)}`;
+  }
 
-    return ranges
-      .map((range) => ({
-        category: range.category,
-        value: backups.filter(
-          (b) => b.sizeMB >= range.min && b.sizeMB < range.max
-        ).length,
-      }))
-      .filter((item) => item.value > 0);
+  private formatSize(mb: number): string {
+    if (mb >= 1000000) {
+      return `${(mb / 1000000).toFixed(0)}TB`;
+    }
+    if (mb >= 1000) {
+      return `${(mb / 1000).toFixed(0)}GB`;
+    }
+    return `${mb}MB`;
   }
 
   /**
