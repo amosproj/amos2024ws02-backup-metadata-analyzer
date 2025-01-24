@@ -101,44 +101,19 @@ export class BackupDataService extends PaginationService {
     types?: string[]
   ): Promise<BackupSizesPerDayDto[]> {
     //Validate Dates
-    //TODO: extract to seperate method
-    let from: Date | null = null;
-    let to: Date | null = null;
-    if (fromDate) {
-      from = new Date(fromDate);
-      if (Number.isNaN(from.getTime())) {
-        throw new BadRequestException('parameter fromDate is not a valid date');
-      }
-      //Set time to first millisecond of the day
-      from.setHours(0);
-      from.setMinutes(0);
-      from.setSeconds(0);
-      from.setMilliseconds(0);
-    }
-    if (toDate) {
-      to = new Date(toDate);
-      if (Number.isNaN(to.getTime())) {
-        throw new BadRequestException('parameter toDate is not a valid date');
-      }
-      //Set time to last millisecond of the day
-      to.setHours(0);
-      to.setMinutes(0);
-      to.setSeconds(0);
-      to.setDate(to.getDate() + 1);
-      to.setMilliseconds(-1);
-    }
+    const { from, to } = this.transformDates(fromDate, toDate);
 
     const query = this.backupDataRepository.createQueryBuilder('backup');
     query.select('DATE(backup.creationDate)', 'date');
     query.addSelect('SUM(backup.sizeMB)', 'sizeMB');
     query.groupBy('DATE(backup.creationDate)');
 
-    if (fromDate) {
+    if (from) {
       query.andWhere('DATE(backup.creationDate) >= :fromDate', {
         fromDate: from,
       });
     }
-    if (toDate) {
+    if (to) {
       query.andWhere('DATE(backup.creationDate) <= :toDate', {
         toDate: to,
       });
@@ -218,39 +193,18 @@ export class BackupDataService extends PaginationService {
 
     // Check if params from and to are valid dates
 
-    let from: Date | null = null;
-    let to: Date | null = null;
-    if (backupDataFilterDto.fromDate) {
-      from = new Date(backupDataFilterDto.fromDate);
-      if (Number.isNaN(from.getTime())) {
-        throw new BadRequestException('parameter fromDate is not a valid date');
-      }
-      //Set time to first millisecond of the day
-      from.setHours(0);
-      from.setMinutes(0);
-      from.setSeconds(0);
-      from.setMilliseconds(0);
-    }
-    if (backupDataFilterDto.toDate) {
-      to = new Date(backupDataFilterDto.toDate);
-      if (Number.isNaN(to.getTime())) {
-        throw new BadRequestException('parameter toDate is not a valid date');
-      }
-      //Set time to last millisecond of the day
-      to.setHours(0);
-      to.setMinutes(0);
-      to.setSeconds(0);
-      to.setDate(to.getDate() + 1);
-      to.setMilliseconds(-1);
-    }
+    const { from, to } = this.transformDates(
+      backupDataFilterDto.fromDate,
+      backupDataFilterDto.toDate
+    );
 
     //Creation date search
-    if (backupDataFilterDto.fromDate && backupDataFilterDto.toDate) {
-      where.creationDate = Between(from!, to!);
-    } else if (backupDataFilterDto.fromDate) {
-      where.creationDate = MoreThanOrEqual(from!);
-    } else if (backupDataFilterDto.toDate) {
-      where.creationDate = LessThanOrEqual(to!);
+    if (from && to) {
+      where.creationDate = Between(from, to);
+    } else if (from) {
+      where.creationDate = MoreThanOrEqual(from);
+    } else if (to) {
+      where.creationDate = LessThanOrEqual(to);
     }
 
     //Size search
@@ -301,47 +255,19 @@ export class BackupDataService extends PaginationService {
     }
 
     // Check if params fromScheduledDate and toScheduledDate are valid dates
-
-    let fromScheduledTime: Date | null = null;
-    let toScheduledTime: Date | null = null;
-    if (backupDataFilterDto.fromScheduledDate) {
-      fromScheduledTime = new Date(backupDataFilterDto.fromScheduledDate);
-      if (Number.isNaN(fromScheduledTime.getTime())) {
-        throw new BadRequestException(
-          'parameter fromScheduledTime is not a valid date'
-        );
-      }
-      //Set time to first millisecond of the day
-      fromScheduledTime.setHours(0);
-      fromScheduledTime.setMinutes(0);
-      fromScheduledTime.setSeconds(0);
-      fromScheduledTime.setMilliseconds(0);
-    }
-    if (backupDataFilterDto.toScheduledDate) {
-      toScheduledTime = new Date(backupDataFilterDto.toScheduledDate);
-      if (Number.isNaN(toScheduledTime.getTime())) {
-        throw new BadRequestException(
-          'parameter toScheduledTime is not a valid date'
-        );
-      }
-      //Set time to last millisecond of the day
-      toScheduledTime.setHours(0);
-      toScheduledTime.setMinutes(0);
-      toScheduledTime.setSeconds(0);
-      toScheduledTime.setDate(toScheduledTime.getDate() + 1);
-      toScheduledTime.setMilliseconds(-1);
-    }
+    const { from: fromScheduledTime, to: toScheduledTime } =
+      this.transformDates(
+        backupDataFilterDto.fromScheduledDate,
+        backupDataFilterDto.toScheduledDate
+      );
 
     //Creation date search
-    if (
-      backupDataFilterDto.fromScheduledDate &&
-      backupDataFilterDto.toScheduledDate
-    ) {
-      where.scheduledTime = Between(fromScheduledTime!, toScheduledTime!);
-    } else if (backupDataFilterDto.fromScheduledDate) {
-      where.scheduledTime = MoreThanOrEqual(fromScheduledTime!);
-    } else if (backupDataFilterDto.toScheduledDate) {
-      where.scheduledTime = LessThanOrEqual(toScheduledTime!);
+    if (fromScheduledTime && toScheduledTime) {
+      where.scheduledTime = Between(fromScheduledTime, toScheduledTime);
+    } else if (fromScheduledTime) {
+      where.scheduledTime = MoreThanOrEqual(fromScheduledTime);
+    } else if (toScheduledTime) {
+      where.scheduledTime = LessThanOrEqual(toScheduledTime);
     }
     return where;
   }
@@ -366,5 +292,43 @@ export class BackupDataService extends PaginationService {
       [backupDataOrderOptionsDto.orderBy ?? 'creationDate']:
         backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
     };
+  }
+
+  /**
+   * Transform dates to Date objects.
+   * Sets fromDate to first millisecond of the day and toDate to last millisecond of the day.
+   * @param fromDate
+   * @param toDate
+   */
+  transformDates(
+    fromDate?: string,
+    toDate?: string
+  ): { from: Date | null; to: Date | null } {
+    let from: Date | null = null;
+    let to: Date | null = null;
+    if (fromDate) {
+      from = new Date(fromDate);
+      if (Number.isNaN(from.getTime())) {
+        throw new BadRequestException('parameter fromDate is not a valid date');
+      }
+      //Set time to first millisecond of the day
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+    }
+    if (toDate) {
+      to = new Date(toDate);
+      if (Number.isNaN(to.getTime())) {
+        throw new BadRequestException('parameter toDate is not a valid date');
+      }
+      //Set time to last millisecond of the day
+      to.setHours(0);
+      to.setMinutes(0);
+      to.setSeconds(0);
+      to.setDate(to.getDate() + 1);
+      to.setMilliseconds(-1);
+    }
+    return { from, to };
   }
 }
