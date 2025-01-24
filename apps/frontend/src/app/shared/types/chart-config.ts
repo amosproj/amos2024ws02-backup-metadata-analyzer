@@ -13,6 +13,7 @@ export interface ChartConfig {
     categoryField?: string;
     valueField?: string;
     seriesName?: string;
+    hideLabels?: boolean,
   }
 
 
@@ -22,6 +23,7 @@ export interface TimelineData {
 }
 
 export interface PieChartData {
-  category: string;
-  sizeMB: number;
+  startSize: number;
+  endSize: number;
+  count: number;
 }

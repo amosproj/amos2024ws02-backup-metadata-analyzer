@@ -6,7 +6,7 @@ import { Backup } from '../../types/backup';
 import { APIResponse } from '../../types/api-response';
 import { BackupFilterParams } from '../../types/backup-filter-type';
 import { BackupTask } from '../../types/backup.task';
-import { TimelineData } from '../../types/chart-config';
+import { PieChartData, TimelineData } from '../../types/chart-config';
 
 @Injectable({
   providedIn: 'root',
@@ -53,14 +53,32 @@ export class BackupService {
     const body = {
       taskIds: selectedTasks,
     };
-
-    console.log(cleanParams);
-    return this.http
-      .post<TimelineData[]>(`${this.baseUrl}/backupData/sizes/perDay`, body, {
+    return this.http.post<TimelineData[]>(
+      `${this.baseUrl}/backupData/sizes/perDay`,
+      body,
+      {
         params: cleanParams,
-      })
-      .pipe(tap((data) => console.log(data)));
+      }
+    );
   }
+
+  getGroupedBackupSizes(
+    filterParams: BackupFilterParams & { taskIds?: string[] },
+    selectedTasks?: string[]
+  ): Observable<PieChartData[]> {
+    const cleanParams = this.cleanParams(filterParams);
+    const body = {
+      taskIds: selectedTasks,
+    };
+    return this.http.post<PieChartData[]>(
+      `${this.baseUrl}/backupData/sizes/grouped`,
+      body,
+      {
+        params: cleanParams,
+      }
+    );
+  }
+
   refresh() {
     this.refreshBackups.next();
   }
