@@ -1,17 +1,17 @@
-from flask import Flask, request, jsonify
-from dotenv import load_dotenv
+import os
+
 from datetime import datetime
-from metadata_analyzer.database import Database
-from metadata_analyzer.simple_analyzer import SimpleAnalyzer
-from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
-from metadata_analyzer.analyzer import Analyzer
-from metadata_analyzer.time_series_analyzer import Time_series_analyzer
-from metadata_analyzer.schedule_based_analyzer import ScheduleBasedAnalyzer
-from metadata_analyzer.backend import Backend
+from dotenv import load_dotenv
 from flasgger import Swagger
 from flasgger import swag_from
-import requests
-import os
+from flask import Flask, request, jsonify
+
+from metadata_analyzer.analyzer import Analyzer
+from metadata_analyzer.backend import Backend
+from metadata_analyzer.database import Database
+from metadata_analyzer.schedule_based_analyzer import ScheduleBasedAnalyzer
+from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
+from metadata_analyzer.time_series_analyzer import Time_series_analyzer
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -22,29 +22,6 @@ path = app.root_path
 @app.route("/")
 def hello_world():
     return "Hello, world!"
-
-
-@app.route("/echo", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','echo.yaml'), validation=False)
-def echo():
-    if request.method == "POST":
-        data = request.get_json()
-        obj = data["body"]
-        strData = obj["text"]
-        newData = ""
-
-        for i in range(len(strData) - 1, -1, -1):
-            newData = newData + strData[i]
-
-        newBody = '{ "output": "' + newData + '" }'
-        return newBody
-
-
-@app.route("/analyze", methods=["GET"])
-@swag_from(os.path.join(path,'swagger','analyze.yaml'), validation=False)
-def analyze():
-    return jsonify(Analyzer.analyze())
-
 
 @app.route("/updateBasicBackupData", methods=["POST"])
 @swag_from(os.path.join(path,'swagger','updateBasicBackupData.yaml'), validation=False)
@@ -261,7 +238,6 @@ def calculate_training_indices():
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))
-    simple_analyzer = SimpleAnalyzer()
     parameters = []
     parameters.append(os.getenv("ANOMALY_THRESHOLD"))
     parameters.append(os.getenv("CLUSTER_NUMBER"))
@@ -271,7 +247,6 @@ def main():
     Analyzer.init(
         database,
         backend,
-        simple_analyzer,
         simple_rule_based_analyzer,
         time_series_analyzer,
         schedule_based_analyzer,

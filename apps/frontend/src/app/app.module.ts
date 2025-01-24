@@ -20,6 +20,7 @@ import {
   errorStandardIcon,
   filterIcon,
   helpIcon,
+  historyIcon,
   homeIcon,
   infoStandardIcon,
   lineChartIcon,
@@ -34,8 +35,6 @@ import {
   warningStandardIcon,
 } from '@cds/core/icon';
 import { NgxEchartsModule } from 'ngx-echarts';
-import { TestUploadComponent } from './test-upload/component/test-upload/test-upload.component';
-import { FindTestDataComponent } from './test-upload/component/find-test-data/find-test-data.component';
 import { OverviewPageComponent } from './backups-overview-page/component/overview-page.component';
 import { BASE_URL } from './shared/types/configuration';
 import { AlertComponent } from './backups-overview-page/component/alert-panel/component/alert.component';
@@ -53,12 +52,9 @@ import { AlertPageComponent } from './alert-page/component/alert-page/alert-page
 import { DatePipe } from '@angular/common';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay/loading-overlay.component';
 
-
 @NgModule({
   declarations: [
     AppComponent,
-    TestUploadComponent,
-    FindTestDataComponent,
     OverviewPageComponent,
     AlertComponent,
     NotificationSettingsComponent,
@@ -112,7 +108,8 @@ export class AppModule {
       bookIcon,
       lineChartIcon,
       infoStandardIcon,
-      barsIcon
+      barsIcon,
+      historyIcon
     );
   }
 }

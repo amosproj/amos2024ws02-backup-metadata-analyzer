@@ -74,7 +74,6 @@ export class PaginationService {
     whereClause: any,
     paginationOptionsDto: PaginationOptionsDto
   ): Promise<PaginationDto<T>> {
-    let unionQuery = '';
 
     // Define the columns to select and their types
     const columns = [
@@ -86,93 +85,8 @@ export class PaginationService {
       'deprecated',
     ];
 
-    const parameters = [];
-
-    // Do a query for each repository and combine them with UNION
-    for (let i = 0; i < repositories.length; i++) {
-      const whereConditions = [];
-      if (whereClause.severity) {
-        whereConditions.push(`alertType.severity = $${parameters.length + 1}`);
-        parameters.push(whereClause.severity);
-      }
-      if (whereClause.id) {
-        whereConditions.push(`alias${i}.id = $${parameters.length + 1}`); // Use = for uuid type
-        parameters.push(whereClause.id);
-      }
-      if (whereClause.backupId) {
-        whereConditions.push(`alias${i}.backupId = $${parameters.length + 1}`); // Use = for uuid type
-        parameters.push(whereClause.backupId);
-      }
-      if (whereClause.fromDate && whereClause.toDate) {
-        whereConditions.push(
-          `alias${i}.creationDate BETWEEN $${parameters.length + 1} AND $${
-            parameters.length + 2
-          }`
-        );
-        parameters.push(whereClause.fromDate, whereClause.toDate);
-      } else if (whereClause.fromDate) {
-        whereConditions.push(
-          `alias${i}.creationDate >= $${parameters.length + 1}`
-        );
-        parameters.push(whereClause.fromDate);
-      } else if (whereClause.toDate) {
-        whereConditions.push(
-          `alias${i}.creationDate <= $${parameters.length + 1}`
-        );
-        parameters.push(whereClause.toDate);
-      } else if (whereClause.alertType) {
-        whereConditions.push(`alertType.name = $${parameters.length + 1}`);
-        parameters.push(whereClause.alertType);
-      }
-      if (
-        whereClause.includeDeprecated === 'false' ||
-        whereClause.includeDeprecated === false ||
-        whereClause.includeDeprecated === undefined
-      ) {
-        whereConditions.push(`alias${i}.deprecated = FALSE`);
-      }
-
-      const whereClauseString =
-        whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
-
-      const subQuery = repositories[i]
-        .createQueryBuilder(`alias${i}`)
-        .select(
-          columns
-            .map((column) => {
-              if (column === 'severity') {
-                return `alertType.${column} AS ${column}`;
-              }
-              if (column === 'creationDate') {
-                return `alias${i}.${column} AS ${column}`;
-              }
-              return `alias${i}.${column}`;
-            })
-            .join(', ')
-        )
-        .leftJoinAndSelect(`alias${i}.alertType`, 'alertType')
-        .where(whereClauseString, parameters)
-        .getQuery();
-
-      unionQuery += (i > 0 ? ' UNION ALL ' : '') + subQuery;
-    }
-
-    // Apply order by clause
-    let orderClause = '';
-    if (orderInfo.orderBy === 'severity') {
-      orderClause = `
-            ORDER BY CASE 
-            WHEN severity = 'CRITICAL' THEN 3
-            WHEN severity = 'WARNING' THEN 2
-            WHEN severity = 'INFO' THEN 1
-            ELSE 4
-            END ${orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'}
-            `;
-    } else if (orderInfo.orderBy === 'date') {
-      orderClause = `ORDER BY creationDate ${
-        orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'
-      }`;
-    }
+    const  { parameters, unionQuery } = this.createUnionQuery(repositories, whereClause, columns);
+    const orderClause = this.createOrderClauseString(orderInfo);
 
     // Apply pagination
     const offset = paginationOptionsDto.offset ?? 0;
@@ -234,6 +148,106 @@ export class PaginationService {
         total: parseInt(total[0].count, 10),
       },
     };
+  }
+
+  /**
+   * Takes the order information from the requests and builds an SQL string based on it
+   * @param orderInfo 
+   * @returns SQL string for the order clause
+   */
+  private createOrderClauseString(orderInfo: AlertOrderOptionsDto) {
+    let orderClause = '';
+    if (orderInfo.orderBy === 'severity') {
+      orderClause = `
+            ORDER BY CASE 
+            WHEN severity = 'CRITICAL' THEN 3
+            WHEN severity = 'WARNING' THEN 2
+            WHEN severity = 'INFO' THEN 1
+            ELSE 4
+            END ${orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'}
+            `;
+    } else if (orderInfo.orderBy === 'date') {
+      orderClause = `ORDER BY creationDate ${orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'}`;
+    }
+    return orderClause;
+  }
+
+
+  /**
+   * Combines tables with UNION and applies where conditions based on whereClause
+   * @param repositories 
+   * @param whereClause 
+   * @param columns the coluns to select from the combined table. Every one has to be present in each table.
+   * @returns 
+   */
+  private createUnionQuery(repositories: Repository<any>[], whereClause: any, columns: string[]) {
+    const parameters = [];
+    let unionQuery = '';
+
+    // Do a query for each repository and combine them with UNION
+    for (let i = 0; i < repositories.length; i++) {
+      const whereConditions = [];
+      if (whereClause.severity) {
+        whereConditions.push(`alertType.severity = $${parameters.length + 1}`);
+        parameters.push(whereClause.severity);
+      }
+      if (whereClause.id) {
+        whereConditions.push(`alias${i}.id = $${parameters.length + 1}`); // Use = for uuid type
+        parameters.push(whereClause.id);
+      }
+      if (whereClause.backupId) {
+        whereConditions.push(`alias${i}.backupId = $${parameters.length + 1}`); // Use = for uuid type
+        parameters.push(whereClause.backupId);
+      }
+      if (whereClause.fromDate && whereClause.toDate) {
+        whereConditions.push(
+          `alias${i}.creationDate BETWEEN $${parameters.length + 1} AND $${parameters.length + 2}`
+        );
+        parameters.push(whereClause.fromDate, whereClause.toDate);
+      } else if (whereClause.fromDate) {
+        whereConditions.push(
+          `alias${i}.creationDate >= $${parameters.length + 1}`
+        );
+        parameters.push(whereClause.fromDate);
+      } else if (whereClause.toDate) {
+        whereConditions.push(
+          `alias${i}.creationDate <= $${parameters.length + 1}`
+        );
+        parameters.push(whereClause.toDate);
+      } else if (whereClause.alertType) {
+        whereConditions.push(`alertType.name = $${parameters.length + 1}`);
+        parameters.push(whereClause.alertType);
+      }
+      if (whereClause.includeDeprecated === 'false' ||
+        whereClause.includeDeprecated === false ||
+        whereClause.includeDeprecated === undefined) {
+        whereConditions.push(`alias${i}.deprecated = FALSE`);
+      }
+
+      const whereClauseString = whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
+
+      const subQuery = repositories[i]
+        .createQueryBuilder(`alias${i}`)
+        .select(
+          columns
+            .map((column) => {
+              if (column === 'severity') {
+                return `alertType.${column} AS ${column}`;
+              }
+              if (column === 'creationDate') {
+                return `alias${i}.${column} AS ${column}`;
+              }
+              return `alias${i}.${column}`;
+            })
+            .join(', ')
+        )
+        .leftJoinAndSelect(`alias${i}.alertType`, 'alertType')
+        .where(whereClauseString, parameters)
+        .getQuery();
+
+      unionQuery += (i > 0 ? ' UNION ALL ' : '') + subQuery;
+    }
+    return { parameters, unionQuery };
   }
 
   private async getAlertFromRepository(

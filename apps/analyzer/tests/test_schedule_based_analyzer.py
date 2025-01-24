@@ -152,7 +152,7 @@ def test_alerts_correct_schedule():
     )
     backend = MockBackend()
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T22:00:00"))
 
     assert backend.creation_date_alerts == []
@@ -206,7 +206,7 @@ def test_alerts_correct_schedule_small_deviations():
     )
     backend = MockBackend()
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T22:00:00"))
 
     assert backend.creation_date_alerts == []
@@ -260,7 +260,7 @@ def test_alerts_correct_schedule_large_deviations():
     )
     backend = MockBackend()
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T22:00:00"))
 
     assert backend.creation_date_alerts == [
@@ -317,7 +317,7 @@ def test_alerts_additional_backup():
     )
     backend = MockBackend()
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T22:00:00"))
 
     assert backend.creation_date_alerts == []
@@ -376,7 +376,7 @@ def test_alerts_multiple_additional_backups():
     )
     backend = MockBackend()
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T22:00:00"))
 
     assert backend.creation_date_alerts == []
@@ -423,7 +423,7 @@ def test_alerts_missing_backup():
     )
     backend = MockBackend()
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T20:00:00"))
 
     assert backend.creation_date_alerts == []
@@ -465,7 +465,7 @@ def test_alerts_multiple_missing_backups():
     )
     backend = MockBackend()
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T19:00:00"))
 
     assert backend.creation_date_alerts == []
@@ -526,7 +526,7 @@ def test_alerts_creation_date_alert_and_additional_backup_alerts():
     )
     backend = MockBackend()
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T22:00:00"))
 
     assert backend.creation_date_alerts == [
@@ -576,7 +576,7 @@ def test_alerts_start_date_no_alerts():
     backend = MockBackend()
     backend.set_latest_alert_id("CREATION_DATE_ALERT", None, "2")
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T20:00:00"))
 
     assert backend.creation_date_alerts == []
@@ -615,7 +615,7 @@ def test_alerts_start_date_alert():
     backend = MockBackend()
     backend.set_latest_alert_id("CREATION_DATE_ALERT", None, "1")
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(database, backend, None, None, None, schedule_based_analyzer)
+    Analyzer.init(database, backend, None, None, schedule_based_analyzer)
     Analyzer.schedule_based_analysis(-1, datetime.fromisoformat("2000-01-01T20:00:00"))
 
     assert backend.creation_date_alerts == []

@@ -5,7 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { SizeAlertEntity } from './entity/alerts/sizeAlert.entity';
 import { Repository } from 'typeorm';
 import { BackupDataService } from '../backupData/backupData.service';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { AlertTypeEntity } from './entity/alertType.entity';
 import { CreateAlertTypeDto } from './dto/createAlertType.dto';
@@ -382,100 +382,6 @@ describe('AlertingService', () => {
     });
   });
 
-  describe('createSizeAlert', () => {
-    it('should create and save a size alert', async () => {
-      const createSizeAlertDto: CreateSizeAlertDto = {
-        size: 100,
-        referenceSize: 200,
-        backupId: 'backup-id',
-      };
-
-      await service.createSizeAlert(createSizeAlertDto);
-
-      expect(backupDataService.findOneById).toHaveBeenCalledWith('backup-id');
-      expect(sizeAlertRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          size: 100,
-          referenceSize: 200,
-          backup: mockedBackupDataEntity,
-        })
-      );
-      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('createCreationDateAlert', () => {
-    it('should create and save a creation date alert', async () => {
-      const createCreationDateAlertDto: CreateCreationDateAlertDto = {
-        backupId: 'backup-id',
-        date: new Date('2021-01-01'),
-        referenceDate: new Date('2021-01-02'),
-      };
-
-      await service.createCreationDateAlert(createCreationDateAlertDto);
-
-      expect(backupDataService.findOneById).toHaveBeenCalledWith('backup-id');
-      expect(creationDateAlertEntityRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          date: new Date('2021-01-01'),
-          referenceDate: new Date('2021-01-02'),
-          backup: mockedBackupDataEntity,
-          alertType: mockedCreationDateAlertTypeEntity,
-        })
-      );
-      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw NotFoundException if backup not found', async () => {
-      const createCreationDateAlertDto: CreateCreationDateAlertDto = {
-        backupId: 'not-existing-id',
-        date: new Date('2021-01-01'),
-        referenceDate: new Date('2021-01-02'),
-      };
-
-      await expect(
-        service.createCreationDateAlert(createCreationDateAlertDto)
-      ).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('createMissingBackupAlert', () => {
-    it('should create and save a missing backup alert', async () => {
-      const createMissingBackupAlertDto: CreateMissingBackupAlertDto = {
-        referenceDate: new Date('2021-01-01'),
-      };
-
-      await service.createMissingBackupAlert(createMissingBackupAlertDto);
-
-      expect(missingBackupAlertEntityRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          referenceDate: new Date('2021-01-01'),
-          alertType: mockedMissingBackupAlertTypeEntity,
-        })
-      );
-      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('createAdditionalBackupAlert', () => {
-    it('should create and save an additional backup alert', async () => {
-      const createAdditionalBackupAlertDto: CreateAdditionalBackupAlertDto = {
-        backupId: 'backup-id',
-        date: new Date('2021-01-01'),
-      };
-
-      await service.createAdditionalBackupAlert(createAdditionalBackupAlertDto);
-
-      expect(additionalBackupAlertEntityRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          backup: mockedBackupDataEntity,
-          date: new Date('2021-01-01'),
-        })
-      );
-      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('createAlertType', () => {
     it('should create and save an alert type', async () => {
       const createAlertTypeDto: CreateAlertTypeDto = {
@@ -575,6 +481,99 @@ describe('AlertingService', () => {
       await service.triggerAlertMail(alert);
 
       expect(mailService.sendAlertMail).toHaveBeenCalledWith(alert);
+    });
+  });
+
+  describe('createSizeAlertsBatched', () => {
+    it('should create and save size alerts in batch', async () => {
+      const createSizeAlertDtos: CreateSizeAlertDto[] = [
+        {
+          size: 100,
+          referenceSize: 200,
+          backupId: 'backup-id',
+        },
+      ];
+
+      await service.createSizeAlertsBatched(createSizeAlertDtos);
+
+      expect(backupDataService.findOneById).toHaveBeenCalledWith('backup-id');
+      expect(sizeAlertRepository.save).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            size: 100,
+            referenceSize: 200,
+            backup: mockedBackupDataEntity,
+          }),
+        ])
+      );
+      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
+    });
+
+    it('should ignore existing size alerts', async () => {
+      jest.spyOn(sizeAlertRepository, 'findOneBy').mockResolvedValue(sizeAlert);
+
+      const createSizeAlertDtos: CreateSizeAlertDto[] = [
+        {
+          size: 100,
+          referenceSize: 200,
+          backupId: 'backup-id',
+        },
+      ];
+
+      await service.createSizeAlertsBatched(createSizeAlertDtos);
+
+      expect(sizeAlertRepository.save).toHaveBeenCalledWith([]);
+      expect(mailService.sendAlertMail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createCreationDateAlertsBatched', () => {
+    it('should create and save creation date alerts in batch', async () => {
+      const createCreationDateAlertDtos: CreateCreationDateAlertDto[] = [
+        {
+          backupId: 'backup-id',
+          date: new Date('2021-01-01'),
+          referenceDate: new Date('2021-01-02'),
+        },
+      ];
+
+      await service.createCreationDateAlertsBatched(
+        createCreationDateAlertDtos
+      );
+
+      expect(backupDataService.findOneById).toHaveBeenCalledWith('backup-id');
+      expect(creationDateAlertEntityRepository.save).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            date: new Date('2021-01-01'),
+            referenceDate: new Date('2021-01-02'),
+            backup: mockedBackupDataEntity,
+            alertType: mockedCreationDateAlertTypeEntity,
+          }),
+        ])
+      );
+      expect(mailService.sendAlertMail).toHaveBeenCalledTimes(1);
+    });
+
+    it('should ignore existing creation date alerts', async () => {
+      jest
+        .spyOn(creationDateAlertEntityRepository, 'findOneBy')
+        .mockResolvedValue(creationDateAlertEntities[0]);
+
+      const createCreationDateAlertDtos: CreateCreationDateAlertDto[] = [
+        {
+          backupId: 'backup-id',
+          date: new Date('2021-01-01'),
+          referenceDate: new Date('2021-01-02'),
+        },
+      ];
+
+      await service.createCreationDateAlertsBatched(
+        createCreationDateAlertDtos
+      );
+
+      expect(creationDateAlertEntityRepository.save).toHaveBeenCalledWith([]);
+      expect(mailService.sendAlertMail).not.toHaveBeenCalled();
     });
   });
 

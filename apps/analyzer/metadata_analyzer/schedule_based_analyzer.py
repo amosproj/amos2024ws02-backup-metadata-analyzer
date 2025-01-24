@@ -45,14 +45,24 @@ class ScheduleBasedAnalyzer:
         # Only send a maximum of alert_limit alerts or all alerts if alert_limit is -1
         count = len(alerts) if alert_limit == -1 else min(alert_limit, len(alerts))
 
+        creation_date_alerts = []
+        missing_backup_alerts = []
+        additional_backup_alerts = []
         for alert in alerts[:count]:
             print(alert.as_json())
             if isinstance(alert, CreationDateAlert):
-                self.backend.create_creation_date_alert(alert.as_json())
+                creation_date_alerts.append(alert.as_json())
             elif isinstance(alert, MissingBackupAlert):
-                self.backend.create_missing_backup_alert(alert.as_json())
+                missing_backup_alerts.append(alert.as_json())
             elif isinstance(alert, AdditionalBackupAlert):
-                self.backend.create_additional_backup_alert(alert.as_json())
+                additional_backup_alerts.append(alert.as_json())
+
+        self.backend.create_creation_date_alerts_batched(creation_date_alerts)
+        for alert in missing_backup_alerts:
+            self.backend.create_missing_backup_alert(alert)
+        for alert in additional_backup_alerts:
+            self.backend.create_additional_backup_alert(alert)
+
 
         return {"count": count}
 

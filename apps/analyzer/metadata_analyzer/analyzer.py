@@ -5,30 +5,16 @@ class Analyzer:
 	def init(
 			database,
 			backend,
-			simple_analyzer,
 			simple_rule_based_analyzer,
 			time_series_analyzer,
 			schedule_based_analyzer,
 	):
 		Analyzer.database = database
 		Analyzer.backend = backend
-		Analyzer.simple_analyzer = simple_analyzer
 		Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
 		Analyzer.time_series_analyzer = time_series_analyzer
 		Analyzer.schedule_based_analyzer = schedule_based_analyzer
 		Analyzer.series_loaded = False
-
-	def analyze():
-		data = list(Analyzer.database.get_results())
-		converted_data = []
-
-		for elem in data:
-			if elem.data_size != None:
-				converted_data.append(Analyzer._convert_result(elem))
-
-		result = Analyzer.simple_analyzer.analyze(converted_data)
-
-		return result
 
 	# Convert a result from the database into the format used by the backend
 	def _convert_result(result):
@@ -82,8 +68,9 @@ class Analyzer:
 		results = list(Analyzer.database.get_results(latest_backup_date))
 
 		schedules = list(Analyzer.database.get_schedules())
-		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, latest_backup_date, "ONLY_SCHEDULES")
-		
+		Analyzer.simple_rule_based_analyzer.analyze_creation_dates(results, schedules, None, latest_backup_date,
+																   "ONLY_SCHEDULES")
+
 		# Batch the api calls to the backend for improved efficiency
 		batch = []
 		count = 0
