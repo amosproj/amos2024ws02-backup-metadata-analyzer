@@ -1,121 +1,131 @@
 .btn-group-vertical {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .btn-group-vertical .btn {
-    border: 1px solid #0072a3;
-    color: #0072a3;
-    background: white;
-    text-align: center;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
-    width: 100%;
-    border-radius: 0.15rem;
+  border: 1px solid #0072a3;
+  color: #0072a3;
+  background: white;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  width: 100%;
+  border-radius: 0.15rem;
 }
 
 .btn-group-vertical .btn.btn-primary {
-    background: #0072a3;
-    color: white;
+  background: #0072a3;
+  color: white;
 }
 .clr-side-panel {
-    width: 80% !important;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 0.15rem;
-    background: white;
-    color: #1b2834;
-    font-size: 0.875rem;
-    right: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 1000000;
-    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  width: 80% !important;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.15rem;
+  background: white;
+  color: #1b2834;
+  font-size: 0.875rem;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 1000000;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
 }
 .modal {
-    z-index: 1000000;
+  z-index: 1000000;
 }
 
 .side-panel-footer {
-    padding: 1rem;
-    border-top: 1px solid #eee;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
 }
 
 .backupTaskFilter {
-    margin-top: 0.8rem;
-    width: 100%;
+  margin-top: 0.8rem;
+  width: 100%;
 }
 
 .backupTaskFilter ::ng-deep .clr-combobox-wrapper {
-    width: 100%;
-    border: 1px solid #0072a3;
-    border-radius: 0.15rem;
-    background: white;
-    padding: 10px 15px;
+  width: 100%;
+  border: 1px solid #0072a3;
+  border-radius: 0.15rem;
+  background: white;
+  padding: 10px 15px;
 }
 
 .backupTaskFilter ::ng-deep .clr-combobox-input {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    color: #0072a3;
-    font-weight: 500;
-    border: none;
-    background: white;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  color: #0072a3;
+  font-weight: 500;
+  border: none;
+  background: white;
 }
 
 .backupTaskFilter ::ng-deep .clr-combobox-trigger {
-    color: #0072a3;
-    border: none;
-    background: none;
-    padding-right: 0.5rem;
-    top: unset;
+  color: #0072a3;
+  border: none;
+  background: none;
+  padding-right: 0.5rem;
+  top: unset;
 }
 
 .backupTaskFilter ::ng-deep .clr-combobox-options {
-    border: 1px solid #0072a3;
-    border-radius: 0.15rem;
-    margin-top: 0.25rem;
+  border: 1px solid #0072a3;
+  border-radius: 0.15rem;
+  margin-top: 0.25rem;
 }
 
 .backupTaskFilter ::ng-deep .clr-combobox-options .clr-combobox-option {
-    padding: 0.5rem 1rem;
-    color: #0072a3;
-    font-weight: 500;
+  padding: 0.5rem 1rem;
+  color: #0072a3;
+  font-weight: 500;
 }
 
 .backupTaskFilter ::ng-deep .clr-combobox-options .clr-combobox-option:hover {
-    background: #0072a3;
-    color: white;
+  background: #0072a3;
+  color: white;
 }
 
 .backupTaskFilter
-::ng-deep
-.clr-combobox-options
-.clr-combobox-option[aria-selected='true'] {
-    background: #0072a3;
-    color: white;
+  ::ng-deep
+  .clr-combobox-options
+  .clr-combobox-option[aria-selected='true'] {
+  background: #0072a3;
+  color: white;
 }
 
 .backupTaskFilter ::ng-deep .clr-combobox-wrapper .label-combobox-pill {
-    max-width: none;
-    font-size: 0.7rem;
-    padding: 0.15rem 0.5rem;
-    margin: 0.15rem;
-    white-space: nowrap;
-    height: auto;
-    line-height: 1;
+  max-width: none;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  margin: 0.15rem;
+  white-space: nowrap;
+  height: auto;
+  line-height: 1;
 }
 
-
 .backupTaskFilter ::ng-deep .clr-combobox-options {
-    width: 100% !important;
-    min-width: 100%;
-    max-width: 100%;
+  width: 100% !important;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.filter-section {
+  margin-bottom: 1rem;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }

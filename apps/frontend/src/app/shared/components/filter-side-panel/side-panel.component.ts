@@ -341,4 +341,24 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   protected changeFilterPanelState(): void {
     this.isOpen = !this.isOpen;
   }
+
+  resetTimeRange(): void {
+    this.setTimeRange('month');
+  }
+
+  resetTasks(): void {
+    this.setBackupTask([]);
+    this.selectedTask = [];
+  }
+
+  resetTypes(): void {
+    this.setBackupTypes([]);
+    this.selectedBackupTypes = [];
+  }
+
+  resetAllFilters(): void {
+    this.resetTimeRange();
+    this.resetTasks();
+    this.resetTypes();
+  }
 }
