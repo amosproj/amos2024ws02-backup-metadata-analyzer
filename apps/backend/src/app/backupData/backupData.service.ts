@@ -31,6 +31,20 @@ import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dt
 import { TaskEntity } from '../tasks/entity/task.entity';
 import { BackupInformationDto } from '../information/dto/backupInformation.dto';
 import { BackupSizesPerDayDto } from './dto/BackupSizesPerDay.dto';
+import { BackupDataSizeRangeDto } from './dto/BackupDataSizeRanges.dto';
+
+const RANGES = [
+  { startSize: 0, endSize: 100 },
+  { startSize: 100, endSize: 500 },
+  { startSize: 500, endSize: 1000 },
+  { startSize: 1000, endSize: 5000 },
+  { startSize: 5000, endSize: 10000 },
+  { startSize: 10000, endSize: 50000 },
+  { startSize: 50000, endSize: 100000 },
+  { startSize: 100000, endSize: 500000 },
+  { startSize: 500000, endSize: 1000000 },
+  { startSize: 1000000, endSize: -1 },
+];
 
 @Injectable()
 export class BackupDataService extends PaginationService {
@@ -128,6 +142,65 @@ export class BackupDataService extends PaginationService {
     }
 
     return query.getRawMany();
+  }
+
+  async getBackupDataSizeRanges(
+    fromDate?: string,
+    toDate?: string,
+    taskIds?: string[],
+    types?: string[]
+  ): Promise<BackupDataSizeRangeDto[]> {
+    // Validate Dates
+    const { from, to } = this.transformDates(fromDate, toDate);
+
+    const query = this.backupDataRepository.createQueryBuilder('backup');
+
+    // Apply date filters
+    if (from) {
+      query.andWhere('backup.creationDate >= :fromDate', { fromDate: from });
+    }
+    if (to) {
+      query.andWhere('backup.creationDate <= :toDate', { toDate: to });
+    }
+
+    // Apply task ID filters
+    if (taskIds) {
+      query.andWhere('backup.taskId IN (:...taskIds)', { taskIds });
+    }
+
+    // Apply type filters
+    if (types) {
+      query.andWhere('backup.type IN (:...types)', { types });
+    }
+
+    // Initialize result array
+    const result: BackupDataSizeRangeDto[] = [];
+
+    // Iterate over predefined ranges and count backups in each range
+    for (const range of RANGES) {
+      const countQuery = query.clone();
+      if (range.endSize === -1) {
+        countQuery.andWhere('backup.sizeMB >= :startSize', {
+          startSize: range.startSize,
+        });
+      } else {
+        countQuery.andWhere(
+          'backup.sizeMB >= :startSize AND backup.sizeMB < :endSize',
+          {
+            startSize: range.startSize,
+            endSize: range.endSize,
+          }
+        );
+      }
+      const count = await countQuery.getCount();
+      result.push({
+        startSize: range.startSize,
+        endSize: range.endSize,
+        count: count,
+      });
+    }
+
+    return result;
   }
 
   /**
