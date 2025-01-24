@@ -87,6 +87,9 @@ class ScheduleBasedAnalyzer:
         return alerts
 
     def _analyze_one_task_one_schedule(self, schedule, results, start_date, stop_date):
+        if len(results) == 0:
+            return []
+
         alerts = []
         stop_date = min(stop_date, results[-1].start_time + 2 * self.calculate_expected_delta(schedule)) # Stop a potential flood of missing backup alerts (5-min schedule generates 1000s of alerts)
         tolerance = self.calculate_tolerance(schedule)
