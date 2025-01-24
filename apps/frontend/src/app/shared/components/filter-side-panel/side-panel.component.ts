@@ -106,24 +106,36 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
         )
       ),
       this.backupTaskSubject$.pipe(
-        distinctUntilChanged(
-          (prev, curr) =>
-            JSON.stringify(prev.map((p) => p.id).sort()) ===
-            JSON.stringify(curr.map((c) => c.id).sort())
-        )
+        distinctUntilChanged((prev, curr) => {
+          if (!prev && !curr) return true;
+          if (!prev || !curr) return false;
+          if (prev.length !== curr.length) {
+            return false;
+          }
+          const prevIds = prev.map((p) => p.id).sort();
+          const currIds = curr.map((c) => c.id).sort();
+
+          return prevIds === currIds;
+        })
       ),
       this.backupTypesSubject$.pipe(
-        distinctUntilChanged(
-          (prev, curr) =>
-            JSON.stringify(prev.sort()) === JSON.stringify(curr.sort())
-        )
+        distinctUntilChanged((prev, curr) => {
+          if (!prev && !curr) return true;
+          if (!prev || !curr) return false;
+          if (prev.length !== curr.length) {
+            return false;
+          }
+          const prevIds = prev.map((p) => p).sort();
+          const currIds = curr.map((c) => c).sort();
+          return prevIds === currIds;
+        })
       ),
     ]).pipe(
       map(([timeRange, tasks, backupTypes]) => ({
         fromDate: timeRange.fromDate.toISOString(),
         toDate: timeRange.toDate.toISOString(),
-        types: backupTypes,
-        taskIds: tasks?.map((task) => task.id) || [],
+        types: backupTypes || [],
+        taskIds: (tasks || []).map((task) => task?.id).filter(Boolean) || [],
       })),
       shareReplay(1)
     );
@@ -178,15 +190,10 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.timelineData$ = this.filterParams$.pipe(
       switchMap((params) => {
-        return this.backupService
-          .getBackupSizesPerDay(params)
-          .pipe(
-            tap((rawResponse) => console.log('Raw API response:', rawResponse))
-          );
+        return this.backupService.getBackupSizesPerDay(params);
       }),
       tap({
         next: (response) => {
-          console.log('Response received:', response);
           if (response.length) {
             this.chartService.updateChart('backupTimelineChart', response);
           }
@@ -198,22 +205,24 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       shareReplay(1)
     );
-    // when PieChart Endpoint is ready
-    /*     this.pieChartData$ = this.filterParams$.pipe(
-      switchMap(params => this.backupService.getBackupSizesPerDay(params)),
+    //preparation for new piechart handling
+    this.pieChartData$ = this.filterParams$.pipe(
+      switchMap((params) => {
+        return this.backupService.getGroupedBackupSizes(params);
+      }),
       tap({
         next: (response) => {
-          if (response.data?.length > 0) {
-            this.chartService.updateChart('backupSizeChart', response.data);
+          if (response.length) {
+            this.chartService.updateChart('backupSizeChart', response);
           }
         },
         error: (error) => {
-          console.error('Error updating pie chart:', error);
+          console.error('Error updating timeline chart:', error);
           this.loading = false;
-        }
+        },
       }),
       shareReplay(1)
-    ); */
+    );
   }
 
   /**
@@ -242,9 +251,12 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
               {
                 id: chart.id,
                 type: 'pie',
-                valueField: 'sizeMB',
+                valueField: 'count',
                 categoryField: 'category',
                 seriesName: 'SizeDistribution',
+                hideLabels: true, // Hide default labels
+                tooltipText:
+                  '{category}: [bold]{value.percent.formatNumber("#.##")}%[/]\n({value} backups)',
               },
               this.pieChartData$
             );
