@@ -188,8 +188,8 @@ export class PaginationService {
         parameters.push(whereClause.severity);
       }
       if (whereClause.id) {
-        whereConditions.push(`alias${i}.id = $${parameters.length + 1}`); // Use = for uuid type
-        parameters.push(whereClause.id);
+        whereConditions.push(`CAST(alias${i}.id AS TEXT) LIKE $${parameters.length + 1}`);
+        parameters.push(`%${whereClause.id}%`);
       }
       if (whereClause.backupId) {
         whereConditions.push(`alias${i}.backupId = $${parameters.length + 1}`); // Use = for uuid type
