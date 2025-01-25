@@ -6,7 +6,10 @@ import { Backup } from '../../types/backup';
 import { APIResponse } from '../../types/api-response';
 import { BackupFilterParams } from '../../types/backup-filter-type';
 import { BackupTask } from '../../types/backup.task';
-import { PieChartData, TimelineData } from '../../types/chart-config';
+import {
+  PieChartDataPoint,
+  TimelineDataPoint
+} from '../../types/chart-config';
 
 @Injectable({
   providedIn: 'root',
@@ -48,12 +51,12 @@ export class BackupService {
   getBackupSizesPerDay(
     filterParams: BackupFilterParams & { taskIds?: string[] },
     selectedTasks?: string[]
-  ): Observable<TimelineData[]> {
+  ): Observable<TimelineDataPoint[]> {
     const cleanParams = this.cleanParams(filterParams);
     const body = {
       taskIds: selectedTasks,
     };
-    return this.http.post<TimelineData[]>(
+    return this.http.post<TimelineDataPoint[]>(
       `${this.baseUrl}/backupData/sizes/perDay`,
       body,
       {
@@ -65,17 +68,23 @@ export class BackupService {
   getGroupedBackupSizes(
     filterParams: BackupFilterParams & { taskIds?: string[] },
     selectedTasks?: string[]
-  ): Observable<PieChartData[]> {
+  ): Observable<PieChartDataPoint[]> {
     const cleanParams = this.cleanParams(filterParams);
     const body = {
       taskIds: selectedTasks,
     };
-    return this.http.post<PieChartData[]>(
+    return this.http.post<PieChartDataPoint[]>(
       `${this.baseUrl}/backupData/sizes/grouped`,
       body,
       {
         params: cleanParams,
       }
+    );
+  }
+
+  getBackupAlertSeverityOverview(): Observable<PieChartDataPoint[]> {
+    return this.http.get<PieChartDataPoint[]>(
+      `${this.baseUrl}/alerting/severityOverview`
     );
   }
 
