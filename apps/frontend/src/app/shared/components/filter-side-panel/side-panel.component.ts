@@ -28,7 +28,7 @@ import { APIResponse } from '../../types/api-response';
 import { Backup } from '../../types/backup';
 import { BackupService } from '../../services/backup-service/backup-service.service';
 import { ChartService } from '../../services/chart-service/chart-service.service';
-import { PieChartData, TimelineData } from '../../types/chart-config';
+import { TimelineDataPoint, PieChartDataPoint } from '../../types/chart-config';
 import { BackupFilterParams } from '../../types/backup-filter-type';
 
 interface TimeRangeConfig {
@@ -79,8 +79,9 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
   //Observables
   filterCount$: Observable<number> = of(0);
-  timelineData$!: Observable<TimelineData[]>;
-  pieChartData$!: Observable<PieChartData[]>;
+  timelineData$!: Observable<TimelineDataPoint[]>;
+  backupSizePieChartData$!: Observable<PieChartDataPoint[]>;
+  backupAlertPieChartData$!: Observable<PieChartDataPoint[]>;
   private readonly filterParams$: Observable<BackupFilterParams>;
 
   chartBackups$: Observable<APIResponse<Backup>> = of({
@@ -205,8 +206,8 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       shareReplay(1)
     );
-    //preparation for new piechart handling
-    this.pieChartData$ = this.filterParams$.pipe(
+
+    this.backupSizePieChartData$ = this.filterParams$.pipe(
       switchMap((params) => {
         return this.backupService.getGroupedBackupSizes(params);
       }),
@@ -223,8 +224,30 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       shareReplay(1)
     );
-  }
 
+    /*     this.backupAlertPieChartData$ = this.backupService
+      .getBackupAlertSeverityOverview()
+      .pipe(
+        tap({
+          next: (response) => {
+            if (response.length) {
+              this.chartService.updateChart('overviewAlertsPieChart', response);
+            }
+          },
+          error: (error) => {
+            console.error('Error updating timeline chart:', error);
+            this.loading = false;
+          },
+        }),
+        shareReplay(1)
+      ); */
+    this.backupAlertPieChartData$ = of([
+      { category: 'ok', count: 58197 },
+      { category: 'info', count: 0 },
+      { category: 'warning', count: 393 },
+      { category: 'critical', count: 2 },
+    ]);
+  }
   /**
    * Initialize the charts
    */
@@ -247,26 +270,43 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       for (const chart of this.charts) {
         switch (chart.type) {
           case ChartType.SIZEPIECHART:
-            this.chartService.createChart(
-              {
-                id: chart.id,
-                type: 'pie',
-                valueField: 'count',
-                categoryField: 'category',
-                seriesName: 'SizeDistribution',
-                hideLabels: true, // Hide default labels
-                tooltipText:
-                  '{category}: [bold]{value.percent.formatNumber("#.##")}%[/]\n({value} backups)',
-              },
-              this.pieChartData$
-            );
+            if (chart.id === 'backupStatisticsPageSizePieChart') {
+              this.chartService.createChart(
+                {
+                  id: chart.id,
+                  type: 'pie',
+                  valueField: 'count',
+                  categoryField: 'category',
+                  seriesName: 'SizeDistribution',
+                  hideLabels: true,
+                  tooltipText:
+                    '{category}: [bold]{value.percent.formatNumber("#.##")}%[/]\n({value} backups)',
+                },
+                this.backupSizePieChartData$
+              );
+            }
+            if (chart.id === 'overviewAlertsPieChart') {
+              this.chartService.createChart(
+                {
+                  id: chart.id,
+                  type: 'pie',
+                  valueField: 'count',
+                  categoryField: 'category',
+                  seriesName: 'SizeDistribution',
+                  hideLabels: true,
+                  tooltipText: '{category}: [bold]{value}[/] alerts',
+                },
+                this.backupAlertPieChartData$
+              );
+            }
+
             break;
           case ChartType.SIZECOLUMNCHART:
             this.chartService.createChart(
               {
                 id: chart.id,
                 type: 'column',
-                valueYField: 'sizeMB',
+                valueYField: 'value',
                 valueXField: 'date',
                 seriesName: 'BackupSize',
                 tooltipText: '[bold]{valueY}[/] MB\n{valueX}',
