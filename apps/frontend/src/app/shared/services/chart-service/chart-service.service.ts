@@ -10,9 +10,9 @@ import _ from 'lodash';
 import {
   ChartConfig,
   ChartType,
-  PieChartData,
-  TimelineData,
   TimeRange,
+  PieChartDataPoint,
+  TimelineDataPoint,
 } from '../../types/chart-config';
 
 @Injectable({
@@ -33,9 +33,9 @@ export class ChartService {
    * @param data$ data to be displayed
    * @param timeRange select the range of time for the chart
    */
-  createChart(
+  createChart<T>(
     config: ChartConfig,
-    data$: Observable<TimelineData[] | PieChartData[]>,
+    data$: Observable<T>,
     timeRange?: TimeRange
   ): void {
     const root = this.initializeRoot(config.id);
@@ -183,7 +183,7 @@ export class ChartService {
           name: config.seriesName || 'Backups',
           xAxis: xAxis,
           yAxis: yAxis,
-          valueYField: config.valueYField || 'sizeMB',
+          valueYField: config.valueYField || 'value',
           valueXField: config.valueXField || 'date',
           clustered: true,
           tooltip: am5.Tooltip.new(root, {
@@ -254,43 +254,54 @@ export class ChartService {
    * @param timeRange selected filter time range
    * @returns Array of grouped objects with date and sizeMB properties
    */
-  prepareColumnData(backups: TimelineData[], timeRange: TimeRange): any[] {
+  prepareColumnData<T>(
+    backups: T[],
+    timeRange: TimeRange
+  ): TimelineDataPoint[] {
     if (!backups?.length) return [];
 
-    const processedData = backups.map((backup) => ({
-      date: new Date(backup.date),
-      sizeMB: Number(backup.sizeMB) * 1000000,
+    const processedData = backups.map((item: any) => ({
+      date: new Date(this.getDateValue(item)),
+      value: 'sizeMB' in item ? item.sizeMB * 1000000 : item.value,
     }));
 
-    // Sort data by date
-    const sortedData = _.sortBy(processedData, 'date');
+    return timeRange === 'year'
+      ? this.groupByWeek(processedData)
+      : this.groupByDay(processedData);
+  }
 
-    if (timeRange === 'year') {
-      const groupedByWeek = _.groupBy(sortedData, (backup) => {
-        const date = backup.date;
-        const startOfWeek = new Date(date);
-        startOfWeek.setDate(
-          date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1)
-        );
-        return startOfWeek.toISOString().split('T')[0];
-      });
+  private getDateValue(item: any): Date | number {
+    return item.date || item.creationDate || item.timestamp || new Date();
+  }
 
-      return Object.entries(groupedByWeek).map(([weekStart, backups]) => ({
-        date: new Date(weekStart).getTime(),
-        sizeMB: _.sumBy(backups, 'sizeMB'),
-      }));
-    } else {
-      // Group by day for month/week view
-      const groupedByDay = _.groupBy(
-        sortedData,
-        (backup) => backup.date.toISOString().split('T')[0]
-      );
+  private getNumericValue(item: any): number {
+    return item.sizeMB ? item.sizeMB * 1000000 : item.value || item.size || 0;
+  }
 
-      return Object.entries(groupedByDay).map(([day, backups]) => ({
-        date: new Date(day).getTime(),
-        sizeMB: _.sumBy(backups, 'sizeMB'),
-      }));
-    }
+  private groupByDay(data: TimelineDataPoint[]): TimelineDataPoint[] {
+    const grouped = _.groupBy(
+      data,
+      (item) => new Date(item.date).toISOString().split('T')[0]
+    );
+
+    return Object.entries(grouped).map(([day, items]) => ({
+      date: new Date(day).getTime(),
+      value: _.sumBy(items, 'value'),
+    }));
+  }
+
+  private groupByWeek(data: TimelineDataPoint[]): TimelineDataPoint[] {
+    const grouped = _.groupBy(data, (item) => {
+      const date = new Date(item.date);
+      const week = new Date(date);
+      week.setDate(date.getDate() - date.getDay() + 1);
+      return week.toISOString();
+    });
+
+    return Object.entries(grouped).map(([week, items]) => ({
+      date: new Date(week).getTime(),
+      value: _.sumBy(items, 'value'),
+    }));
   }
 
   private getAxisFormat(timeRange: TimeRange): string {
@@ -327,7 +338,24 @@ export class ChartService {
     }
   }
 
-  preparePieData(data: any[]): any[] {
+  preparePieData<T>(data: T): PieChartDataPoint[] {
+    if (!data) return [];
+
+    if (Array.isArray(data) && 'category' in (data[0] || {})) {
+      return data.map((item: any) => ({
+        category: item.category.toUpperCase(),
+        value: item.count,
+        count: item.count,
+      }));
+    }
+
+    if (Array.isArray(data) && 'startSize' in (data[0] || {})) {
+      return this.prepareSizeDistributionData(data as any);
+    } else {
+      return [];
+    }
+  }
+  private prepareSizeDistributionData(data: any[]): PieChartDataPoint[] {
     const total = data.reduce((sum, item) => sum + item.count, 0);
     return data.map((item) => ({
       category: this.createSizeCategory(item.startSize, item.endSize),
@@ -335,6 +363,15 @@ export class ChartService {
       value: (item.count / total) * 100, // Calculate percentage
     }));
   }
+
+  private isAlertData(
+    data: any
+  ): data is { ok: number; info: number; warning: number; critical: number } {
+    return (
+      'ok' in data && 'info' in data && 'warning' in data && 'critical' in data
+    );
+  }
+
   private createSizeCategory(start: number, end: number): string {
     if (end === -1) {
       return `>${this.formatSize(start)}`;
@@ -355,20 +392,20 @@ export class ChartService {
   /**
    * Subscribes to data updates
    */
-  private subscribeToData(
+  private subscribeToData<T>(
     series: am5.Series,
-    data$: Observable<TimelineData[] | PieChartData[]>,
+    data$: Observable<T>,
     config: ChartConfig,
     timeRange?: TimeRange
   ): void {
     data$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (backups) => {
         series.data.clear();
-        if (backups?.length) {
+        if (Array.isArray(backups) && backups.length) {
           const chartData =
             config.type === 'column'
-              ? this.prepareColumnData(backups as TimelineData[], timeRange!)
-              : this.preparePieData(backups as PieChartData[]);
+              ? this.prepareColumnData(backups as any[], timeRange!)
+              : this.preparePieData(backups);
           series.data.clear();
           series.data.setAll(chartData);
         }

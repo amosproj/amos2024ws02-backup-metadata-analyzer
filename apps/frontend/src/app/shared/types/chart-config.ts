@@ -17,13 +17,13 @@ export interface ChartConfig {
   }
 
 
-export interface TimelineData {
-  date: Date;
-  sizeMB: number;
+export interface TimelineDataPoint {
+  date: Date | number;
+  value: number;
 }
 
-export interface PieChartData {
-  startSize: number;
-  endSize: number;
-  count: number;
+export interface PieChartDataPoint {
+  category: string;
+  value?: number;
+  count?: number;
 }
