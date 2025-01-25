@@ -57,7 +57,7 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loading = false;
   selectedBackupTypes: string[] = [];
-  protected selectedTask: BackupTask[] = [];
+  selectedTask: BackupTask[] = [];
 
   // Backup types for the filter
   backupEnumTypes = Object.keys(BackupType).filter((item) => {
