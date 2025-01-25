@@ -30,6 +30,16 @@ class Backend:
 		r = requests.post(url, json=alerts)
 		r.raise_for_status()
 
+	def create_missing_backup_alert(self, alert):
+		url = self.backend_url + "alerting/missingBackup"
+		r = requests.post(url, json=alert)
+		r.raise_for_status()
+
+	def create_additional_backup_alert(self, alert):
+		url = self.backend_url + "alerting/additionalBackup"
+		r = requests.post(url, json=alert)
+		r.raise_for_status()
+
 	def create_storage_fill_alerts(self, alerts):
 		url = self.backend_url + "alerting/storageFill"
 		r = requests.post(url, json=alerts)
