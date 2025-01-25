@@ -6,10 +6,7 @@ import { Backup } from '../../types/backup';
 import { APIResponse } from '../../types/api-response';
 import { BackupFilterParams } from '../../types/backup-filter-type';
 import { BackupTask } from '../../types/backup.task';
-import {
-  PieChartDataPoint,
-  TimelineDataPoint
-} from '../../types/chart-config';
+import { PieChartDataPoint, TimelineDataPoint } from '../../types/chart-config';
 
 @Injectable({
   providedIn: 'root',
@@ -49,28 +46,44 @@ export class BackupService {
   }
 
   getBackupSizesPerDay(
-    filterParams: BackupFilterParams & { taskIds?: string[] },
-    selectedTasks?: string[]
+    filterParams: BackupFilterParams
   ): Observable<TimelineDataPoint[]> {
-    const cleanParams = this.cleanParams(filterParams);
-    const body = {
-      taskIds: taskIds || [],
-    };
+    const { taskId, ...queryParams } = filterParams;
+    let cleanParams = this.cleanParams(queryParams);
+    if (filterParams.types && filterParams.types.length > 0) {
+      filterParams.types.forEach((type) => {
+        cleanParams = cleanParams.set('types', type);
+      });
+    }
+
+    let body: { taskIds: string[] } | null = null;
+    if (taskId && taskId.length > 0) {
+      body = { taskIds: taskId };
+    }
+
     return this.http.post<TimelineDataPoint[]>(
       `${this.baseUrl}/backupData/sizes/perDay`,
       body,
       { params: cleanParams }
     );
   }
-
   getGroupedBackupSizes(
-    filterParams: BackupFilterParams & { taskIds?: string[] },
-    selectedTasks?: string[]
+    filterParams: BackupFilterParams
   ): Observable<PieChartDataPoint[]> {
-    const cleanParams = this.cleanParams(filterParams);
-    const body = {
-      taskIds: taskIds || [],
-    };
+    const { taskId, ...queryParams } = filterParams;
+    let cleanParams = this.cleanParams(queryParams);
+    if (filterParams.types && filterParams.types.length > 0) {
+      filterParams.types.forEach((type) => {
+        cleanParams = cleanParams.set('types', type);
+      });
+    }
+
+
+    let body: { taskIds: string[] } | null = null;
+    if (taskId && taskId.length > 0) {
+      body = { taskIds: taskId };
+    }
+
     return this.http.post<PieChartDataPoint[]>(
       `${this.baseUrl}/backupData/sizes/grouped`,
       body,

@@ -82,7 +82,7 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   timelineData$!: Observable<TimelineDataPoint[]>;
   backupSizePieChartData$!: Observable<PieChartDataPoint[]>;
   backupAlertPieChartData$!: Observable<PieChartDataPoint[]>;
-  private readonly filterParams$: Observable<BackupFilterParams>;
+  filterParams$: Observable<BackupFilterParams>;
 
   chartBackups$: Observable<APIResponse<Backup>> = of({
     data: [],
@@ -136,7 +136,7 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
         fromDate: timeRange.fromDate.toISOString(),
         toDate: timeRange.toDate.toISOString(),
         types: backupTypes,
-        taskId: tasks.map((task) => task.id),
+        taskId: tasks.map((task) => task.id) || [],
       })),
       shareReplay(1)
     );
@@ -191,11 +191,8 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.timelineData$ = this.filterParams$.pipe(
       switchMap((params) => {
-        const { taskId, ...queryParams } = params;
-        return this.backupService.getBackupSizesPerDay(
-          queryParams,
-          taskId || undefined
-        );
+        //const { taskId, ...queryParams } = params;
+        return this.backupService.getBackupSizesPerDay(params);
       }),
       tap({
         next: (response) => {
@@ -213,11 +210,8 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.backupSizePieChartData$ = this.filterParams$.pipe(
       switchMap((params) => {
-        const { taskId, ...queryParams } = params;
-        return this.backupService.getGroupedBackupSizes(
-          queryParams,
-          taskId || undefined
-        );
+        //const { taskId, ...queryParams } = params;
+        return this.backupService.getGroupedBackupSizes(params);
       }),
       tap({
         next: (response) => {
