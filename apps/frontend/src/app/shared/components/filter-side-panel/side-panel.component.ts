@@ -135,8 +135,8 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       map(([timeRange, tasks, backupTypes]) => ({
         fromDate: timeRange.fromDate.toISOString(),
         toDate: timeRange.toDate.toISOString(),
-        types: backupTypes || [],
-        taskIds: (tasks || []).map((task) => task?.id).filter(Boolean) || [],
+        types: backupTypes,
+        taskId: tasks.map((task) => task.id),
       })),
       shareReplay(1)
     );
@@ -191,7 +191,11 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.timelineData$ = this.filterParams$.pipe(
       switchMap((params) => {
-        return this.backupService.getBackupSizesPerDay(params);
+        const { taskId, ...queryParams } = params;
+        return this.backupService.getBackupSizesPerDay(
+          queryParams,
+          taskId || undefined
+        );
       }),
       tap({
         next: (response) => {
@@ -209,7 +213,11 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.backupSizePieChartData$ = this.filterParams$.pipe(
       switchMap((params) => {
-        return this.backupService.getGroupedBackupSizes(params);
+        const { taskId, ...queryParams } = params;
+        return this.backupService.getGroupedBackupSizes(
+          queryParams,
+          taskId || undefined
+        );
       }),
       tap({
         next: (response) => {

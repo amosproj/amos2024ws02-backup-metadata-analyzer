@@ -54,14 +54,12 @@ export class BackupService {
   ): Observable<TimelineDataPoint[]> {
     const cleanParams = this.cleanParams(filterParams);
     const body = {
-      taskIds: selectedTasks,
+      taskIds: taskIds || [],
     };
     return this.http.post<TimelineDataPoint[]>(
       `${this.baseUrl}/backupData/sizes/perDay`,
       body,
-      {
-        params: cleanParams,
-      }
+      { params: cleanParams }
     );
   }
 
@@ -71,7 +69,7 @@ export class BackupService {
   ): Observable<PieChartDataPoint[]> {
     const cleanParams = this.cleanParams(filterParams);
     const body = {
-      taskIds: selectedTasks,
+      taskIds: taskIds || [],
     };
     return this.http.post<PieChartDataPoint[]>(
       `${this.baseUrl}/backupData/sizes/grouped`,
