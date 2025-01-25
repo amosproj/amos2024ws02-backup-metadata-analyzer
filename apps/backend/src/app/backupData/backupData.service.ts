@@ -138,7 +138,8 @@ export class BackupDataService extends PaginationService {
     }
 
     if (types) {
-      query.andWhere('backup.type IN (:...types)', { types });
+      const typesArray = Array.isArray(types) ? types : [types];
+      query.andWhere('backup.type IN (:...types)', { types: typesArray });
     }
 
     return query.getRawMany();
@@ -170,7 +171,8 @@ export class BackupDataService extends PaginationService {
 
     // Apply type filters
     if (types) {
-      query.andWhere('backup.type IN (:...types)', { types });
+      const typesArray = Array.isArray(types) ? types : [types];
+      query.andWhere('backup.type IN (:...types)', { types: typesArray });
     }
 
     // Initialize result array
