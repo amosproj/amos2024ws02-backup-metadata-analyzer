@@ -18,3 +18,5 @@ Gets task ids of current dataset, necessary for time series analysis.
         description: All possible task ids
         schema:
           $ref: '#/definitions/task_ids'
+    tags:
+      - Time Series Analysis

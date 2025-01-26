@@ -11,3 +11,5 @@ Runs a simple rule based analysis on data stores searching for ones which are al
             description: Number of created alerts
         400:
             description: The value set for the alert limit was not valid
+    tags:
+      - Alerting
