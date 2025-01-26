@@ -1,6 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Between, ILike, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import {
+  Between,
+  ILike,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { BackupDataService } from './backupData.service';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
@@ -24,6 +31,7 @@ const mockBackupDataRepository = {
   findAndCount: jest.fn().mockResolvedValue([[mockBackupDataEntity], 1]),
   save: jest.fn().mockResolvedValue(mockBackupDataEntity),
   findOne: jest.fn().mockResolvedValue(mockBackupDataEntity),
+  createQueryBuilder: jest.fn().mockReturnThis(),
 };
 
 describe('BackupDataService', () => {
@@ -291,6 +299,90 @@ describe('BackupDataService', () => {
       await service.createBatched(createBackupDataDtos);
 
       expect(repository.save).toHaveBeenCalledWith(createBackupDataDtos);
+    });
+  });
+
+  describe('getBackupDataSizesPerDay', () => {
+    it('should return backup data sizes per day with given params', async () => {
+      const fromDate = '2023-01-01';
+      const toDate = '2023-12-31';
+      const taskIds = ['task-1', 'task-2'];
+      const types = [BackupType.FULL, BackupType.INCREMENTAL];
+
+      const mockResult = [
+        { date: '2023-01-01', sizeMB: 100 },
+        { date: '2023-01-02', sizeMB: 200 },
+      ];
+
+      jest.spyOn(repository, 'createQueryBuilder').mockImplementation(() => {
+        return {
+          select: jest.fn().mockReturnThis(),
+          addSelect: jest.fn().mockReturnThis(),
+          groupBy: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          getRawMany: jest.fn().mockResolvedValue(mockResult),
+        } as any;
+      });
+
+      const result = await service.getBackupDataSizesPerDay(
+        fromDate,
+        toDate,
+        taskIds,
+        types
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getBackupDataSizeRanges', () => {
+    it('should return backup data size ranges with given params', async () => {
+      const fromDate = '2023-01-01';
+      const toDate = '2023-12-31';
+      const taskIds = ['task-1', 'task-2'];
+      const types = [BackupType.FULL, BackupType.INCREMENTAL];
+
+      const mockResult = [
+        { startSize: 0, endSize: 100, count: 10 },
+        { startSize: 100, endSize: 500, count: 20 },
+        { startSize: 500, endSize: 1000, count: 30 },
+        { startSize: 1000, endSize: 5000, count: 40 },
+        { startSize: 5000, endSize: 10000, count: 50 },
+        { startSize: 10000, endSize: 50000, count: 60 },
+        { startSize: 50000, endSize: 100000, count: 70 },
+        { startSize: 100000, endSize: 500000, count: 80 },
+        { startSize: 500000, endSize: 1000000, count: 90 },
+        { startSize: 1000000, endSize: -1, count: 5 },
+      ];
+
+      jest.spyOn(repository, 'createQueryBuilder').mockImplementation(() => {
+        return {
+          select: jest.fn().mockReturnThis(),
+          addSelect: jest.fn().mockReturnThis(),
+          groupBy: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          getCount: jest
+            .fn()
+            .mockResolvedValueOnce(10)
+            .mockResolvedValueOnce(20)
+            .mockResolvedValueOnce(30)
+            .mockResolvedValueOnce(40)
+            .mockResolvedValueOnce(50)
+            .mockResolvedValueOnce(60)
+            .mockResolvedValueOnce(70)
+            .mockResolvedValueOnce(80)
+            .mockResolvedValueOnce(90)
+            .mockResolvedValueOnce(5),
+          clone: jest.fn().mockReturnThis(),
+        } as any;
+      });
+
+      const result = await service.getBackupDataSizeRanges(
+        fromDate,
+        toDate,
+        taskIds,
+        types
+      );
+      expect(result).toEqual(mockResult);
     });
   });
 });

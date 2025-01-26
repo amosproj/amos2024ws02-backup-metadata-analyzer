@@ -375,7 +375,7 @@ export class BackupDataService extends PaginationService {
    * @param fromDate
    * @param toDate
    */
-  transformDates(
+  private transformDates(
     fromDate?: string,
     toDate?: string
   ): { from: Date | null; to: Date | null } {
