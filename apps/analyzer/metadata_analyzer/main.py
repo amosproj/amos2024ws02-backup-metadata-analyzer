@@ -24,13 +24,13 @@ def hello_world():
     return "Hello, world!"
 
 @app.route("/updateBasicBackupData", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','updateBasicBackupData.yaml'), validation=False)
+@swag_from(os.path.join(path,"swagger","updateBasicBackupData.yaml"), validation=False)
 def update_data():
     return jsonify(Analyzer.update_data())
 
 
-@app.route("/simpleRuleBasedAnalysis", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysis.yaml'), validation=False)
+@app.route("/alerting/size/fullBackups", methods=["POST"])
+@swag_from(os.path.join(path,"swagger","alerting","size","fullBackups.yaml"), validation=False)
 def simple_rule_based_analysis():
     alert_limit = request.args.get("alertLimit")
 
@@ -41,8 +41,8 @@ def simple_rule_based_analysis():
         return "Invalid value for alert limit", 400
 
 
-@app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisDiff.yaml'), validation=False)
+@app.route("/alerting/size/diffBackups", methods=["POST"])
+@swag_from(os.path.join(path,"swagger","alerting","size","diffBackups.yaml"), validation=False)
 def simple_rule_based_analysis_diff():
     alert_limit = request.args.get("alertLimit")
 
@@ -53,8 +53,8 @@ def simple_rule_based_analysis_diff():
         return "Invalid value for alert limit", 400
 
 
-@app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisInc.yaml'), validation=False)
+@app.route("/alerting/size/incBackups", methods=["POST"])
+@swag_from(os.path.join(path,"swagger","alerting","size","incBackups.yaml"), validation=False)
 def simple_rule_based_analysis_inc():
     alert_limit = request.args.get("alertLimit")
 
@@ -65,9 +65,9 @@ def simple_rule_based_analysis_inc():
         return "Invalid value for alert limit", 400
 
 
-@app.route("/simpleRuleBasedAnalysisCreationDates", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisCreationDates.yaml'), validation=False)
-def simple_rule_based_analysis_creation_dates():
+@app.route("/alerting/creationDate", methods=["POST"])
+@swag_from(os.path.join(path,"swagger","alerting","creationDate.yaml"), validation=False)
+def simple_rule_based_analysis_creation_date():
     alert_limit = request.args.get("alertLimit")
     now = datetime.now()
 
@@ -80,8 +80,8 @@ def simple_rule_based_analysis_creation_dates():
         return "Invalid value for alert limit", 400
 
 
-@app.route("/simpleRuleBasedAnalysisStorageCapacity", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisStorageCapacity.yaml'), validation=False)
+@app.route("/alerting/storageCapacity", methods=["POST"])
+@swag_from(os.path.join(path,"swagger","alerting","storageCapacity.yaml"), validation=False)
 def simple_rule_based_analysis_storage_capacity():
     alert_limit = request.args.get("alertLimit")
 

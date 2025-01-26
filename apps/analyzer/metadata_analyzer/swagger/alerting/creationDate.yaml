@@ -1,5 +1,4 @@
-Runs a simple rule based analysis on data stores searching for ones with
-    almost full
+Runs a schedule based analysis searching for missing, additional or delayed backups
     ---
     parameters:
       - name: Input

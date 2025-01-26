@@ -1,4 +1,4 @@
-Fulfills a simple rule based analysis on full backups.
+Runs a simple rule based analysis on full backups searching for unusual size changes
     ---
     parameters:
       - name: Input

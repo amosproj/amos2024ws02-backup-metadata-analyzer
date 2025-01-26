@@ -1,4 +1,4 @@
-Fulfills a simple rule based analysis on diff backups.
+Runs a simple rule based analysis on inc backups searching for unusual size changes
     ---
     parameters:
       - name: Input
