@@ -76,7 +76,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       })
       .join(' AND ');
 
-    // console.log('Generated WHERE conditions:', whereConditions);
 
     // 4. Create dynamic join condition for the AlertType table
     const alertTypeJoinCondition = existingTables
