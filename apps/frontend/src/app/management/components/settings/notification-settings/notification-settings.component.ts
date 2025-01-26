@@ -28,6 +28,9 @@ export class NotificationSettingsComponent implements OnDestroy, OnInit {
       notifications: this.fb.array([]),
     });
   }
+  /**
+   * Get the notification controls from the form array
+   */
   get notificationControls(): FormArray {
     return this.settingsForm.get('notifications') as FormArray;
   }
@@ -39,7 +42,9 @@ export class NotificationSettingsComponent implements OnDestroy, OnInit {
   open() {
     this.isOpen = true;
   }
-
+  /**
+   * Load notification settings
+   */
   loadNotificationSettings(): void {
     this.isLoading = true;
     this.settingsService
@@ -56,7 +61,10 @@ export class NotificationSettingsComponent implements OnDestroy, OnInit {
         },
       });
   }
-
+  /**
+   * Initialize the form with the notification settings
+   * @param settings includes the notification settings for each AlertType
+   */
   initForm(settings: AlertType[]): void {
     const notificationArray = this.fb.array(
       settings.map((notification) =>
@@ -71,7 +79,10 @@ export class NotificationSettingsComponent implements OnDestroy, OnInit {
     );
     this.settingsForm.setControl('notifications', notificationArray);
   }
-
+  /**
+   * Save the notification settings
+   * Use forkJoin to update all settings at once
+   */
   saveSettings(): void {
     if (this.settingsForm.valid) {
       this.isLoading = true;
