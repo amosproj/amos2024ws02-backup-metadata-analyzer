@@ -68,7 +68,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       })
       .join(' ');
 
-    // console.log('Generierte Joins:', alertJoins);
 
     // 3. Generate WHERE conditions from the existing tables
     const whereConditions = existingTables
