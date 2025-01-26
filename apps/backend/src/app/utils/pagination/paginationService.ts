@@ -10,12 +10,16 @@ import {
   CREATION_DATE_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
+  MISSING_BACKUP_ALERT,
+  ADDITIONAL_BACKUP_ALERT,
 } from '../constants';
 import { AlertTypeEntity } from '../../alerting/entity/alertType.entity';
 import { Alert } from '../../alerting/entity/alerts/alert';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
 import { CreationDateAlertEntity } from '../../alerting/entity/alerts/creationDateAlert.entity';
 import { StorageFillAlertEntity } from '../../alerting/entity/alerts/storageFillAlert.entity';
+import { MissingBackupAlertEntity } from '../../alerting/entity/alerts/missingBackupAlert.entity';
+import { AdditionalBackupAlertEntity } from '../../alerting/entity/alerts/additionalBackupAlert.entity';
 import { AlertOrderOptionsDto } from '../../alerting/dto/alertOrderOptions.dto';
 
 export class PaginationService {
@@ -188,8 +192,8 @@ export class PaginationService {
         parameters.push(whereClause.severity);
       }
       if (whereClause.id) {
-        whereConditions.push(`alias${i}.id = $${parameters.length + 1}`); // Use = for uuid type
-        parameters.push(whereClause.id);
+        whereConditions.push(`CAST(alias${i}.id AS TEXT) LIKE $${parameters.length + 1}`);
+        parameters.push(`%${whereClause.id}%`);
       }
       if (whereClause.backupId) {
         whereConditions.push(`alias${i}.backupId = $${parameters.length + 1}`); // Use = for uuid type
@@ -264,6 +268,14 @@ export class PaginationService {
         return (await repositories[2].findOne({
           where: { id: alertId },
         })) as StorageFillAlertEntity;
+      case MISSING_BACKUP_ALERT:
+        return (await repositories[3].findOne({
+          where: { id: alertId },
+        })) as MissingBackupAlertEntity;
+      case ADDITIONAL_BACKUP_ALERT:
+        return (await repositories[4].findOne({
+          where: { id: alertId },
+        })) as AdditionalBackupAlertEntity;
       default:
         return undefined;
     }

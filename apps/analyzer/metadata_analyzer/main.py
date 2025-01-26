@@ -1,5 +1,6 @@
 import os
 
+from datetime import datetime
 from dotenv import load_dotenv
 from flasgger import Swagger
 from flasgger import swag_from
@@ -8,6 +9,7 @@ from flask import Flask, request, jsonify
 from metadata_analyzer.analyzer import Analyzer
 from metadata_analyzer.backend import Backend
 from metadata_analyzer.database import Database
+from metadata_analyzer.schedule_based_analyzer import ScheduleBasedAnalyzer
 from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
 from metadata_analyzer.time_series_analyzer import Time_series_analyzer
 
@@ -67,11 +69,12 @@ def simple_rule_based_analysis_inc():
 @swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisCreationDates.yaml'), validation=False)
 def simple_rule_based_analysis_creation_dates():
     alert_limit = request.args.get("alertLimit")
+    now = datetime.now()
 
     try:
         int(alert_limit)
         return jsonify(
-            Analyzer.simple_rule_based_analysis_creation_dates(int(alert_limit))
+            Analyzer.schedule_based_analysis(int(alert_limit), now)
         )
     except ValueError:
         return "Invalid value for alert limit", 400
@@ -240,11 +243,13 @@ def main():
     parameters.append(os.getenv("CLUSTER_NUMBER"))
     time_series_analyzer = Time_series_analyzer(parameters)
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
+    schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
     Analyzer.init(
         database,
         backend,
         simple_rule_based_analyzer,
         time_series_analyzer,
+        schedule_based_analyzer,
     )
 
     print(f"FLASK_RUN_HOST: {os.getenv('FLASK_RUN_HOST')}")

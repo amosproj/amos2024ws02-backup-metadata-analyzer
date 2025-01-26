@@ -7,11 +7,13 @@ class Analyzer:
 			backend,
 			simple_rule_based_analyzer,
 			time_series_analyzer,
+			schedule_based_analyzer,
 	):
 		Analyzer.database = database
 		Analyzer.backend = backend
 		Analyzer.simple_rule_based_analyzer = simple_rule_based_analyzer
 		Analyzer.time_series_analyzer = time_series_analyzer
+		Analyzer.schedule_based_analyzer = schedule_based_analyzer
 		Analyzer.series_loaded = False
 
 	# Convert a result from the database into the format used by the backend
@@ -209,12 +211,15 @@ class Analyzer:
 		Analyzer.time_series_analyzer.preload_data(data)
 		Analyzer.series_loaded = True
 
-	def simple_rule_based_analysis_creation_dates(alert_limit):
-		data = list(Analyzer.database.get_results())
+	def schedule_based_analysis(alert_limit, stop_date):
+		results = list(Analyzer.database.get_results())
 		schedules = list(Analyzer.database.get_schedules())
-		start_date = Analyzer._get_start_date(data, "CREATION_DATE_ALERT", None)
-		result = Analyzer.simple_rule_based_analyzer.analyze_creation_dates(data, schedules, alert_limit, start_date)
-		return result
+		task_events = list(Analyzer.database.get_task_events())
+		start_date = max(
+			Analyzer._get_start_date(results, "CREATION_DATE_ALERT", None),
+			Analyzer._get_start_date(results, "ADDITIONAL_BACKUP_ALERT", None),
+		)
+		return Analyzer.schedule_based_analyzer.analyze(results, schedules, task_events, alert_limit, start_date, stop_date)
 
 	def simple_rule_based_analysis_storage_capacity(alert_limit):
 		data = list(Analyzer.database.get_data_stores())
