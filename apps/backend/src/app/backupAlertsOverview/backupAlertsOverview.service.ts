@@ -84,7 +84,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       })
       .join(' OR ');
 
-    // console.log('Generated alertTypeJoinCondition:', alertTypeJoinCondition);
 
     // 5. Create dynamic SQL query
     const query = `
