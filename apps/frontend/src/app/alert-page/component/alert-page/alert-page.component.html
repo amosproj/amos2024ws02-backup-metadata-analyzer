@@ -239,6 +239,24 @@
     [clrDgLoading]="loading"
     (clrDgRefresh)="refresh($event)"
   >
+    <clr-dg-column [clrFilterValue]="'id'">
+      <ng-container *clrDgHideableColumn>
+        ID
+        <clr-dg-filter [clrDgFilter]="alertIdFilter">
+          <clr-input-container>
+            <label>ID:</label>
+            <input
+              clrInput
+              type="string"
+              [(ngModel)]="alertIdFilter.ranges.id"
+              (ngModelChange)="
+                  alertIdFilter.updateRanges({ id: $event })
+                "
+            />
+          </clr-input-container>
+        </clr-dg-filter>
+      </ng-container>
+    </clr-dg-column>
     <clr-dg-column [clrDgField]="'severity'" [clrDgColAutoWidth]="true">
       <ng-container *clrDgHideableColumn>
         Severity
@@ -325,6 +343,7 @@
 
     <clr-dg-placeholder>We couldn't find any alerts!</clr-dg-placeholder>
     <clr-dg-row *ngFor="let alert of alerts.data" [clrDgItem]="alert">
+      <clr-dg-cell>{{ alert.id }}</clr-dg-cell>
       <clr-dg-cell>
         <div
           class="severity-badge"
@@ -394,9 +413,7 @@
         }}
         -
         {{
-          alerts.paginationData.offset
-            ? +alerts.paginationData.offset + 10
-            : 0
+          alerts.paginationData.offset ? +alerts.paginationData.offset + 10 : 0
         }}
         of {{ alerts.paginationData.total }} alerts
       </clr-dg-pagination>
