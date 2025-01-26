@@ -1,9 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertServiceService } from '../../../../shared/services/alert-service/alert-service.service';
 import { Alert, StorageFillAlert } from '../../../../shared/types/alert';
-import { DatePipe } from '@angular/common';
-import { shortenBytes } from '../../../../shared/utils/shortenBytes';
-import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, Observable, of, shareReplay, Subject, takeUntil } from 'rxjs';
 import { SeverityType } from '../../../../shared/enums/severityType';
 import { AlertUtilsService } from '../../../../shared/utils/alertUtils';
 import { AlertFilterParams } from '../../../../shared/types/alert-filter-type';
@@ -17,7 +15,6 @@ const INITIAL_ALERT_COUNTS: AlertCounts = {
 };
 
 const PARAMS: AlertFilterParams = {
-  //fromDate: this.fromDate.toISOString(),
   limit: 5,
   orderBy: 'severity',
 };
