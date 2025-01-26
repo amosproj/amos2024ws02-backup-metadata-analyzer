@@ -58,7 +58,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       )
     ).filter((tableName) => tableName !== null); // Remove `null` values
 
-    // console.log('Existing tables:', existingTables);
 
     // 2. Generate joins from existing tables
     const alertJoins = existingTables
