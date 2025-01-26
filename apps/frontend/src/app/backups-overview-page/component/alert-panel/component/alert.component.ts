@@ -32,8 +32,6 @@ const PARAMS: AlertFilterParams = {
   styleUrl: './alert.component.css',
 })
 export class AlertComponent implements OnInit, OnDestroy {
-  total = 0;
-  status: 'OK' | 'Warning' | 'Critical' | 'INFO' = 'OK';
   protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
   private readonly fromDate = new Date(
@@ -44,8 +42,6 @@ export class AlertComponent implements OnInit, OnDestroy {
   readonly alerts$ = this.alertsSubject.asObservable();
   protected alertCounts$: Observable<AlertCounts> = of(INITIAL_ALERT_COUNTS);
   total = 0;
-
-  protected alertCounts$: Observable<AlertCounts> = of(INITIAL_ALERT_COUNTS);
 
   status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
@@ -70,6 +66,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       this.status = this.getStatus();
     });
   }
+
   /**
    * Loads alerts from the alert service and updates the alertsSubject
    */
@@ -87,6 +84,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       .getAlertCounts(this.fromDate.toISOString())
       .pipe(shareReplay(1));
   }
+
   /**
    * Iteraates through alerts and filters them by alertType
    * @param alerts items to filter
@@ -116,6 +114,7 @@ export class AlertComponent implements OnInit, OnDestroy {
 
     return filteredAlerts;
   }
+
   /**
    *
    * @returns Status of alerts to set css  class
@@ -129,12 +128,13 @@ export class AlertComponent implements OnInit, OnDestroy {
     }
     return 'status-green';
   }
+
   /**
    *
    * @returns Status of alerts as string
    */
-  getStatus(): 'OK' | 'Warning' | 'Critical' | 'INFO' {
-    let status: 'OK' | 'Warning' | 'Critical' | 'INFO' = 'OK';
+  getStatus(): 'OK' | 'Warning' | 'Critical' {
+    let status: 'OK' | 'Warning' | 'Critical' = 'OK';
 
     this.alertCounts$.subscribe((counts) => {
       if (counts.criticalAlerts > 0) {
