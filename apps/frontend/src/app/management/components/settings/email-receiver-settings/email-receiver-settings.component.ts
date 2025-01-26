@@ -1,12 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {
-  BehaviorSubject,
-  from,
-  mergeMap,
-  Subject,
-  takeUntil,
-} from 'rxjs';
+import { BehaviorSubject, from, mergeMap, Subject, takeUntil } from 'rxjs';
 import { EmailReceiverService } from '../../../services/email-receiver/email-receiver.service';
 import { CustomEmailFilter } from './emailfilter';
 import { EmailType } from '../../../../shared/types/email';
@@ -46,7 +40,9 @@ export class EmailReceiverSettingsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadEmailReceiver();
   }
-
+  /**
+   * Loads email receiver data
+   */
   loadEmailReceiver(): void {
     this.isLoading = true;
     this.emailService
@@ -60,8 +56,11 @@ export class EmailReceiverSettingsComponent implements OnInit, OnDestroy {
         error: (error) => (this.isLoading = false),
       });
   }
-
-  removeEmail(emailsToRemove: EmailType[]) {
+  /**
+   * Removes email from the notifiication list
+   * @param emailsToRemove Array of emails to remove
+   */
+  removeEmail(emailsToRemove: EmailType[]): void {
     if (!emailsToRemove.length) return;
 
     this.confirmationService.handleConfirmation(
@@ -102,7 +101,9 @@ export class EmailReceiverSettingsComponent implements OnInit, OnDestroy {
       }
     );
   }
-
+  /**
+   * Saves changes to the email receiver
+   */
   saveChanges() {
     if (this.emailForm.valid) {
       this.isLoading = true;
@@ -132,7 +133,9 @@ export class EmailReceiverSettingsComponent implements OnInit, OnDestroy {
         });
     }
   }
-
+  /**
+   * Resets the form and closes the modal
+   */
   resetForm(): void {
     this.emailForm.controls['email'].reset();
     this.showEmailModal = false;

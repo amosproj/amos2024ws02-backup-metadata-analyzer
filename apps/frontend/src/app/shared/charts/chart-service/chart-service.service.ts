@@ -20,7 +20,12 @@ export class ChartService {
   private readonly destroy$ = new Subject<void>();
 
   constructor() {}
-
+  /**
+   * Create the chart instance
+   * @param config Configuration for chart
+   * @param data$ data to visualize
+   * @param timeRange selected time range
+   */
   createChart(
     config: ChartConfig,
     data$: Observable<Backup[]>,
@@ -38,7 +43,11 @@ export class ChartService {
 
     this.animateChart(chart, series);
   }
-
+  /**
+   * 
+   * @param containerId Id of the chart configuration
+   * @returns initialized root
+   */
   private initializeRoot(containerId: string): am5.Root {
     if (this.roots[containerId]) {
       this.roots[containerId].dispose();
@@ -120,7 +129,14 @@ export class ChartService {
 
     return { xAxis, yAxis };
   }
-
+  /**
+   * Creates series based on chart type and config. Actually creates series for XY charts or pie charts
+   * @param chart chart instance
+   * @param config configurations for chart
+   * @param root 
+   * @param timeRange selected time range filter
+   * @returns series instance for visualization
+   */
   private createSeries(
     chart: am5.Chart,
     config: ChartConfig,
@@ -173,7 +189,11 @@ export class ChartService {
     }
     throw new Error('Unsupported chart configuration');
   }
-
+  /**
+   * If Chart is XY chart, this function will create modal window with information about data
+   * @param chart 
+   * @param config 
+   */
   private addChartControls(chart: am5.Chart, config: ChartConfig): void {
     chart.children.unshift(
       am5.Legend.new(chart.root, {
@@ -195,12 +215,22 @@ export class ChartService {
       );
     }
   }
-
+  /**
+   * Plays initial reveal animation regardless if element is currently hidden or visible
+   * @param chart 
+   * @param series 
+   */
   private animateChart(chart: am5.Chart, series: am5.Series): void {
     series.appear(1000);
     chart.appear(1000, 100);
   }
-
+  /**
+   * Get data to visualize and  prepare it for visualization. Thiis function is used for XY charts.
+   * Preapre data format and group data for the correct time range
+   * @param backups data to visualize
+   * @param timeRange selected time range week, month, year
+   * @returns Grouped data information for visualization
+   */
   prepareColumnData(backups: Backup[], timeRange: TimeRange): any[] {
     if (!backups?.length) return [];
 
@@ -229,7 +259,12 @@ export class ChartService {
       sizeMB: total,
     }));
   }
-
+  /**
+   * Helper function to group data by time range correctly
+   * @param date selected date
+   * @param timeRange week, month, year
+   * @returns correct group key for week, month, year
+   */
   private getGroupKey(date: Date, timeRange: TimeRange): string {
     switch (timeRange) {
       case 'week':
@@ -240,7 +275,12 @@ export class ChartService {
         return `${date.getFullYear()}-W${weekNum}`;
     }
   }
-
+  /**
+   * Parse group key to get correct date for visualization. If time range is year, it will return date of week
+   * @param key 
+   * @param timeRange 
+   * @returns date as stored time value in milliseconds
+   */
   private parseGroupKey(key: string, timeRange: TimeRange): number {
     if (timeRange === 'year' && key.includes('W')) {
       const [year, week] = key.split('-W');
@@ -248,13 +288,22 @@ export class ChartService {
     }
     return new Date(key).getTime();
   }
-
+  /**
+   * Calculate date of week.
+   * @param year 
+   * @param week week number as time value in milliseconds
+   * @returns date of week
+   */
   private getDateOfWeek(year: number, week: number): Date {
     const date = new Date(year, 0, 1);
     date.setDate(date.getDate() + (week - 1) * 7);
     return date;
   }
-
+  /**
+   * 
+   * @param date date of week
+   * @returns calcculated week number
+   */
   private getWeekNumber(date: Date): number {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
@@ -262,7 +311,9 @@ export class ChartService {
     const yearStart = new Date(d.getFullYear(), 0, 1);
     return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
   }
-
+  /**
+   * Decide what date format to use for axis and tooltip for XY charts
+   */
   private getAxisFormat(timeRange: TimeRange): string {
     switch (timeRange) {
       case 'week':
@@ -272,7 +323,9 @@ export class ChartService {
         return "MMM 'W'w";
     }
   }
-
+  /**
+   * Decide what tooltip format to use for XY charts
+   */
   private getTooltipFormat(timeRange: TimeRange): string {
     switch (timeRange) {
       case 'week':
@@ -284,7 +337,9 @@ export class ChartService {
         return 'Size: {valueY} MB';
     }
   }
-
+  /**
+   * Decide what date format to use for axis
+   */
   private getDateFormat(timeRange: TimeRange): string {
     switch (timeRange) {
       case 'week':
@@ -296,7 +351,9 @@ export class ChartService {
         return 'MMM dd';
     }
   }
-
+  /**
+   * Either prepares the data for aggregation of backups by alert severity or groups the larger of the backups by category
+   */
   preparePieData(backups: Backup[]): any[] {
     const ranges = [
       { min: 0, max: 100, category: '0-100 MB' },
@@ -316,7 +373,7 @@ export class ChartService {
   }
 
   /**
-   * Subscribes to data updates
+   * Subscribes to data updates visualization
    */
   private subscribeToData(
     series: am5.Series,
@@ -384,7 +441,9 @@ export class ChartService {
       }
     }
   }
-
+  /**
+   * Handles charts if data is not available
+   */
   private createModal(root: am5.Root, chartId: string): am5.Modal {
     const modal = am5.Modal.new(root, {
       content: 'No data available',

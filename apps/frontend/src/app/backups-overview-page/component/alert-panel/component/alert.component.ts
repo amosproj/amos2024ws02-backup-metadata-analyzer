@@ -21,12 +21,20 @@ const INITIAL_ALERT_COUNTS: AlertCounts = {
   infoAlerts: 0,
 };
 
+const PARAMS: AlertFilterParams = {
+  //fromDate: this.fromDate.toISOString(),
+  limit: 5,
+  orderBy: 'severity',
+};
+
 @Component({
   selector: 'app-alert',
   templateUrl: './alert.component.html',
   styleUrl: './alert.component.css',
 })
 export class AlertComponent implements OnInit, OnDestroy {
+  total = 0;
+  status: 'OK' | 'Warning' | 'Critical' | 'INFO' = 'OK';
   protected readonly SeverityType = SeverityType;
   readonly DAYS = 7;
   private readonly fromDate = new Date(
@@ -35,12 +43,7 @@ export class AlertComponent implements OnInit, OnDestroy {
 
   private readonly alertsSubject = new BehaviorSubject<Alert[]>([]);
   readonly alerts$ = this.alertsSubject.asObservable();
-  total = 0;
-
   protected alertCounts$: Observable<AlertCounts> = of(INITIAL_ALERT_COUNTS);
-
-  status: 'OK' | 'Warning' | 'Critical' = 'OK';
-
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -62,15 +65,12 @@ export class AlertComponent implements OnInit, OnDestroy {
       this.status = this.getStatus();
     });
   }
-
+  /**
+   * Loads alerts from the alert service and updates the alertsSubject
+   */
   loadAlerts(): void {
-    const params: AlertFilterParams = {
-      fromDate: this.fromDate.toISOString(),
-      limit: 5,
-      orderBy: 'severity',
-    };
     this.alertService
-      .getAllAlerts(params)
+      .getAllAlerts({ ...PARAMS, fromDate: this.fromDate.toISOString() })
       .pipe(takeUntil(this.destroy$))
       .subscribe((response: APIResponse<Alert>) => {
         const filteredAlerts = this.filterAlerts(response.data);
@@ -78,15 +78,19 @@ export class AlertComponent implements OnInit, OnDestroy {
         this.total = response.paginationData.total;
       });
 
-    this.alertCounts$ = this.alertService.getAlertCounts(this.fromDate.toISOString()).pipe(shareReplay(1));
+    this.alertCounts$ = this.alertService
+      .getAlertCounts(this.fromDate.toISOString())
+      .pipe(shareReplay(1));
   }
-
+  /**
+   * Iteraates through alerts and filters them by alertType
+   * @param alerts items to filter
+   * @returns Arrayy of Alerts filtered by alertType
+   */
   filterAlerts(alerts: Alert[]): Alert[] {
     const alertMap = new Map<string, StorageFillAlert>();
-
     const filteredAlerts: Alert[] = [];
 
-    // sort alerts by creationDate
     alerts.sort((a, b) => {
       return (
         new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
@@ -107,7 +111,10 @@ export class AlertComponent implements OnInit, OnDestroy {
 
     return filteredAlerts;
   }
-
+  /**
+   * 
+   * @returns Status of alerts to set css  class
+   */
   getStatusClass(): string {
     switch (this.status) {
       case 'Critical':
@@ -117,9 +124,12 @@ export class AlertComponent implements OnInit, OnDestroy {
     }
     return 'status-green';
   }
-
-  getStatus(): 'OK' | 'Warning' | 'Critical' {
-    let status: 'OK' | 'Warning' | 'Critical' = 'OK';
+  /**
+   * 
+   * @returns Status of alerts as string
+   */
+  getStatus(): 'OK' | 'Warning' | 'Critical' | 'INFO' {
+    let status: 'OK' | 'Warning' | 'Critical' | 'INFO' = 'OK';
 
     this.alertCounts$.subscribe((counts) => {
       if (counts.criticalAlerts > 0) {
