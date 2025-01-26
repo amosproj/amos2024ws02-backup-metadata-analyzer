@@ -124,7 +124,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       GROUP BY "severity";
     `;
 
-    //console.log('Final SQL query:', query);
 
     const result = await this.backupRepository.query(query);
 
