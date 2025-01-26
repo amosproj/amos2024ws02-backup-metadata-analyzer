@@ -6,6 +6,8 @@ class MockBackend:
 		self.size_alerts = []
 		self.creation_date_alerts = []
 		self.storage_fill_alerts = []
+		self.missing_backup_alerts = []
+		self.additional_backup_alerts = []
 		self.latest_alert_ids = {}
 
 	def send_backup_data_batched(self, batch):
@@ -25,6 +27,12 @@ class MockBackend:
 
 	def create_storage_fill_alerts(self, alerts):
 		self.storage_fill_alerts += alerts
+
+	def create_missing_backup_alert(self, alert):
+		self.missing_backup_alerts.append(alert)
+
+	def create_additional_backup_alert(self, alert):
+		self.additional_backup_alerts.append(alert)
 
 	def set_latest_alert_id(self, alert_type, backup_type, uuid):
 		self.latest_alert_ids[(alert_type, backup_type)] = uuid
