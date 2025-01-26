@@ -27,7 +27,7 @@ import { ChartInformation } from '../../types/chartInformation';
 import { APIResponse } from '../../types/api-response';
 import { Backup } from '../../types/backup';
 import { BackupService } from '../../services/backup-service/backup-service.service';
-import { ChartService } from '../../services/chart-service/chart-service.service';
+import { ChartService } from '../../charts/chart-service/chart-service.service';
 
 interface TimeRangeConfig {
   fromDate: Date;
