@@ -8,7 +8,8 @@ import { BackupFilterParams } from '../../types/backup-filter-type';
 import { BackupTask } from '../../types/backup.task';
 import {
   PieChartDataPoint,
-  TimelineDataPoint
+  TimelineDataPoint,
+  AlertSeverityOverview
 } from '../../types/chart-config';
 
 @Injectable({
@@ -82,8 +83,8 @@ export class BackupService {
     );
   }
 
-  getBackupAlertSeverityOverview(): Observable<PieChartDataPoint[]> {
-    return this.http.get<PieChartDataPoint[]>(
+  getBackupAlertSeverityOverview(): Observable<AlertSeverityOverview> {
+    return this.http.get<AlertSeverityOverview>(
       `${this.baseUrl}/alerting/severityOverview`
     );
   }

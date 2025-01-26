@@ -50,17 +50,6 @@
     <div class="card">
       <div class="card-header">
         <div class="card-header-title">Backups and Alerts</div>
-        <div class="card-header-actions">
-          <button
-            class="btn btn-sm btn-link"
-            (click)="changeFilterPanelState()"
-          >
-            <cds-icon shape="filter"></cds-icon>
-            <div *ngIf="(filterCount$ | async) ?? 0 as activeFilters">
-              <span class="badge badge-info">{{ activeFilters }}</span>
-            </div>
-          </button>
-        </div>
       </div>
       <div class="card-block">
         <div
