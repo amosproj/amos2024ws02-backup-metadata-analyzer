@@ -34,7 +34,7 @@ export class AnalyzerServiceService {
 
   async updateBasicBackupData(): Promise<void> {
     await firstValueFrom(
-      this.httpService.post(`${this.analyzerServiceUrl}/updateBasicBackupData`)
+      this.httpService.post(`${this.analyzerServiceUrl}/updating/basicBackupData`)
     ).then(() => {
       this.logger.log(`Basic Backup Data updated`);
     });
@@ -46,7 +46,7 @@ export class AnalyzerServiceService {
   async triggerStorageFillAnalysis() {
     await firstValueFrom(
       this.httpService.post(
-        `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisStorageCapacity?alertLimit=-1`
+        `${this.analyzerServiceUrl}/alerting/storageCapacity?alertLimit=-1`
       )
     )
       .then((response) => {
@@ -65,7 +65,7 @@ export class AnalyzerServiceService {
   async triggerCreationDateAnalysis() {
     await firstValueFrom(
       this.httpService.post(
-        `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisCreationDates?alertLimit=-1`
+        `${this.analyzerServiceUrl}/alerting/creationDate?alertLimit=-1`
       )
     )
       .then((response) => {
@@ -84,7 +84,7 @@ export class AnalyzerServiceService {
   async triggerSizeAnalysisForFullBackups() {
     await firstValueFrom(
       this.httpService.post(
-        `${this.analyzerServiceUrl}/simpleRuleBasedAnalysis?alertLimit=-1`
+        `${this.analyzerServiceUrl}/alerting/size/fullBackups?alertLimit=-1`
       )
     )
       .then((response) => {
@@ -103,7 +103,7 @@ export class AnalyzerServiceService {
   async triggerSizeAnalysisForDiffBackups() {
     await firstValueFrom(
       this.httpService.post(
-        `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisDiff?alertLimit=-1`
+        `${this.analyzerServiceUrl}/alerting/size/diffBackups?alertLimit=-1`
       )
     )
       .then((response) => {
@@ -122,7 +122,7 @@ export class AnalyzerServiceService {
   async triggerSizeAnalysisForIncBackups() {
     await firstValueFrom(
       this.httpService.post(
-        `${this.analyzerServiceUrl}/simpleRuleBasedAnalysisInc?alertLimit=-1`
+        `${this.analyzerServiceUrl}/alerting/size/incBackups?alertLimit=-1`
       )
     )
       .then((response) => {
