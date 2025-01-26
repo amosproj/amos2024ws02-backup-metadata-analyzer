@@ -32,7 +32,7 @@ def update_data():
 @app.route("/alerting/size/fullBackups", methods=["POST"])
 @swag_from(os.path.join(path, "swagger", "alerting", "size", "fullBackups.yaml"), validation=False)
 def simple_rule_based_analysis():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
 
     try:
         int(alert_limit)
@@ -44,7 +44,7 @@ def simple_rule_based_analysis():
 @app.route("/alerting/size/diffBackups", methods=["POST"])
 @swag_from(os.path.join(path, "swagger", "alerting", "size", "diffBackups.yaml"), validation=False)
 def simple_rule_based_analysis_diff():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
 
     try:
         int(alert_limit)
@@ -56,7 +56,7 @@ def simple_rule_based_analysis_diff():
 @app.route("/alerting/size/incBackups", methods=["POST"])
 @swag_from(os.path.join(path, "swagger", "alerting", "size", "incBackups.yaml"), validation=False)
 def simple_rule_based_analysis_inc():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
 
     try:
         int(alert_limit)
@@ -68,7 +68,7 @@ def simple_rule_based_analysis_inc():
 @app.route("/alerting/creationDate", methods=["POST"])
 @swag_from(os.path.join(path, "swagger", "alerting", "creationDate.yaml"), validation=False)
 def simple_rule_based_analysis_creation_date():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
     now = datetime.now()
 
     try:
@@ -83,7 +83,7 @@ def simple_rule_based_analysis_creation_date():
 @app.route("/alerting/storageCapacity", methods=["POST"])
 @swag_from(os.path.join(path, "swagger", "alerting", "storageCapacity.yaml"), validation=False)
 def simple_rule_based_analysis_storage_capacity():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
 
     try:
         int(alert_limit)
