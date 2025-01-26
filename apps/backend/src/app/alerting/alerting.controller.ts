@@ -83,7 +83,7 @@ export class AlertingController {
   }
 
   @Patch('type/:alertTypeId/user')
-  @ApiOperation({ summary: 'Activate Alert Type by user.' })
+  @ApiOperation({ summary: '(De-)Activate Alert Type by user.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiBody({ type: AlertStatusDto })
   @ApiNoContentResponse({ description: 'Alert Type Status changed' })
@@ -98,7 +98,7 @@ export class AlertingController {
   }
 
   @Patch('type/:alertTypeId/admin')
-  @ApiOperation({ summary: 'Activate Alert Type by admin.' })
+  @ApiOperation({ summary: '(De-)Activate Alert Type by admin.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiBody({ type: AlertStatusDto })
   @ApiNoContentResponse({ description: 'Alert Type Status changed' })
