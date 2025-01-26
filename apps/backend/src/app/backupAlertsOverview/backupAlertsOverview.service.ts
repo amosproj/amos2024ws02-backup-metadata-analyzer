@@ -1,26 +1,15 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BackupDataEntity } from '../backupData/entity/backupData.entity';
 import { BackupAlertsOverviewDto } from './dto/backupAlertsOverview.dto';
 
 @Injectable()
-export class BackupAlertsOverviewService implements OnModuleInit {
-  private severityOverview!: BackupAlertsOverviewDto;
-
+export class BackupAlertsOverviewService {
   constructor(
     @InjectRepository(BackupDataEntity)
     private readonly backupRepository: Repository<BackupDataEntity>
   ) {}
-
-  async onModuleInit() {
-    this.severityOverview = await this.getBackupAlertsBySeverity();
-  }
-
-  // Expose the severityOverview variable
-  getSeverityOverview(): BackupAlertsOverviewDto {
-    return this.severityOverview;
-  }
 
   async getBackupAlertsBySeverity(): Promise<BackupAlertsOverviewDto> {
     const alertTypes = await this.backupRepository.query(`
@@ -58,7 +47,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       )
     ).filter((tableName) => tableName !== null); // Remove `null` values
 
-
     // 2. Generate joins from existing tables
     const alertJoins = existingTables
       .map((tableName) => {
@@ -68,7 +56,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       })
       .join(' ');
 
-
     // 3. Generate WHERE conditions from the existing tables
     const whereConditions = existingTables
       .map((tableName) => {
@@ -76,14 +63,12 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       })
       .join(' AND ');
 
-
     // 4. Create dynamic join condition for the AlertType table
     const alertTypeJoinCondition = existingTables
       .map((tableName) => {
         return `"${tableName}"."alertTypeId" = at.id`;
       })
       .join(' OR ');
-
 
     // 5. Create dynamic SQL query
     const query = `
@@ -124,7 +109,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       GROUP BY "severity";
     `;
 
-
     const result = await this.backupRepository.query(query);
 
     const dto = new BackupAlertsOverviewDto();
@@ -144,8 +128,6 @@ export class BackupAlertsOverviewService implements OnModuleInit {
       result.find((row: any) => row.severity === 'CRITICAL')
         ?.totalBackupsForSeverity || 0
     );
-
-    this.severityOverview = dto;
 
     return dto;
   }

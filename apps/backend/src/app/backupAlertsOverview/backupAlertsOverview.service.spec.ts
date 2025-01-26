@@ -32,22 +32,6 @@ describe('BackupAlertsOverviewService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should initialize severityOverview on module init', async () => {
-    jest
-      .spyOn(service, 'getBackupAlertsBySeverity')
-      .mockResolvedValue(new BackupAlertsOverviewDto());
-    await service.onModuleInit();
-    expect(service.getSeverityOverview()).toBeInstanceOf(
-      BackupAlertsOverviewDto
-    );
-  });
-
-  it('should return severity overview', () => {
-    const overview = new BackupAlertsOverviewDto();
-    service['severityOverview'] = overview;
-    expect(service.getSeverityOverview()).toBe(overview);
-  });
-
   it('should get backup alerts by severity', async () => {
     const queryResult = [
       { severity: 'OK', totalBackupsForSeverity: 5 },
