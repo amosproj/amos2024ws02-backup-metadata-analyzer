@@ -5,6 +5,8 @@ import {
   CreationDateAlert,
   SizeAlert,
   StorageFillAlert,
+  MissingBackupAlert,
+  AdditionalBackupAlert,
 } from '../types/alert';
 import { SeverityType } from '../enums/severityType';
 import { shortenBytes } from './shortenBytes';
@@ -49,6 +51,12 @@ export class AlertUtilsService {
         break;
       case 'STORAGE_FILL_ALERT':
         reason = `Less available storage space than expected`;
+        break;
+      case 'MISSING_BACKUP_ALERT':
+        reason = `Backup was scheduled but not started`;
+        break;
+      case 'ADDITIONAL_BACKUP_ALERT':
+        reason = `Backup was started but not scheduled`;
         break;
     }
     return reason;
@@ -95,6 +103,18 @@ export class AlertUtilsService {
         )}, which is above the threshold of ${shortenBytes(
           storageFillAlert.highWaterMark * 1_000_000_000
         )}`;
+        break;
+      case 'MISSING_BACKUP_ALERT':
+        const missingBackupAlert = alert as MissingBackupAlert;
+        description = `According to the schedule there should have been at backup started at ${this.formatDate(
+          missingBackupAlert.referenceDate
+        )}`;
+        break;
+      case 'ADDITIONAL_BACKUP_ALERT':
+        const additionalBackupAlert = alert as AdditionalBackupAlert;
+        description = `A backup was started at ${this.formatDate(
+          additionalBackupAlert.date
+        )} without being scheduled`;
         break;
     }
     return description;

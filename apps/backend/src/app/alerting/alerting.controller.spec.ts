@@ -15,12 +15,18 @@ import {
   CREATION_DATE_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
+  MISSING_BACKUP_ALERT,
+  ADDITIONAL_BACKUP_ALERT,
 } from '../utils/constants';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { TaskEntity } from '../tasks/entity/task.entity';
 import { MailReceiverEntity } from '../utils/mail/entity/MailReceiver.entity';
 import { StorageFillAlertEntity } from './entity/alerts/storageFillAlert.entity';
 import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
+import { MissingBackupAlertEntity } from './entity/alerts/missingBackupAlert.entity';
+import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAlert.dto';
+import { AdditionalBackupAlertEntity } from './entity/alerts/additionalBackupAlert.entity';
+import { CreateAdditionalBackupAlertDto } from './dto/alerts/createAdditionalBackupAlert.dto';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { CreateSizeAlertDto } from './dto/alerts/createSizeAlert.dto';
 import { groupBy } from 'rxjs';
@@ -53,6 +59,22 @@ const mockedCreationDateAlertTypeEntity: AlertTypeEntity = {
 const mockedStorageFillAlertTypeEntity: AlertTypeEntity = {
   id: 'storage-fill-alert1',
   name: STORAGE_FILL_ALERT,
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const mockedMissingBackupAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id3',
+  name: MISSING_BACKUP_ALERT,
+  severity: SeverityType.WARNING,
+  user_active: true,
+  master_active: true,
+};
+
+const mockedAdditionalBackupAlertTypeEntity: AlertTypeEntity = {
+  id: 'alert-type-id4',
+  name: MISSING_BACKUP_ALERT,
   severity: SeverityType.WARNING,
   user_active: true,
   master_active: true,
@@ -101,6 +123,10 @@ const mockAlertTypeRepository = {
       return mockedCreationDateAlertTypeEntity;
     } else if (name === STORAGE_FILL_ALERT) {
       return mockedStorageFillAlertTypeEntity;
+    } else if (name === MISSING_BACKUP_ALERT) {
+      return mockedMissingBackupAlertTypeEntity;
+    } else if (name === ADDITIONAL_BACKUP_ALERT) {
+      return mockedAdditionalBackupAlertTypeEntity;
     } else {
       return null;
     }
@@ -148,6 +174,42 @@ const mockStorageFillAlertRepository = {
   findOneBy: jest.fn().mockResolvedValue(null),
 };
 
+const mockMissingBackupAlertRepository = {
+  save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  count: jest.fn().mockResolvedValue(1),
+  find: jest.fn().mockResolvedValue([]),
+  findOneBy: jest.fn().mockResolvedValue(null),
+  createQueryBuilder: jest.fn(() => ({
+    select: jest.fn().mockReturnThis(),
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
+    getManyAndCount: jest.fn().mockResolvedValue([[sizeAlert], 1]),
+  })),
+};
+
+const mockAdditionalBackupAlertRepository = {
+  save: jest.fn().mockImplementation((alert) => Promise.resolve(alert)),
+  count: jest.fn().mockResolvedValue(1),
+  find: jest.fn().mockResolvedValue([]),
+  findOneBy: jest.fn().mockResolvedValue(null),
+  createQueryBuilder: jest.fn(() => ({
+    select: jest.fn().mockReturnThis(),
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    getQuery: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    having: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn().mockResolvedValue([]),
+    getManyAndCount: jest.fn().mockResolvedValue([[sizeAlert], 1]),
+  })),
+};
+
 describe('AlertingController (e2e)', () => {
   let app: INestApplication;
   let repository: Repository<SizeAlertEntity>;
@@ -174,6 +236,10 @@ describe('AlertingController (e2e)', () => {
       .useValue(mockCreationDateAlertRepository)
       .overrideProvider(getRepositoryToken(StorageFillAlertEntity))
       .useValue(mockStorageFillAlertRepository)
+      .overrideProvider(getRepositoryToken(MissingBackupAlertEntity))
+      .useValue(mockMissingBackupAlertRepository)
+      .overrideProvider(getRepositoryToken(AdditionalBackupAlertEntity))
+      .useValue(mockAdditionalBackupAlertRepository)
       .overrideProvider(getRepositoryToken(AlertTypeEntity))
       .useValue(mockAlertTypeRepository)
       .overrideProvider(getRepositoryToken(TaskEntity))
@@ -217,10 +283,10 @@ describe('AlertingController (e2e)', () => {
       .expect(200);
 
     expect(response.body).toEqual({
-      criticalAlerts: 3,
-      infoAlerts: 3,
+      criticalAlerts: 5,
+      infoAlerts: 5,
       repeatedAlerts: [],
-      warningAlerts: 3,
+      warningAlerts: 5,
     });
   });
 
@@ -317,6 +383,40 @@ describe('AlertingController (e2e)', () => {
         alertType: expect.objectContaining({ name: STORAGE_FILL_ALERT }),
       })
     );
+  });
+
+  it('POST /alerting/missingBackup - should create a new missing backup alert', async () => {
+    const createMissingBackupAlertDto: CreateMissingBackupAlertDto = {
+      referenceDate: new Date('2025-01-13T17:53:33.239Z'),
+    };
+
+    await request(app.getHttpServer())
+      .post('/alerting/missingBackup')
+      .send(createMissingBackupAlertDto)
+      .expect(201);
+
+    expect(mockMissingBackupAlertRepository.save).toHaveBeenCalledWith({
+      referenceDate: new Date('2025-01-13T17:53:33.239Z').toISOString(),
+      alertType: mockedMissingBackupAlertTypeEntity,
+    });
+  });
+
+  it('POST /alerting/additionalBackup - should create a new additional backup alert', async () => {
+    const createAdditionalBackupAlertDto: CreateAdditionalBackupAlertDto = {
+      date: new Date('2025-01-13T17:53:33.239Z'),
+      backupId: 'backup-id',
+    };
+
+    await request(app.getHttpServer())
+      .post('/alerting/additionalBackup')
+      .send(createAdditionalBackupAlertDto)
+      .expect(201);
+
+    expect(mockAdditionalBackupAlertRepository.save).toHaveBeenCalledWith({
+      date: new Date('2025-01-13T17:53:33.239Z').toISOString(),
+      backup: mockedBackupDataEntity,
+      alertType: mockedAdditionalBackupAlertTypeEntity,
+    });
   });
 
   it('PATCH /alerting/type/:alertTypeId/admin - should activate alert type by admin', async () => {
