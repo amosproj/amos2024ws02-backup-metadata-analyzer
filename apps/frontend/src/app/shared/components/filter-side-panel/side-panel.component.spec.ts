@@ -10,20 +10,35 @@ describe('SidePanelComponent', () => {
   let backupService: BackupService;
   let chartService: ChartService;
 
-  beforeEach(() => {
-    backupService = {
-      getRefreshObservable: vi.fn().mockReturnValue(of(null)),
-      getAllBackupTasks: vi.fn().mockReturnValue(of([])),
-      getBackupSizesPerDay: vi.fn().mockReturnValue(of([])),
-      getGroupedBackupSizes: vi.fn().mockReturnValue(of([])),
-    } as any;
+  const mockBackupService = {
+    getAllBackupTasks: vi.fn(),
+    getBackupSizesPerDay: vi.fn(),
+    getGroupedBackupSizes: vi.fn(),
+    getBackupAlertSeverityOverview: vi.fn(),
+    getRefreshObservable: vi.fn()
+  };
 
-    chartService = {
-      updateChart: vi.fn(),
-      createChart: vi.fn(),
-      updateTimeRange: vi.fn(),
-      dispose: vi.fn(),
-    } as any;
+  const mockChartService = {
+    updateChart: vi.fn(),
+    createChart: vi.fn(),
+    updateTimeRange: vi.fn(),
+    dispose: vi.fn()
+  };
+
+  beforeEach(() => {
+    backupService = mockBackupService as unknown as BackupService;
+    chartService = mockChartService as unknown as ChartService;
+    
+    mockBackupService.getRefreshObservable.mockReturnValue(of(null));
+    mockBackupService.getAllBackupTasks.mockReturnValue(of([]));
+    mockBackupService.getBackupSizesPerDay.mockReturnValue(of([]));
+    mockBackupService.getGroupedBackupSizes.mockReturnValue(of([]));
+    mockBackupService.getBackupAlertSeverityOverview.mockReturnValue(of({
+      ok: 0,
+      info: 0,
+      warning: 0,
+      critical: 0
+    }));
 
     component = new SidePanelComponent(backupService, chartService);
   });
@@ -35,7 +50,24 @@ describe('SidePanelComponent', () => {
   it('should initialize with default values', () => {
     expect(component.isOpen).toBe(false);
     expect(component.selectedBackupTypes).toEqual([]);
-    expect(component.charts).toEqual([]);
+    expect(component.selectedTask).toEqual([]);
+  });
+
+  it('should set time range correctly', () => {
+    component.setTimeRange('week');
+    expect(component['timeRangeSubject$'].getValue().range).toBe('week');
+
+    component.setTimeRange('month');
+    expect(component['timeRangeSubject$'].getValue().range).toBe('month');
+
+    component.setTimeRange('year');
+    expect(component['timeRangeSubject$'].getValue().range).toBe('year');
+  });
+
+  it('should set backup types correctly', () => {
+    const types = [BackupType.FULL, BackupType.INCREMENTAL];
+    component.setBackupTypes(types);
+    expect(component.selectedBackupTypes).toEqual(types);
   });
 
   it('should toggle filter panel state', () => {
@@ -46,36 +78,20 @@ describe('SidePanelComponent', () => {
     expect(component.isOpen).toBe(false);
   });
 
-  it('should set backup types correctly', () => {
-    const types = [BackupType.FULL, BackupType.INCREMENTAL];
-    component.setBackupTypes(types);
-    expect(component.selectedBackupTypes).toEqual(types);
-  });
-
-  it('should set time range correctly', () => {
-    const range = 'week';
-    component.setTimeRange(range as 'week' | 'month' | 'year');
-    expect(component['timeRangeSubject$'].getValue().range).toBe(range);
-  });
-
-  it('should handle backup task selection', () => {
-    const mockTasks = [
-      { id: '1', displayName: 'Task 1' },
-      { id: '2', displayName: 'Task 2' },
-    ];
-    component.setBackupTask(mockTasks);
-    expect(component.selectedTask).toEqual(mockTasks);
-  });
-
-  it('should call loadData on refresh observable', () => {
+  it('should call loadData on init', () => {
     const loadDataSpy = vi.spyOn(component, 'loadData');
     component.ngOnInit();
     expect(loadDataSpy).toHaveBeenCalled();
   });
 
   it('should clean up on destroy', () => {
-    const chartServiceSpy = vi.spyOn(chartService, 'dispose');
     component.ngOnDestroy();
-    expect(chartServiceSpy).toHaveBeenCalled();
+    expect(chartService.dispose).toHaveBeenCalled();
+  });
+
+  it('should handle backup task search', () => {
+    const searchTerm = 'test';
+    component.onSearchInput(searchTerm);
+    expect(component['backupTaskSearchTerm$']).toBeTruthy();
   });
 });

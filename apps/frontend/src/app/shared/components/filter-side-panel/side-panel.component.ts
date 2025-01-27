@@ -227,28 +227,20 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       shareReplay(1)
     );
 
-    /*     this.backupAlertPieChartData$ = this.backupService
+    this.backupAlertPieChartData$ = this.backupService
       .getBackupAlertSeverityOverview()
       .pipe(
-        tap({
-          next: (response) => {
-            if (response.length) {
-              this.chartService.updateChart('overviewAlertsPieChart', response);
-            }
-          },
-          error: (error) => {
-            console.error('Error updating timeline chart:', error);
-            this.loading = false;
-          },
-        }),
+        map((response) => [
+          { category: 'ok', count: response.ok },
+          { category: 'info', count: response.info },
+          { category: 'warning', count: response.warning },
+          { category: 'critical', count: response.critical },
+        ]),
+        tap((data) =>
+          this.chartService.updateChart('overviewAlertsPieChart', data)
+        ),
         shareReplay(1)
-      ); */
-    this.backupAlertPieChartData$ = of([
-      { category: 'ok', count: 58197 },
-      { category: 'info', count: 0 },
-      { category: 'warning', count: 393 },
-      { category: 'critical', count: 2 },
-    ]);
+      );
   }
   /**
    * Initialize the charts

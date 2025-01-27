@@ -25,15 +25,18 @@ import { MailReceiver1733580333590 } from './migrations/1733580333590-MailReceiv
 import { AddSaveset1733760846109 } from './migrations/1733760846109-AddSaveset';
 import { StorageFillAlert1733739256545 } from './migrations/1733739256545-StorageFillAlert';
 import { StorageFillAlertChangedColumns1733765217660 } from './migrations/1733765217660-StorageFillAlertChangedColumns';
-import {
-  StorageFillAlertChangedColumnsDecimal1733768959317
-} from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
+import { StorageFillAlertChangedColumnsDecimal1733768959317 } from './migrations/1733768959317-StorageFillAlertChangedColumnsDecimal';
 import { AddScheduledTimeToBackup1734538152155 } from './migrations/1734538152155-AddScheduledTimeToBackup';
 import { DataStoreEntity } from './dataStores/entity/dataStore.entity';
 import { DataStores1734616685846 } from './migrations/1734616685846-DataStores';
 import { AddAlertCreationDate1736344989806 } from './migrations/1736344989806-AddAlertCreationDate';
+import { MissingBackupAlertEntity } from './alerting/entity/alerts/missingBackupAlert.entity';
+import { AddAlertMissingBackup1736620579537 } from './migrations/1736620579537-AddAlertMissingBackup';
+import { AdditionalBackupAlertEntity } from './alerting/entity/alerts/additionalBackupAlert.entity';
+import { AddAlertAdditionalBackup1736630779875 } from './migrations/1736630779875-AddAlertAdditionalBackup';
 import { StorageOverflowTime1736550460789 } from './migrations/1736550460789-StorageOverflowTime';
 import { DeprecatedFlag1737107214086 } from './migrations/1737107214086-DeprecatedFlag';
+import { DeprecatedFlagNewAlerts1737406388351 } from './migrations/1737406388351-DeprecatedFlagNewAlerts';
 
 /**
  * Used by NestJS to reach database.
@@ -62,6 +65,8 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         TaskEntity,
         MailReceiverEntity,
         DataStoreEntity,
+        MissingBackupAlertEntity,
+        AdditionalBackupAlertEntity,
       ],
       migrationsRun: true,
       migrations: [
@@ -85,8 +90,11 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AddScheduledTimeToBackup1734538152155,
         DataStores1734616685846,
         AddAlertCreationDate1736344989806,
+        AddAlertMissingBackup1736620579537,
+        AddAlertAdditionalBackup1736630779875,
         StorageOverflowTime1736550460789,
         DeprecatedFlag1737107214086,
+        DeprecatedFlagNewAlerts1737406388351,
       ],
       logging: true,
       logger: 'debug',

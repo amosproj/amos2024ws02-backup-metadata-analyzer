@@ -27,3 +27,10 @@ export interface PieChartDataPoint {
   value?: number;
   count?: number;
 }
+
+export interface AlertSeverityOverview {
+  ok: number;
+  info: number;
+  warning: number;
+  critical: number;
+}
