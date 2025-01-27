@@ -344,10 +344,10 @@ export class ChartService {
 
     if (Array.isArray(data) && 'category' in (data[0] || {})) {
       const categoryColors: { [key: string]: string } = {
-        OK: '#4CAF50', // Green
-        INFO: '#2196F3', // Blue
-        WARNING: '#FFC107', // Yellow
-        CRITICAL: '#FF5252', // Red
+        OK: '#4caf50', // Green
+        INFO: '#2196f3', // Blue
+        WARNING: '#ffeb3b', // Yellow
+        CRITICAL: '#f44336', // Red
       };
 
       return data.map((item: any) => ({
