@@ -6,8 +6,8 @@ from darts.models import AutoARIMA
 from decimal import Decimal
 
 class EnhancedStorageAnalyzer:
-    forecast_length = 31622400
-    frequency = 86400
+    forecast_length = 366 * (24 * 60 * 60) 
+    frequency = 24 * 60 * 60
 
     # TODO endpoint for this
     def set_forecast_length(self, new_length):
