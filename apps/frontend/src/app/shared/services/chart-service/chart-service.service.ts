@@ -213,6 +213,7 @@ export class ChartService {
           categoryField: config.categoryField || 'category',
           legendValueText: '{config.valueField} backups',
           legendLabelText: '{category}',
+          fillField: 'fill'
         })
       );
 
@@ -342,10 +343,20 @@ export class ChartService {
     if (!data) return [];
 
     if (Array.isArray(data) && 'category' in (data[0] || {})) {
+      const categoryColors: { [key: string]: string } = {
+        OK: '#4CAF50', // Green
+        INFO: '#2196F3', // Blue
+        WARNING: '#FFC107', // Yellow
+        CRITICAL: '#FF5252', // Red
+      };
+
       return data.map((item: any) => ({
         category: item.category.toUpperCase(),
         value: item.count,
         count: item.count,
+        fill: am5.color(
+          categoryColors[item.category.toUpperCase()] || '#999999'
+        ), // Default gray if category not found
       }));
     }
 
