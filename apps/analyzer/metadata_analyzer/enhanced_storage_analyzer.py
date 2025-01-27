@@ -4,6 +4,7 @@ import numpy as np
 from darts import TimeSeries
 from darts.models import AutoARIMA
 from decimal import Decimal
+from collections import defaultdict
 
 class EnhancedStorageAnalyzer:
     forecast_length = 366 * (24 * 60 * 60) 
@@ -20,7 +21,7 @@ class EnhancedStorageAnalyzer:
 
     # Analyzes if storage capacity will be reached within confines of forecast
     def analyze_future_storage_capacity(self, data, labeled_data_store):
-        scaled_forecasts = {}
+        scaled_forecasts = defaultdict(list)
 
         # gets the saveset (as an identifier) for all backups that are relevant for these labels
         savesets = set([row.saveset for row in labeled_data_store])
@@ -35,27 +36,23 @@ class EnhancedStorageAnalyzer:
         # removing subtasks leads to forecast not converging, so leave commented out
         #root_df = root_df.loc[root_df["subtask_flag"]=='0']
 
-        data_store_capacities = {}
+        data_store_capacities = defaultdict(list)
         # groups savesets of backups by the data_store they are saved on
-        data_store_groups = {}
+        data_store_groups = defaultdict(list)
         for row in labeled_data_store:
-            if row.name not in data_store_groups:
-                data_store_groups[row.name] = [row.saveset]
-            else:
-                data_store_groups[row.name].append(row.saveset)
+            data_store_groups[row.name].append(row.saveset)
             # saves data_store cpacities for later use
-            if row.name not in data_store_capacities:
-                data_store_capacities[row.name] = [row.capacity]
+            data_store_capacities[row.name] = [row.capacity]
 
 
         # calculates the forecast values of each task
-        forecasts = {}
+        forecasts = defaultdict(list)
         # groups savesets by their task, relevant tasks implicitly filtered as well
         tasks_savesets = root_df
         tasks_savesets = tasks_savesets.groupby("task")
 
         # starts forecast for every task
-        task_total_sizes = {}
+        task_total_sizes = defaultdict(list)
         for task,group in tasks_savesets:#
 
             df = group[["sbc_start", "data_size"]]
@@ -67,11 +64,11 @@ class EnhancedStorageAnalyzer:
             task_size_val = group["data_size"].sum()
             task_total_sizes.update({task:task_size_val})
 
-        task_size_on_datastore = {}
+        task_size_on_datastore = defaultdict(list)
         for store,group in data_store_groups.items():
         
             # get size of task on data_store
-            task_sizes = {}
+            task_sizes = defaultdict(list)
             for saveset in group:
 
                 current_task = root_df.loc[root_df['saveset'] == saveset]
@@ -80,7 +77,7 @@ class EnhancedStorageAnalyzer:
                 if not current_task.empty: 
                     current_task = current_task.iloc[0]['task']
 
-                    # TODO ensure updates the right values bc of iloc() function
+                    # ensure updates the right values bc of iloc() function
                     if current_task not in task_sizes:
                         task_sizes.update({current_task:root_df.loc[root_df['saveset'] == saveset].iloc[0]['data_size']})
                     else:
@@ -154,7 +151,7 @@ class EnhancedStorageAnalyzer:
         return pred
  
     def get_overflow_times(self,scaled_forecasts,data_store_capacities):
-        overflows = {}
+        overflows = defaultdict(list)
 
         for key,forecasted_steps in scaled_forecasts.items():
             multiplier = 1000000000 #assume capacity in gb, forecast in bytes
