@@ -191,7 +191,6 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.timelineData$ = this.filterParams$.pipe(
       switchMap((params) => {
-        //const { taskId, ...queryParams } = params;
         return this.backupService.getBackupSizesPerDay(params);
       }),
       tap({
@@ -210,7 +209,6 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.backupSizePieChartData$ = this.filterParams$.pipe(
       switchMap((params) => {
-        //const { taskId, ...queryParams } = params;
         return this.backupService.getGroupedBackupSizes(params);
       }),
       tap({
