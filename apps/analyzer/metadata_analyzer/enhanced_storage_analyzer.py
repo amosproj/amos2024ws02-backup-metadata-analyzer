@@ -125,8 +125,6 @@ class EnhancedStorageAnalyzer:
         overflows = self.get_overflow_times(scaled_forecasts,data_store_capacities)
         for store,overflow in overflows.items():
             uuid = data_store_ids[store]
-            print("sending trigger to backup for id " + str(uuid[0]),flush=True)
-            print("and overflow time " + str(overflow),flush=True)
             self.backend.create_size_overflow_notification(uuid[0],json.dumps({"overflowTime":int(overflow)}))
 
         return overflows
