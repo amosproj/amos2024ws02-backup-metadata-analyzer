@@ -82,7 +82,7 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
   timelineData$!: Observable<TimelineDataPoint[]>;
   backupSizePieChartData$!: Observable<PieChartDataPoint[]>;
   backupAlertPieChartData$!: Observable<PieChartDataPoint[]>;
-  private readonly filterParams$: Observable<BackupFilterParams>;
+  filterParams$: Observable<BackupFilterParams>;
 
   chartBackups$: Observable<APIResponse<Backup>> = of({
     data: [],
@@ -135,8 +135,8 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
       map(([timeRange, tasks, backupTypes]) => ({
         fromDate: timeRange.fromDate.toISOString(),
         toDate: timeRange.toDate.toISOString(),
-        types: backupTypes || [],
-        taskIds: (tasks || []).map((task) => task?.id).filter(Boolean) || [],
+        types: backupTypes,
+        taskId: tasks.map((task) => task.id) || [],
       })),
       shareReplay(1)
     );
