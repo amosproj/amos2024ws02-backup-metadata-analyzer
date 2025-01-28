@@ -1,6 +1,5 @@
 import datetime
 
-
 class Analyzer:
 	@classmethod
 	def __init__(
