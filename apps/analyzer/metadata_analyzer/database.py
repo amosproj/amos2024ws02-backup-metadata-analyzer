@@ -1,18 +1,18 @@
 import datetime
 import os
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, distinct
 from sqlalchemy.orm import Session
 
-from metadata_analyzer.analyzer import Analyzer
 from metadata_analyzer.models import (
     Result,
     Tasks,
     DataStore,
     Schedule,
     TaskEvent,
+    ResultLabel,
 )
-from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
+
 
 
 class Database:
@@ -78,3 +78,16 @@ class Database:
 
         result = session.scalars(stmt)
         return result
+
+    def get_result_labels(self):
+        session = Session(self.engine)
+        stmt = select(ResultLabel)
+
+        labels = session.scalars(stmt)
+        return labels
+    
+    def get_labeled_data_store(self):
+        session = Session(self.engine)
+        stmt = select(DataStore.name,DataStore.high_water_mark,DataStore.capacity,DataStore.filled,DataStore.uuid, ResultLabel.saveset).select_from(DataStore).join(ResultLabel, DataStore.name == ResultLabel.pool) 
+        joined = session.execute(stmt).mappings().all()
+        return joined

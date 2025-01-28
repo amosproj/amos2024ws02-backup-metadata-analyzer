@@ -26,3 +26,5 @@ Updates the backend database with values taken from the analyzer database.
             description: The number of entries that were updated
             schema:
                 $ref: '#/definitions/BackendResponse'
+    tags:
+      - Updating

@@ -65,7 +65,7 @@ def test_update_data_all_types():
 	database = MockDatabase(mock_results, mock_tasks, mock_storages)
 	backend = MockBackend()
 	simple_rule_based_analyzer = MockSimpleRuleBasedAnalyzer()
-	Analyzer.init(database, backend, simple_rule_based_analyzer, None, None)
+	Analyzer.__init__(database, backend, simple_rule_based_analyzer, None, None, None)
 	Analyzer.update_data()
 
 	assert backend.backups == [{
@@ -137,7 +137,7 @@ def test_update_data_not_a_backup():
 	simple_rule_based_analyzer = MockSimpleRuleBasedAnalyzer()
 	database = MockDatabase([mock_result1], [])
 	backend = MockBackend()
-	Analyzer.init(database, backend, simple_rule_based_analyzer, None, None)
+	Analyzer.__init__(database, backend, simple_rule_based_analyzer, None, None, None)
 	Analyzer.update_data()
 
 	assert backend.backups == []
@@ -149,7 +149,7 @@ def test_update_data_no_subtasks():
 	simple_rule_based_analyzer = MockSimpleRuleBasedAnalyzer()
 	database = MockDatabase([mock_result1], [])
 	backend = MockBackend()
-	Analyzer.init(database, backend, simple_rule_based_analyzer, None, None)
+	Analyzer.__init__(database, backend, simple_rule_based_analyzer, None, None, None)
 	Analyzer.update_data()
 
 	assert backend.backups == []

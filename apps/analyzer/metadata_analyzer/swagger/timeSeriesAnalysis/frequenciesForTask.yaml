@@ -48,3 +48,5 @@ Gets frequencies for a specific task, variable and backup type.
         description: All backup frequencies found that meet the conditions, ranked by times appeared
         schema:
           $ref: '#/definitions/Frequencies'
+    tags:
+      - Time Series Analysis

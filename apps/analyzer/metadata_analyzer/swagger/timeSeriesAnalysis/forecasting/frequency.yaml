@@ -1,0 +1,13 @@
+Sets a new frequency to scale the time series for the forecast on
+    ---
+    parameters:
+      - name: Input
+        in: query
+        name: frequency
+        schema:
+            type: int
+    responses:
+        200:
+            description: Frequency set
+        400:
+            description: The value set for the forecasting frequency was not valid

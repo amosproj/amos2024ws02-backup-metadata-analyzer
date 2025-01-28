@@ -58,3 +58,9 @@ class Backend:
 		r = requests.get(url)
 		r.raise_for_status()
 		return r.json()
+	
+	def create_size_overflow_notification(self, uuid, overflow):
+		headers = {'Content-type': 'application/json'}
+		url = self.backend_url + f"datastores/{uuid}/OverflowTime/"
+		r = requests.put(url, data=overflow,headers=headers)
+		r.raise_for_status()

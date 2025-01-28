@@ -11,3 +11,5 @@ Sets a new threshold value for the time series analysis, should be between 1 and
             description: Threshold set
         400:
             description: The value set for the threshold was not valid
+    tags:
+      - Time Series Analysis
