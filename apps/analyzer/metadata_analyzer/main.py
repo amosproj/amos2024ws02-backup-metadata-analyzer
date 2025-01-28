@@ -18,7 +18,6 @@ swagger = Swagger(app)
 load_dotenv(dotenv_path=".env")
 path = app.root_path
 
-
 @app.route("/")
 def hello_world():
     return "Hello, world!"
@@ -26,7 +25,7 @@ def hello_world():
 @app.route("/updating/basicBackupData", methods=["POST"])
 @swag_from(os.path.join(path, "swagger", "updating", "basicBackupData.yaml"), validation=False)
 def update_data():
-    return jsonify(Analyzer.update_data())
+    return jsonify(analyzer.update_data())
 
 
 @app.route("/alerting/size/fullBackups", methods=["POST"])
@@ -36,7 +35,7 @@ def simple_rule_based_analysis():
 
     try:
         int(alert_limit)
-        return jsonify(Analyzer.simple_rule_based_analysis(int(alert_limit)))
+        return jsonify(analyzer.simple_rule_based_analysis(int(alert_limit)))
     except ValueError:
         return "Invalid value for alert limit", 400
 
@@ -243,7 +242,7 @@ def main():
     time_series_analyzer = Time_series_analyzer(parameters)
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
-    Analyzer.init(
+    Analyzer.__init__(
         database,
         backend,
         simple_rule_based_analyzer,
