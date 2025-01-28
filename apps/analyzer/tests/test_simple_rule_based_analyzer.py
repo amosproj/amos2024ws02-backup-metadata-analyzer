@@ -548,7 +548,7 @@ def test_alert_backup_size_no_subtasks_inc():
 
 
 # Tests if the inc analysis skips alerts already created
-def test_alert_diff_start_date():
+def test_alert_diff_start_date_2():
 	mock_result1 = _create_mock_result(
 		"foo", "1", "I", 100_000_000, datetime.fromisoformat("2000-01-01")
 	)
@@ -665,7 +665,7 @@ def test_storage_fill_alert_enough_capacity_left():
 
 
 # Data stores with less than enough capacity left should generate an alert
-def test_storage_fill_alert_enough_capacity_left():
+def test_storage_fill_alert_enough_capacity_left_2():
 	mock_data_store1 = _create_mock_data_store("foo", 100, 80, 81)
 	mock_data_store2 = _create_mock_data_store("bar", 120, 90, 100)
 	mock_data_store3 = _create_mock_data_store("baz", 150, 50, 150)
