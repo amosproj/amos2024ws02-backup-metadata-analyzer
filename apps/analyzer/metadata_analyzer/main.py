@@ -26,7 +26,7 @@ def hello_world():
 @app.route("/updating/basicBackupData", methods=["POST"])
 @swag_from(os.path.join(path, "swagger", "updating", "basicBackupData.yaml"), validation=False)
 def update_data():
-    return jsonify(analyzer.update_data())
+    return jsonify(Analyzer.update_data())
 
 
 @app.route("/alerting/size/fullBackups", methods=["POST"])
@@ -36,7 +36,7 @@ def simple_rule_based_analysis():
 
     try:
         int(alert_limit)
-        return jsonify(analyzer.simple_rule_based_analysis(int(alert_limit)))
+        return jsonify(Analyzer.simple_rule_based_analysis(int(alert_limit)))
     except ValueError:
         return "Invalid value for alert limit", 400
 
