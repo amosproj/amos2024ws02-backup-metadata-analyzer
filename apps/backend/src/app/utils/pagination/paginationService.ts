@@ -109,17 +109,7 @@ export class PaginationService {
       ),
     ]);
 
-    const alertTypeIds: Map<string, string> = new Map<string, string>();
-    for (const alert of data) {
-      if (alert.alertTypeId) {
-        const alertType = await alertTypeRepository.findOne({
-          where: { id: alert.alertTypeId }, // Provide the where clause
-        });
-        if (alertType) {
-          alertTypeIds.set(alert.id, alertType.name);
-        }
-      }
-    }
+    const alertTypeIds: Map<string, string> = await this.getAlertTypeMap(data, alertTypeRepository);
 
     // get full alert objects from the repositories
     const alerts: Alert[] = [];
@@ -148,6 +138,21 @@ export class PaginationService {
         total: parseInt(total[0].count, 10),
       },
     };
+  }
+
+  private async getAlertTypeMap(data: any, alertTypeRepository: Repository<AlertTypeEntity>) {
+    const alertTypeIds: Map<string, string> = new Map<string, string>();
+    for (const alert of data) {
+      if (alert.alertTypeId) {
+        const alertType = await alertTypeRepository.findOne({
+          where: { id: alert.alertTypeId }, // Provide the where clause
+        });
+        if (alertType) {
+          alertTypeIds.set(alert.id, alertType.name);
+        }
+      }
+    }
+    return alertTypeIds;
   }
 
   /**
