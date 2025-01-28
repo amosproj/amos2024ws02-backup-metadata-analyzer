@@ -302,7 +302,7 @@ def main():
     parameters.append(os.getenv("CLUSTER_NUMBER"))
     time_series_analyzer = Time_series_analyzer(parameters)
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
-    enhanced_storage_analyzer = EnhancedStorageAnalyzer()
+    enhanced_storage_analyzer = EnhancedStorageAnalyzer(backend)
     Analyzer.init(
         database,
         backend,

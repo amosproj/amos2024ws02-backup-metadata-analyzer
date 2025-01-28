@@ -2,6 +2,7 @@ from metadata_analyzer.forecast_storage_fill_alert import ForecastStorageFillAle
 import pandas as pd
 import numpy as np
 import metadata_analyzer.backend
+import json
 from darts import TimeSeries
 from darts.models import AutoARIMA
 from decimal import Decimal
@@ -11,7 +12,12 @@ class EnhancedStorageAnalyzer:
     forecast_length = 366 * (24 * 60 * 60) 
     frequency = 24 * 60 * 60
 
-    # TODO endpoint for this
+    def __init__(
+        self,
+        backend
+    ):
+        self.backend = backend
+
     def set_forecast_length(self, new_length):
         self.forecast_length = new_length
 
@@ -43,14 +49,14 @@ class EnhancedStorageAnalyzer:
         data_store_capacities = defaultdict(list)
         # groups savesets of backups by the data_store they are saved on
         data_store_groups = defaultdict(list)
+        i = 0
         for row in labeled_data_store:
             data_store_groups[row.name].append(row.saveset)
 
-            # saves data_store capacities for later use
-            data_store_capacities[row.name] = [row.capacity]
-
-            data_store_ids[row.name].append(row.uuid)
-
+            # saves data_store capacities and uuids in dicts for later use
+            if data_store_capacities[row.name] == []:
+                data_store_capacities[row.name] = [row.capacity]
+                data_store_ids[row.name].append(row.uuid)
 
         # calculates the forecast values of each task
         forecasts = defaultdict(list)
@@ -119,9 +125,9 @@ class EnhancedStorageAnalyzer:
         overflows = self.get_overflow_times(scaled_forecasts,data_store_capacities)
         for store,overflow in overflows.items():
             uuid = data_store_ids[store]
-            #print("sending trigger to backup for id " + str(uuid),flush=True)
-            #print("and overflow time " + str(overflow),flush=True)
-            self.backend.create_size_overflow_notification(uuid,{"overflowTime":overflow}.as_json())
+            print("sending trigger to backup for id " + str(uuid[0]),flush=True)
+            print("and overflow time " + str(overflow),flush=True)
+            self.backend.create_size_overflow_notification(uuid[0],json.dumps({"overflowTime":int(overflow)}))
 
         return overflows
     
