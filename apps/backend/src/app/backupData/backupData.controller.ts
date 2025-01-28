@@ -37,14 +37,20 @@ export class BackupDataController {
 
   @Get('latest')
   @ApiOperation({ summary: 'Returns the latest backupData Object.' })
-  @ApiOkResponse({ type: BackupDataEntity })
+  @ApiOkResponse({
+    description: 'The latest Backup Data Object.',
+    type: BackupDataEntity,
+  })
   async getLatest(): Promise<BackupDataEntity | null> {
     return this.backupDataService.findLatest();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Returns the backupData Object with the given id.' })
-  @ApiOkResponse({ type: BackupDataEntity })
+  @ApiOkResponse({
+    description: 'The Backup Data Object with the given id.',
+    type: BackupDataEntity,
+  })
   async getById(@Param('id') id: string): Promise<BackupDataEntity> {
     const entity = await this.backupDataService.findOneById(id);
     if (!entity) {
@@ -56,7 +62,11 @@ export class BackupDataController {
 
   @Post('filter')
   @ApiOperation({ summary: 'Returns all backupData Objects.' })
-  @ApiOkResponse()
+  @ApiOkResponse({
+    description: 'All Backup Data Objects.',
+    type: BackupDataEntity,
+    isArray: true,
+  })
   @ApiBody({
     type: BackupDataFilterByTaskIdsDto,
     required: false,
@@ -89,7 +99,9 @@ export class BackupDataController {
 
   @Post('batched')
   @ApiOperation({ summary: 'Creates new backupData Objects batched.' })
-  @ApiCreatedResponse({})
+  @ApiCreatedResponse({
+    description: 'Created Backup Data Objects.',
+  })
   async createBatched(
     @Body() createBackupDataDtos: CreateBackupDataDto[]
   ): Promise<void> {

@@ -11,8 +11,7 @@ import {
   startWith,
   Subject,
   switchMap,
-  takeUntil,
-  tap,
+  takeUntil
 } from 'rxjs';
 import { AlertServiceService } from '../../../shared/services/alert-service/alert-service.service';
 import { AlertUtilsService } from '../../../shared/utils/alertUtils';
@@ -69,7 +68,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   readonly PAGE_SIZES = [10, 20, 50, 100];
   loading = false;
   error: string | null = null;
-
   severityTypes = Object.values(SeverityType);
 
   readonly alertDateFilter: CustomAlertFilter;
@@ -88,7 +86,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   );
 
   protected alertSummary$: Observable<AlertSummary> = of(INITIAL_ALERT_SUMMARY);
-
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -126,7 +123,9 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       )
       .subscribe((params) => this.filterOptions$.next(params));
   }
-
+  /**
+   * Load alerts from the API
+   */
   private loadAlerts(): void {
     this.error = null;
 
@@ -135,13 +134,17 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     );
   }
-
+  /**
+   * Load alert types from the API
+   */
   private loadAlertTypes(): void {
     this.alertTypeService.getNotificationSettings().subscribe((response) => {
       this.alertTypeSubject.next(response);
     });
   }
-
+  /**
+   * Load alert summary from the API
+   */
   private loadAlertSummary(): void {
     this.alertSummary$ = this.alertService
       .getAlertRepetitions()
@@ -149,7 +152,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Set filter options for the backup table
+   * Set filter options for the backup data grid
    * @returns Filter options
    */
   private buildFilterParams(): AlertFilterParams {
@@ -222,12 +225,6 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     this.alertUtils.getAlertDetails(alert);
 
   protected shortenBytes = shortenBytes;
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   /**
    * Select the alert type icon
    * @param severity type of alert
@@ -246,5 +243,10 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       default:
         return 'info-standard';
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

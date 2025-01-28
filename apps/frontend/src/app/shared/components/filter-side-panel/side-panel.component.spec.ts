@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SidePanelComponent } from './side-panel.component';
-import { BackupService } from '../../services/backup-service/backup-service.service';
-import { ChartService } from '../../services/chart-service/chart-service.service';
 import { BackupType } from '../../enums/backup.types';
+import { ChartService } from '../../charts/chart-service/chart-service.service';
+import { BackupService } from '../../services/backup-service/backup-service.service';
 import { of } from 'rxjs';
 
 describe('SidePanelComponent', () => {

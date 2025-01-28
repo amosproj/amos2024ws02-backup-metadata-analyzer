@@ -29,22 +29,34 @@ export class MailController {
 
   @Get()
   @ApiOperation({ summary: 'Returns all Mail Receiver.' })
-  @ApiOkResponse()
+  @ApiOkResponse({
+    description: 'All Mail Receiver.',
+    type: MailReceiverEntity,
+    isArray: true,
+  })
   async findAll(): Promise<MailReceiverEntity[]> {
     return this.mailService.getAllMailReceiver();
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Removes the mail receiver with the given id.' })
-  @ApiOkResponse()
-  @ApiNotFoundResponse()
+  @ApiOkResponse({
+    description: 'The Mail Receiver with the given id has been removed.',
+    type: MailReceiverEntity,
+  })
+  @ApiNotFoundResponse({
+    description: 'Mail Receiver with given id not found.',
+  })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.mailService.removeMailReceiver(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Adds a new Mail Receiver.' })
-  @ApiCreatedResponse()
+  @ApiCreatedResponse({
+    description: 'Mail Receiver created successfully.',
+    type: MailReceiverEntity,
+  })
   @ApiConflictResponse({ description: 'Mail Receiver already exists.' })
   async create(
     @Body() createMailReceiverDto: CreateMailReceiverDto

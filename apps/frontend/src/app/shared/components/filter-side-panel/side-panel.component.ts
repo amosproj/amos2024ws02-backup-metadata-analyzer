@@ -27,9 +27,9 @@ import { ChartInformation } from '../../types/chartInformation';
 import { APIResponse } from '../../types/api-response';
 import { Backup } from '../../types/backup';
 import { BackupService } from '../../services/backup-service/backup-service.service';
-import { ChartService } from '../../services/chart-service/chart-service.service';
 import { TimelineDataPoint, PieChartDataPoint } from '../../types/chart-config';
 import { BackupFilterParams } from '../../types/backup-filter-type';
+import { ChartService } from '../../charts/chart-service/chart-service.service';
 
 interface TimeRangeConfig {
   fromDate: Date;
@@ -383,5 +383,25 @@ export class SidePanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.chartService.dispose();
+  }
+
+  resetTimeRange(): void {
+    this.setTimeRange('month');
+  }
+
+  resetTasks(): void {
+    this.setBackupTask([]);
+    this.selectedTask = [];
+  }
+
+  resetTypes(): void {
+    this.setBackupTypes([]);
+    this.selectedBackupTypes = [];
+  }
+
+  resetAllFilters(): void {
+    this.resetTimeRange();
+    this.resetTasks();
+    this.resetTypes();
   }
 }

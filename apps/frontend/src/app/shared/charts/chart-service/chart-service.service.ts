@@ -160,14 +160,13 @@ export class ChartService {
 
     return { xAxis, yAxis };
   }
-
   /**
-   * create series for charts
-   * @param chart
-   * @param config
-   * @param root
-   * @param timeRange
-   * @returns series to visualize data
+   * Creates series based on chart type and config. Actually creates series for XY charts or pie charts
+   * @param chart chart instance
+   * @param config configurations for chart
+   * @param root 
+   * @param timeRange selected time range filter
+   * @returns series instance for visualization
    */
   private createSeries(
     chart: am5.Chart,
@@ -224,9 +223,9 @@ export class ChartService {
     throw new Error('Unsupported chart configuration');
   }
   /**
-   * ChartControls
-   * @param chart selected chart
-   * @param config chart config
+   * If Chart is XY chart, this function will create modal window with information about data
+   * @param chart 
+   * @param config 
    */
   private addChartControls(chart: am5.Chart, config: ChartConfig): void {
     chart.children.unshift(
@@ -271,14 +270,6 @@ export class ChartService {
       : this.groupByDay(processedData);
   }
 
-  private getDateValue(item: any): Date | number {
-    return item.date || item.creationDate || item.timestamp || new Date();
-  }
-
-  private getNumericValue(item: any): number {
-    return item.sizeMB ? item.sizeMB * 1000000 : item.value || item.size || 0;
-  }
-
   private groupByDay(data: TimelineDataPoint[]): TimelineDataPoint[] {
     const grouped = _.groupBy(
       data,
@@ -291,6 +282,37 @@ export class ChartService {
     }));
   }
 
+  private getDateValue(item: any): Date | number {
+    return item.date || item.creationDate || item.timestamp || new Date();
+  }
+
+  private getNumericValue(item: any): number {
+    return item.sizeMB ? item.sizeMB * 1000000 : item.value || item.size || 0;
+  }
+
+  private getGroupKey(date: Date, timeRange: TimeRange): string {
+    switch (timeRange) {
+      case 'week':
+      case 'month':
+        return date.toISOString().split('T')[0];
+      case 'year':
+        const weekNum = this.getWeekNumber(date);
+        return `${date.getFullYear()}-W${weekNum}`;
+    }
+  }
+  /**
+   * Parse group key to get correct date for visualization. If time range is year, it will return date of week
+   * @param key 
+   * @param timeRange 
+   * @returns date as stored time value in milliseconds
+   */
+  private parseGroupKey(key: string, timeRange: TimeRange): number {
+    if (timeRange === 'year' && key.includes('W')) {
+      const [year, week] = key.split('-W');
+      return this.getDateOfWeek(parseInt(year), parseInt(week)).getTime();
+    }
+    return new Date(key).getTime();
+  }
   private groupByWeek(data: TimelineDataPoint[]): TimelineDataPoint[] {
     const grouped = _.groupBy(data, (item) => {
       const date = new Date(item.date);
@@ -304,7 +326,32 @@ export class ChartService {
       value: _.sumBy(items, 'value'),
     }));
   }
-
+  /**
+   * Calculate date of week.
+   * @param year 
+   * @param week week number as time value in milliseconds
+   * @returns date of week
+   */
+  private getDateOfWeek(year: number, week: number): Date {
+    const date = new Date(year, 0, 1);
+    date.setDate(date.getDate() + (week - 1) * 7);
+    return date;
+  }
+  /**
+   * 
+   * @param date date of week
+   * @returns calcculated week number
+   */
+  private getWeekNumber(date: Date): number {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  }
+  /**
+   * Decide what date format to use for axis and tooltip for XY charts
+   */
   private getAxisFormat(timeRange: TimeRange): string {
     switch (timeRange) {
       case 'week':
@@ -314,7 +361,9 @@ export class ChartService {
         return "MMM 'W'w";
     }
   }
-
+  /**
+   * Decide what tooltip format to use for XY charts
+   */
   private getTooltipFormat(timeRange: TimeRange): string {
     switch (timeRange) {
       case 'week':
@@ -326,7 +375,9 @@ export class ChartService {
         return 'Size: {valueY} MB';
     }
   }
-
+  /**
+   * Decide what date format to use for axis
+   */
   private getDateFormat(timeRange: TimeRange): string {
     switch (timeRange) {
       case 'week':
@@ -338,7 +389,9 @@ export class ChartService {
         return 'MMM dd';
     }
   }
-
+  /**
+   * Either prepares the data for aggregation of backups by alert severity or groups the larger of the backups by category
+   */
   preparePieData<T>(data: T): PieChartDataPoint[] {
     if (!data) return [];
 
@@ -473,7 +526,9 @@ export class ChartService {
       }
     }
   }
-
+  /**
+   * Handles charts if data is not available
+   */
   private createModal(root: am5.Root, chartId: string): am5.Modal {
     const modal = am5.Modal.new(root, {
       content: 'No data available',

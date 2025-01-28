@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import {
-  HttpClientTestingModule,
   HttpTestingController,
+  provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { AlertServiceService } from './alert-service.service';
 import { BASE_URL } from '../../types/configuration';
@@ -11,6 +11,7 @@ import { randomUUID } from 'node:crypto';
 import { SeverityType } from '../../enums/severityType';
 import { BackupType } from '../../enums/backup.types';
 import { AlertFilterParams } from '../../types/alert-filter-type';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('AlertServiceService', () => {
   let service: AlertServiceService;
@@ -19,8 +20,9 @@ describe('AlertServiceService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         AlertServiceService,
         { provide: BASE_URL, useValue: baseUrl },
       ],
@@ -165,5 +167,51 @@ describe('AlertServiceService', () => {
     });
 
     req.flush({ data: mockAlerts, paginationData: { total: 2 } });
+  });
+
+  it('should fetch alert counts without fromDate parameter', () => {
+    const mockAlertCounts = {
+      total: 5,
+      critical: 1,
+      warning: 2,
+      info: 2,
+    };
+
+    service.getAlertCounts().subscribe((alertCounts) => {
+      expect(alertCounts).toEqual(mockAlertCounts);
+    });
+
+    const req = httpMock.expectOne((request) => {
+      return (
+        request.url === `${baseUrl}/alerting/statistics` &&
+        request.method === 'GET' &&
+        !request.params.has('fromDate')
+      );
+    });
+    req.flush(mockAlertCounts);
+  });
+
+  it('should fetch alert counts with fromDate parameter', () => {
+    const mockAlertCounts = {
+      total: 3,
+      critical: 1,
+      warning: 1,
+      info: 1,
+    };
+    const fromDate = new Date().toISOString();
+
+    service.getAlertCounts(fromDate).subscribe((alertCounts) => {
+      expect(alertCounts).toEqual(mockAlertCounts);
+    });
+
+    const req = httpMock.expectOne((request) => {
+      return (
+        request.url === `${baseUrl}/alerting/statistics` &&
+        request.method === 'GET' &&
+        request.params.has('fromDate') &&
+        request.params.get('fromDate') === fromDate
+      );
+    });
+    req.flush(mockAlertCounts);
   });
 });

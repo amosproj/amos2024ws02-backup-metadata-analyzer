@@ -24,12 +24,9 @@ export class FactsPanelComponent implements OnDestroy, OnInit {
         this.loadBasicInformations();
       });
   }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
+  /**
+   * Loads the basic informations about the page
+   */
   loadBasicInformations(): void {
     this.basicInformations$ = this.informationService
       .getBasicInformations()
@@ -37,4 +34,9 @@ export class FactsPanelComponent implements OnDestroy, OnInit {
   }
 
   protected readonly shortenBytes = shortenBytes;
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { appRoutes } from './app.routes';
-import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -51,6 +50,7 @@ import { UserManualComponent } from './management/components/user-manual/user-ma
 import { AlertPageComponent } from './alert-page/component/alert-page/alert-page.component';
 import { DatePipe } from '@angular/common';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay/loading-overlay.component';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -69,6 +69,7 @@ import { LoadingOverlayComponent } from './shared/components/loading-overlay/loa
     UserManualComponent,
     AlertPageComponent,
     LoadingOverlayComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -77,10 +78,13 @@ import { LoadingOverlayComponent } from './shared/components/loading-overlay/loa
     NgxEchartsModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule,
-    RouterModule.forRoot(appRoutes),
+    RouterModule.forRoot(appRoutes)
   ],
-  providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }, DatePipe],
+  providers: [
+    { provide: BASE_URL, useValue: 'http://localhost:3000/api' },
+    DatePipe,
+    provideHttpClient(withInterceptors([]))
+  ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

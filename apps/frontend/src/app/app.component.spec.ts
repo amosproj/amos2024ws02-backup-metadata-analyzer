@@ -1,13 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { RouterModule } from '@angular/router';
 import { ClarityModule } from '@clr/angular';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AppComponent } from './app.component';
 import { By } from '@angular/platform-browser';
 import { AnalyzerService } from './shared/services/analyzer-service/analyzer-service';
 import { of } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -20,12 +21,11 @@ describe('AppComponent', () => {
     };
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
+        RouterModule.forRoot([]),
         ClarityModule,
         BrowserAnimationsModule,
-        HttpClientTestingModule,
       ],
-      providers: [{ provide: AnalyzerService, useValue: mockAnalyzerService }],
+      providers: [{ provide: AnalyzerService, useValue: mockAnalyzerService }, provideHttpClient(), provideHttpClientTesting() ],
       declarations: [AppComponent],
     }).compileComponents();
 
@@ -63,7 +63,6 @@ describe('AppComponent', () => {
       'Dashboard',
       'Backup Statistics',
       'Analysis Overview',
-      'Find Data',
       'How to get started?',
       
     ];
@@ -87,7 +86,6 @@ describe('AppComponent', () => {
       '/',
       '/backup-statistics',
       '/alert',
-      '/findData',
       '/user-manual',
       
     ];
