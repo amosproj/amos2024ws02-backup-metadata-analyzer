@@ -4,7 +4,6 @@ import os
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from metadata_analyzer.analyzer import Analyzer
 from metadata_analyzer.models import (
     Result,
     Tasks,
@@ -12,7 +11,7 @@ from metadata_analyzer.models import (
     Schedule,
     TaskEvent,
 )
-from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
+
 
 
 class Database:
