@@ -73,6 +73,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
   readonly alertDateFilter: CustomAlertFilter;
   readonly alertSeverityFilter: CustomAlertFilter;
   readonly alertTypeFilter: CustomAlertFilter;
+  readonly alertIdFilter: CustomAlertFilter;
 
   readonly alertTypeSubject = new BehaviorSubject<AlertType[]>([]);
   alerts$: Observable<APIResponse<Alert>> = of({
@@ -95,6 +96,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
     this.alertSeverityFilter = new CustomAlertFilter('severity');
     this.alertDateFilter = new CustomAlertFilter('date');
     this.alertTypeFilter = new CustomAlertFilter('alertType');
+    this.alertIdFilter = new CustomAlertFilter('id');
   }
   ngOnInit(): void {
     this.loadAlerts();
@@ -113,6 +115,7 @@ export class AlertPageComponent implements OnInit, OnDestroy {
       this.alertDateFilter.changes.pipe(startWith(null)),
       this.alertSeverityFilter.changes.pipe(startWith(null)),
       this.alertTypeFilter.changes.pipe(startWith(null)),
+      this.alertIdFilter.changes.pipe(startWith(null)),
     ])
       .pipe(
         map(() => this.buildFilterParams()),
@@ -166,6 +169,9 @@ export class AlertPageComponent implements OnInit, OnDestroy {
 
     if (this.alertTypeFilter.isActive()) {
       params.alertType = this.alertTypeFilter.ranges.alertType;
+    }
+    if (this.alertIdFilter.isActive()) {
+      params.id = this.alertIdFilter.ranges.id;
     }
 
     params.includeDeprecated = true;

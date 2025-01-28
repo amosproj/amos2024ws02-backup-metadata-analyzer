@@ -13,4 +13,24 @@ export interface ChartConfig {
     categoryField?: string;
     valueField?: string;
     seriesName?: string;
+    hideLabels?: boolean,
   }
+
+
+export interface TimelineDataPoint {
+  date: Date | number;
+  value: number;
+}
+
+export interface PieChartDataPoint {
+  category: string;
+  value?: number;
+  count?: number;
+}
+
+export interface AlertSeverityOverview {
+  ok: number;
+  info: number;
+  warning: number;
+  critical: number;
+}

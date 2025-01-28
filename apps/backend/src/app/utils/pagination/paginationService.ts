@@ -7,11 +7,11 @@ import {
 } from 'typeorm';
 import { PaginationDto } from './PaginationDto';
 import {
+  ADDITIONAL_BACKUP_ALERT,
   CREATION_DATE_ALERT,
+  MISSING_BACKUP_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
-  MISSING_BACKUP_ALERT,
-  ADDITIONAL_BACKUP_ALERT,
 } from '../constants';
 import { AlertTypeEntity } from '../../alerting/entity/alertType.entity';
 import { Alert } from '../../alerting/entity/alerts/alert';
@@ -74,7 +74,6 @@ export class PaginationService {
     whereClause: any,
     paginationOptionsDto: PaginationOptionsDto
   ): Promise<PaginationDto<T>> {
-
     // Define the columns to select and their types
     const columns = [
       'id',
@@ -85,7 +84,11 @@ export class PaginationService {
       'deprecated',
     ];
 
-    const  { parameters, unionQuery } = this.createUnionQuery(repositories, whereClause, columns);
+    const { parameters, unionQuery } = this.createUnionQuery(
+      repositories,
+      whereClause,
+      columns
+    );
     const orderClause = this.createOrderClauseString(orderInfo);
 
     // Apply pagination
@@ -157,7 +160,7 @@ export class PaginationService {
 
   /**
    * Takes the order information from the requests and builds an SQL string based on it
-   * @param orderInfo 
+   * @param orderInfo
    * @returns SQL string for the order clause
    */
   private createOrderClauseString(orderInfo: AlertOrderOptionsDto) {
@@ -172,33 +175,42 @@ export class PaginationService {
             END ${orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'}
             `;
     } else if (orderInfo.orderBy === 'date') {
-      orderClause = `ORDER BY creationDate ${orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'}`;
+      orderClause = `ORDER BY creationDate ${
+        orderInfo.sortOrder === 'ASC' ? 'ASC' : 'DESC'
+      }`;
     }
     return orderClause;
   }
 
-
   /**
    * Combines tables with UNION and applies where conditions based on whereClause
-   * @param repositories 
-   * @param whereClause 
+   * @param repositories
+   * @param whereClause
    * @param columns the coluns to select from the combined table. Every one has to be present in each table.
-   * @returns 
+   * @returns
    */
-  private createUnionQuery(repositories: Repository<any>[], whereClause: any, columns: string[]) {
+  private createUnionQuery(
+    repositories: Repository<any>[],
+    whereClause: any,
+    columns: string[]
+  ) {
     const parameters = [];
     let unionQuery = '';
 
     // Do a query for each repository and combine them with UNION
     for (let i = 0; i < repositories.length; i++) {
       const whereConditions = [];
+      //Only use alerts, whose alertType is user_active and master_active
+      whereConditions.push(
+        'alertType.user_active = true AND alertType.master_active = true'
+      );
       if (whereClause.severity) {
         whereConditions.push(`alertType.severity = $${parameters.length + 1}`);
         parameters.push(whereClause.severity);
       }
       if (whereClause.id) {
-        whereConditions.push(`alias${i}.id = $${parameters.length + 1}`); // Use = for uuid type
-        parameters.push(whereClause.id);
+        whereConditions.push(`CAST(alias${i}.id AS TEXT) LIKE $${parameters.length + 1}`);
+        parameters.push(`%${whereClause.id}%`);
       }
       if (whereClause.backupId) {
         whereConditions.push(`alias${i}.backupId = $${parameters.length + 1}`); // Use = for uuid type
@@ -206,7 +218,9 @@ export class PaginationService {
       }
       if (whereClause.fromDate && whereClause.toDate) {
         whereConditions.push(
-          `alias${i}.creationDate BETWEEN $${parameters.length + 1} AND $${parameters.length + 2}`
+          `alias${i}.creationDate BETWEEN $${parameters.length + 1} AND $${
+            parameters.length + 2
+          }`
         );
         parameters.push(whereClause.fromDate, whereClause.toDate);
       } else if (whereClause.fromDate) {
@@ -223,15 +237,18 @@ export class PaginationService {
         whereConditions.push(`alertType.name = $${parameters.length + 1}`);
         parameters.push(whereClause.alertType);
       }
-      if (whereClause.includeDeprecated === 'false' ||
+      if (
+        whereClause.includeDeprecated === 'false' ||
         whereClause.includeDeprecated === false ||
-        whereClause.includeDeprecated === undefined) {
+        whereClause.includeDeprecated === undefined
+      ) {
         whereConditions.push(`alias${i}.deprecated = FALSE`);
       }
       whereConditions.push(`alertType.user_active = TRUE`);
       whereConditions.push(`alertType.master_active = TRUE`);
 
-      const whereClauseString = whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
+      const whereClauseString =
+        whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
 
       const subQuery = repositories[i]
         .createQueryBuilder(`alias${i}`)
