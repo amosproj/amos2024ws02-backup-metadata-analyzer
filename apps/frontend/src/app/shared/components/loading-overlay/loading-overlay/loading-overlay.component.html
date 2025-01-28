@@ -1,0 +1,21 @@
+<div class="loading-overlay" *ngIf="isLoading">
+  <div class="loading-backdrop"></div>
+  <div class="loading-container">
+    <div class="logo-spinner">
+      <div class="spinner-wrapper">
+        <div class="flip-container">
+          <img
+            src="../../../../public/team_logo.png"
+            alt="Team Logo"
+            class="animated-logo"
+          />
+        </div>
+        <div class="spinner-ring"></div>
+      </div>
+    </div>
+    <div class="loading-text">
+      <h4>{{ title }}</h4>
+      <p *ngIf="subtitle">{{ subtitle }}</p>
+    </div>
+  </div>
+</div>

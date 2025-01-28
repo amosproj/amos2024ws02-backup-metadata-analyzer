@@ -1,7 +1,20 @@
+import datetime
+import os
+
 from sqlalchemy import create_engine, select, distinct
 from sqlalchemy.orm import Session
-from metadata_analyzer.models import BackupData, Result, Tasks, DataStore, Schedule, ResultLabel
-import os
+
+from metadata_analyzer.analyzer import Analyzer
+from metadata_analyzer.models import (
+    BackupData,
+    Result,
+    Tasks,
+    DataStore,
+    Schedule,
+    TaskEvent,
+    ResultLabel,
+)
+from metadata_analyzer.simple_rule_based_analyzer import SimpleRuleBasedAnalyzer
 
 
 class Database:
@@ -24,20 +37,21 @@ class Database:
             + db_name
         )
 
-
-    def get_data(self):
-        session = Session(self.engine)
-        stmt = select(BackupData)
-
-        result = session.scalars(stmt)
-        return result
-
-    def get_results(self):
+    def get_results(self, latest_backup_date=None):
         session = Session(self.engine)
         stmt = select(Result)
+        # Select all results since the latest backup date
+        if latest_backup_date is not None:
+            timestamp = datetime.datetime.strptime(
+                latest_backup_date, "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
+            stmt = select(Result).where(Result.start_time > timestamp)
+        else:
+            stmt = select(Result).where(Result.start_time > datetime.datetime.min)
 
-        result = session.scalars(stmt)
-        return result
+        results = session.scalars(stmt)
+
+        return results
 
     def get_tasks(self):
         session = Session(self.engine)
@@ -56,6 +70,13 @@ class Database:
     def get_schedules(self):
         session = Session(self.engine)
         stmt = select(Schedule)
+
+        result = session.scalars(stmt)
+        return result
+
+    def get_task_events(self):
+        session = Session(self.engine)
+        stmt = select(TaskEvent)
 
         result = session.scalars(stmt)
         return result

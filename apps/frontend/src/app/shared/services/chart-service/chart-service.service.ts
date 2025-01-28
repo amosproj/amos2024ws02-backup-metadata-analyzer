@@ -5,9 +5,15 @@ import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5percent from '@amcharts/amcharts5/percent';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import { ITimeInterval } from '@amcharts/amcharts5/.internal/core/util/Time';
-import { Backup } from '../../types/backup';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { ChartConfig, ChartType, TimeRange } from '../../types/chart-config';
+import _ from 'lodash';
+import {
+  ChartConfig,
+  ChartType,
+  TimeRange,
+  PieChartDataPoint,
+  TimelineDataPoint,
+} from '../../types/chart-config';
 
 @Injectable({
   providedIn: 'root',
@@ -21,9 +27,15 @@ export class ChartService {
 
   constructor() {}
 
-  createChart(
+  /**
+   * Creates chart based on config
+   * @param config contains all neccessary information about the chart
+   * @param data$ data to be displayed
+   * @param timeRange select the range of time for the chart
+   */
+  createChart<T>(
     config: ChartConfig,
-    data$: Observable<Backup[]>,
+    data$: Observable<T>,
     timeRange?: TimeRange
   ): void {
     const root = this.initializeRoot(config.id);
@@ -38,7 +50,11 @@ export class ChartService {
 
     this.animateChart(chart, series);
   }
-
+  /**
+   * Creates root for the chart
+   * @param containerId unique id of the chart
+   * @returns root to identify the chart
+   */
   private initializeRoot(containerId: string): am5.Root {
     if (this.roots[containerId]) {
       this.roots[containerId].dispose();
@@ -52,6 +68,9 @@ export class ChartService {
 
   /**
    * Initializes chart based on type
+   * @param root defines root of the chart
+   * @param config contains all neccessary information about the chart
+   * @returns chart instance
    */
   private initializeChart(root: am5.Root, config: ChartConfig): am5.Chart {
     const commonConfig = {
@@ -90,15 +109,20 @@ export class ChartService {
 
   /**
    * Creates axes for XY charts
+   * @param chart
+   * @param root
+   * @param timeRange
+   * @returns {xAxis, yAxis}
    */
   private createAxes(
     chart: am5xy.XYChart,
     root: am5.Root,
     timeRange: TimeRange
-  ) {
+  ): { xAxis: any; yAxis: any } {
     const yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(root, {
         numberFormat: '#,##0.00 b',
+        min: 0,
         renderer: am5xy.AxisRendererY.new(root, {
           pan: 'none',
           minGridDistance: 30,
@@ -112,15 +136,39 @@ export class ChartService {
         renderer: am5xy.AxisRendererX.new(root, {
           minGridDistance: 50,
           pan: 'none',
-          //tooltipLocation: 0.5,
+          visible: true,
         }),
         tooltipDateFormat: this.getDateFormat(timeRange),
+        start: 0,
+        end: 1,
+        visible: true,
+        maxDeviation: 0.1,
       })
     );
+
+    // Make axis labels explicitly visible
+    xAxis.get('renderer').labels.template.setAll({
+      visible: true,
+      forceHidden: false,
+    });
+
+    // Ensure gridlines are visible
+    xAxis.get('renderer').grid.template.setAll({
+      visible: true,
+      location: 0,
+    });
 
     return { xAxis, yAxis };
   }
 
+  /**
+   * create series for charts
+   * @param chart
+   * @param config
+   * @param root
+   * @param timeRange
+   * @returns series to visualize data
+   */
   private createSeries(
     chart: am5.Chart,
     config: ChartConfig,
@@ -135,8 +183,8 @@ export class ChartService {
           name: config.seriesName || 'Backups',
           xAxis: xAxis,
           yAxis: yAxis,
-          valueYField: config.valueYField || 'sizeMB',
-          valueXField: config.valueXField || 'creationDate',
+          valueYField: config.valueYField || 'value',
+          valueXField: config.valueXField || 'date',
           clustered: true,
           tooltip: am5.Tooltip.new(root, {
             labelText: this.getTooltipFormat(timeRange),
@@ -163,17 +211,23 @@ export class ChartService {
           name: config.seriesName || 'Distribution',
           valueField: config.valueField || 'value',
           categoryField: config.categoryField || 'category',
-          legendValueText: '{value} backups',
+          legendValueText: '{config.valueField} backups',
           legendLabelText: '{category}',
+          fillField: 'fill'
         })
       );
+
       this.chartHasNoDataHandler(series, config, 'pie');
 
       return series;
     }
     throw new Error('Unsupported chart configuration');
   }
-
+  /**
+   * ChartControls
+   * @param chart selected chart
+   * @param config chart config
+   */
   private addChartControls(chart: am5.Chart, config: ChartConfig): void {
     chart.children.unshift(
       am5.Legend.new(chart.root, {
@@ -195,72 +249,60 @@ export class ChartService {
       );
     }
   }
-
-  private animateChart(chart: am5.Chart, series: am5.Series): void {
-    series.appear(1000);
-    chart.appear(1000, 100);
-  }
-
-  prepareColumnData(backups: Backup[], timeRange: TimeRange): any[] {
+  /**
+   * Prepares data for column charts to visualize correct data format
+   * @param backups
+   * @param timeRange selected filter time range
+   * @returns Array of grouped objects with date and sizeMB properties
+   */
+  prepareColumnData<T>(
+    backups: T[],
+    timeRange: TimeRange
+  ): TimelineDataPoint[] {
     if (!backups?.length) return [];
 
-    backups = backups.map((backup) => {
-      return {
-        ...backup,
-        sizeMB: Math.floor(backup.sizeMB) * 1_000_000,
-      };
-    });
+    const processedData = backups.map((item: any) => ({
+      date: new Date(this.getDateValue(item)),
+      value: 'sizeMB' in item ? item.sizeMB * 1000000 : item.value,
+    }));
 
-    const sortedBackups = [...backups].sort(
-      (a, b) =>
-        new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()
+    return timeRange === 'year'
+      ? this.groupByWeek(processedData)
+      : this.groupByDay(processedData);
+  }
+
+  private getDateValue(item: any): Date | number {
+    return item.date || item.creationDate || item.timestamp || new Date();
+  }
+
+  private getNumericValue(item: any): number {
+    return item.sizeMB ? item.sizeMB * 1000000 : item.value || item.size || 0;
+  }
+
+  private groupByDay(data: TimelineDataPoint[]): TimelineDataPoint[] {
+    const grouped = _.groupBy(
+      data,
+      (item) => new Date(item.date).toISOString().split('T')[0]
     );
 
-    const groupedData = new Map<string, number>();
-
-    sortedBackups.forEach((backup) => {
-      const date = new Date(backup.creationDate);
-      const key = this.getGroupKey(date, timeRange);
-      groupedData.set(key, (groupedData.get(key) || 0) + backup.sizeMB);
-    });
-
-    return Array.from(groupedData.entries()).map(([key, total]) => ({
-      creationDate: this.parseGroupKey(key, timeRange),
-      sizeMB: total,
+    return Object.entries(grouped).map(([day, items]) => ({
+      date: new Date(day).getTime(),
+      value: _.sumBy(items, 'value'),
     }));
   }
 
-  private getGroupKey(date: Date, timeRange: TimeRange): string {
-    switch (timeRange) {
-      case 'week':
-      case 'month':
-        return date.toISOString().split('T')[0];
-      case 'year':
-        const weekNum = this.getWeekNumber(date);
-        return `${date.getFullYear()}-W${weekNum}`;
-    }
-  }
+  private groupByWeek(data: TimelineDataPoint[]): TimelineDataPoint[] {
+    const grouped = _.groupBy(data, (item) => {
+      const date = new Date(item.date);
+      const week = new Date(date);
+      week.setDate(date.getDate() - date.getDay() + 1);
+      return week.toISOString();
+    });
 
-  private parseGroupKey(key: string, timeRange: TimeRange): number {
-    if (timeRange === 'year' && key.includes('W')) {
-      const [year, week] = key.split('-W');
-      return this.getDateOfWeek(parseInt(year), parseInt(week)).getTime();
-    }
-    return new Date(key).getTime();
-  }
-
-  private getDateOfWeek(year: number, week: number): Date {
-    const date = new Date(year, 0, 1);
-    date.setDate(date.getDate() + (week - 1) * 7);
-    return date;
-  }
-
-  private getWeekNumber(date: Date): number {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    const yearStart = new Date(d.getFullYear(), 0, 1);
-    return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+    return Object.entries(grouped).map(([week, items]) => ({
+      date: new Date(week).getTime(),
+      value: _.sumBy(items, 'value'),
+    }));
   }
 
   private getAxisFormat(timeRange: TimeRange): string {
@@ -297,41 +339,83 @@ export class ChartService {
     }
   }
 
-  preparePieData(backups: Backup[]): any[] {
-    const ranges = [
-      { min: 0, max: 100, category: '0-100 MB' },
-      { min: 100, max: 500, category: '100-500 MB' },
-      { min: 500, max: 1000, category: '500MB-1GB' },
-      { min: 1000, max: Infinity, category: '>1GB' },
-    ];
+  preparePieData<T>(data: T): PieChartDataPoint[] {
+    if (!data) return [];
 
-    return ranges
-      .map((range) => ({
-        category: range.category,
-        value: backups.filter(
-          (b) => b.sizeMB >= range.min && b.sizeMB < range.max
-        ).length,
-      }))
-      .filter((item) => item.value > 0);
+    if (Array.isArray(data) && 'category' in (data[0] || {})) {
+      const categoryColors: { [key: string]: string } = {
+        OK: '#4caf50', // Green
+        INFO: '#2196f3', // Blue
+        WARNING: '#ffeb3b', // Yellow
+        CRITICAL: '#f44336', // Red
+      };
+
+      return data.map((item: any) => ({
+        category: item.category.toUpperCase(),
+        value: item.count,
+        count: item.count,
+        fill: am5.color(
+          categoryColors[item.category.toUpperCase()] || '#999999'
+        ), // Default gray if category not found
+      }));
+    }
+
+    if (Array.isArray(data) && 'startSize' in (data[0] || {})) {
+      return this.prepareSizeDistributionData(data as any);
+    } else {
+      return [];
+    }
+  }
+  private prepareSizeDistributionData(data: any[]): PieChartDataPoint[] {
+    const total = data.reduce((sum, item) => sum + item.count, 0);
+    return data.map((item) => ({
+      category: this.createSizeCategory(item.startSize, item.endSize),
+      count: item.count,
+      value: (item.count / total) * 100, // Calculate percentage
+    }));
+  }
+
+  private isAlertData(
+    data: any
+  ): data is { ok: number; info: number; warning: number; critical: number } {
+    return (
+      'ok' in data && 'info' in data && 'warning' in data && 'critical' in data
+    );
+  }
+
+  private createSizeCategory(start: number, end: number): string {
+    if (end === -1) {
+      return `>${this.formatSize(start)}`;
+    }
+    return `${this.formatSize(start)} - ${this.formatSize(end)}`;
+  }
+
+  private formatSize(mb: number): string {
+    if (mb >= 1000000) {
+      return `${(mb / 1000000).toFixed(0)}TB`;
+    }
+    if (mb >= 1000) {
+      return `${(mb / 1000).toFixed(0)}GB`;
+    }
+    return `${mb}MB`;
   }
 
   /**
    * Subscribes to data updates
    */
-  private subscribeToData(
+  private subscribeToData<T>(
     series: am5.Series,
-    data$: Observable<Backup[]>,
+    data$: Observable<T>,
     config: ChartConfig,
     timeRange?: TimeRange
   ): void {
     data$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (backups) => {
         series.data.clear();
-
-        if (backups?.length) {
+        if (Array.isArray(backups) && backups.length) {
           const chartData =
             config.type === 'column'
-              ? this.prepareColumnData(backups, timeRange!)
+              ? this.prepareColumnData(backups as any[], timeRange!)
               : this.preparePieData(backups);
           series.data.clear();
           series.data.setAll(chartData);
@@ -345,7 +429,7 @@ export class ChartService {
   private getBaseInterval(timeRange: string): ITimeInterval {
     switch (timeRange) {
       case 'week':
-        return { timeUnit: 'hour', count: 4 };
+        return { timeUnit: 'day', count: 1 };
       case 'month':
         return { timeUnit: 'day', count: 1 };
       case 'year':
@@ -353,6 +437,11 @@ export class ChartService {
       default:
         return { timeUnit: 'month', count: 1 };
     }
+  }
+
+  private animateChart(chart: am5.Chart, series: am5.Series): void {
+    series.appear(1000);
+    chart.appear(1000, 100);
   }
 
   /**

@@ -20,6 +20,10 @@ export class OverviewPageComponent implements AfterViewInit {
       id: 'overviewSizeColumnChart',
       type: ChartType.SIZECOLUMNCHART,
     },
+    {
+      id: 'overviewAlertsPieChart',
+      type: ChartType.SIZEPIECHART,
+    }
   ];
 
   protected isInfoPanelOpen = false;

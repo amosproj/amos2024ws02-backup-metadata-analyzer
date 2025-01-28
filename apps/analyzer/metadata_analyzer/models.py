@@ -1,25 +1,12 @@
 from datetime import datetime
+from typing import ClassVar, Optional
 
-from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import mapped_column, Mapped
+
 
 class Base(DeclarativeBase):
     pass
-
-class BackupData(Base):
-    __tablename__ = "BackupData"
-
-    id: Mapped[str] = mapped_column(primary_key=True)
-    saveset: Mapped[str]
-    sizeMB: Mapped[int]
-    creationDate: Mapped[datetime]
-    bio: Mapped[str]
-
-    def __repr__(self):
-        return f"""BackupData(id={self.id}, sizeMB={self.sizeMB}, creationDate={self.creationDate}, bio={self.bio!r})"""
-
-    def __str__(self):
-        return repr(self)
 
 
 class Result(Base):
@@ -45,6 +32,7 @@ class Result(Base):
     total_size: Mapped[int]
     throughput: Mapped[str]
     duration: Mapped[int]
+    scheduledTime: ClassVar[Optional[datetime]] = None
 
     def __repr__(self):
         return f"""Result(uuid={self.uuid})"""
@@ -68,6 +56,7 @@ class Result(Base):
             "data_size": self.data_size,
             "throughput": self.throughput,
             "duration": self.duration,
+            "scheduledTime": self.scheduledTime,
             "stored_size": self.stored_size,
             "total_size": self.data_size,
             "subtask_flag":self.subtask_flag
@@ -128,6 +117,22 @@ class Schedule(Base):
 
     def __repr__(self):
         return f"""Schedule(name={self.name})"""
+
+    def __str__(self):
+        return repr(self)
+
+
+class TaskEvent(Base):
+    __tablename__ = "task_events"
+
+    # For now I only added the most relevant columns
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    object: Mapped[str]
+    schedule: Mapped[str]
+
+    def __repr__(self):
+        return f"""TaskEvent(id={self.id})"""
 
     def __str__(self):
         return repr(self)

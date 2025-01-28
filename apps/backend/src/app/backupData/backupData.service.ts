@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -29,9 +30,26 @@ import { TasksService } from '../tasks/tasks.service';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
 import { TaskEntity } from '../tasks/entity/task.entity';
 import { BackupInformationDto } from '../information/dto/backupInformation.dto';
+import { BackupSizesPerDayDto } from './dto/BackupSizesPerDay.dto';
+import { BackupDataSizeRangeDto } from './dto/BackupDataSizeRanges.dto';
+
+const RANGES = [
+  { startSize: 0, endSize: 100 },
+  { startSize: 100, endSize: 500 },
+  { startSize: 500, endSize: 1000 },
+  { startSize: 1000, endSize: 5000 },
+  { startSize: 5000, endSize: 10000 },
+  { startSize: 10000, endSize: 50000 },
+  { startSize: 50000, endSize: 100000 },
+  { startSize: 100000, endSize: 500000 },
+  { startSize: 500000, endSize: 1000000 },
+  { startSize: 1000000, endSize: -1 },
+];
 
 @Injectable()
 export class BackupDataService extends PaginationService {
+  readonly logger = new Logger(BackupDataService.name);
+
   constructor(
     @InjectRepository(BackupDataEntity)
     private readonly backupDataRepository: Repository<BackupDataEntity>,
@@ -66,6 +84,13 @@ export class BackupDataService extends PaginationService {
     return this.backupDataRepository.findOne({ where: { id: id } });
   }
 
+  async findLatest(): Promise<BackupDataEntity | null> {
+    return this.backupDataRepository.findOne({
+      where: {},
+      order: { creationDate: 'DESC' },
+    });
+  }
+
   /**
    * Find all backups with pagination.
    */
@@ -81,6 +106,103 @@ export class BackupDataService extends PaginationService {
       this.createWhereClause(backupDataFilterDto, backupDataFilterByTaskIdsDto),
       paginationOptionsDto
     );
+  }
+
+  async getBackupDataSizesPerDay(
+    fromDate?: string,
+    toDate?: string,
+    taskIds?: string[],
+    types?: string[]
+  ): Promise<BackupSizesPerDayDto[]> {
+    //Validate Dates
+    const { from, to } = this.transformDates(fromDate, toDate);
+
+    const query = this.backupDataRepository.createQueryBuilder('backup');
+    query.select('DATE(backup.creationDate)', 'date');
+    query.addSelect('SUM(backup.sizeMB)', 'sizeMB');
+    query.groupBy('DATE(backup.creationDate)');
+
+    if (from) {
+      query.andWhere('DATE(backup.creationDate) >= :fromDate', {
+        fromDate: from,
+      });
+    }
+    if (to) {
+      query.andWhere('DATE(backup.creationDate) <= :toDate', {
+        toDate: to,
+      });
+    }
+
+    if (taskIds) {
+      query.andWhere('backup.taskId IN (:...taskIds)', { taskIds });
+    }
+
+    if (types) {
+      const typesArray = Array.isArray(types) ? types : [types];
+      query.andWhere('backup.type IN (:...types)', { types: typesArray });
+    }
+
+    return query.getRawMany();
+  }
+
+  async getBackupDataSizeRanges(
+    fromDate?: string,
+    toDate?: string,
+    taskIds?: string[],
+    types?: string[]
+  ): Promise<BackupDataSizeRangeDto[]> {
+    // Validate Dates
+    const { from, to } = this.transformDates(fromDate, toDate);
+
+    const query = this.backupDataRepository.createQueryBuilder('backup');
+
+    // Apply date filters
+    if (from) {
+      query.andWhere('backup.creationDate >= :fromDate', { fromDate: from });
+    }
+    if (to) {
+      query.andWhere('backup.creationDate <= :toDate', { toDate: to });
+    }
+
+    // Apply task ID filters
+    if (taskIds) {
+      query.andWhere('backup.taskId IN (:...taskIds)', { taskIds });
+    }
+
+    // Apply type filters
+    if (types) {
+      const typesArray = Array.isArray(types) ? types : [types];
+      query.andWhere('backup.type IN (:...types)', { types: typesArray });
+    }
+
+    // Initialize result array
+    const result: BackupDataSizeRangeDto[] = [];
+
+    // Iterate over predefined ranges and count backups in each range
+    for (const range of RANGES) {
+      const countQuery = query.clone();
+      if (range.endSize === -1) {
+        countQuery.andWhere('backup.sizeMB >= :startSize', {
+          startSize: range.startSize,
+        });
+      } else {
+        countQuery.andWhere(
+          'backup.sizeMB >= :startSize AND backup.sizeMB < :endSize',
+          {
+            startSize: range.startSize,
+            endSize: range.endSize,
+          }
+        );
+      }
+      const count = await countQuery.getCount();
+      result.push({
+        startSize: range.startSize,
+        endSize: range.endSize,
+        count: count,
+      });
+    }
+
+    return result;
   }
 
   /**
@@ -108,10 +230,13 @@ export class BackupDataService extends PaginationService {
   async createBatched(
     createBackupDataDtos: CreateBackupDataDto[]
   ): Promise<void> {
+    const existingTaskIds = await this.tasksService.findAll().then((tasks) => {
+      return tasks.map((task) => task.id);
+    });
     //ignore unknown taskIds
     for (const dto of createBackupDataDtos) {
-      if (dto.taskId && !(await this.tasksService.findOne(dto.taskId))) {
-        console.warn(
+      if (dto.taskId && !existingTaskIds.includes(dto.taskId)) {
+        this.logger.debug(
           `Task with id ${dto.taskId} not found - still creating the backup, but without task`
         );
         dto.taskId = undefined;
@@ -143,39 +268,18 @@ export class BackupDataService extends PaginationService {
 
     // Check if params from and to are valid dates
 
-    let from: Date | null = null;
-    let to: Date | null = null;
-    if (backupDataFilterDto.fromDate) {
-      from = new Date(backupDataFilterDto.fromDate);
-      if (Number.isNaN(from.getTime())) {
-        throw new BadRequestException('parameter fromDate is not a valid date');
-      }
-      //Set time to first millisecond of the day
-      from.setHours(0);
-      from.setMinutes(0);
-      from.setSeconds(0);
-      from.setMilliseconds(0);
-    }
-    if (backupDataFilterDto.toDate) {
-      to = new Date(backupDataFilterDto.toDate);
-      if (Number.isNaN(to.getTime())) {
-        throw new BadRequestException('parameter toDate is not a valid date');
-      }
-      //Set time to last millisecond of the day
-      to.setHours(0);
-      to.setMinutes(0);
-      to.setSeconds(0);
-      to.setDate(to.getDate() + 1);
-      to.setMilliseconds(-1);
-    }
+    const { from, to } = this.transformDates(
+      backupDataFilterDto.fromDate,
+      backupDataFilterDto.toDate
+    );
 
     //Creation date search
-    if (backupDataFilterDto.fromDate && backupDataFilterDto.toDate) {
-      where.creationDate = Between(from!, to!);
-    } else if (backupDataFilterDto.fromDate) {
-      where.creationDate = MoreThanOrEqual(from!);
-    } else if (backupDataFilterDto.toDate) {
-      where.creationDate = LessThanOrEqual(to!);
+    if (from && to) {
+      where.creationDate = Between(from, to);
+    } else if (from) {
+      where.creationDate = MoreThanOrEqual(from);
+    } else if (to) {
+      where.creationDate = LessThanOrEqual(to);
     }
 
     //Size search
@@ -226,47 +330,19 @@ export class BackupDataService extends PaginationService {
     }
 
     // Check if params fromScheduledDate and toScheduledDate are valid dates
-
-    let fromScheduledTime: Date | null = null;
-    let toScheduledTime: Date | null = null;
-    if (backupDataFilterDto.fromScheduledDate) {
-      fromScheduledTime = new Date(backupDataFilterDto.fromScheduledDate);
-      if (Number.isNaN(fromScheduledTime.getTime())) {
-        throw new BadRequestException(
-          'parameter fromScheduledTime is not a valid date'
-        );
-      }
-      //Set time to first millisecond of the day
-      fromScheduledTime.setHours(0);
-      fromScheduledTime.setMinutes(0);
-      fromScheduledTime.setSeconds(0);
-      fromScheduledTime.setMilliseconds(0);
-    }
-    if (backupDataFilterDto.toScheduledDate) {
-      toScheduledTime = new Date(backupDataFilterDto.toScheduledDate);
-      if (Number.isNaN(toScheduledTime.getTime())) {
-        throw new BadRequestException(
-          'parameter toScheduledTime is not a valid date'
-        );
-      }
-      //Set time to last millisecond of the day
-      toScheduledTime.setHours(0);
-      toScheduledTime.setMinutes(0);
-      toScheduledTime.setSeconds(0);
-      toScheduledTime.setDate(toScheduledTime.getDate() + 1);
-      toScheduledTime.setMilliseconds(-1);
-    }
+    const { from: fromScheduledTime, to: toScheduledTime } =
+      this.transformDates(
+        backupDataFilterDto.fromScheduledDate,
+        backupDataFilterDto.toScheduledDate
+      );
 
     //Creation date search
-    if (
-      backupDataFilterDto.fromScheduledDate &&
-      backupDataFilterDto.toScheduledDate
-    ) {
-      where.scheduledTime = Between(fromScheduledTime!, toScheduledTime!);
-    } else if (backupDataFilterDto.fromScheduledDate) {
-      where.scheduledTime = MoreThanOrEqual(fromScheduledTime!);
-    } else if (backupDataFilterDto.toScheduledDate) {
-      where.scheduledTime = LessThanOrEqual(toScheduledTime!);
+    if (fromScheduledTime && toScheduledTime) {
+      where.scheduledTime = Between(fromScheduledTime, toScheduledTime);
+    } else if (fromScheduledTime) {
+      where.scheduledTime = MoreThanOrEqual(fromScheduledTime);
+    } else if (toScheduledTime) {
+      where.scheduledTime = LessThanOrEqual(toScheduledTime);
     }
     return where;
   }
@@ -291,5 +367,43 @@ export class BackupDataService extends PaginationService {
       [backupDataOrderOptionsDto.orderBy ?? 'creationDate']:
         backupDataOrderOptionsDto.sortOrder ?? SortOrder.DESC,
     };
+  }
+
+  /**
+   * Transform dates to Date objects.
+   * Sets fromDate to first millisecond of the day and toDate to last millisecond of the day.
+   * @param fromDate
+   * @param toDate
+   */
+  private transformDates(
+    fromDate?: string,
+    toDate?: string
+  ): { from: Date | null; to: Date | null } {
+    let from: Date | null = null;
+    let to: Date | null = null;
+    if (fromDate) {
+      from = new Date(fromDate);
+      if (Number.isNaN(from.getTime())) {
+        throw new BadRequestException('parameter fromDate is not a valid date');
+      }
+      //Set time to first millisecond of the day
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+    }
+    if (toDate) {
+      to = new Date(toDate);
+      if (Number.isNaN(to.getTime())) {
+        throw new BadRequestException('parameter toDate is not a valid date');
+      }
+      //Set time to last millisecond of the day
+      to.setHours(0);
+      to.setMinutes(0);
+      to.setSeconds(0);
+      to.setDate(to.getDate() + 1);
+      to.setMilliseconds(-1);
+    }
+    return { from, to };
   }
 }

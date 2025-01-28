@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
-import { DemoEntity } from './demo/entity/demo.entity';
 import { Init1730126846408 } from './migrations/1730126846408-Init';
 import { BackupDataEntity } from './backupData/entity/backupData.entity';
 import { AddBackupDataTable1730491370687 } from './migrations/1730491370687-AddBackupDataTable';
@@ -31,7 +30,13 @@ import { AddScheduledTimeToBackup1734538152155 } from './migrations/173453815215
 import { DataStoreEntity } from './dataStores/entity/dataStore.entity';
 import { DataStores1734616685846 } from './migrations/1734616685846-DataStores';
 import { AddAlertCreationDate1736344989806 } from './migrations/1736344989806-AddAlertCreationDate';
+import { MissingBackupAlertEntity } from './alerting/entity/alerts/missingBackupAlert.entity';
+import { AddAlertMissingBackup1736620579537 } from './migrations/1736620579537-AddAlertMissingBackup';
+import { AdditionalBackupAlertEntity } from './alerting/entity/alerts/additionalBackupAlert.entity';
+import { AddAlertAdditionalBackup1736630779875 } from './migrations/1736630779875-AddAlertAdditionalBackup';
 import { StorageOverflowTime1736550460789 } from './migrations/1736550460789-StorageOverflowTime';
+import { DeprecatedFlag1737107214086 } from './migrations/1737107214086-DeprecatedFlag';
+import { DeprecatedFlagNewAlerts1737406388351 } from './migrations/1737406388351-DeprecatedFlagNewAlerts';
 
 /**
  * Used by NestJS to reach database.
@@ -52,7 +57,6 @@ export class DbConfigService implements TypeOrmOptionsFactory {
       password: this.configService.getOrThrow<string>('DATABASE_PASSWORD'),
       database: this.configService.getOrThrow<string>('DATABASE_DATABASE'),
       entities: [
-        DemoEntity,
         BackupDataEntity,
         AlertTypeEntity,
         SizeAlertEntity,
@@ -61,6 +65,8 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         TaskEntity,
         MailReceiverEntity,
         DataStoreEntity,
+        MissingBackupAlertEntity,
+        AdditionalBackupAlertEntity,
       ],
       migrationsRun: true,
       migrations: [
@@ -84,7 +90,11 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         AddScheduledTimeToBackup1734538152155,
         DataStores1734616685846,
         AddAlertCreationDate1736344989806,
+        AddAlertMissingBackup1736620579537,
+        AddAlertAdditionalBackup1736630779875,
         StorageOverflowTime1736550460789,
+        DeprecatedFlag1737107214086,
+        DeprecatedFlagNewAlerts1737406388351,
       ],
       logging: true,
       logger: 'debug',

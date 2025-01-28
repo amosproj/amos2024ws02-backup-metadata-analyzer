@@ -4,8 +4,9 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { BackupType } from '../../backupData/dto/backupType';
 import { SizeAlertEntity } from '../../alerting/entity/alerts/sizeAlert.entity';
+import { MissingBackupAlertEntity } from '../../alerting/entity/alerts/missingBackupAlert.entity';
 import { SeverityType } from '../../alerting/dto/severityType';
-import { SIZE_ALERT } from '../constants';
+import { SIZE_ALERT, MISSING_BACKUP_ALERT } from '../constants';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { MailReceiverEntity } from './entity/MailReceiver.entity';
 import { NotFoundException } from '@nestjs/common';
@@ -91,6 +92,7 @@ describe('MailService', () => {
         saveset: 'saveset1',
       },
       creationDate: new Date(),
+      deprecated: false,
     };
 
     await service.sendAlertMail(alert);
@@ -103,12 +105,59 @@ describe('MailService', () => {
         reason: 'Size of latest Backup decreased by 50 %',
         description:
           'Size of latest Backup decreased by 50% compared to the previous Backup. This could indicate a problem with the Backup.',
+        info: "-",
+        infoColumnName: "",
         value: '100 MB',
         referenceValue: '200 MB',
         valueColumnName: 'Size of backup',
         referenceValueColumnName: 'Size of previous backup',
         backupId: 'backup-id',
         creationDate: alert.backup?.creationDate?.toLocaleString() ?? '',
+      },
+      attachments: [
+        {
+          filename: 'logo.png',
+          path: 'mocked/path/to/logo.png',
+          cid: 'logo',
+          contentType: 'image/png',
+        },
+      ],
+    });
+  });
+
+  it('should send alert mail with different template', async () => {
+    const alert: MissingBackupAlertEntity = {
+      id: 'alert-id',
+      alertType: {
+        id: 'alert-type-id',
+        name: MISSING_BACKUP_ALERT,
+        severity: SeverityType.CRITICAL,
+        user_active: true,
+        master_active: true,
+      },
+      referenceDate: new Date(),
+      creationDate: new Date(),
+      deprecated: false,
+    };
+
+    await service.sendAlertMail(alert);
+
+    expect(mailerService.sendMail).toHaveBeenCalledWith({
+      to: ['test@example.com'],
+      subject: 'Alert has been triggered',
+      template: './alertMailOneInfoRow',
+      context: {
+        reason: 'Backup was scheduled but not started',
+        description:
+          `According to the schedule there should have been at backup started at ${alert.referenceDate.toString()}`,
+        info: alert.referenceDate.toString(),
+        infoColumnName: "Scheduled Date",
+        value: '-',
+        referenceValue: '-',
+        valueColumnName: '',
+        referenceValueColumnName: '',
+        backupId: '-',
+        creationDate: alert.backup?.creationDate?.toLocaleString() ?? '-',
       },
       attachments: [
         {

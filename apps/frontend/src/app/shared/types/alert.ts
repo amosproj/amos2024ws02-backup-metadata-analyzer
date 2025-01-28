@@ -1,5 +1,6 @@
 import { Backup } from './backup';
 import { AlertType } from './alertType';
+import { BackupType } from '../enums/backup.types';
 
 export interface Alert {
   id: string;
@@ -23,4 +24,12 @@ export interface StorageFillAlert extends Alert {
   filled: number;
   highWaterMark: number;
   capacity: number;
+}
+
+export interface MissingBackupAlert extends Alert {
+  referenceDate: Date;
+}
+
+export interface AdditionalBackupAlert extends Alert {
+  date: Date;
 }
