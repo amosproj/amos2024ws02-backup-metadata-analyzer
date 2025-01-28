@@ -280,6 +280,19 @@ def set_enhanced_size_forecast_steps():
     Analyzer.enhanced_storage_analyzer.set_forecast_length(steps), 200
     return "Setting forecasting steps was succesful", 200
 
+@app.route("/setEnhancedSizeForecastFrequency", methods=["POST"])
+@swag_from(os.path.join(path,'swagger','setEnhancedSizeForecastFrequency.yaml'), validation=False)
+def set_enhanced_size_forecast_frequency():
+    try:
+        steps = int(request.args.get("freq"))
+    except:
+        return (
+            "Threshold value could not be converted to int, was " + str(steps),
+            400,
+        )
+    Analyzer.enhanced_storage_analyzer.set_forecast_length(steps), 200
+    return "Setting forecasting frequency was succesful", 200
+
 def main():
     database = Database()
     backend = Backend(os.getenv("BACKEND_URL"))

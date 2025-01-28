@@ -1,11 +1,11 @@
-Sets a new threshold value for the time series analysis, should be between 1 and 0
+Sets a new number of steps that the forecast should look ahead for
     ---
     parameters:
       - name: Input
         in: query
         name: steps
         schema:
-            type: string
+            type: int
     responses:
         200:
             description: Steps set

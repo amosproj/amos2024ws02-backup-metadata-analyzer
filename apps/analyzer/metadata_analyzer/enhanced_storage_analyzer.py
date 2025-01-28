@@ -1,6 +1,7 @@
 from metadata_analyzer.forecast_storage_fill_alert import ForecastStorageFillAlert
 import pandas as pd
 import numpy as np
+import metadata_analyzer.backend
 from darts import TimeSeries
 from darts.models import AutoARIMA
 from decimal import Decimal
@@ -36,13 +37,19 @@ class EnhancedStorageAnalyzer:
         # removing subtasks leads to forecast not converging, so leave commented out
         #root_df = root_df.loc[root_df["subtask_flag"]=='0']
 
+        #id lookup for backend triggering at the end
+        data_store_ids = defaultdict(list)
+
         data_store_capacities = defaultdict(list)
         # groups savesets of backups by the data_store they are saved on
         data_store_groups = defaultdict(list)
         for row in labeled_data_store:
             data_store_groups[row.name].append(row.saveset)
-            # saves data_store cpacities for later use
+
+            # saves data_store capacities for later use
             data_store_capacities[row.name] = [row.capacity]
+
+            data_store_ids[row.name].append(row.uuid)
 
 
         # calculates the forecast values of each task
@@ -108,8 +115,15 @@ class EnhancedStorageAnalyzer:
                         prev = np.add(prev,forecast * scaler)
             
             scaled_forecasts.update({store:prev})
-        
-        return self.get_overflow_times(scaled_forecasts,data_store_capacities)
+
+        overflows = self.get_overflow_times(scaled_forecasts,data_store_capacities)
+        for store,overflow in overflows.items():
+            uuid = data_store_ids[store]
+            #print("sending trigger to backup for id " + str(uuid),flush=True)
+            #print("and overflow time " + str(overflow),flush=True)
+            self.backend.create_size_overflow_notification(uuid,{"overflowTime":overflow}.as_json())
+
+        return overflows
     
     def forecast_storage(self,df):
 
