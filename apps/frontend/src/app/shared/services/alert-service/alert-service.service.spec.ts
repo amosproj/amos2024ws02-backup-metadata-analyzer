@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import {
-  HttpClientTestingModule,
   HttpTestingController,
+  provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { AlertServiceService } from './alert-service.service';
 import { BASE_URL } from '../../types/configuration';
@@ -11,6 +11,7 @@ import { randomUUID } from 'node:crypto';
 import { SeverityType } from '../../enums/severityType';
 import { BackupType } from '../../enums/backup.types';
 import { AlertFilterParams } from '../../types/alert-filter-type';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('AlertServiceService', () => {
   let service: AlertServiceService;
@@ -19,8 +20,9 @@ describe('AlertServiceService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         AlertServiceService,
         { provide: BASE_URL, useValue: baseUrl },
       ],
