@@ -262,13 +262,13 @@ def set_enhanced_size_forecast_steps():
 @swag_from(os.path.join(path,'swagger','timeSeriesAnalysis','forecasting','frequency.yaml'), validation=False)
 def set_enhanced_size_forecast_frequency():
     try:
-        steps = int(request.args.get("freq"))
+        freq = int(request.args.get("frequency"))
     except:
         return (
-            "Threshold value could not be converted to int, was " + str(steps),
+            "Threshold value could not be converted to int, was " + str(freq),
             400,
         )
-    Analyzer.enhanced_storage_analyzer.set_forecast_length(steps), 200
+    Analyzer.enhanced_storage_analyzer.set_forecast_length(freq), 200
     return "Setting forecasting frequency was succesful", 200
 
 def main():

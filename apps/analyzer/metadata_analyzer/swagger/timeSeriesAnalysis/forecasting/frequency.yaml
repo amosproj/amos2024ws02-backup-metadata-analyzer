@@ -3,7 +3,7 @@ Sets a new frequency to scale the time series for the forecast on
     parameters:
       - name: Input
         in: query
-        name: steps
+        name: frequency
         schema:
             type: int
     responses:
