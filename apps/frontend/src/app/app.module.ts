@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { appRoutes } from './app.routes';
-import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -77,7 +76,6 @@ import { LoadingOverlayComponent } from './shared/components/loading-overlay/loa
     NgxEchartsModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule,
     RouterModule.forRoot(appRoutes),
   ],
   providers: [{ provide: BASE_URL, useValue: 'http://localhost:3000/api' }, DatePipe],
