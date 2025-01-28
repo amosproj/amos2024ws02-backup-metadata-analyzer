@@ -71,7 +71,7 @@ describe('AnalyzerServiceService', () => {
     await service.updateBasicBackupData();
 
     expect(httpService.post).toHaveBeenCalledWith(
-      'http://localhost:8000/updateBasicBackupData'
+      'http://localhost:8000/updating/basicBackupData'
     );
   });
 
@@ -83,7 +83,7 @@ describe('AnalyzerServiceService', () => {
     service.triggerStorageFillAnalysis();
 
     expect(httpService.post).toHaveBeenCalledWith(
-      'http://localhost:8000/simpleRuleBasedAnalysisStorageCapacity?alertLimit=-1'
+      'http://localhost:8000/alerting/storageCapacity?alertLimit=-1'
     );
   });
 
@@ -95,7 +95,7 @@ describe('AnalyzerServiceService', () => {
     service.triggerCreationDateAnalysis();
 
     expect(httpService.post).toHaveBeenCalledWith(
-      'http://localhost:8000/simpleRuleBasedAnalysisCreationDates?alertLimit=-1'
+      'http://localhost:8000/alerting/creationDate?alertLimit=-1'
     );
   });
 
@@ -107,7 +107,7 @@ describe('AnalyzerServiceService', () => {
     await service.triggerSizeAnalysisForFullBackups();
 
     expect(httpService.post).toHaveBeenCalledWith(
-      'http://localhost:8000/simpleRuleBasedAnalysis?alertLimit=-1'
+      'http://localhost:8000/alerting/size/fullBackups?alertLimit=-1'
     );
   });
 
@@ -119,7 +119,7 @@ describe('AnalyzerServiceService', () => {
     await service.triggerSizeAnalysisForDiffBackups();
 
     expect(httpService.post).toHaveBeenCalledWith(
-      'http://localhost:8000/simpleRuleBasedAnalysisDiff?alertLimit=-1'
+      'http://localhost:8000/alerting/size/diffBackups?alertLimit=-1'
     );
   });
 
@@ -131,7 +131,7 @@ describe('AnalyzerServiceService', () => {
     await service.triggerSizeAnalysisForIncBackups();
 
     expect(httpService.post).toHaveBeenCalledWith(
-      'http://localhost:8000/simpleRuleBasedAnalysisInc?alertLimit=-1'
+      'http://localhost:8000/alerting/size/incBackups?alertLimit=-1'
     );
   });
 });

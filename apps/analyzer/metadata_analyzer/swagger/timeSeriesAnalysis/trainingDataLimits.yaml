@@ -29,3 +29,5 @@ Sets start and end index of the values to be used as a training set.
     responses:
         200:
             description: Values set succesfully
+    tags:
+      - Time Series Analysis

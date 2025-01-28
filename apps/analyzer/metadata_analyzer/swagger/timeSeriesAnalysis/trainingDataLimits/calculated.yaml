@@ -5,3 +5,5 @@ Triggers automatic calculation of the indices for training data in basic time se
         description: Calculation was succesful
       500:
         description: Calculation could not be completed
+    tags:
+      - Time Series Analysis

@@ -19,33 +19,32 @@ swagger = Swagger(app)
 load_dotenv(dotenv_path=".env")
 path = app.root_path
 
-
 @app.route("/")
 def hello_world():
     return "Hello, world!"
 
-@app.route("/updateBasicBackupData", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','updateBasicBackupData.yaml'), validation=False)
+@app.route("/updating/basicBackupData", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "updating", "basicBackupData.yaml"), validation=False)
 def update_data():
-    return jsonify(Analyzer.update_data())
+    return jsonify(analyzer.update_data())
 
 
-@app.route("/simpleRuleBasedAnalysis", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysis.yaml'), validation=False)
+@app.route("/alerting/size/fullBackups", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "alerting", "size", "fullBackups.yaml"), validation=False)
 def simple_rule_based_analysis():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
 
     try:
         int(alert_limit)
-        return jsonify(Analyzer.simple_rule_based_analysis(int(alert_limit)))
+        return jsonify(analyzer.simple_rule_based_analysis(int(alert_limit)))
     except ValueError:
         return "Invalid value for alert limit", 400
 
 
-@app.route("/simpleRuleBasedAnalysisDiff", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisDiff.yaml'), validation=False)
+@app.route("/alerting/size/diffBackups", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "alerting", "size", "diffBackups.yaml"), validation=False)
 def simple_rule_based_analysis_diff():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
 
     try:
         int(alert_limit)
@@ -54,10 +53,10 @@ def simple_rule_based_analysis_diff():
         return "Invalid value for alert limit", 400
 
 
-@app.route("/simpleRuleBasedAnalysisInc", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisInc.yaml'), validation=False)
+@app.route("/alerting/size/incBackups", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "alerting", "size", "incBackups.yaml"), validation=False)
 def simple_rule_based_analysis_inc():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
 
     try:
         int(alert_limit)
@@ -66,10 +65,10 @@ def simple_rule_based_analysis_inc():
         return "Invalid value for alert limit", 400
 
 
-@app.route("/simpleRuleBasedAnalysisCreationDates", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisCreationDates.yaml'), validation=False)
-def simple_rule_based_analysis_creation_dates():
-    alert_limit = request.args.get("alertLimit")
+@app.route("/alerting/creationDate", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "alerting", "creationDate.yaml"), validation=False)
+def simple_rule_based_analysis_creation_date():
+    alert_limit = request.args.get("alertLimit", -1)
     now = datetime.now()
 
     try:
@@ -81,10 +80,10 @@ def simple_rule_based_analysis_creation_dates():
         return "Invalid value for alert limit", 400
 
 
-@app.route("/simpleRuleBasedAnalysisStorageCapacity", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','simpleRuleBasedAnalysisStorageCapacity.yaml'), validation=False)
+@app.route("/alerting/storageCapacity", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "alerting", "storageCapacity.yaml"), validation=False)
 def simple_rule_based_analysis_storage_capacity():
-    alert_limit = request.args.get("alertLimit")
+    alert_limit = request.args.get("alertLimit", -1)
 
     try:
         int(alert_limit)
@@ -95,8 +94,8 @@ def simple_rule_based_analysis_storage_capacity():
         return "Invalid value for alert limit", 400
 
 
-@app.route("/kMeansAnomalies", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','kMeansAnomalies.yaml'), validation=False)
+@app.route("/timeSeriesAnalysis/kMeansAnomalies", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "timeSeriesAnalysis", "kMeansAnomalies.yaml"), validation=False)
 def runTimeSeriesTests():
     json = request.get_json()
     field = "None"
@@ -129,11 +128,10 @@ def runTimeSeriesTests():
         )
 
 
-@app.route("/getTaskIds", methods=["GET"])
-@swag_from(os.path.join(path,'swagger','getTaskIds.yaml'), validation=False)
+@app.route("/timeSeriesAnalysis/taskIds", methods=["GET"])
+@swag_from(os.path.join(path, "swagger", "timeSeriesAnalysis", "taskIds.yaml"), validation=False)
 def return_task_ids():
     try:
-
         return jsonify(Analyzer.time_series_get_task_ids())
     except AttributeError as att:
         return (
@@ -143,8 +141,8 @@ def return_task_ids():
         )
 
 
-@app.route("/getFrequenciesForTask", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','getFrequenciesForTask.yaml'), validation=False)
+@app.route("/timeSeriesAnalysis/frequenciesForTask", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "timeSeriesAnalysis", "frequenciesForTask.yaml"), validation=False)
 def return_frequencies():
     json = request.get_json()
     field = "None"
@@ -168,8 +166,8 @@ def return_frequencies():
         )
 
 
-@app.route("/setTimeSeriesThreshold", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','setTimeSeriesThreshold.yaml'), validation=False)
+@app.route("/timeSeriesAnalysis/threshold", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "timeSeriesAnalysis", "threshold.yaml"), validation=False)
 def set_time_series_threshold():
     try:
         threshold = float(request.args.get("threshold"))
@@ -181,11 +179,11 @@ def set_time_series_threshold():
     if threshold > 1 or threshold < 0:
         return "Threshold value not between 1 and 0, was " + str(threshold), 400
     Analyzer.time_series_analyzer.set_threshold(threshold), 200
-    return "Setting threshold was succesful", 200
+    return "Setting threshold was successful", 200
 
 
-@app.route("/setTimeSeriesClusters", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','setTimeSeriesClusters.yaml'), validation=False)
+@app.route("/timeSeriesAnalysis/clusters", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "timeSeriesAnalysis", "clusters.yaml"), validation=False)
 def set_time_series_clusters():
     try:
         clusters = None
@@ -193,11 +191,11 @@ def set_time_series_clusters():
     except:
         return "Clusters value not an integer, was " + str(clusters), 400
     Analyzer.time_series_analyzer.set_clusters(clusters)
-    return "Setting clusters was succesful", 200
+    return "Setting clusters was successful", 200
 
 
-@app.route("/setTrainingDataLimits", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','setTrainingDataLimits.yaml'), validation=False)
+@app.route("/timeSeriesAnalysis/trainingDataLimits", methods=["POST"])
+@swag_from(os.path.join(path, "swagger", "timeSeriesAnalysis", "trainingDataLimits.yaml"), validation=False)
 def set_training_limits():
     if request.method == "POST":
         data = request.get_json()
@@ -213,11 +211,11 @@ def set_training_limits():
 
         Analyzer.time_series_analyzer.set_training_start(start)
         Analyzer.time_series_analyzer.set_training_end(end)
-        return "Indices set succesfully", 200
+        return "Indices set successfully", 200
 
 
-@app.route("/calcTrainingDataLimits", methods=["GET"])
-@swag_from(os.path.join(path,'swagger','calcTrainingDataLimits.yaml'), validation=False)
+@app.route("/timeSeriesAnalysis/trainingDataLimits/calculated", methods=["GET"])
+@swag_from(os.path.join(path, "swagger", "timeSeriesAnalysis" , "trainingDataLimits", "calculated.yaml"), validation=False)
 def calculate_training_indices():
     try:
         Analyzer.time_series_analyzer.calc_training_indices()
@@ -233,7 +231,7 @@ def calculate_training_indices():
             + str(ex),
             500,
         )
-    return "Calculation of training series was succesful", 200
+    return "Calculation of training series was successful", 200
 
 @app.route("/enhancedAnalysisStorageCapacity", methods=["GET"])
 @swag_from(os.path.join(path,'swagger','enhancedAnalysisStorageCapacity.yaml'), validation=False)
@@ -283,7 +281,7 @@ def main():
     simple_rule_based_analyzer = SimpleRuleBasedAnalyzer(backend, 0.2, 0.2, 0.2, 0.2)
     schedule_based_analyzer = ScheduleBasedAnalyzer(backend)
     enhanced_storage_analyzer = EnhancedStorageAnalyzer(backend)
-    Analyzer.init(
+    Analyzer.__init__(
         database,
         backend,
         simple_rule_based_analyzer,
