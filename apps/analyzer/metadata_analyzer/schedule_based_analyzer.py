@@ -100,6 +100,9 @@ class ScheduleBasedAnalyzer:
         if len(results) == 0:
             return []
 
+        if not self._check_schedule(schedule):
+            return []
+
         alerts = []
         stop_date = min(stop_date, results[-1].start_time + 2 * self.calculate_expected_delta(schedule)) # Stop a potential flood of missing backup alerts (5-min schedule generates 1000s of alerts)
         tolerance = self.calculate_tolerance(schedule)
@@ -109,7 +112,7 @@ class ScheduleBasedAnalyzer:
             first_start,
             self.calculate_next_reference_time(schedule, first_start),
         )
-        print(results[0].task, schedule, start_date, stop_date, len(results), cur_ref, next_ref, self.calculate_expected_delta(schedule), file=sys.stderr)
+        #print(results[0].task, schedule, start_date, stop_date, len(results), cur_ref, next_ref, self.calculate_expected_delta(schedule), file=sys.stderr)
         num_consecutive_alerts = 0
         while cur_ref < stop_date:
             if last_ref >= start_date:
@@ -132,9 +135,9 @@ class ScheduleBasedAnalyzer:
                 next_ref,
                 self.calculate_next_reference_time(schedule, next_ref),
             )
-        print("Generated", len(alerts), file=sys.stderr)
-        for alert in alerts[:5]:
-            print(alert.as_json(), file=sys.stderr)
+        #print("Generated", len(alerts), file=sys.stderr)
+        #for alert in alerts[:5]:
+        #    print(alert.as_json(), file=sys.stderr)
         return alerts
 
     def _analyze_one_ref(self, results, last_ref, cur_ref, next_ref, tolerance):
@@ -213,6 +216,36 @@ class ScheduleBasedAnalyzer:
                 next_reference_time += timedelta(days=1)
 
         return next_reference_time
+
+    def _check_schedule(self, schedule):
+        bases = ["MIN", "HOU", "DAY", "WEE", "MON"]
+        if schedule.p_base not in bases:
+            print(f"Schedule {schedule.name} has invalid base {schedule.p_base}", file=sys.stderr)
+            return False
+
+        if schedule.p_base in ["DAY", "WEE", "MON"]:
+            try:
+                time.fromisoformat(schedule.start_time)
+            except ValueError:
+                print(f"Schedule {schedule.name} has invalid start_time {schedule.start_time}", file=sys.stderr)
+                return False
+
+        if schedule.p_base in ["WEE", "MON"]:
+            day_mask = [
+                schedule.mo,
+                schedule.tu,
+                schedule.we,
+                schedule.th,
+                schedule.fr,
+                schedule.sa,
+                schedule.su,
+            ]
+            accepted_days = [i for i in range(7) if day_mask[i] == "1"]
+            if accepted_days == []:
+                print(f"Schedule {schedule.name} has no accepted days", file=sys.stderr)
+                return False
+
+        return True
 
     def _alert_key_function(alert):
         if isinstance(alert, CreationDateAlert) or isinstance(
