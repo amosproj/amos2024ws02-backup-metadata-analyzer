@@ -50,7 +50,7 @@ import { UserManualComponent } from './management/components/user-manual/user-ma
 import { AlertPageComponent } from './alert-page/component/alert-page/alert-page.component';
 import { DatePipe } from '@angular/common';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay/loading-overlay.component';
-import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 @NgModule({
   declarations: [
