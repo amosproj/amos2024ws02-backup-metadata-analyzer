@@ -16,6 +16,7 @@ class Analyzer:
 		Analyzer.time_series_analyzer = time_series_analyzer
 		Analyzer.schedule_based_analyzer = schedule_based_analyzer
 		Analyzer.series_loaded = False
+		Analyzer.enhanced_storage_analyzer = enhanced_storage_analyzer
 
 	# Convert a result from the database into the format used by the backend
 	def _convert_result(result):
