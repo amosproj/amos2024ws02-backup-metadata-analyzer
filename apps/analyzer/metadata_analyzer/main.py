@@ -234,7 +234,7 @@ def calculate_training_indices():
     return "Calculation of training series was successful", 200
 
 @app.route("/timeSeriesAnalysis/forecasting/storageOverflow", methods=["GET"])
-@swag_from(os.path.join(path,'swagger','timeSeriesAnalysis","forecasting","storageOverflow.yaml'), validation=False)
+@swag_from(os.path.join(path,'swagger','timeSeriesAnalysis','forecasting','storageOverflow.yaml'), validation=False)
 def enhanced_analysis_storage_capacity():
     try:
         return jsonify(
@@ -246,7 +246,7 @@ def enhanced_analysis_storage_capacity():
         return "Invalid value occurred: " + str(valError), 500
     
 @app.route("/timeSeriesAnalysis/forecasting/steps", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','timeSeriesAnalysis","forecasting","steps.yaml'), validation=False)
+@swag_from(os.path.join(path,'swagger','timeSeriesAnalysis','forecasting','steps.yaml'), validation=False)
 def set_enhanced_size_forecast_steps():
     try:
         steps = int(request.args.get("steps"))
@@ -259,7 +259,7 @@ def set_enhanced_size_forecast_steps():
     return "Setting forecasting steps was succesful", 200
 
 @app.route("/timeSeriesAnalysis/forecasting/frequency", methods=["POST"])
-@swag_from(os.path.join(path,'swagger','timeSeriesAnalysis","forecasting","frequency.yaml'), validation=False)
+@swag_from(os.path.join(path,'swagger','timeSeriesAnalysis','forecasting','frequency.yaml'), validation=False)
 def set_enhanced_size_forecast_frequency():
     try:
         steps = int(request.args.get("freq"))
