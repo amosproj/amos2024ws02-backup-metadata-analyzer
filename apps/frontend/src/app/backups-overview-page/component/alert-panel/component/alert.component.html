@@ -1,18 +1,18 @@
 <div class="card" [ngClass]="getStatusClass()">
-  <div class="card-header" routerLink="/alert" style="cursor: pointer">
+  <div class="card-header" routerLink="/alert" style="cursor: pointer" *ngIf="alertCounts$ | async as alertCounts">
     <span>Status: {{ status }}</span>
     <span class="alert-counts">
-      <span *ngIf="criticalAlertsCount > 0" class="alert-count">
+      <span *ngIf="alertCounts.criticalAlerts > 0" class="alert-count">
         <cds-icon shape="error-standard" class="is-solid"></cds-icon>
-        {{ criticalAlertsCount }}
+        {{ alertCounts.criticalAlerts }}
       </span>
-      <span *ngIf="warningAlertsCount > 0" class="alert-count">
+      <span *ngIf="alertCounts.warningAlerts > 0" class="alert-count">
         <cds-icon shape="warning-standard" class="is-solid"></cds-icon>
-        {{ warningAlertsCount }}
+        {{ alertCounts.warningAlerts }}
       </span>
-      <span *ngIf="infoAlertsCount > 0" class="alert-count">
+      <span *ngIf="alertCounts.infoAlerts > 0" class="alert-count">
         <cds-icon shape="info-standard" class="is-solid"></cds-icon>
-        {{ warningAlertsCount }}
+        {{ alertCounts.infoAlerts }}
       </span>
     </span>
   </div>

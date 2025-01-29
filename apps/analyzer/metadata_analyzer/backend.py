@@ -30,6 +30,16 @@ class Backend:
 		r = requests.post(url, json=alerts)
 		r.raise_for_status()
 
+	def create_missing_backup_alert(self, alert):
+		url = self.backend_url + "alerting/missingBackup"
+		r = requests.post(url, json=alert)
+		r.raise_for_status()
+
+	def create_additional_backup_alert(self, alert):
+		url = self.backend_url + "alerting/additionalBackup"
+		r = requests.post(url, json=alert)
+		r.raise_for_status()
+
 	def create_storage_fill_alerts(self, alerts):
 		url = self.backend_url + "alerting/storageFill"
 		r = requests.post(url, json=alerts)
@@ -48,3 +58,9 @@ class Backend:
 		r = requests.get(url)
 		r.raise_for_status()
 		return r.json()
+	
+	def create_size_overflow_notification(self, uuid, overflow):
+		headers = {'Content-type': 'application/json'}
+		url = self.backend_url + f"datastores/{uuid}/OverflowTime/"
+		r = requests.put(url, data=overflow,headers=headers)
+		r.raise_for_status()

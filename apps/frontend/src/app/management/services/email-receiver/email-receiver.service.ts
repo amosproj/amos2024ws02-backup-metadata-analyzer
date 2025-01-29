@@ -12,11 +12,18 @@ export class EmailReceiverService {
     @Inject(BASE_URL) private readonly baseUrl: string,
     private readonly http: HttpClient
   ) {}
-
+  /**
+   * Returns all email receiver details
+   * @returns Observable<EmailType[]>
+   */
   getAllEmailReceiver(): Observable<EmailType[]> {
     return this.http.get<EmailType[]>(`${this.baseUrl}/mail`);
   }
-
+  /**
+   * Updates email receiver
+   * @param email EmailType
+   * @returns Observable<EmailType> and handling error if email already exists
+   */
   updateEmailReceiver(email: Partial<EmailType>): Observable<EmailType> {
     return this.http
       .post<EmailType>(`${this.baseUrl}/mail`, {
@@ -24,7 +31,10 @@ export class EmailReceiverService {
       })
       .pipe(catchError(this.handleError));
   }
-
+  /**
+   * 
+   * @param id email id to delete
+   */
   deleteEmail(id: string): Observable<void> {
     return this.http
       .delete<void>(`${this.baseUrl}/mail/${id}`)

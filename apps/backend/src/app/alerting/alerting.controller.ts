@@ -10,11 +10,13 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
-  ApiConflictResponse, ApiCreatedResponse, ApiNoContentResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AlertingService } from './alerting.service';
@@ -26,6 +28,8 @@ import { BackupType } from '../backupData/dto/backupType';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
 import { AlertStatusDto } from './dto/alertStatus.dto';
 import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.dto';
+import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAlert.dto';
+import { CreateAdditionalBackupAlertDto } from './dto/alerts/createAdditionalBackupAlert.dto';
 import { PaginationOptionsDto } from '../utils/pagination/PaginationOptionsDto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
@@ -44,38 +48,44 @@ export class AlertingController {
   @ApiOperation({
     summary: 'Returns the number of Info, Warning and Critical alerts.',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'The number of Info, Warning and Critical alerts.',
     type: AlertStatisticsDto,
   })
-  async getStatistics(): Promise<AlertStatisticsDto> {
-    return this.alertingService.getStatistics();
+  @ApiQuery({
+    name: 'fromDate',
+    description: 'Filter alerts by creation date',
+    required: false,
+    type: String,
+  })
+  async getStatistics(
+    @Query('fromDate') fromDate?: string
+  ): Promise<AlertStatisticsDto> {
+    return this.alertingService.getStatistics(undefined, fromDate);
   }
 
   @Get('repetitions')
   @ApiOperation({
     summary: 'Returns Information about repeated Alerts.',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'The number of Info, Warning and Critical alerts.',
   })
   async getTestRepetitions(): Promise<AlertSummaryDto> {
     return this.alertingService.getRepetitions();
   }
 
-
   @Post('type')
   @ApiOperation({ summary: 'Create a new alert type.' })
   @ApiConflictResponse({ description: 'Alert type already exists' })
+  @ApiCreatedResponse({ description: 'Alert Type created' })
   @ApiBody({ type: CreateAlertTypeDto })
   async createAlertType(@Body() createAlertTypeDto: CreateAlertTypeDto) {
     await this.alertingService.createAlertType(createAlertTypeDto);
   }
 
   @Patch('type/:alertTypeId/user')
-  @ApiOperation({ summary: 'Activate Alert Type by user.' })
+  @ApiOperation({ summary: '(De-)Activate Alert Type by user.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiBody({ type: AlertStatusDto })
   @ApiNoContentResponse({ description: 'Alert Type Status changed' })
@@ -90,7 +100,7 @@ export class AlertingController {
   }
 
   @Patch('type/:alertTypeId/admin')
-  @ApiOperation({ summary: 'Activate Alert Type by admin.' })
+  @ApiOperation({ summary: '(De-)Activate Alert Type by admin.' })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
   @ApiBody({ type: AlertStatusDto })
   @ApiNoContentResponse({ description: 'Alert Type Status changed' })
@@ -118,8 +128,7 @@ export class AlertingController {
     required: false,
     type: Boolean,
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'Returns all alert types.',
     type: AlertTypeEntity,
     isArray: true,
@@ -133,8 +142,7 @@ export class AlertingController {
 
   @Get()
   @ApiOperation({ summary: 'Returns all alert Objects paginated.' })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'Returns all alert Objects paginated.',
     type: Alert,
     isArray: true,
@@ -192,14 +200,36 @@ export class AlertingController {
     );
   }
 
+  @Post('missingBackup')
+  @ApiOperation({ summary: 'Create a new missing backup alert.' })
+  @ApiBody({ type: CreateMissingBackupAlertDto })
+  async missingBackupAlert(
+    @Body() createMissingBackupAlertDto: CreateMissingBackupAlertDto
+  ): Promise<void> {
+    await this.alertingService.createMissingBackupAlert(
+      createMissingBackupAlertDto
+    );
+  }
+
+  @Post('additionalBackup')
+  @ApiOperation({ summary: 'Create a new additional backup alert.' })
+  @ApiNotFoundResponse({ description: 'Backup not found' })
+  @ApiBody({ type: CreateAdditionalBackupAlertDto })
+  async additionalBackupAlert(
+    @Body() createAdditionalBackupAlertDto: CreateAdditionalBackupAlertDto
+  ): Promise<void> {
+    await this.alertingService.createAdditionalBackupAlert(
+      createAdditionalBackupAlertDto
+    );
+  }
+
   @Get('type/:typeName/latest')
   @ApiOperation({
     summary:
       'Gets the id of the backup with the latest alert of the given type.',
   })
   @ApiNotFoundResponse({ description: 'Alert type not found' })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'Returns the backupId of the latest alert of the given type.',
     type: String,
   })

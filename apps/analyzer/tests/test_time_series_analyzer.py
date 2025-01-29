@@ -48,7 +48,7 @@ class Test_time_series_analyzer:
             [mock_result1, mock_result2, mock_result3, mock_result4]
         )
         time_series_analyzer = Time_series_analyzer([0.95, 5])
-        Analyzer.init(database, backend, None, time_series_analyzer)
+        Analyzer.__init__(database, backend, None, time_series_analyzer, None, None)
         Analyzer.load_time_series_data()
 
         with pytest.raises(ValueError) as valErr:
@@ -154,7 +154,7 @@ class Test_time_series_analyzer:
             ]
         )
         time_series_analyzer = Time_series_analyzer([0.95, 5])
-        Analyzer.init(database, backend, None, time_series_analyzer)
+        Analyzer.__init__(database, backend, None, time_series_analyzer, None, None)
         Analyzer.load_time_series_data()
 
         result = Analyzer.simple_time_series_analysis(
@@ -263,7 +263,7 @@ class Test_time_series_analyzer:
         time_series_analyzer = Time_series_analyzer([0.95, 5])
         Analyzer.time_series_analyzer.set_training_start(0)
         Analyzer.time_series_analyzer.set_training_end(5)
-        Analyzer.init(database, backend, None, time_series_analyzer)
+        Analyzer.__init__(database, backend, None, time_series_analyzer, None, None)
         Analyzer.load_time_series_data()
 
         result = Analyzer.simple_time_series_analysis(

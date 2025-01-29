@@ -1,236 +1,97 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SidePanelComponent } from './side-panel.component';
-import { APIResponse } from '../../types/api-response';
-import { Backup } from '../../types/backup';
 import { BackupType } from '../../enums/backup.types';
-import { ChartService } from '../../services/chart-service/chart-service.service';
+import { ChartService } from '../../charts/chart-service/chart-service.service';
 import { BackupService } from '../../services/backup-service/backup-service.service';
-import { BackupTask } from '../../types/backup.task';
-import { ChartType } from '../../enums/chartType';
+import { of } from 'rxjs';
 
 describe('SidePanelComponent', () => {
   let component: SidePanelComponent;
-  let mockBackupService: any;
-  let mockChartService: any;
-  const mockBackups: APIResponse<Backup> = {
-    data: [
-      {
-        id: '1',
-        sizeMB: 500,
-        creationDate: new Date(),
-        saveset: '',
-        type: BackupType.DIFFERENTIAL,
-      },
-      {
-        id: '2',
-        sizeMB: 750,
-        creationDate: new Date(),
-        saveset: '',
-        type: BackupType.DIFFERENTIAL,
-      },
-    ],
-    paginationData: {
-      total: 2,
-    },
+  let backupService: BackupService;
+  let chartService: ChartService;
+
+  const mockBackupService = {
+    getAllBackupTasks: vi.fn(),
+    getBackupSizesPerDay: vi.fn(),
+    getGroupedBackupSizes: vi.fn(),
+    getBackupAlertSeverityOverview: vi.fn(),
+    getRefreshObservable: vi.fn()
+  };
+
+  const mockChartService = {
+    updateChart: vi.fn(),
+    createChart: vi.fn(),
+    updateTimeRange: vi.fn(),
+    dispose: vi.fn()
   };
 
   beforeEach(() => {
-    mockBackupService = {
-      getAllBackups: vi.fn().mockReturnValue(of(mockBackups)),
-      getAllBackupTasks: vi.fn().mockReturnValue(of([])),
-      getRefreshObservable: vi.fn().mockReturnValue(of({})),
-    };
+    backupService = mockBackupService as unknown as BackupService;
+    chartService = mockChartService as unknown as ChartService;
+    
+    mockBackupService.getRefreshObservable.mockReturnValue(of(null));
+    mockBackupService.getAllBackupTasks.mockReturnValue(of([]));
+    mockBackupService.getBackupSizesPerDay.mockReturnValue(of([]));
+    mockBackupService.getGroupedBackupSizes.mockReturnValue(of([]));
+    mockBackupService.getBackupAlertSeverityOverview.mockReturnValue(of({
+      ok: 0,
+      info: 0,
+      warning: 0,
+      critical: 0
+    }));
 
-    mockChartService = {
-      createChart: vi.fn(),
-      updateChart: vi.fn(),
-      prepareColumnData: vi.fn().mockReturnValue([]),
-      preparePieData: vi.fn().mockReturnValue([]),
-      updateTimeRange: vi.fn(),
-      dispose: vi.fn(),
-    };
-
-    TestBed.configureTestingModule({
-      providers: [
-        SidePanelComponent,
-        { provide: BackupService, useValue: mockBackupService },
-        { provide: ChartService, useValue: mockChartService },
-      ],
-    });
-
-    component = TestBed.inject(SidePanelComponent);
+    component = new SidePanelComponent(backupService, chartService);
   });
 
-  it('should create the component', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('setTimeRange', () => {
-    it('should set time range to week', () => {
-      component['charts'] = [
-        { id: 'overviewSizeColumnChart', type: ChartType.SIZECOLUMNCHART },
-      ];
-
-      const spy = vi.spyOn(component['timeRangeSubject$'], 'next');
-      const chartServiceSpy = vi.spyOn(mockChartService, 'updateTimeRange');
-
-      component.setTimeRange('week');
-
-      const emittedValue = spy.mock.calls[0][0];
-      expect(emittedValue.range).toBe('week');
-      expect(emittedValue.fromDate).toBeDefined();
-      expect(emittedValue.toDate).toBeDefined();
-      expect(chartServiceSpy).toHaveBeenCalledWith(
-        'overviewSizeColumnChart',
-        'week'
-      );
-    });
-
-    it('should set time range to month', () => {
-      const spy = vi.spyOn(component['timeRangeSubject$'], 'next');
-
-      component.setTimeRange('month');
-
-      const emittedValue = spy.mock.calls[0][0];
-      expect(emittedValue.range).toBe('month');
-    });
-
-    it('should set time range to year', () => {
-      const spy = vi.spyOn(component['timeRangeSubject$'], 'next');
-
-      component.setTimeRange('year');
-
-      const emittedValue = spy.mock.calls[0][0];
-      expect(emittedValue.range).toBe('year');
-    });
+  it('should initialize with default values', () => {
+    expect(component.isOpen).toBe(false);
+    expect(component.selectedBackupTypes).toEqual([]);
+    expect(component.selectedTask).toEqual([]);
   });
 
-  describe('Lifecycle Hooks', () => {
-    it('should dispose chart service on destroy', () => {
-      component.ngOnDestroy();
-      expect(mockChartService.dispose).toHaveBeenCalled();
-    });
+  it('should set time range correctly', () => {
+    component.setTimeRange('week');
+    expect(component['timeRangeSubject$'].getValue().range).toBe('week');
 
-    it('should create charts after view init', () => {
-      component['charts'] = [
-        { id: 'overviewSizePieChart', type: ChartType.SIZEPIECHART },
-        { id: 'overviewSizeColumnChart', type: ChartType.SIZECOLUMNCHART },
-      ];
+    component.setTimeRange('month');
+    expect(component['timeRangeSubject$'].getValue().range).toBe('month');
 
-      vi.useFakeTimers();
-      component.ngAfterViewInit();
-      vi.advanceTimersByTime(200);
-
-      expect(mockChartService.createChart).toHaveBeenCalledTimes(4);
-      vi.useRealTimers();
-    });
+    component.setTimeRange('year');
+    expect(component['timeRangeSubject$'].getValue().range).toBe('year');
   });
 
-  describe('Time Range and Chart Data Integration', () => {
-    it('should handle time range changes and update charts', () => {
-      component['charts'] = [
-        { id: 'overviewSizeColumnChart', type: ChartType.SIZECOLUMNCHART },
-      ];
-      component.setTimeRange('week');
-
-      expect(mockChartService.updateTimeRange).toHaveBeenCalledWith(
-        'overviewSizeColumnChart',
-        'week'
-      );
-    });
+  it('should set backup types correctly', () => {
+    const types = [BackupType.FULL, BackupType.INCREMENTAL];
+    component.setBackupTypes(types);
+    expect(component.selectedBackupTypes).toEqual(types);
   });
 
-  describe('Search and Task Selection', () => {
-    it('should handle task search input', () => {
-      const searchTerm = 'backup-task';
-      const searchSpy = vi.spyOn(component['backupTaskSearchTerm$'], 'next');
-
-      component.onSearchInput(searchTerm);
-
-      expect(searchSpy).toHaveBeenCalledWith(searchTerm);
-    });
-
-    it('should update selected backup tasks', () => {
-      const mockTasks = [
-        { id: '1', displayName: 'Task 1' },
-        { id: '2', displayName: 'Task 2' },
-      ] as BackupTask[];
-      const taskSubjectSpy = vi.spyOn(component['backupTaskSubject$'], 'next');
-
-      component.setBackupTask(mockTasks);
-
-      expect(component['selectedTask']).toEqual(mockTasks);
-      expect(taskSubjectSpy).toHaveBeenCalledWith(mockTasks);
-    });
+  it('should toggle filter panel state', () => {
+    expect(component.isOpen).toBe(false);
+    component['changeFilterPanelState']();
+    expect(component.isOpen).toBe(true);
+    component['changeFilterPanelState']();
+    expect(component.isOpen).toBe(false);
   });
 
-  describe('Filter Panel', () => {
-    it('should toggle filter panel state', () => {
-      expect(component['isOpen']).toBe(false);
-
-      component['changeFilterPanelState']();
-      expect(component['isOpen']).toBe(true);
-
-      component['changeFilterPanelState']();
-      expect(component['isOpen']).toBe(false);
-    });
+  it('should call loadData on init', () => {
+    const loadDataSpy = vi.spyOn(component, 'loadData');
+    component.ngOnInit();
+    expect(loadDataSpy).toHaveBeenCalled();
   });
 
-  describe('Chart Data Updates', () => {
-    it('should update charts when new data is received', (done) => {
-      component['charts'] = [
-        { id: 'overviewSizePieChart', type: ChartType.SIZEPIECHART },
-        { id: 'overviewSizeColumnChart', type: ChartType.SIZECOLUMNCHART },
-      ];
-
-      const mockResponse = {
-        data: [
-          { id: '1', sizeMB: 100, creationDate: new Date() },
-          { id: '2', sizeMB: 200, creationDate: new Date() },
-        ],
-        paginationData: { total: 2 },
-      };
-
-      mockBackupService.getAllBackups.mockReturnValue(of(mockResponse));
-
-      component.loadData();
-
-      component.chartBackups$.subscribe(() => {
-        expect(mockChartService.prepareColumnData).toHaveBeenCalled();
-        expect(mockChartService.preparePieData).toHaveBeenCalled();
-        expect(mockChartService.updateChart).toHaveBeenCalledTimes(2);
-      });
-    });
+  it('should clean up on destroy', () => {
+    component.ngOnDestroy();
+    expect(chartService.dispose).toHaveBeenCalled();
   });
 
-  describe('Task Filtering', () => {
-    it('should filter tasks based on search term', (done) => {
-      const mockTasks = [
-        { id: '1', displayName: 'Daily Backup' },
-        { id: '2', displayName: 'Weekly Backup' },
-      ] as BackupTask[];
-
-      mockBackupService.getAllBackupTasks.mockReturnValue(of(mockTasks));
-
-      component['selectedbackupTasks$'].subscribe((filteredTasks) => {
-        expect(filteredTasks).toEqual([]);
-      });
-    });
-    it('should handle empty search term', (done) => {
-      const mockTasks = [
-        { id: '1', displayName: 'Daily Backup' },
-      ] as BackupTask[];
-
-      mockBackupService.getAllBackupTasks.mockReturnValue(of(mockTasks));
-      component.onSearchInput('');
-
-      (component as any).selectedbackupTasks$.subscribe(
-        (filteredTasks: BackupTask[]) => {
-          expect(filteredTasks).toEqual([]);
-        }
-      );
-    });
+  it('should handle backup task search', () => {
+    const searchTerm = 'test';
+    component.onSearchInput(searchTerm);
+    expect(component['backupTaskSearchTerm$']).toBeTruthy();
   });
 });

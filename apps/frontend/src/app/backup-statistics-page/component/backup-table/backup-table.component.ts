@@ -95,13 +95,11 @@ export class BackupTableComponent implements OnInit, OnDestroy {
       .subscribe((params) => this.filterOptions$.next(params));
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
+  /**
+   * Load all backups and filter them based
+   *  on the filter options for table
+   */
   loadBackups(): void {
-    //Load all backups and filter them based on the filter options for table
     this.backups$ = this.filterOptions$.pipe(
       switchMap((params) => this.backupService.getAllBackups(params)),
       takeUntil(this.destroy$)
@@ -145,12 +143,14 @@ export class BackupTableComponent implements OnInit, OnDestroy {
 
     return params;
   }
-
+  /**
+   * Update the backup types filter
+   * @param types selected backup types
+   */
   setBackupTypes(types: BackupType[]): void {
     this.selectedBackupTypes = types;
     this.typeFilter.updateRanges({ type: types });
   }
-
   /**
    * Check the filter states and add new filter values to the filterOptions$ subject
    * @param state filter values
@@ -175,11 +175,23 @@ export class BackupTableComponent implements OnInit, OnDestroy {
     this.filterOptions$.next(params);
     this.loading = false;
   }
-
+  /**
+   * Change date format
+   * @param date datee to format
+   * @returns formatted date
+   */
   formatDate(date?: Date): string {
     return this.datePipe.transform(date, 'dd.MM.yyyy HH:mm') ?? '';
   }
 
   protected readonly ClrDatagridSortOrder = ClrDatagridSortOrder;
+  /**
+   * Convert bytes to human readable format
+   */
   protected readonly shortenBytes = shortenBytes;
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

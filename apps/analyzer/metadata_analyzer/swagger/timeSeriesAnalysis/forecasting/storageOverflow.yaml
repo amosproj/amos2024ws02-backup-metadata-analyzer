@@ -1,0 +1,18 @@
+Runs an enhanced, forecast based analysis on data stores searching for ones that will soon be full. Time is returned in seconds.
+    ---
+    definitions:
+        overflow_times:
+            type: object
+            properties:
+                dataStore1:
+                    type: int
+                    example: 12321
+                dataStore2:
+                    type: int
+                    example: 42
+                dataStore3:
+                    type: int
+                    example: 219832
+    responses:
+      200:
+        description: All forecasted overflow times that could be determined

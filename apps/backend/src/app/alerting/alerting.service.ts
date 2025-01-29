@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  Get,
   Injectable,
   NotFoundException,
   OnModuleInit,
@@ -28,10 +27,16 @@ import { CreateStorageFillAlertDto } from './dto/alerts/createStorageFillAlert.d
 import { BackupType } from '../backupData/dto/backupType';
 import { CreationDateAlertEntity } from './entity/alerts/creationDateAlert.entity';
 import { CreateCreationDateAlertDto } from './dto/alerts/createCreationDateAlert.dto';
+import { MissingBackupAlertEntity } from './entity/alerts/missingBackupAlert.entity';
+import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAlert.dto';
+import { AdditionalBackupAlertEntity } from './entity/alerts/additionalBackupAlert.entity';
+import { CreateAdditionalBackupAlertDto } from './dto/alerts/createAdditionalBackupAlert.dto';
 import {
   CREATION_DATE_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
+  MISSING_BACKUP_ALERT,
+  ADDITIONAL_BACKUP_ALERT,
 } from '../utils/constants';
 import { SeverityType } from './dto/severityType';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
@@ -40,7 +45,11 @@ import { AlertOrderOptionsDto } from './dto/alertOrderOptions.dto';
 import { AlertFilterDto } from './dto/alertFilter.dto';
 import { PaginationService } from '../utils/pagination/paginationService';
 import { AlertStatisticsDto } from './dto/alertStatistics.dto';
-import { AlertOcurrenceDto, AlertSummaryDto, RepeatedAlertDto } from './dto/alertSummary';
+import {
+  AlertOcurrenceDto,
+  AlertSummaryDto,
+  RepeatedAlertDto,
+} from './dto/alertSummary';
 
 @Injectable()
 export class AlertingService extends PaginationService implements OnModuleInit {
@@ -56,6 +65,10 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     private readonly creationDateRepository: Repository<CreationDateAlertEntity>,
     @InjectRepository(StorageFillAlertEntity)
     private readonly storageFillRepository: Repository<StorageFillAlertEntity>,
+    @InjectRepository(MissingBackupAlertEntity)
+    private readonly missingBackupRepository: Repository<MissingBackupAlertEntity>,
+    @InjectRepository(AdditionalBackupAlertEntity)
+    private readonly additionalBackupRepository: Repository<AdditionalBackupAlertEntity>,
     //Services
     private readonly mailService: MailService,
     private readonly backupDataService: BackupDataService
@@ -64,6 +77,8 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     this.alertRepositories.push(this.sizeAlertRepository);
     this.alertRepositories.push(this.creationDateRepository);
     this.alertRepositories.push(this.storageFillRepository);
+    this.alertRepositories.push(this.missingBackupRepository);
+    this.alertRepositories.push(this.additionalBackupRepository);
   }
 
   async onModuleInit() {
@@ -90,6 +105,16 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         master_active: true,
         severity: SeverityType.WARNING,
       },
+      {
+        name: MISSING_BACKUP_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
+      {
+        name: ADDITIONAL_BACKUP_ALERT,
+        master_active: true,
+        severity: SeverityType.WARNING,
+      },
     ];
 
     for (const alertType of alertTypes) {
@@ -102,7 +127,32 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     }
   }
 
-  async getStatistics(): Promise<AlertStatisticsDto> {
+  async getStatistics(
+    includeDeprecated?: boolean,
+    fromDate?: string
+  ): Promise<AlertStatisticsDto> {
+    // Check if param is valid date
+
+    let from: Date | null = null;
+    if (fromDate) {
+      from = new Date(fromDate);
+      if (Number.isNaN(from.getTime())) {
+        throw new BadRequestException('parameter fromDate is not a valid date');
+      }
+      //Set time to first millisecond of the day
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+    }
+
+    const filter = {} as FindOptionsWhere<Alert>;
+    if (includeDeprecated === undefined || includeDeprecated === false) {
+      filter.deprecated = false;
+    }
+    if (from) {
+      filter.creationDate = MoreThanOrEqual(from);
+    }
     const alertStatisticsDto: AlertStatisticsDto = {
       infoAlerts: 0,
       warningAlerts: 0,
@@ -110,13 +160,13 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     };
     for (const repo of this.alertRepositories) {
       const infoAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.INFO } },
+        where: { ...filter, alertType: { severity: SeverityType.INFO } },
       });
       const warningAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.WARNING } },
+        where: { ...filter, alertType: { severity: SeverityType.WARNING } },
       });
       const criticalAlerts = await repo.count({
-        where: { alertType: { severity: SeverityType.CRITICAL } },
+        where: { ...filter, alertType: { severity: SeverityType.CRITICAL } },
       });
       alertStatisticsDto.infoAlerts += infoAlerts;
       alertStatisticsDto.warningAlerts += warningAlerts;
@@ -125,7 +175,6 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return alertStatisticsDto;
   }
 
-
   async getRepetitions(): Promise<AlertSummaryDto> {
     const retAlerts: RepeatedAlertDto[] = [];
 
@@ -133,19 +182,22 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       if (repository === this.storageFillRepository) {
         await this.fetchRepeatedStorageAlerts(retAlerts); // adds alerts to retAlerts
       } else {
-
         // get History of task associated alerts
-        const repeatedAlerts = await repository
+        const repeatedAlerts = (await repository
           .createQueryBuilder('alert')
-          .select('alertType.severity, alertType.name AS type, backup.taskId, task.displayName, COUNT(alert.id) as count')
+          .select(
+            'alertType.severity, alertType.name AS type, backup.taskId, task.displayName, COUNT(alert.id) as count'
+          )
           .leftJoin('alert.backup', 'backup')
           .leftJoin('backup.taskId', 'task')
           .leftJoin('alert.alertType', 'alertType')
           .where('backup.taskId IS NOT NULL')
-          .groupBy('backup.taskId, alertType.severity, alertType.name, task.displayName')
+          .groupBy(
+            'backup.taskId, alertType.severity, alertType.name, task.displayName'
+          )
 
           .having('COUNT(alert.id) > 1')
-          .getRawMany() as RepeatedAlertDto[];
+          .getRawMany()) as RepeatedAlertDto[];
 
         for (const repeatedAlert of repeatedAlerts) {
           const history: AlertOcurrenceDto[] = [];
@@ -167,8 +219,8 @@ export class AlertingService extends PaginationService implements OnModuleInit {
             }
             repeatedAlert.latestAlert = alertEntities[0];
           }
-          
-          repeatedAlert.history = history.slice(0,5);
+
+          repeatedAlert.history = history.slice(0, 5);
           repeatedAlert.firstOccurence = history[history.length - 1].date;
         }
         retAlerts.push(...repeatedAlerts);
@@ -176,7 +228,9 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       retAlerts.sort((a, b) => b.count - a.count);
     }
 
-    const alertStatisticsDto: AlertStatisticsDto = await this.getStatistics();
+    const alertStatisticsDto: AlertStatisticsDto = await this.getStatistics(
+      true
+    );
     const alertSummaryDto: AlertSummaryDto = {
       infoAlerts: alertStatisticsDto.infoAlerts,
       criticalAlerts: alertStatisticsDto.criticalAlerts,
@@ -188,18 +242,17 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     return alertSummaryDto;
   }
 
-
-
-
   private async fetchRepeatedStorageAlerts(retAlerts: RepeatedAlertDto[]) {
     {
-      const repeatedStorageAlerts = await this.storageFillRepository
+      const repeatedStorageAlerts = (await this.storageFillRepository
         .createQueryBuilder('alert')
-        .select('alertType.severity, alertType.name AS type, COUNT(alert.id) as count')
+        .select(
+          'alertType.severity, alertType.name AS type, COUNT(alert.id) as count'
+        )
         .leftJoin('alert.alertType', 'alertType')
         .groupBy('alert.dataStoreName, alertType.severity, alertType.name')
         .having('COUNT(alert.id) > 1')
-        .getRawMany() as RepeatedAlertDto[];
+        .getRawMany()) as RepeatedAlertDto[];
       // get History of storage associated alerts
       for (const repeatedStorageAlert of repeatedStorageAlerts) {
         const history: AlertOcurrenceDto[] = [];
@@ -214,9 +267,12 @@ export class AlertingService extends PaginationService implements OnModuleInit {
           },
         });
         for (const alertEntity of alertEntities) {
-          history.push({  date: alertEntity.creationDate, alertId: alertEntity.id });
+          history.push({
+            date: alertEntity.creationDate,
+            alertId: alertEntity.id,
+          });
         }
-        repeatedStorageAlert.history = history.slice(0,5);
+        repeatedStorageAlert.history = history.slice(0, 5);
         repeatedStorageAlert.firstOccurence = history[history.length - 1].date;
       }
       retAlerts.push(...repeatedStorageAlerts);
@@ -443,6 +499,80 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     }
   }
 
+  async createMissingBackupAlert(
+    createMissingBackupAlertDto: CreateMissingBackupAlertDto
+  ) {
+    // Check if alert already exists
+    const existingAlertEntity = await this.missingBackupRepository.findOneBy({
+      referenceDate: createMissingBackupAlertDto.referenceDate,
+    });
+
+    if (existingAlertEntity) {
+      console.log('Alert already exists -> ignoring it');
+      return;
+    }
+
+    const alert = new MissingBackupAlertEntity();
+    alert.referenceDate = createMissingBackupAlertDto.referenceDate;
+
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: MISSING_BACKUP_ALERT,
+    });
+    if (!alertType) {
+      throw new NotFoundException(`Alert type ${MISSING_BACKUP_ALERT} not found`);
+    }
+    alert.alertType = alertType;
+
+    await this.missingBackupRepository.save(alert);
+
+    if (alert.alertType.user_active && alert.alertType.master_active) {
+      await this.triggerAlertMail(alert);
+    }
+  }
+
+  async createAdditionalBackupAlert(
+    createAdditionalBackupAlertDto: CreateAdditionalBackupAlertDto
+  ) {
+    // Check if alert already exists
+    const existingAlertEntity = await this.additionalBackupRepository.findOneBy({
+      backup: { id: createAdditionalBackupAlertDto.backupId },
+    });
+
+    if (existingAlertEntity) {
+      console.log('Alert already exists -> ignoring it');
+      return;
+    }
+
+    const alert = new AdditionalBackupAlertEntity();
+    alert.date = createAdditionalBackupAlertDto.date;
+
+    const backup = await this.backupDataService.findOneById(
+      createAdditionalBackupAlertDto.backupId
+    );
+    if (!backup) {
+      throw new NotFoundException(
+        `Backup with id ${createAdditionalBackupAlertDto.backupId} not found`
+      );
+    }
+    alert.backup = backup;
+
+    const alertType = await this.alertTypeRepository.findOneBy({
+      name: ADDITIONAL_BACKUP_ALERT,
+    });
+    if (!alertType) {
+      throw new NotFoundException(
+        `Alert type ${ADDITIONAL_BACKUP_ALERT} not found`
+      );
+    }
+    alert.alertType = alertType;
+
+    await this.additionalBackupRepository.save(alert);
+
+    if (alert.alertType.user_active && alert.alertType.master_active) {
+      await this.triggerAlertMail(alert);
+    }
+  }
+
   private async findAlertTypeByIdOrThrow(id: string): Promise<AlertTypeEntity> {
     const entity = await this.alertTypeRepository.findOneBy({ id });
     if (!entity) {
@@ -486,6 +616,15 @@ export class AlertingService extends PaginationService implements OnModuleInit {
         throw new BadRequestException(
           'Method not supported for alert type STORAGE_FILL_ALERT'
         );
+      }
+      case 'MISSING_BACKUP_ALERT': {
+        throw new BadRequestException(
+          'Method not supported for alert type MISSING_BACKUP_ALERT'
+        );
+      }
+      case 'ADDITIONAL_BACKUP_ALERT': {
+        alert = await this.additionalBackupRepository.findOne(options);
+        break;
       }
     }
 

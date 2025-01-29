@@ -1,10 +1,18 @@
 import datetime
 import os
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, distinct
 from sqlalchemy.orm import Session
 
-from metadata_analyzer.models import Result, Tasks, DataStore, Schedule
+from metadata_analyzer.models import (
+    Result,
+    Tasks,
+    DataStore,
+    Schedule,
+    TaskEvent,
+    ResultLabel,
+)
+
 
 
 class Database:
@@ -27,18 +35,20 @@ class Database:
             + db_name
         )
 
-    def get_results(self, latest_backup_date = None):
+    def get_results(self, latest_backup_date=None):
         session = Session(self.engine)
         stmt = select(Result)
         # Select all results since the latest backup date
         if latest_backup_date is not None:
-            timestamp = datetime.datetime.strptime(latest_backup_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+            timestamp = datetime.datetime.strptime(
+                latest_backup_date, "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
             stmt = select(Result).where(Result.start_time > timestamp)
         else:
             stmt = select(Result).where(Result.start_time > datetime.datetime.min)
 
         results = session.scalars(stmt)
-        
+
         return results
 
     def get_tasks(self):
@@ -61,3 +71,23 @@ class Database:
 
         result = session.scalars(stmt)
         return result
+
+    def get_task_events(self):
+        session = Session(self.engine)
+        stmt = select(TaskEvent)
+
+        result = session.scalars(stmt)
+        return result
+
+    def get_result_labels(self):
+        session = Session(self.engine)
+        stmt = select(ResultLabel)
+
+        labels = session.scalars(stmt)
+        return labels
+    
+    def get_labeled_data_store(self):
+        session = Session(self.engine)
+        stmt = select(DataStore.name,DataStore.high_water_mark,DataStore.capacity,DataStore.filled,DataStore.uuid, ResultLabel.saveset).select_from(DataStore).join(ResultLabel, DataStore.name == ResultLabel.pool) 
+        joined = session.execute(stmt).mappings().all()
+        return joined

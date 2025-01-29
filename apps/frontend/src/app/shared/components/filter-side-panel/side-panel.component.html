@@ -1,11 +1,13 @@
-<clr-side-panel
-  [(clrSidePanelOpen)]="isOpen"
-  [clrSidePanelSize]="'md'"
->
+<clr-side-panel [(clrSidePanelOpen)]="isOpen" [clrSidePanelSize]="'md'">
   <div class="side-panel-title">Chart Filter Options</div>
   <div class="side-panel-body">
-    <div>
-      <h5>Time Range</h5>
+    <div class="filter-section">
+      <div class="filter-header">
+        <h5>Time Range</h5>
+        <button class="btn btn-sm btn-link" (click)="resetTimeRange()">
+          Reset
+        </button>
+      </div>
       <div class="btn-group-vertical">
         <button
           *ngFor="let range of timeRanges"
@@ -18,8 +20,14 @@
       </div>
     </div>
 
-    <div>
-      <h5>Tasks</h5>
+    <div class="filter-section">
+      <div class="filter-header">
+        <h5>Tasks</h5>
+        <button class="btn btn-sm btn-link" (click)="resetTasks()">
+          Reset
+        </button>
+      </div>
+
       <clr-combobox-container *ngIf="allBackupTasks$" class="backupTaskFilter">
         <clr-combobox
           name="task"
@@ -57,19 +65,29 @@
         <clr-control-error>There was an error</clr-control-error>
       </clr-combobox-container>
     </div>
-    <div>
-      <h5>Types</h5>
+    <div class="filter-section">
+      <div class="filter-header">
+        <h5>Types</h5>
+        <button class="btn btn-sm btn-link" (click)="resetTypes()">
+          Reset
+        </button>
+      </div>
+
       <clr-combobox-container class="backupTaskFilter">
         <clr-combobox
           [(ngModel)]="selectedBackupTypes"
           [clrMulti]="true"
           (ngModelChange)="setBackupTypes($event)"
-          placeholder="Select backup types">
+          placeholder="Select backup types"
+        >
           <ng-container *clrOptionSelected="let value">
             {{ value }}
           </ng-container>
           <clr-options>
-            <clr-option *ngFor="let option of backupEnumTypes" [clrValue]="option">
+            <clr-option
+              *ngFor="let option of backupEnumTypes"
+              [clrValue]="option"
+            >
               {{ option }}
             </clr-option>
           </clr-options>
@@ -78,6 +96,9 @@
     </div>
   </div>
   <div class="side-panel-footer">
+    <button class="btn btn-outline" (click)="resetAllFilters()">
+      Reset All
+    </button>
     <button class="btn btn-outline" (click)="changeFilterPanelState()">
       Close
     </button>

@@ -5,13 +5,15 @@
     <cds-icon class="info-badge" shape="help" solid="true"></cds-icon>
   </div>
 
-  <app-information-panel *ngIf="isInfoPanelOpen" class="info"></app-information-panel>
+  <app-information-panel
+    *ngIf="isInfoPanelOpen"
+    class="info"
+  ></app-information-panel>
 </div>
 <div class="clr-row">
   <app-data-stores class="clr-col-6"></app-data-stores>
   <app-alert class="clr-col-6"></app-alert>
 </div>
-
 
 <div class="clr-row">
   <div class="clr-col-6">
@@ -24,7 +26,7 @@
             (click)="changeFilterPanelState()"
           >
             <cds-icon shape="filter"></cds-icon>
-            <div *ngIf="((filterCount$ | async) ?? 0) as activeFilters">
+            <div *ngIf="(filterCount$ | async) ?? 0 as activeFilters">
               <span class="badge badge-info">{{ activeFilters }}</span>
             </div>
           </button>
@@ -41,6 +43,11 @@
   </div>
   <div class="clr-col-6">
     <app-facts-panel></app-facts-panel>
+    <div
+      id="overviewAlertsPieChart"
+      class="mt-4"
+      style="width: 100%; height: 400px"
+    ></div>
   </div>
 </div>
 

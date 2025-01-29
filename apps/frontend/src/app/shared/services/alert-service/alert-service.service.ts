@@ -6,9 +6,8 @@ import { shareReplay } from 'rxjs/operators';
 import { Alert } from '../../types/alert';
 import { AlertFilterParams } from '../../types/alert-filter-type';
 import { APIResponse } from '../../types/api-response';
-import {
-  AlertSummary,
-} from '../../types/alert-summary';
+import { AlertSummary } from '../../types/alert-summary';
+import { AlertCounts } from '../../types/alertCounts';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +18,7 @@ export class AlertServiceService {
     offset: 0,
     limit: 10,
   };
+
   constructor(
     @Inject(BASE_URL) private readonly baseUrl: string,
     private readonly http: HttpClient
@@ -56,6 +56,18 @@ export class AlertServiceService {
   getAlertRepetitions(): Observable<AlertSummary> {
     return this.http
       .get<AlertSummary>(`${this.baseUrl}/alerting/repetitions`)
+      .pipe(shareReplay(1));
+  }
+
+  getAlertCounts(fromDate?: string): Observable<AlertCounts> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    return this.http
+      .get<AlertCounts>(`${this.baseUrl}/alerting/statistics`, {
+        params: params,
+      })
       .pipe(shareReplay(1));
   }
 

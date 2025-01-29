@@ -13,6 +13,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { BackupDataService } from './backupData.service';
@@ -23,6 +24,9 @@ import { BackupDataFilterDto } from './dto/backupDataFilter.dto';
 import { BackupDataOrderOptionsDto } from './dto/backupDataOrderOptions.dto';
 import { BackupDataEntity } from './entity/backupData.entity';
 import { BackupDataFilterByTaskIdsDto } from './dto/backupDataFilterByTaskIds.dto';
+import { BackupSizesPerDayDto } from './dto/BackupSizesPerDay.dto';
+import { BackupType } from './dto/backupType';
+import { BackupDataSizeRangeDto } from './dto/BackupDataSizeRanges.dto';
 
 @ApiTags('Backup Data')
 @Controller('backupData')
@@ -33,14 +37,20 @@ export class BackupDataController {
 
   @Get('latest')
   @ApiOperation({ summary: 'Returns the latest backupData Object.' })
-  @ApiOkResponse({ type: BackupDataEntity })
+  @ApiOkResponse({
+    description: 'The latest Backup Data Object.',
+    type: BackupDataEntity,
+  })
   async getLatest(): Promise<BackupDataEntity | null> {
     return this.backupDataService.findLatest();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Returns the backupData Object with the given id.' })
-  @ApiOkResponse({ type: BackupDataEntity })
+  @ApiOkResponse({
+    description: 'The Backup Data Object with the given id.',
+    type: BackupDataEntity,
+  })
   async getById(@Param('id') id: string): Promise<BackupDataEntity> {
     const entity = await this.backupDataService.findOneById(id);
     if (!entity) {
@@ -52,7 +62,11 @@ export class BackupDataController {
 
   @Post('filter')
   @ApiOperation({ summary: 'Returns all backupData Objects.' })
-  @ApiOkResponse()
+  @ApiOkResponse({
+    description: 'All Backup Data Objects.',
+    type: BackupDataEntity,
+    isArray: true,
+  })
   @ApiBody({
     type: BackupDataFilterByTaskIdsDto,
     required: false,
@@ -85,10 +99,94 @@ export class BackupDataController {
 
   @Post('batched')
   @ApiOperation({ summary: 'Creates new backupData Objects batched.' })
-  @ApiCreatedResponse({})
+  @ApiCreatedResponse({
+    description: 'Created Backup Data Objects.',
+  })
   async createBatched(
     @Body() createBackupDataDtos: CreateBackupDataDto[]
   ): Promise<void> {
     return this.backupDataService.createBatched(createBackupDataDtos);
+  }
+
+  @Post('sizes/perDay')
+  @ApiOperation({ summary: 'Returns the backupData sizes per day.' })
+  @ApiOkResponse({ type: BackupSizesPerDayDto, isArray: true })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    description: 'From Date',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    description: 'To Date',
+  })
+  @ApiQuery({
+    name: 'types',
+    required: false,
+    type: String,
+    isArray: true,
+    description: 'Array of backup types',
+  })
+  @ApiBody({
+    type: BackupDataFilterByTaskIdsDto,
+    required: false,
+  })
+  async getBackupDataSizesPerDay(
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('types') types?: BackupType[],
+    @Body() backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
+  ): Promise<BackupSizesPerDayDto[]> {
+    return this.backupDataService.getBackupDataSizesPerDay(
+      fromDate,
+      toDate,
+      backupDataFilterByTaskIdsDto?.taskIds,
+      types
+    );
+  }
+
+  @Post('sizes/grouped')
+  @ApiOperation({
+    summary: 'Returns the number of backupData grouped by size.',
+  })
+  @ApiOkResponse({ type: BackupDataSizeRangeDto, isArray: true })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    description: 'From Date',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    description: 'To Date',
+  })
+  @ApiQuery({
+    name: 'types',
+    required: false,
+    type: String,
+    isArray: true,
+    description: 'Array of backup types',
+  })
+  @ApiBody({
+    type: BackupDataFilterByTaskIdsDto,
+    required: false,
+  })
+  async getBackupDataSizeRanges(
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('types') types?: BackupType[],
+    @Body() backupDataFilterByTaskIdsDto?: BackupDataFilterByTaskIdsDto
+  ): Promise<BackupDataSizeRangeDto[]> {
+    return this.backupDataService.getBackupDataSizeRanges(
+      fromDate,
+      toDate,
+      backupDataFilterByTaskIdsDto?.taskIds,
+      types
+    );
   }
 }

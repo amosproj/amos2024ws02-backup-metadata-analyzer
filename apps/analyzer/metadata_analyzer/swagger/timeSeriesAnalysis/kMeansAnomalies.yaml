@@ -55,3 +55,5 @@ Runs k-means anomaly detection on the specified dataset.
         description: The timestamps of the anomalies
         schema:
           $ref: '#/definitions/Timestamps'
+    tags:
+      - Time Series Analysis
