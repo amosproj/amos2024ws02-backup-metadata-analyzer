@@ -1,0 +1,116 @@
+Title	URL	Assignees	Status	Estimated size	Real size
+Clean up: Miscellaneous	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/266	engelharddirk	In Progress	5	
+Analyzer Module: Implement estimatated storage overflow time	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/203	heskil	In Progress	5	
+Analyzer Module: Send overflow estimation for data store to backend	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/289	heskil	In Progress		
+Prepare Demo day slide	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/268	LHMoritz	Awaiting Review	3	
+Clean up: Analyzer	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/264	engelharddirk, Omega65536	Awaiting Review	5	
+Prepare Demo day video	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/269	Omega65536	Awaiting Review	5	
+Add Alert "Missing Backup"	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/221	Omega65536	Awaiting Review	5	
+Deactivation of alerts for alert panel is broke	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/285	flo0852	Awaiting Review		
+Clean up: Backend	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/265	engelharddirk, flo0852	Awaiting Review	8	
+Clean up: Frontend	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/253	flo0852	Awaiting Review	2	
+Frontend: Display Alert id in coloum in an extra column on alert overview page	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/287	chrisklg	Awaiting Review		
+Backend Module: Pie chart API for FE and Analysis Module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/251	ddeli	Awaiting Review		
+Design-Update Architecture Diagram	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/270	ddeli	Awaiting Review	1	
+Frontend Module: Pie chart for backups with alert types	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/202	chrisklg	Awaiting Review		
+Integration Test: Check wheather the live database can be integrated without any problems at runtime	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/213		Feature Archive	2	0
+Clean Up 4	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/288		Feature Archive		3
+Bugfix: Footer is fixed	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/260	ddeli	Feature Archive	1	1
+Backend Module: Alert Overview Page Severity Counter API	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/274	flo0852	Feature Archive		1
+Frontend: Alert Overview Page: Matching Alerts with previous "same" alerts and display history	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/250	chrisklg	Feature Archive	3	3
+Backend: Alert Overview Page: Matching Alerts with previous "same" alerts and display history	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/254	engelharddirk	Feature Archive	3	5
+Frontend Module: Alert overview page with alert table	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/209	chrisklg	Feature Archive	5	5
+Implement Analyzer run loading screen	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/239	chrisklg	Feature Archive		2
+Frontend Module: Filter for Data Stores panel	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/207	flo0852	Feature Archive	2	2
+Backend Module: Deprecation of storage fill alerts	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/259	flo0852	Feature Archive	5	5
+Clean Up 3	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/212	flo0852	Feature Archive	5	
+Find a date to give SEP a walkthrough of our system	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/206	Us3rname11	Feature Archive	2	
+Frontend: Sidebar with Navigation for pages	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/174	chrisklg	Feature Archive	3	3
+Frontend Module: Estimated storage overflow time displayed in Data Stores panel	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/205	ddeli	Feature Archive	2	2
+Backend Module: Implement API for estimated storage overflow time	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/204	ddeli	Feature Archive	3	3
+Bugfix: ignore null values for data-stores (Analyzer)	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/233	flo0852	Feature Archive	1	1
+Create Testkonzept	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/230	flo0852	Feature Archive	2	2
+Replace reoccuring storage fill alerts in the overview page	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/201	flo0852	Feature Archive	2	2
+Backend/Frontend Module: Save all alert creation times and display creation times of storage fill alerts	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/208	flo0852	Feature Archive	3	2
+Backend Module: Data and API for Alert overview page with alert table	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/210	engelharddirk	Feature Archive	3	8
+Frontend/Backend Module: Overview about total backups	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/195	flo0852	Feature Archive	3	3
+Backend & Analyzer Module: Add schedule time to backend information for backup table	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/173	engelharddirk, flo0852	Feature Archive	5	5
+Fix and Update Docker Build	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/229	ddeli	Feature Archive	3	5
+Clean up 2	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/181	engelharddirk, flo0852, heskil	Feature Archive	8	13
+Update Glossary in Planning Document	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/189	flo0852	Feature Archive	2	1
+Frontend, Analyzer, Backend: Storage Fill Element	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/188	flo0852	Feature Archive	5	5
+Frontend module: Show schedule time of task in Frontend (creation time alert, backup table)	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/146	flo0852	Feature Archive	3	2
+Frontened/Backend Module: About Info-Text Panel	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/196	flo0852	Feature Archive	2	2
+Frontend Module: Refactor Homepage design	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/199	flo0852	Feature Archive	3	3
+Backend Module: API to trigger analyzer module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/214	flo0852	Feature Archive	2	2
+Frontend Module: Trigger Analyzer manually per Button Click event	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/211	flo0852	Feature Archive	3	3
+Research: Best way to use Time Series Analysis for Backup size alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/163	heskil, Omega65536	Feature Archive	3	2
+Analysis Module: Time series analysis enhancement -  Parameterization	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/160	ddeli, heskil, Omega65536	Feature Archive	5	5
+Analyisis & Backend Module: Improve creation time alert logic by using schedules	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/164	Omega65536	Feature Archive	3	5
+Update GitHub Wiki	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/190	engelharddirk	Feature Archive	2	2
+Frontend Module: Alert Panel - Backup Storage Fill Alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/123	ddeli	Feature Archive	2	3
+Frontend: Show selected filter values for bar chart diagramm	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/161	chrisklg	Feature Archive	2	1
+Frontend: Email notification reciever list	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/87	chrisklg	Feature Archive	3	3
+Frontend Module: Filter backup size bar chart by backup type	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/155	chrisklg	Feature Archive	2	2
+Times in dump do not exactly match backend Database time	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/115	heskil, Omega65536	Feature Archive		1
+Frontend Module: Filter backup table by backup type	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/154	flo0852	Feature Archive	2	2
+Backend Module: API for requesting all or selected backup types for backup table	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/157	flo0852	Feature Archive	1	2
+Filter backups for Root backups	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/130	ddeli, Omega65536	Feature Archive	2	3
+Fix Dev branch for next sprint	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/162	ddeli, flo0852, Omega65536	Feature Archive		5
+Replace UUID with Save Set Name	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/106	engelharddirk	Feature Archive	3	3
+Frontend Module: Filter bar chart by backup tasks	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/124	chrisklg	Feature Archive	5	5
+Backend: Email notification reciever list	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/93	flo0852	Feature Archive	3	3
+Frontend Module: Add task_id in the backup table	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/132	flo0852	Feature Archive	2	2
+Backend Module: Filter backup data by backup tasks id's	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/125	flo0852	Feature Archive	5	3
+Analysis Module: Filter backup data by backup tasks id's	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/131	flo0852	Feature Archive	3	3
+Github Action: Include Frontend Tests	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/101	ddeli	Feature Archive	1	1
+Filter by Backup ID is broken	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/114	chrisklg	Feature Archive	3	1
+Analysis Module: First Time Series Analysis Implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/51	heskil	Feature Archive	5	8
+Backend Module: Alert API - Backup Storage Fill Alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/122	chrisklg, ddeli	Feature Archive	3	5
+Analysis Module: Backup Storage Fill Alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/107	Omega65536	Feature Archive	3	3
+Test if github action blocks PR	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/96	ddeli	Feature Archive		
+Bug: Fix local setup for every chip based system (Win, linux,  MacOS intel, MacOS arm)	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/88	ddeli	Feature Archive	5	8
+Frontend: Alert Panel Component - Deactivate option	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/86	chrisklg	Feature Archive	3	3
+Backend: Alert deactivation	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/91	flo0852	Feature Archive	3	3
+Frontend: Alert Panel for Backup creation time alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/85	chrisklg, ddeli	Feature Archive	1	3
+Backend: Alert API - Backup creation time alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/84	flo0852	Feature Archive	5	5
+Analysis Module: Rule Based Alert - Backup creation time alert	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/82	Omega65536	Feature Archive	3	3
+Clean Up Task: Technical debt clean up	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/92	flo0852, heskil, Omega65536	Feature Archive	8	8
+Unit & Integration Test Implementation Frontend	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/33	chrisklg, ddeli, engelharddirk, flo0852, heskil, Omega65536	Feature Archive	3	13
+Github Actions: Backend and Analyzer Test Automation	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/32	ddeli	Feature Archive	3	3
+Homework: Build Documentation	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/69	engelharddirk	Feature Archive	2	2
+Improve local setup - Containerization: Analyzer Module + Database	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/74	ddeli, engelharddirk	Feature Archive	8	8
+Analysis Module: First Rule Based Analysis Implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/50	heskil, Omega65536	Feature Archive	5	3
+Backend: Alert Handling	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/72	flo0852	Feature Archive	3	3
+Frontend: Blueprint Alert Panel	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/48	flo0852	Feature Archive	3	3
+Backend: Backup Size-Timeline API	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/29	flo0852, heskil, Omega65536	Feature Archive	5	5
+Frontend: Display Backup Size-Timeline 	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/47	chrisklg, engelharddirk, flo0852	Feature Archive	3	3
+Being familiar with the Data	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/30	engelharddirk, flo0852, heskil, Omega65536	Feature Archive	3	3
+Homework: Initialize Glossary	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/57	ddeli	Feature Archive		
+Homework: Record and upload build process video	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/53	ddeli, engelharddirk	Feature Archive	2	2
+Backend: E-mail notification trigger	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/49	flo0852	Feature Archive	3	3
+Unit & Integration Test Implementation Backend	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/45	flo0852	Feature Archive	3	3
+Homework: Project Mission	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/56		Feature Archive		
+Homework: Define a Project Vision	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/54		Feature Archive		
+Homework: Define Definition of Done	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/55		Feature Archive		
+Homework: Define on Release plan	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/59		Feature Archive		
+Am Charts integration	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/28	chrisklg	Feature Archive	2	2
+Build Process Review preperation	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/20	chrisklg, ddeli, engelharddirk, flo0852, Omega65536	Feature Archive	1	2
+First Test with Analysis module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/19	heskil, Omega65536	Feature Archive	3	3
+Init the Analysis module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/18	engelharddirk, flo0852, heskil, Omega65536	Feature Archive	3	3
+Analysis Methods: Rule Based Analysis	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/34	flo0852	Feature Archive	3	3
+Analysis Methods: Density Based Analysis	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/31	chrisklg, engelharddirk	Feature Archive	5	5
+Analysis Methods: Time Series Analysis	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/35	heskil	Feature Archive	5	5
+Analysis Methods: Neural Networks	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/36	ddeli, Omega65536	Feature Archive	8	5
+Implement build process for release	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/7	ddeli	Feature Archive	8	8
+Decide on Build process steps for release	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/22	ddeli, heskil	Feature Archive	2	2
+Landing page with backup data table	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/9	chrisklg, flo0852	Feature Archive	2	2
+Initialize Frontend module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/8	chrisklg	Feature Archive	2	2
+Create Architecture Diagram	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/10	ddeli	Feature Archive	1	1
+Architecture evaluation and decision	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/4	ddeli, engelharddirk, flo0852, heskil	Feature Archive	3	2
+Initialize Backend Module	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/11	engelharddirk, flo0852	Feature Archive	2	8
+Dev Environment Setup	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/3	chrisklg, ddeli, engelharddirk, flo0852, heskil, Omega65536	Feature Archive	3	2
+Model analysis research	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/5	heskil, Omega65536	Feature Archive	3	2
+Concept of build process defined & local build implemented	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/6	engelharddirk	Feature Archive	2	2
+Clean up: Security	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/267		Product Backlog		
+Finalize user, (technical) design, and build/deploy documentation, Set up system from scratch	https://github.com/amosproj/amos2024ws02-backup-metadata-analyzer/issues/271		Product Backlog		
