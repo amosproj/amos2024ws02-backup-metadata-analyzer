@@ -32,11 +32,11 @@ import { CreateMissingBackupAlertDto } from './dto/alerts/createMissingBackupAle
 import { AdditionalBackupAlertEntity } from './entity/alerts/additionalBackupAlert.entity';
 import { CreateAdditionalBackupAlertDto } from './dto/alerts/createAdditionalBackupAlert.dto';
 import {
+  ADDITIONAL_BACKUP_ALERT,
   CREATION_DATE_ALERT,
+  MISSING_BACKUP_ALERT,
   SIZE_ALERT,
   STORAGE_FILL_ALERT,
-  MISSING_BACKUP_ALERT,
-  ADDITIONAL_BACKUP_ALERT,
 } from '../utils/constants';
 import { SeverityType } from './dto/severityType';
 import { PaginationDto } from '../utils/pagination/PaginationDto';
@@ -160,13 +160,34 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     };
     for (const repo of this.alertRepositories) {
       const infoAlerts = await repo.count({
-        where: { ...filter, alertType: { severity: SeverityType.INFO } },
+        where: {
+          ...filter,
+          alertType: {
+            severity: SeverityType.INFO,
+            user_active: true,
+            master_active: true,
+          },
+        },
       });
       const warningAlerts = await repo.count({
-        where: { ...filter, alertType: { severity: SeverityType.WARNING } },
+        where: {
+          ...filter,
+          alertType: {
+            severity: SeverityType.WARNING,
+            user_active: true,
+            master_active: true,
+          },
+        },
       });
       const criticalAlerts = await repo.count({
-        where: { ...filter, alertType: { severity: SeverityType.CRITICAL } },
+        where: {
+          ...filter,
+          alertType: {
+            severity: SeverityType.CRITICAL,
+            user_active: true,
+            master_active: true,
+          },
+        },
       });
       alertStatisticsDto.infoAlerts += infoAlerts;
       alertStatisticsDto.warningAlerts += warningAlerts;
@@ -326,6 +347,13 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     alertOrderOptionsDto: AlertOrderOptionsDto,
     alertFilterDto: AlertFilterDto
   ): Promise<PaginationDto<Alert>> {
+    const { from, to } = this.transformDates(
+      alertFilterDto.fromDate,
+      alertFilterDto.toDate
+    );
+    alertFilterDto.fromDate = from?.toISOString();
+    alertFilterDto.toDate = to?.toISOString();
+
     return this.paginateAlerts<Alert>(
       this.alertRepositories,
       this.alertTypeRepository,
@@ -519,7 +547,9 @@ export class AlertingService extends PaginationService implements OnModuleInit {
       name: MISSING_BACKUP_ALERT,
     });
     if (!alertType) {
-      throw new NotFoundException(`Alert type ${MISSING_BACKUP_ALERT} not found`);
+      throw new NotFoundException(
+        `Alert type ${MISSING_BACKUP_ALERT} not found`
+      );
     }
     alert.alertType = alertType;
 
@@ -534,9 +564,11 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     createAdditionalBackupAlertDto: CreateAdditionalBackupAlertDto
   ) {
     // Check if alert already exists
-    const existingAlertEntity = await this.additionalBackupRepository.findOneBy({
-      backup: { id: createAdditionalBackupAlertDto.backupId },
-    });
+    const existingAlertEntity = await this.additionalBackupRepository.findOneBy(
+      {
+        backup: { id: createAdditionalBackupAlertDto.backupId },
+      }
+    );
 
     if (existingAlertEntity) {
       console.log('Alert already exists -> ignoring it');
@@ -700,5 +732,43 @@ export class AlertingService extends PaginationService implements OnModuleInit {
     }
 
     return where;
+  }
+
+  /**
+   * Transform dates to Date objects.
+   * Sets fromDate to first millisecond of the day and toDate to last millisecond of the day.
+   * @param fromDate
+   * @param toDate
+   */
+  private transformDates(
+    fromDate?: string,
+    toDate?: string
+  ): { from: Date | null; to: Date | null } {
+    let from: Date | null = null;
+    let to: Date | null = null;
+    if (fromDate) {
+      from = new Date(fromDate);
+      if (Number.isNaN(from.getTime())) {
+        throw new BadRequestException('parameter fromDate is not a valid date');
+      }
+      //Set time to first millisecond of the day
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+    }
+    if (toDate) {
+      to = new Date(toDate);
+      if (Number.isNaN(to.getTime())) {
+        throw new BadRequestException('parameter toDate is not a valid date');
+      }
+      //Set time to last millisecond of the day
+      to.setHours(0);
+      to.setMinutes(0);
+      to.setSeconds(0);
+      to.setDate(to.getDate() + 1);
+      to.setMilliseconds(-1);
+    }
+    return { from, to };
   }
 }
