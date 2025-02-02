@@ -21,21 +21,21 @@ export class DataStoreEntity {
     description: 'Capacity in GB',
     required: true,
   })
-  @Column({ nullable: false })
+  @Column({ type: 'float', nullable: false })
   capacity!: number;
 
   @ApiProperty({
     description: 'High water mark in GB',
     required: true,
   })
-  @Column({ nullable: false })
+  @Column({ type: 'float', nullable: false })
   highWaterMark!: number;
 
   @ApiProperty({
     description: 'Filled in GB',
     required: true,
   })
-  @Column({ nullable: false })
+  @Column({ type: 'float', nullable: false })
   filled!: number;
 
   @ApiProperty({
