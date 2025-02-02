@@ -106,7 +106,7 @@ export class AlertUtilsService {
         break;
       case 'MISSING_BACKUP_ALERT':
         const missingBackupAlert = alert as MissingBackupAlert;
-        description = `According to the schedule there should have been at backup started at ${this.formatDate(
+        description = `According to the schedule there should have been a backup started at ${this.formatDate(
           missingBackupAlert.referenceDate
         )}`;
         break;
