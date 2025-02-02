@@ -42,10 +42,17 @@
 - l. 107 and l. 130 contain code that probably should be changed when analyzing a live database and not dumps
 
 ### enhanced_storage_analyzer.py
-- TODO
+- Specific analyzer for estimating when a datastore could potentially overflow
+- the amount of time to look into the future (steps * frequency) can be adjusted
+- not all datastore overflow times can be forecast due to missing or mismatched data
+- uses an AutoARIMA model
+- trigger via swagger endpoint, results are passed to backend and displayed in frontend
 
 ### time_series_analyzer.py
-- TODO
+- Specific analyzer for identifying outliers in storage size
+- Quality of results varies greatly depending on parameter fit to data set, some parameters must be adjusted for specific backups
+- uses basic k-means analysis
+- trigger via swagger endpoint
 
 ## Development
 - `poetry add <dependency-name>`: add a new dependency
