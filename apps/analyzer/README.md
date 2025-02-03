@@ -1,6 +1,7 @@
 # Analyzer Readme
 ## Setup
-- `poetry install`: install dependencies
+- install poetry (https://python-poetry.org/)
+- `poetry install`: run command in the analyzer directory to install dependencies
 - copy `.env.example` to `.env` and adjust database parameters
 - `npm run py`: run analyzer individually
 - `nx run metadata-analyzer:test`: run analyzer tests
