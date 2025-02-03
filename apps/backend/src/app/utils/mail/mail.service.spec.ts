@@ -149,7 +149,7 @@ describe('MailService', () => {
       context: {
         reason: 'Backup was scheduled but not started',
         description:
-          `According to the schedule there should have been at backup started at ${alert.referenceDate.toString()}`,
+          `According to the schedule there should have been a backup started at ${alert.referenceDate.toString()}`,
         info: alert.referenceDate.toString(),
         infoColumnName: "Scheduled Date",
         value: '-',
