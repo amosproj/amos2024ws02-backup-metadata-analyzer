@@ -63,7 +63,6 @@ class ScheduleBasedAnalyzer:
         for alert in additional_backup_alerts:
             self.backend.create_additional_backup_alert(alert)
 
-
         return {"count": count}
 
     def _analyze_one_task(
@@ -84,7 +83,7 @@ class ScheduleBasedAnalyzer:
 
         alerts = []
         for used_schedule in used_schedules:
-            if used_schedule.p_base == "CAL": # Not implemented
+            if used_schedule.p_base == "CAL":  # Not implemented
                 continue
 
             alerts += self._analyze_one_task_one_schedule(
@@ -104,15 +103,20 @@ class ScheduleBasedAnalyzer:
             return []
 
         alerts = []
-        stop_date = min(stop_date, results[-1].start_time + 2 * self.calculate_expected_delta(schedule)) # Stop a potential flood of missing backup alerts (5-min schedule generates 1000s of alerts)
+        stop_date = min(
+            stop_date,
+            results[-1].start_time + 2 * self.calculate_expected_delta(schedule),
+        )  # Stop a potential flood of missing backup alerts (5-min schedule generates 1000s of alerts)
         tolerance = self.calculate_tolerance(schedule)
-        first_start = results[0].start_time # Use the first start and not the start date of the schedule because results doesn't store all backups in the past
+        first_start = results[
+            0
+        ].start_time  # Use the first start and not the start date of the schedule because results doesn't store all backups in the past
         last_ref, cur_ref, next_ref = (
             first_start,
             first_start,
             self.calculate_next_reference_time(schedule, first_start),
         )
-        #print(results[0].task, schedule, start_date, stop_date, len(results), cur_ref, next_ref, self.calculate_expected_delta(schedule), file=sys.stderr)
+        # print(results[0].task, schedule, start_date, stop_date, len(results), cur_ref, next_ref, self.calculate_expected_delta(schedule), file=sys.stderr)
         num_consecutive_alerts = 0
         while cur_ref < stop_date:
             if last_ref >= start_date:
@@ -125,7 +129,7 @@ class ScheduleBasedAnalyzer:
                     num_consecutive_alerts = 0
                 alerts += new_alerts
 
-            # There are some breaks in the results table which are multiple months long and would generate 10000s of alerts for short schedules 
+            # There are some breaks in the results table which are multiple months long and would generate 10000s of alerts for short schedules
             # This is not a pretty fix but the only one I could come up with
             if num_consecutive_alerts > 10:
                 alerts = []
@@ -135,8 +139,8 @@ class ScheduleBasedAnalyzer:
                 next_ref,
                 self.calculate_next_reference_time(schedule, next_ref),
             )
-        #print("Generated", len(alerts), file=sys.stderr)
-        #for alert in alerts[:5]:
+        # print("Generated", len(alerts), file=sys.stderr)
+        # for alert in alerts[:5]:
         #    print(alert.as_json(), file=sys.stderr)
         return alerts
 
@@ -220,14 +224,20 @@ class ScheduleBasedAnalyzer:
     def _check_schedule(self, schedule):
         bases = ["MIN", "HOU", "DAY", "WEE", "MON"]
         if schedule.p_base not in bases:
-            print(f"Schedule {schedule.name} has invalid base {schedule.p_base}", file=sys.stderr)
+            print(
+                f"Schedule {schedule.name} has invalid base {schedule.p_base}",
+                file=sys.stderr,
+            )
             return False
 
         if schedule.p_base in ["DAY", "WEE", "MON"]:
             try:
                 time.fromisoformat(schedule.start_time)
             except ValueError:
-                print(f"Schedule {schedule.name} has invalid start_time {schedule.start_time}", file=sys.stderr)
+                print(
+                    f"Schedule {schedule.name} has invalid start_time {schedule.start_time}",
+                    file=sys.stderr,
+                )
                 return False
 
         if schedule.p_base in ["WEE", "MON"]:

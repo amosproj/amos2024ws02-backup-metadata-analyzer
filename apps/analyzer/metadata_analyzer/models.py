@@ -40,7 +40,7 @@ class Result(Base):
     def __str__(self):
         return repr(self)
 
-    #TODO clean up model attributes
+    # TODO clean up model attributes
     def as_dict(self):
         return {
             "saveset": self.saveset,
@@ -59,7 +59,7 @@ class Result(Base):
             "scheduledTime": self.scheduledTime,
             "stored_size": self.stored_size,
             "total_size": self.data_size,
-            "subtask_flag":self.subtask_flag
+            "subtask_flag": self.subtask_flag,
         }
 
 
@@ -137,6 +137,7 @@ class TaskEvent(Base):
     def __str__(self):
         return repr(self)
 
+
 class ResultLabel(Base):
     __tablename__ = "result_lbls"
 
@@ -151,12 +152,12 @@ class ResultLabel(Base):
 
     def __str__(self):
         return repr(self)
-    
+
     def as_dict(self):
         return {
             "saveset": self.saveset,
             "uuid": self.uuid,
             "pool": self.pool,
             "backup_id": self.backup_id,
-            "id": self.id
+            "id": self.id,
         }

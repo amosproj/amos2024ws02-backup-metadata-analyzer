@@ -6,7 +6,7 @@ class CreationDateAlert:
 
     def as_json(self):
         return {
-                "backupId": self.backup_uuid,
-                "date": self.date.isoformat(),
-                "referenceDate": self.reference_date.isoformat()
+            "backupId": self.backup_uuid,
+            "date": self.date.isoformat(),
+            "referenceDate": self.reference_date.isoformat(),
         }
