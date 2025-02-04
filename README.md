@@ -89,18 +89,18 @@ Now you have 2 options:
 
 ### Local dev build and run instructions
 
-- use `npm ci` to install local node dependencies
-- cd into apps/analyzer/metadata_analyzer directory and run `poetry install` to install python venv and dependencies
+- Use `npm ci` to install local node dependencies.
+- Navigate into the apps/analyzer/metadata_analyzer directory and run `poetry install` to install python venv and dependencies.
 
-- in `apps/backend` and `apps/analyzer`: copy the `.env.example` files and rename them to `.env`
-- make sure you have postgres databases running on the connections defined in the `.env` files.
-- the analyzer database should contain the database with backup metadata to be analyzed.
-- the backend database should initially be empty and is used to store the analysis results.
+- In `apps/backend` and `apps/analyzer`: copy the `.env.example` files and rename them to `.env`.
+- Make sure you have postgres databases running on the connections defined in the `.env` files.
+- The analyzer database should contain the database with backup metadata to be analyzed.
+- The backend database should initially be empty and is used to store the analysis results.
 
 
 (Suggestion) Use docker to provide the database(s): 
-- if you only want to provide the analyzer database or the backend database via docker, please change the commands accordingly.
-- Prepare the .env.docker file (see step 3 of docker setup enstructions)
+- If you only want to provide the analyzer database or the backend database via docker, please change the commands accordingly.
+- Prepare the .env.docker file (see step 3 of docker setup enstructions).
 - `docker compose --env-file .env.docker build --no-cache backendDatabase analyzerDatabase`
 - `docker compose --env-file .env.docker up backendDatabase analyzerDatabase`
 
@@ -108,7 +108,7 @@ Now you have 2 options:
 If you have got the databases running:
 - `npm run all` to run all modules at the same time
 
-if you want to run the modules individually:
+If you want to run the modules individually:
 - `npm run py` to run the python analyzer
 - `npm run be` to run the Typescript backend
 - `npm run fe` to run the frontend
