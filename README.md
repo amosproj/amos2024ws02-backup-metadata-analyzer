@@ -29,8 +29,6 @@ The backend is written in TypeScript using NestJS and acts as a bridge between t
 ### Analyzer
 The analyzer is implemented in Python and uses Flask to provide REST APIs for updating backend data and managing various analysis modes. Each analysis mode examines a different aspect of the metadata, using custom algorithms to generate alerts whenever irregularities are detected.
 
-TODO: maybe add a section about contributing: protected dev branch, automatic tests using github actions
-
 ## Prerequisites
 Make sure the following are installed on your machine:
 
