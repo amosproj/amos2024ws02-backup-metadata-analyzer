@@ -68,7 +68,7 @@ Now you have 2 options:
 - in `apps/backend` and `apps/analyzer`: copy the `.env.example` files and rename them to `.env`
 - make sure you have postgres databases running on the connections defined in the `.env` files.
 - the analyzer database should contain the database with backup metadata to be analyzed.
-- the backend database should be initially empty and is used to store the analysis results.
+- the backend database should initially be empty and is used to store the analysis results.
 
 
 (Suggestion) Use docker to provide the database(s): 
