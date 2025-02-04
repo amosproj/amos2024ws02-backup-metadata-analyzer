@@ -1,6 +1,6 @@
 TODO: Fix image scaling/cropping (when adding the css manually via the browser tools, it works. But not when the style is in the README directly)
 <div align="center">
-    <img src="Deliverables/sprint-01/team_logo.png" height="250" width="250" style="overflow: hidden;object-fit: cover;object-position: top;"/>
+    <img src="Documentation/teamLogo.png" height="250" width="250" style="overflow: hidden;object-fit: cover;object-position: top;"/>
     <h1>Backup Metadata Analyzer</h1>
 </div>
 
