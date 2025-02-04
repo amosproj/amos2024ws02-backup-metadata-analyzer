@@ -244,8 +244,6 @@ export class PaginationService {
       ) {
         whereConditions.push(`alias${i}.deprecated = FALSE`);
       }
-      whereConditions.push(`alertType.user_active = TRUE`);
-      whereConditions.push(`alertType.master_active = TRUE`);
 
       const whereClauseString =
         whereConditions.length > 0 ? `${whereConditions.join(' AND ')}` : '';
