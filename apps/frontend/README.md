@@ -1,4 +1,4 @@
-# Analyzer Readme
+# Frontend Readme
 ## Setup
 - `npm ci`: dependency install
 - `npm run fe`: run frontend individually
