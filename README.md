@@ -4,7 +4,7 @@ TODO: Fix image scaling/cropping (when adding the css manually via the browser t
     <h1>Backup Metadata Analyzer</h1>
 </div>
 
-TODO: Add screenshot of overview page, preferably after running the randomization script to get better data
+![Overview Page](Documentation/overviewPage.png)
 
 ## Product Vision
 Databackups are an essential functionality for businesses. They ensure, that no important information or artifacts of work is lost due to technical errors or hacking. This metadata analyzer aims to help detect problems or anomalies with backups. This problem detection is done in a timely manor, and in some cases even predictively, to help the customer to react before major damages occur.
