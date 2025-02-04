@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="Deliverables/sprint-01/team-logo.png" height="250"/>
+    <img src="Deliverables/sprint-01/team_logo.png" height="250"/>
     <h1>Backup Metadata Analyzer</h1>
 </div>
 
