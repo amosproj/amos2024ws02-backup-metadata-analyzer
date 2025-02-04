@@ -14,7 +14,7 @@ This project aims to explore which data analysis methods are applicable to the b
 
 ## Project Structure
 
-![Architecture Diagram](Documentation/AMOS #2 WebApp Architecture Diagram V05.pdf)
+![Architecture Diagram](Documentation/AMOS #2 WebApp Architecture Diagram V05.png)
 
 The project is structured in three modules:
 - Frontend
