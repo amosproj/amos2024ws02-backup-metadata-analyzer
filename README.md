@@ -20,22 +20,16 @@ The project is structured in three modules:
 - Backend
 - Analyzer
 
-TODO: expand this section
 ### Frontend
-The frontend uses Angular, ...
+The frontend is developed in TypeScript using Angular and serves to present the analysis of the backup metadata to the user. It includes an overview page for quickly assessing the state of the backups, as well as a detailed backup statistics page and a page for viewing all triggered alerts.
 
 ### Backend
-The backend uses NestJS, ...
-
+The backend is written in TypeScript using NestJS and acts as a bridge between the frontend and the analyzer. Its primary function is to store the results from the analysis module, but it also supports additional features such as sending emails when alerts are triggered.
 
 ### Analyzer
-The analyzer is implemented in python and uses flask to provide REST APIs for updating backend data and triggering or configuring different analysis modes.
-
-
+The analyzer is implemented in Python and uses Flask to provide REST APIs for updating backend data and managing various analysis modes. Each analysis mode examines a different aspect of the metadata, using custom algorithms to generate alerts whenever irregularities are detected.
 
 TODO: maybe add a section about contributing: protected dev branch, automatic tests using github actions
-
-TODO: 🚀 maybe add cool emojis before every heading 😎
 
 ## Prerequisites
 Make sure the following are installed on your machine:
