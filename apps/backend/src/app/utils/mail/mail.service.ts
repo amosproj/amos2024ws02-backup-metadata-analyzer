@@ -115,7 +115,7 @@ export class MailService {
         const missingBackupAlert = alert as MissingBackupAlertEntity;
         infoColumnName = 'Scheduled Date';
         reason = `Backup was scheduled but not started`;
-        description = `According to the schedule there should have been at backup started at ${missingBackupAlert.referenceDate.toString()}`;
+        description = `According to the schedule there should have been a backup started at ${missingBackupAlert.referenceDate.toString()}`;
         info = missingBackupAlert.referenceDate.toString();
         template = 'alertMailOneInfoRow';
         break;

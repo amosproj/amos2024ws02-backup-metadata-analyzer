@@ -63,7 +63,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       });
 
     this.alerts$.pipe(takeUntil(this.destroy$)).subscribe((alerts) => {
-      this.status = this.getStatus();
+      this.setStatus();
     });
   }
 
@@ -133,18 +133,16 @@ export class AlertComponent implements OnInit, OnDestroy {
    *
    * @returns Status of alerts as string
    */
-  getStatus(): 'OK' | 'Warning' | 'Critical' {
-    let status: 'OK' | 'Warning' | 'Critical' = 'OK';
-
+  setStatus() {
     this.alertCounts$.subscribe((counts) => {
       if (counts.criticalAlerts > 0) {
-        status = 'Critical';
+        this.status = 'Critical';
       } else if (counts.warningAlerts > 0) {
-        status = 'Warning';
+        this.status = 'Warning';
+      } else {
+        this.status = 'OK';
       }
     });
-
-    return status;
   }
 
   getAlertClass = (alert: Alert): string =>

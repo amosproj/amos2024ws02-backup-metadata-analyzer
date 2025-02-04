@@ -37,6 +37,7 @@ import { AddAlertAdditionalBackup1736630779875 } from './migrations/173663077987
 import { StorageOverflowTime1736550460789 } from './migrations/1736550460789-StorageOverflowTime';
 import { DeprecatedFlag1737107214086 } from './migrations/1737107214086-DeprecatedFlag';
 import { DeprecatedFlagNewAlerts1737406388351 } from './migrations/1737406388351-DeprecatedFlagNewAlerts';
+import { ChangeDatastoresColumnTypesToFloat1738509170401 } from './migrations/1738509170401-changeDatastoresColumnTypesToFloat';
 
 /**
  * Used by NestJS to reach database.
@@ -95,6 +96,7 @@ export class DbConfigService implements TypeOrmOptionsFactory {
         StorageOverflowTime1736550460789,
         DeprecatedFlag1737107214086,
         DeprecatedFlagNewAlerts1737406388351,
+        ChangeDatastoresColumnTypesToFloat1738509170401,
       ],
       logging: true,
       logger: 'debug',

@@ -42,6 +42,7 @@ data-stores.coponent.css .data-store-card {
 }
 
 .percentage {
+    min-width: 40px;
     margin-left: 10px;
     display: inline-block;
 }

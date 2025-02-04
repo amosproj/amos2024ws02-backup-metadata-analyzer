@@ -3,6 +3,4 @@ class MissingBackupAlert:
         self.reference_date = reference_date
 
     def as_json(self):
-        return {
-                "referenceDate": self.reference_date.isoformat()
-        }
+        return {"referenceDate": self.reference_date.isoformat()}

@@ -5,6 +5,6 @@ class AdditionalBackupAlert:
 
     def as_json(self):
         return {
-                "backupId": self.backup_uuid,
-                "date": self.date.isoformat(),
+            "backupId": self.backup_uuid,
+            "date": self.date.isoformat(),
         }

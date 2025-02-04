@@ -24,7 +24,6 @@ class Time_series_analyzer:
         Time_series_analyzer.clusters = int(parameters[1])
 
     def preload_data(self, data):
-        
         # read table into a dataframe
         df = pd.DataFrame([res.as_dict() for res in data])
 
@@ -93,7 +92,9 @@ class Time_series_analyzer:
             self.calc_training_indices()
 
         # trains series
-        series_train = series[Time_series_analyzer.training_series_start:Time_series_analyzer.training_series_end]
+        series_train = series[
+            Time_series_analyzer.training_series_start : Time_series_analyzer.training_series_end
+        ]
 
         # determines number of clusters for the k means scorer,
         # use clusters for more useful k value
@@ -109,7 +110,9 @@ class Time_series_analyzer:
 
         # using basic k-means scorer (moving window comparison)
         Kmeans_scorer = KMeansScorer(
-            k=Time_series_analyzer.clusters, window=int(window_size), component_wise=False
+            k=Time_series_analyzer.clusters,
+            window=int(window_size),
+            component_wise=False,
         )
         Kmeans_scorer.fit(series_train)
         anomaly_score = Kmeans_scorer.score(series)
@@ -129,10 +132,9 @@ class Time_series_analyzer:
         return anomaly_timestamps
 
     def calc_training_indices(self):
-
         training_df = Time_series_analyzer.temp_df
-        if 'index' in training_df.columns:
-            training_df = training_df.drop('index', axis=1)
+        if "index" in training_df.columns:
+            training_df = training_df.drop("index", axis=1)
         training_df.insert(0, "index", range(0, len(training_df)))
 
         # rough outlier removal
@@ -144,19 +146,18 @@ class Time_series_analyzer:
         ]
 
         # groups dataframe into groups with consecutive indices without gaps
-        mask = training_df['index'].diff().gt(1)
+        mask = training_df["index"].diff().gt(1)
 
         grouped = training_df.groupby(mask.cumsum())
 
         # gets the longest group, i.e. the longest range of consecutive values without outliers
         grp = max(grouped, key=lambda x: x[1].shape)
-        grp = grp[1] # gets series out of tuple
+        grp = grp[1]  # gets series out of tuple
 
-        Time_series_analyzer.training_series_start = int(grp.iloc[0]['index'])
-        Time_series_analyzer.training_series_end = int(grp.iloc[len(grp) - 1]['index'])
+        Time_series_analyzer.training_series_start = int(grp.iloc[0]["index"])
+        Time_series_analyzer.training_series_end = int(grp.iloc[len(grp) - 1]["index"])
 
     def task_preprocessing(backup_type, task_id, variable):
-
         # --------------- Task Specific Preprocessing ---------------#
         # TODO remove when other types are implemented
         if backup_type != "F":

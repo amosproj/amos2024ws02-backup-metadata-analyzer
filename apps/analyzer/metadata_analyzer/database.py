@@ -14,7 +14,6 @@ from metadata_analyzer.models import (
 )
 
 
-
 class Database:
     def __init__(self):
         db_user = os.getenv("DATABASE_USER") or "postgres"
@@ -85,9 +84,20 @@ class Database:
 
         labels = session.scalars(stmt)
         return labels
-    
+
     def get_labeled_data_store(self):
         session = Session(self.engine)
-        stmt = select(DataStore.name,DataStore.high_water_mark,DataStore.capacity,DataStore.filled,DataStore.uuid, ResultLabel.saveset).select_from(DataStore).join(ResultLabel, DataStore.name == ResultLabel.pool) 
+        stmt = (
+            select(
+                DataStore.name,
+                DataStore.high_water_mark,
+                DataStore.capacity,
+                DataStore.filled,
+                DataStore.uuid,
+                ResultLabel.saveset,
+            )
+            .select_from(DataStore)
+            .join(ResultLabel, DataStore.name == ResultLabel.pool)
+        )
         joined = session.execute(stmt).mappings().all()
         return joined
