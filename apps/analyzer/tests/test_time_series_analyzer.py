@@ -9,7 +9,6 @@ from tests.mock_database import MockDatabase
 
 
 class Test_time_series_analyzer:
-
     def _create_mock_result(
         self, task, uuid, fdi_type, data_size, sbc_start, task_uuid, is_backup
     ):

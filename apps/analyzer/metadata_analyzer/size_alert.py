@@ -7,7 +7,7 @@ class SizeAlert:
 
     def as_json(self):
         return {
-                "backupId": self.uuid,
-                "size": self.size,
-                "referenceSize": self.reference_size
+            "backupId": self.uuid,
+            "size": self.size,
+            "referenceSize": self.reference_size,
         }
